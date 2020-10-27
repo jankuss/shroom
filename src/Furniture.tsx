@@ -217,5 +217,9 @@ export class Furniture {
   destroy() {
     this.destroySprites();
     this.parent = undefined;
+
+    if (this.cancelTicker != null) {
+      this.cancelTicker();
+    }
   }
 }
