@@ -58,6 +58,7 @@ export class Tile extends PIXI.Container {
         baseX,
         baseY + tileHeight
       );
+
       const matrixEdgeRight = new PIXI.Matrix(-1, 0.5, 0, 1, baseX + 64, baseY);
 
       const transformEdgeLeft = new PIXI.Transform();
