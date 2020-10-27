@@ -65,31 +65,33 @@ export function createBorder({
 export function createWallLeft({
   baseX,
   baseY,
-  height,
+  wallHeight,
+  tileHeight,
   texture,
 }: {
   baseX: number;
   baseY: number;
-  height: number;
+  wallHeight: number;
+  tileHeight: number;
   texture: PIXI.Texture;
 }) {
   const border = createBorder({
     texture,
-    height,
+    height: wallHeight + tileHeight,
     matrix: new PIXI.Matrix(
       1,
       0.5,
       0,
       1,
       baseX + wallWidth - borderWidth,
-      baseY - height + wallWidth / 2 - borderWidth / 2
+      baseY - wallHeight + wallWidth / 2 - borderWidth / 2
     ),
   });
 
   const primary = createWall({
     texture,
-    height,
-    matrix: new PIXI.Matrix(-1, 0.5, 0, 1, baseX + 64, baseY - height),
+    height: wallHeight,
+    matrix: new PIXI.Matrix(-1, 0.5, 0, 1, baseX + 64, baseY - wallHeight),
   });
 
   return [border, primary];
@@ -98,31 +100,33 @@ export function createWallLeft({
 export function createWallRight({
   baseX,
   baseY,
-  height,
+  wallHeight,
   texture,
+  tileHeight,
 }: {
   baseX: number;
   baseY: number;
-  height: number;
+  wallHeight: number;
+  tileHeight: number;
   texture: PIXI.Texture;
 }) {
   const border = createBorder({
     texture,
-    height,
+    height: wallHeight + tileHeight,
     matrix: new PIXI.Matrix(
       -1,
       0.5,
       0,
       1,
       baseX + wallWidth + borderWidth,
-      baseY - height + wallWidth / 2 - borderWidth / 2
+      baseY - wallHeight + wallWidth / 2 - borderWidth / 2
     ),
   });
 
   const primary = createWall({
     texture,
-    height,
-    matrix: new PIXI.Matrix(1, 0.5, 0, 1, baseX, baseY - height),
+    height: wallHeight,
+    matrix: new PIXI.Matrix(1, 0.5, 0, 1, baseX, baseY - wallHeight),
   });
 
   return [border, primary];
@@ -153,8 +157,9 @@ export class Wall extends PIXI.Container {
         const left = createWallLeft({
           baseX,
           baseY,
-          height: wallHeight,
+          wallHeight: wallHeight,
           texture: wallTexture,
+          tileHeight: tileHeight,
         });
         this.addChild(...left);
         break;
@@ -163,8 +168,9 @@ export class Wall extends PIXI.Container {
         const right = createWallRight({
           baseX,
           baseY,
-          height: wallHeight,
+          wallHeight: wallHeight,
           texture: wallTexture,
+          tileHeight: tileHeight,
         });
         this.addChild(...right);
         break;
