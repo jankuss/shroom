@@ -5,6 +5,7 @@ import { Tile } from "./Tile";
 import { IRoomGeometry } from "./IRoomGeometry";
 import { Furniture } from "./Furniture";
 import { Wall } from "./Wall";
+import { Stair } from "./Stair";
 
 export class Room extends PIXI.Container implements IRoomGeometry {
   private furnitures: Furniture[] = [];
@@ -106,14 +107,14 @@ export class Room extends PIXI.Container implements IRoomGeometry {
       for (let x = 0; x < tiles[y].length; x++) {
         const tile = tiles[y][x];
 
-        if (tile.type === "tile" || tile.type === "tile_edge") {
+        if (tile.type === "tile") {
           this.addChild(
             new Tile({
               geometry: this,
               roomX: x - this.wallOffsets.x,
               roomY: y - this.wallOffsets.y,
-              roomZ: 0,
-              edge: tile.type === "tile_edge",
+              roomZ: tile.z,
+              edge: true,
               tileHeight: this.titleHeight,
             })
           );
@@ -131,6 +132,18 @@ export class Room extends PIXI.Container implements IRoomGeometry {
               direction: tile.kind === "rowWall" ? "left" : "right",
               tileHeight: this.titleHeight,
               wallHeight: this.wallHeight,
+            })
+          );
+        }
+
+        if (tile.type === "stairs") {
+          this.addChild(
+            new Stair({
+              geometry: this,
+              roomX: x - this.wallOffsets.x,
+              roomY: y - this.wallOffsets.y,
+              roomZ: 0,
+              tileHeight: this.titleHeight,
             })
           );
         }

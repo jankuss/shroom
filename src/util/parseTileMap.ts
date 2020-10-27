@@ -1,13 +1,15 @@
-import { TileType } from "../types/TileType";
+import { TileType, TileTypeNumber } from "../types/TileType";
 
 export type ParsedTileType =
   | {
       type: "wall";
       kind: "colWall" | "rowWall" | "innerCorner" | "outerCorner";
     }
-  | { type: "tile" }
+  | { type: "tile"; z: number }
   | { type: "hidden" }
-  | { type: "tile_edge" };
+  | { type: "stairs"; kind: 0 | 2 };
+
+const isTile = (type: TileType): type is TileTypeNumber => !isNaN(Number(type));
 
 export function parseTileMap(tilemap: TileType[][]): ParsedTileType[][] {
   const startIndexColumn = findFirstNonEmptyColumnIndex(tilemap);
@@ -67,7 +69,7 @@ export function parseTileMap(tilemap: TileType[][]): ParsedTileType[][] {
 
       const rowWallAllowed = rowWallMinimum.isWallAllowed(wallPositionX);
 
-      if (leftType === "x" && type === 0 && rowWallAllowed) {
+      if (leftType === "x" && isTile(type) && rowWallAllowed) {
         result[resultY][wallPositionX] = { type: "wall", kind: "rowWall" };
         rowWallMinimum.setValueIfLower(wallPositionX);
       }
@@ -77,7 +79,7 @@ export function parseTileMap(tilemap: TileType[][]): ParsedTileType[][] {
         colWallMinimumY >= wallPositionY ||
         (globalWallStartX !== -1 && wallPositionX < globalWallStartX);
 
-      if (topType === "x" && type === 0 && columnWallAllowed) {
+      if (topType === "x" && isTile(type) && columnWallAllowed) {
         result[wallPositionY][resultX] = { type: "wall", kind: "colWall" };
         colWallMinimumY = wallPositionY;
 
@@ -89,34 +91,43 @@ export function parseTileMap(tilemap: TileType[][]): ParsedTileType[][] {
       if (
         leftType === "x" &&
         topType === "x" &&
-        type === 0 &&
+        isTile(type) &&
         rowWallAllowed &&
         columnWallAllowed
       ) {
         result[wallPositionY][wallPositionX] = {
           type: "wall",
-          kind: "outerCorner"
+          kind: "outerCorner",
         };
       }
 
       if (
         topLeftDiagonalType === "x" &&
-        leftType === 0 &&
-        topType === 0 &&
-        type === 0 &&
+        isTile(leftType) &&
+        isTile(topType) &&
+        isTile(type) &&
         columnWallAllowed
       ) {
         result[wallPositionY][wallPositionX] = {
           type: "wall",
-          kind: "innerCorner"
+          kind: "innerCorner",
         };
       }
 
-      if (type === 0) {
+      let isStair = false;
+      if (isTile(topType) && isTile(type)) {
+        const diff = Number(topType) - Number(type);
+        if (diff === 1) {
+          isStair = true;
+          result[resultY][resultX] = { type: "stairs", kind: 0 };
+        }
+      }
+
+      if (isTile(type) && !isStair) {
         if (bottomType === "x" || rightType === "x") {
-          result[resultY][resultX] = { type: "tile_edge" };
+          result[resultY][resultX] = { type: "tile", z: type };
         } else {
-          result[resultY][resultX] = { type: "tile" };
+          result[resultY][resultX] = { type: "tile", z: type };
         }
       }
     }
@@ -210,7 +221,7 @@ function findLastColumnIndex(tilemap: TileType[][]) {
   for (let x = 0; x < tilemap[0].length; x++) {
     let hasTile = false;
     for (let y = 0; y < tilemap.length; y++) {
-      hasTile = hasTile || tilemap[y][x] === 0;
+      hasTile = hasTile || isTile(tilemap[y][x]);
     }
 
     if (hasTile) {
@@ -226,7 +237,7 @@ function findLastRowIndex(tilemap: TileType[][]) {
   for (let y = 0; y < tilemap.length; y++) {
     let hasTile = false;
     for (let x = 0; x < tilemap.length; x++) {
-      hasTile = hasTile || tilemap[y][x] === 0;
+      hasTile = hasTile || isTile(tilemap[y][x]);
     }
 
     if (hasTile) {
