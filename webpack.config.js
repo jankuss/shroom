@@ -7,7 +7,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 module.exports = {
     entry: "./src/index.ts",
     output: {
-      filename: "[name].[hash].js",
+      filename: "[name].[fullhash].js",
       path: path.resolve(__dirname, "dist/webpack"),
     },
     devtool: "source-map",
