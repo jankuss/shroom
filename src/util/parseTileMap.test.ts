@@ -20,6 +20,7 @@ const T: ParsedTileType = { type: "tile" };
 const X: ParsedTileType = { type: "hidden" };
 const D: ParsedTileType = { type: "wall", kind: "outerCorner" };
 const E: ParsedTileType = { type: "wall", kind: "innerCorner" };
+const S0: ParsedTileType = { type: "stairs", kind: 0 };
 
 test("parses basic tilemap", () => {
   expect(
@@ -28,7 +29,7 @@ test("parses basic tilemap", () => {
       [0, 0, 0],
       [0, 0, 0],
       [0, 0, 0],
-      [0, 0, 0]
+      [0, 0, 0],
     ])
   ).toEqual([
     [D, C, C, C],
@@ -36,7 +37,7 @@ test("parses basic tilemap", () => {
     [R, T, T, T],
     [R, T, T, T],
     [R, T, T, T],
-    [R, T, T, T]
+    [R, T, T, T],
   ]);
 });
 
@@ -51,7 +52,7 @@ test("ignores unnecessary spacing", () => {
       ["x", "x", "x", 0, 0, 0, "x", "x"],
       ["x", "x", "x", 0, 0, 0, "x", "x"],
       ["x", "x", "x", "x", "x", "x", "x", "x"],
-      ["x", "x", "x", "x", "x", "x", "x", "x"]
+      ["x", "x", "x", "x", "x", "x", "x", "x"],
     ])
   ).toEqual([
     [D, C, C, C],
@@ -59,7 +60,7 @@ test("ignores unnecessary spacing", () => {
     [R, T, T, T],
     [R, T, T, T],
     [R, T, T, T],
-    [R, T, T, T]
+    [R, T, T, T],
   ]);
 });
 
@@ -70,7 +71,7 @@ test("inner corner", () => {
       [0, 0, 0],
       [0, 0, 0],
       [0, 0, 0],
-      [0, 0, 0]
+      [0, 0, 0],
     ])
   ).toEqual([
     [X, D, C, C],
@@ -78,7 +79,7 @@ test("inner corner", () => {
     [R, T, T, T],
     [R, T, T, T],
     [R, T, T, T],
-    [R, T, T, T]
+    [R, T, T, T],
   ]);
 });
 
@@ -89,7 +90,7 @@ test("rowWall doesnt overlap tile", () => {
       [0, 0, 0],
       [0, 0, 0],
       [0, 0, 0],
-      ["x", 0, 0]
+      ["x", 0, 0],
     ])
   ).toEqual([
     [D, C, C, C],
@@ -97,7 +98,7 @@ test("rowWall doesnt overlap tile", () => {
     [R, T, T, T],
     [R, T, T, T],
     [R, T, T, T],
-    [X, X, T, T]
+    [X, X, T, T],
   ]);
 });
 
@@ -108,7 +109,7 @@ test("colWall doesnt overlap tile", () => {
       [0, 0, 0],
       [0, 0, 0],
       [0, 0, 0],
-      [0, 0, 0]
+      [0, 0, 0],
     ])
   ).toEqual([
     [D, C, C, X],
@@ -116,6 +117,21 @@ test("colWall doesnt overlap tile", () => {
     [R, T, T, T],
     [R, T, T, T],
     [R, T, T, T],
-    [R, T, T, T]
+    [R, T, T, T],
+  ]);
+});
+
+test("handles stairs", () => {
+  expect(
+    parseTileMap([
+      [1, 1, 1],
+      [0, 0, 0],
+      [0, 0, 0],
+    ])
+  ).toEqual([
+    [D, C, C, C],
+    [R, T, T, T],
+    [R, S0, S0, S0],
+    [R, T, T, T],
   ]);
 });

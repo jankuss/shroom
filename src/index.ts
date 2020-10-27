@@ -26,9 +26,9 @@ const furniLoader = new FurnitureLoader();
 
 const room = new Room(
   parseTileMapString(`
-00000000
-00000000
-00000000
+11111111
+11111111
+11111111
 00000000
 00000000
 00000000
