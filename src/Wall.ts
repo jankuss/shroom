@@ -62,6 +62,21 @@ export function createBorder({
   return graphics;
 }
 
+export function createTopBorder(matrix: PIXI.Matrix) {
+  const graphics = new PIXI.Graphics();
+  graphics.beginFill(0xffffff);
+
+  // draw a rectangle
+  graphics.drawRect(0, 0, borderWidth, wallWidth);
+
+  const transform = new PIXI.Transform();
+  transform.setFromMatrix(matrix);
+
+  graphics.transform = transform;
+
+  return graphics;
+}
+
 export function createWallLeft({
   baseX,
   baseY,
@@ -75,6 +90,17 @@ export function createWallLeft({
   tileHeight: number;
   texture: PIXI.Texture;
 }) {
+  const top = createTopBorder(
+    new PIXI.Matrix(
+      1,
+      0.5,
+      1,
+      -0.5,
+      baseX + wallWidth - borderWidth,
+      baseY - wallHeight + borderWidth + 1
+    )
+  );
+
   const border = createBorder({
     texture,
     height: wallHeight + tileHeight,
@@ -94,7 +120,7 @@ export function createWallLeft({
     matrix: new PIXI.Matrix(-1, 0.5, 0, 1, baseX + 64, baseY - wallHeight),
   });
 
-  return [border, primary];
+  return [top, border, primary];
 }
 
 export function createWallRight({
@@ -110,6 +136,10 @@ export function createWallRight({
   tileHeight: number;
   texture: PIXI.Texture;
 }) {
+  const top = createTopBorder(
+    new PIXI.Matrix(1, -0.5, 1, 0.5, baseX, baseY - wallHeight)
+  );
+
   const border = createBorder({
     texture,
     height: wallHeight + tileHeight,
@@ -129,7 +159,7 @@ export function createWallRight({
     matrix: new PIXI.Matrix(1, 0.5, 0, 1, baseX, baseY - wallHeight),
   });
 
-  return [border, primary];
+  return [top, border, primary];
 }
 
 export class Wall extends PIXI.Container {

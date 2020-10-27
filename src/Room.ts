@@ -17,7 +17,7 @@ export class Room extends PIXI.Container implements IRoomGeometry {
   public roomHeight: number;
 
   private wallHeight = 135;
-  private titleHeight = 20;
+  private titleHeight = 10;
 
   constructor(tilemap: TileType[][]) {
     super();
