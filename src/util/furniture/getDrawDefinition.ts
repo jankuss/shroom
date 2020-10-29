@@ -9,7 +9,7 @@ export function getDrawDefinition({
   direction,
   visualization,
   assetMap,
-  animation
+  animation,
 }: {
   type: string;
   direction: number;
@@ -40,9 +40,9 @@ export function getDrawDefinition({
     const asset = assetMap.get(getAssetName("0"));
 
     const assets = frameInfo?.frames
-      .flatMap(frame => Array<string>(frameRepeat).fill(frame))
-      .map(frame => getAssetName(frame))
-      .map(id => {
+      .flatMap((frame) => Array<string>(frameRepeat).fill(frame))
+      .map((frame) => getAssetName(frame))
+      .map((id) => {
         const asset = assetMap.get(id);
         if (asset == null) throw new Error("Invalid asset");
 
@@ -61,8 +61,6 @@ export function getDrawDefinition({
 
     const actualLayer = layerOverride || layer;
 
-    if (!asset) return;
-
     return {
       z: actualLayer != null ? actualLayer.zIndex : undefined,
       shadow: char === "sd",
@@ -70,7 +68,7 @@ export function getDrawDefinition({
       tint: layerColor,
       layer,
       asset,
-      assets
+      assets,
     };
   };
 
@@ -90,7 +88,7 @@ export function getDrawDefinition({
 
   return {
     parts,
-    frameCount
+    frameCount,
   };
 }
 
@@ -111,7 +109,7 @@ function getDisplayFrame(
 
     const frame = nonNormalizedFrame % (frameCount * frameRepeat);
 
-    const repeatedFrames = frames.flatMap(frame =>
+    const repeatedFrames = frames.flatMap((frame) =>
       Array<string>(frameRepeat).fill(frame)
     );
 
@@ -130,6 +128,6 @@ function getDisplayFrame(
 
   return {
     frameRepeat,
-    displayFrame
+    displayFrame,
   };
 }

@@ -1,14 +1,21 @@
 import * as PIXI from "pixi.js";
 import { IRoomGeometry } from "./IRoomGeometry";
 import WallAsset from "./assets/wall2.png";
+import { getWallColors } from "./getTileColors";
+import { IRoomObject } from "./IRoomObject";
+import { IRoomContext } from "./IRoomContext";
+import { RoomObject } from "./RoomObject";
 
 interface Props {
   geometry: IRoomGeometry;
   roomX: number;
   roomY: number;
-  direction: "left" | "right";
+  roomZ: number;
+  direction: "left" | "right" | "corner";
   tileHeight: number;
   wallHeight: number;
+  side?: boolean;
+  color: string;
 }
 
 const wallWidth = 32;
@@ -19,11 +26,13 @@ export function createWall({
   height,
   matrix,
   width = wallWidth,
+  offset = 0,
 }: {
   height: number;
   texture: PIXI.Texture;
   matrix: PIXI.Matrix;
   width?: number;
+  offset?: number;
 }) {
   const sprite = new PIXI.TilingSprite(texture);
 
@@ -34,7 +43,7 @@ export function createWall({
   sprite.width = width;
   sprite.transform = transform;
 
-  sprite.tilePosition = new PIXI.Point(0, height);
+  sprite.tilePosition = new PIXI.Point(0, height + offset);
 
   return sprite;
 }
@@ -53,6 +62,21 @@ export function createBorder({
 
   // draw a rectangle
   graphics.drawRect(0, 0, borderWidth, height);
+
+  const transform = new PIXI.Transform();
+  transform.setFromMatrix(matrix);
+
+  graphics.transform = transform;
+
+  return graphics;
+}
+
+export function createTopCorner(matrix: PIXI.Matrix) {
+  const graphics = new PIXI.Graphics();
+  graphics.beginFill(0xffffff);
+
+  // draw a rectangle
+  graphics.drawRect(0, 0, borderWidth, borderWidth);
 
   const transform = new PIXI.Transform();
   transform.setFromMatrix(matrix);
@@ -83,12 +107,22 @@ export function createWallLeft({
   wallHeight,
   tileHeight,
   texture,
+  side,
+  offset,
+  borderTint,
+  topTint,
+  wallTint,
 }: {
   baseX: number;
   baseY: number;
   wallHeight: number;
   tileHeight: number;
   texture: PIXI.Texture;
+  side: boolean;
+  offset: number;
+  borderTint: number;
+  wallTint: number;
+  topTint: number;
 }) {
   const top = createTopBorder(
     new PIXI.Matrix(
@@ -117,10 +151,26 @@ export function createWallLeft({
   const primary = createWall({
     texture,
     height: wallHeight,
-    matrix: new PIXI.Matrix(-1, 0.5, 0, 1, baseX + 64, baseY - wallHeight),
+    matrix: new PIXI.Matrix(
+      -1,
+      0.5,
+      0,
+      1,
+      baseX + 2 * wallWidth,
+      baseY - wallHeight
+    ),
+    offset,
   });
 
-  return [top, border, primary];
+  border.tint = borderTint;
+  primary.tint = wallTint;
+  top.tint = topTint;
+
+  return {
+    border: side ? border : undefined,
+    primary,
+    top,
+  };
 }
 
 export function createWallRight({
@@ -129,12 +179,22 @@ export function createWallRight({
   wallHeight,
   texture,
   tileHeight,
+  side,
+  offset,
+  borderTint,
+  topTint,
+  wallTint,
 }: {
   baseX: number;
   baseY: number;
   wallHeight: number;
   tileHeight: number;
   texture: PIXI.Texture;
+  side: boolean;
+  offset: number;
+  borderTint: number;
+  wallTint: number;
+  topTint: number;
 }) {
   const top = createTopBorder(
     new PIXI.Matrix(1, -0.5, 1, 0.5, baseX, baseY - wallHeight)
@@ -157,53 +217,138 @@ export function createWallRight({
     texture,
     height: wallHeight,
     matrix: new PIXI.Matrix(1, 0.5, 0, 1, baseX, baseY - wallHeight),
+    offset,
   });
 
-  return [top, border, primary];
+  border.tint = borderTint;
+  primary.tint = wallTint;
+  top.tint = topTint;
+
+  return {
+    border: side ? border : undefined,
+    primary,
+    top,
+  };
 }
 
-export class Wall extends PIXI.Container {
-  constructor({
-    geometry,
-    roomX,
-    roomY,
-    direction,
-    tileHeight,
-    wallHeight,
-  }: Props) {
+const wallTexture = PIXI.Texture.from(WallAsset);
+
+export class Wall extends RoomObject {
+  private container: PIXI.Container | undefined;
+
+  private border: PIXI.DisplayObject | undefined;
+  private top: PIXI.DisplayObject | undefined;
+  private primary: PIXI.DisplayObject | undefined;
+
+  constructor(private props: Props) {
     super();
+  }
 
-    const displayHeight = wallHeight;
+  destroy(): void {
+    this.border?.destroy();
+    this.top?.destroy();
+    this.primary?.destroy();
+  }
 
-    const { x, y } = geometry.getPosition(roomX, roomY, 0);
+  registered(): void {
+    this.updateSprites();
+  }
+
+  updateSprites() {
+    this.container?.destroy();
+    this.container = new PIXI.Container();
+
+    const {
+      geometry,
+      roomX,
+      roomY,
+      roomZ,
+      direction,
+      tileHeight,
+      wallHeight,
+      side = true,
+      color,
+    } = this.props;
+
+    const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
+    const { leftTint, rightTint, topTint } = getWallColors(color);
 
     const baseX = x;
     const baseY = y + 16;
 
-    const wallTexture = PIXI.Texture.from(WallAsset);
+    const offset = roomZ * 32;
 
     switch (direction) {
       case "left":
         const left = createWallLeft({
           baseX,
           baseY,
-          wallHeight: wallHeight,
+          wallHeight: wallHeight - offset,
           texture: wallTexture,
           tileHeight: tileHeight,
+          side,
+          offset,
+          borderTint: leftTint,
+          wallTint: rightTint,
+          topTint: topTint,
         });
-        this.addChild(...left);
+
+        this.border = left.border;
+        this.primary = left.primary;
+        this.top = left.top;
         break;
 
       case "right":
         const right = createWallRight({
           baseX,
           baseY,
-          wallHeight: wallHeight,
+          wallHeight: wallHeight - roomZ * 32,
           texture: wallTexture,
           tileHeight: tileHeight,
+          side,
+          offset,
+          borderTint: rightTint,
+          wallTint: leftTint,
+          topTint: topTint,
         });
-        this.addChild(...right);
+
+        this.border = right.border;
+        this.primary = right.primary;
+        this.top = right.top;
+        break;
+
+      case "corner":
+        const corner = createTopCorner(
+          new PIXI.Matrix(
+            1,
+            0.5,
+            1,
+            -0.5,
+            baseX + wallWidth - borderWidth,
+            baseY - wallHeight + offset + borderWidth + 1
+          )
+        );
+
+        corner.tint = topTint;
+
+        this.top = corner;
         break;
     }
+
+    if (this.container != null) {
+      if (this.top != null) {
+        this.container.addChild(this.top);
+      }
+
+      if (this.border != null) {
+        this.container.addChild(this.border);
+      }
+
+      if (this.primary != null) {
+        this.container.addChild(this.primary);
+      }
+    }
+
+    this.getRoomContext().plane.addChild(this.container);
   }
 }
