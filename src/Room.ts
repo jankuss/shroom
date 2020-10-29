@@ -7,6 +7,8 @@ import { Furniture } from "./Furniture";
 import { Wall } from "./Wall";
 import { Stair } from "./Stair";
 import { IRoomObject } from "./IRoomObject";
+import { IAnimationTicker } from "./IAnimationTicker";
+import { IFurnitureLoader } from "./IFurnitureLoader";
 
 export class Room extends PIXI.Container implements IRoomGeometry {
   private roomObjects: IRoomObject[] = [];
@@ -27,10 +29,17 @@ export class Room extends PIXI.Container implements IRoomGeometry {
 
   private tileColor: string = "#989865";
 
-  constructor(tilemap: TileType[][]) {
+  constructor(
+    tilemap: TileType[][],
+    private animationTicker: IAnimationTicker,
+    private furniLoader: IFurnitureLoader
+  ) {
     super();
 
-    this.parsedTileMap = parseTileMap(tilemap);
+    const { largestDiff, tilemap: parsedTileMap } = parseTileMap(tilemap);
+
+    this.parsedTileMap = parsedTileMap;
+    this.wallHeight = this.wallHeight + largestDiff * 32;
 
     const { rows, columns } = this.getTileDimensions();
 
@@ -73,6 +82,8 @@ export class Room extends PIXI.Container implements IRoomGeometry {
       geometry: this,
       addRoomObject: (object) => this.addRoomObject(object),
       plane: this.plane,
+      animationTicker: this.animationTicker,
+      furnitureLoader: this.furniLoader,
     });
 
     this.roomObjects.push(object);
@@ -180,6 +191,7 @@ export class Room extends PIXI.Container implements IRoomGeometry {
               roomZ: tile.z,
               tileHeight: this.tileHeight,
               color: this.tileColor,
+              direction: tile.kind,
             })
           );
         }
