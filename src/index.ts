@@ -5,6 +5,10 @@ import { Furniture } from "./Furniture";
 import { FurnitureLoader } from "./FurnitureLoader";
 import { AnimationTicker } from "./AnimationTicker";
 
+import TileAsset from "./assets/tile.png";
+import WallAsset from "./assets/wall.png";
+import Wall2Asset from "./assets/wall2.png";
+
 const view = document.querySelector("#root") as HTMLCanvasElement | undefined;
 const container = document.querySelector("#container") as
   | HTMLDivElement
@@ -14,64 +18,94 @@ if (view == null || container == null) throw new Error("Invalid view");
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 const application = new PIXI.Application({
   view,
-  antialias: true,
+  antialias: false,
   resolution: window.devicePixelRatio,
   autoDensity: true,
-  width: 800,
-  height: 600,
+  width: 1200,
+  height: 800,
+  backgroundColor: 0x000000,
 });
 
 const animationTicker = new AnimationTicker(application);
 const furniLoader = new FurnitureLoader();
 
-const room = new Room(
-  parseTileMapString(`
-11111111
-11111111
-11111111
-00000000
-00000000
-00000000
-00000000
-00000000
-00000000
-00000000
-`)
-);
+console.log(TileAsset, WallAsset);
 
-const furnis: Furniture[] = [];
-/*
-for (let y = 0; y < 8; y++) {
-  for (let x = 0; x < 8; x++) {
-    const dragon = new Furniture(
+application.loader
+  .add(TileAsset)
+  .add(WallAsset)
+  .add(Wall2Asset)
+  .load(() => init());
+
+function init() {
+  const room = new Room(
+    parseTileMapString(`
+    xxx111111
+    xxx111111
+    xxx111111
+    xxx111111    
+    xxx111111
+    xxx000000
+    xxx000000
+    000000000
+    000000000
+    000000000
+    000000000
+  `)
+  );
+
+  const furnis: Furniture[] = [];
+
+  room.addRoomObject(
+    new Furniture(animationTicker, furniLoader, `rare_dragonlamp*1`, 2, "1", {
+      roomX: 0,
+      roomY: 7,
+      roomZ: 0,
+    })
+  );
+
+  room.addRoomObject(
+    new Furniture(animationTicker, furniLoader, "hween10_fog", 0, "0", {
+      roomX: 3,
+      roomY: 7,
+      roomZ: 0,
+    })
+  );
+
+  room.addRoomObject(
+    new Furniture(
       animationTicker,
       furniLoader,
-      "olympics_r16_cheerleader",
-      6,
-      "0",
+      "rare_colourable_scifirocket*2",
+      0,
+      "1",
       {
-        roomX: x,
-        roomY: y,
+        roomX: 8,
+        roomY: 7,
+        roomZ: 0,
       }
-    );
+    )
+  );
 
-    furnis.push(dragon);
+  const directions = [0, 2, 4, 6];
+  let index = 0;
 
-    //room.addFurniture(dragon);
-  }
-}*/
+  room.x = application.screen.width / 2 - room.roomWidth / 2;
+  room.y = application.screen.height / 2 - room.roomHeight / 2;
 
-const directions = [0, 2, 4, 6];
-let index = 0;
+  application.stage.addChild(room);
 
-room.x = application.screen.width / 2 - room.roomWidth / 2;
-room.y = application.screen.height / 2 - room.roomHeight / 2;
-
-console.log(
-  application.renderer.width,
-  application.renderer.height,
-  room.roomWidth,
-  room.roomHeight
-);
-
-application.stage.addChild(room);
+  /*application.stage.addChild(
+    new TileTest({ x: 10, y: 10, tileHeight: 10, xEven: false, yEven: false })
+  );
+  application.stage.addChild(
+    new TileTest({
+      x: 10 + 32,
+      y: 10 + 16,
+      tileHeight: 10,
+      xEven: true,
+      yEven: false,
+    })
+  );
+  */
+}

@@ -9,7 +9,7 @@ export function parseAnimations(
     : undefined;
 
   if (animations != null) {
-    animations.forEach(animation => {
+    animations.forEach((animation) => {
       const animationId = animation["$"].id;
 
       const animationLayers = animation.animationLayer;
@@ -21,28 +21,30 @@ export function parseAnimations(
 
       let frameCount = 1;
 
-      animationLayers.forEach(layer => {
+      animationLayers.forEach((layer) => {
         const layerId = layer["$"].id;
 
-        const frameSequenceFrames = layer.frameSequence[0].frame;
+        if (layer.frameSequence != null) {
+          const frameSequenceFrames = layer.frameSequence[0].frame;
 
-        const frames = frameSequenceFrames.map(frame => frame["$"].id);
-        const frameRepeatString = layer["$"].frameRepeat;
+          const frames = frameSequenceFrames.map((frame) => frame["$"].id);
+          const frameRepeatString = layer["$"].frameRepeat;
 
-        layerToFrames.set(layerId, {
-          frames,
-          frameRepeat:
-            frameRepeatString != null ? Number(frameRepeatString) : undefined
-        });
+          layerToFrames.set(layerId, {
+            frames,
+            frameRepeat:
+              frameRepeatString != null ? Number(frameRepeatString) : undefined,
+          });
 
-        if (frames.length > frameCount) {
-          frameCount = frames.length;
+          if (frames.length > frameCount) {
+            frameCount = frames.length;
+          }
         }
       });
 
       set(animationId, {
         frameCount: frameCount,
-        layerToFrames
+        layerToFrames,
       });
     });
   }

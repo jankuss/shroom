@@ -4,10 +4,11 @@ export type ParsedTileType =
   | {
       type: "wall";
       kind: "colWall" | "rowWall" | "innerCorner" | "outerCorner";
+      height: TileTypeNumber;
     }
   | { type: "tile"; z: number }
   | { type: "hidden" }
-  | { type: "stairs"; kind: 0 | 2 };
+  | { type: "stairs"; kind: 0 | 2; z: number };
 
 const isTile = (type: TileType): type is TileTypeNumber => !isNaN(Number(type));
 
@@ -70,7 +71,11 @@ export function parseTileMap(tilemap: TileType[][]): ParsedTileType[][] {
       const rowWallAllowed = rowWallMinimum.isWallAllowed(wallPositionX);
 
       if (leftType === "x" && isTile(type) && rowWallAllowed) {
-        result[resultY][wallPositionX] = { type: "wall", kind: "rowWall" };
+        result[resultY][wallPositionX] = {
+          type: "wall",
+          kind: "rowWall",
+          height: type,
+        };
         rowWallMinimum.setValueIfLower(wallPositionX);
       }
 
@@ -80,7 +85,11 @@ export function parseTileMap(tilemap: TileType[][]): ParsedTileType[][] {
         (globalWallStartX !== -1 && wallPositionX < globalWallStartX);
 
       if (topType === "x" && isTile(type) && columnWallAllowed) {
-        result[wallPositionY][resultX] = { type: "wall", kind: "colWall" };
+        result[wallPositionY][resultX] = {
+          type: "wall",
+          kind: "colWall",
+          height: type,
+        };
         colWallMinimumY = wallPositionY;
 
         if (rowWallStartX === -1) {
@@ -98,6 +107,7 @@ export function parseTileMap(tilemap: TileType[][]): ParsedTileType[][] {
         result[wallPositionY][wallPositionX] = {
           type: "wall",
           kind: "outerCorner",
+          height: type,
         };
       }
 
@@ -111,6 +121,7 @@ export function parseTileMap(tilemap: TileType[][]): ParsedTileType[][] {
         result[wallPositionY][wallPositionX] = {
           type: "wall",
           kind: "innerCorner",
+          height: type,
         };
       }
 
@@ -119,7 +130,7 @@ export function parseTileMap(tilemap: TileType[][]): ParsedTileType[][] {
         const diff = Number(topType) - Number(type);
         if (diff === 1) {
           isStair = true;
-          result[resultY][resultX] = { type: "stairs", kind: 0 };
+          result[resultY][resultX] = { type: "stairs", kind: 0, z: type };
         }
       }
 

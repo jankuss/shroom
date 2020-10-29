@@ -3,16 +3,18 @@ import { IAnimationTicker } from "./IAnimationTicker";
 
 import { IFurnitureLoader } from "./IFurnitureLoader";
 import { IRoomGeometry } from "./IRoomGeometry";
+import { IRoomObject } from "./IRoomObject";
 import { Room } from "./Room";
+import { RoomObject } from "./RoomObject";
 import { Asset, DrawPart } from "./util/furniture";
 import { LoadFurniResult } from "./util/furniture/loadFurni";
 import { Layer } from "./util/furniture/visualization/parseLayers";
 import { getZOrder } from "./util/getZOrder";
 
-export class Furniture {
+export class Furniture extends RoomObject {
   private sprites: PIXI.DisplayObject[] = [];
   private loadFurniResult: LoadFurniResult | undefined;
-  private parent: Room | undefined;
+  private parent: PIXI.Container | undefined;
 
   private animatedSprites: { frames: PIXI.Sprite[] }[] = [];
 
@@ -24,8 +26,9 @@ export class Furniture {
     private type: string,
     private direction: number,
     private animation: string = "0",
-    private position: { roomX: number; roomY: number }
+    private position: { roomX: number; roomY: number; roomZ: number }
   ) {
+    super();
     this.furnitureLoader.loadFurni(type).then((result) => {
       this.loadFurniResult = result;
       this.updateFurniture();
@@ -38,9 +41,11 @@ export class Furniture {
   }
 
   updateFurniture() {
+    const { geometry } = this.getRoomContext();
+
     if (this.loadFurniResult != null && this.parent != null) {
       this.updateSprites(
-        this.parent,
+        geometry,
         this.loadFurniResult,
         this.type,
         this.direction,
@@ -72,7 +77,7 @@ export class Furniture {
     const position = room.getPosition(
       this.position.roomX,
       this.position.roomY,
-      0
+      this.position.roomZ
     );
 
     parts.forEach((part, index) => {
@@ -136,7 +141,7 @@ export class Furniture {
 
     if (layer != null) {
       if (layer.alpha != null) {
-        sprite.alpha = layer.alpha;
+        sprite.alpha = layer.alpha / 255;
       }
 
       if (layer.ink != null) {
@@ -147,6 +152,10 @@ export class Furniture {
 
     if (shadow) {
       sprite.alpha = 0.195;
+    }
+
+    if (!shadow && sprite.alpha == null) {
+      sprite.cacheAsBitmap = true;
     }
 
     return sprite;
@@ -172,16 +181,20 @@ export class Furniture {
       const actualAsset =
         assets != null && assets.length === 1 ? assets[0] : asset;
 
-      const sprite = this.createSprite(actualAsset, layer, {
-        x,
-        y,
-        zIndex,
-        shadow,
-        tint,
-      });
-      sprite.texture = getAssetTexture(actualAsset);
+      if (actualAsset != null) {
+        const sprite = this.createSprite(actualAsset, layer, {
+          x,
+          y,
+          zIndex,
+          shadow,
+          tint,
+        });
+        sprite.texture = getAssetTexture(actualAsset);
 
-      return { kind: "simple", sprite };
+        return { kind: "simple", sprite };
+      }
+
+      return { kind: "simple", sprite: new PIXI.Sprite() };
     }
 
     return {
@@ -209,9 +222,20 @@ export class Furniture {
     this.animatedSprites = [];
   }
 
-  setParent(parent: Room): void {
-    this.parent = parent;
-    this.updateFurniture();
+  registered(): void {
+    const { geometry, container } = this.getRoomContext();
+
+    this.parent = container;
+
+    if (this.loadFurniResult != null) {
+      this.updateSprites(
+        geometry,
+        this.loadFurniResult,
+        this.type,
+        this.direction,
+        this.animation
+      );
+    }
   }
 
   destroy() {

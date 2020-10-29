@@ -36,6 +36,7 @@ export function parseVisualization(xml: VisualizationXml): Visualization {
         directionMap.set(direction, layerMap)
       );
       parseAnimations(visualization, (id, data) => animationMap.set(id, data));
+
       parseColors(visualization, (id, colorLayersMap) =>
         colorMap.set(id, colorLayersMap)
       );
@@ -51,10 +52,11 @@ export function parseVisualization(xml: VisualizationXml): Visualization {
 
           return frameInfo;
         },
-        getFrameCount: animationId => animationMap.get(animationId)?.frameCount,
-        getLayer: layerId => layerMap.get(layerId),
+        getFrameCount: (animationId) =>
+          animationMap.get(animationId)?.frameCount,
+        getLayer: (layerId) => layerMap.get(layerId),
         getDirectionLayerOverride: (direction, layerId) =>
-          directionMap.get(direction)?.get(layerId)
+          directionMap.get(direction)?.get(layerId),
       };
     }
   }

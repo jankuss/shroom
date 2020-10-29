@@ -6,27 +6,35 @@ import { IRoomGeometry } from "./IRoomGeometry";
 import { Furniture } from "./Furniture";
 import { Wall } from "./Wall";
 import { Stair } from "./Stair";
+import { IRoomObject } from "./IRoomObject";
 
 export class Room extends PIXI.Container implements IRoomGeometry {
-  private furnitures: Furniture[] = [];
+  private roomObjects: IRoomObject[] = [];
+
   private offsetX: number;
   private offsetY: number;
   private wallOffsets = { x: 1, y: 1 };
   private parsedTileMap: ParsedTileType[][];
 
+  private container: PIXI.Container = new PIXI.Container();
+  private plane: PIXI.Container = new PIXI.Container();
+
   public roomWidth: number;
   public roomHeight: number;
 
   private wallHeight = 135;
-  private titleHeight = 10;
+  private tileHeight = 8;
+
+  private tileColor: string = "#989865";
 
   constructor(tilemap: TileType[][]) {
     super();
-    this.sortableChildren = true;
 
     this.parsedTileMap = parseTileMap(tilemap);
 
     const { rows, columns } = this.getTileDimensions();
+
+    this.container.sortableChildren = true;
 
     const leftWidth = (rows - this.wallOffsets.y) * 32;
 
@@ -40,28 +48,9 @@ export class Room extends PIXI.Container implements IRoomGeometry {
 
     this.roomWidth = width;
     this.roomHeight = height;
-  }
 
-  _updateBounds() {
-    const { rows, columns } = this.getTileDimensions();
-
-    const width = rows * 32 + columns * 32;
-    const height = columns * 16 + rows * 16;
-
-    const bounds = new PIXI.Bounds();
-
-    bounds.minX = this.x;
-    bounds.minY = this.y;
-    bounds.maxX = this.x + width;
-    bounds.maxY = this.y + height;
-
-    console.log(bounds);
-
-    this._bounds = bounds;
-  }
-
-  _calculateBounds() {
-    this._updateBounds();
+    this.addChild(this.plane);
+    this.addChild(this.container);
   }
 
   getTileDimensions() {
@@ -78,9 +67,15 @@ export class Room extends PIXI.Container implements IRoomGeometry {
     const { rows, columns } = this.getTileDimensions();
   }
 
-  addFurniture(furni: Furniture) {
-    this.furnitures.push(furni);
-    furni.setParent(this);
+  addRoomObject(object: IRoomObject) {
+    object.setParent({
+      container: this.container,
+      geometry: this,
+      addRoomObject: (object) => this.addRoomObject(object),
+      plane: this.plane,
+    });
+
+    this.roomObjects.push(object);
   }
 
   getPosition(
@@ -108,46 +103,97 @@ export class Room extends PIXI.Container implements IRoomGeometry {
         const tile = tiles[y][x];
 
         if (tile.type === "tile") {
-          this.addChild(
+          this.addRoomObject(
             new Tile({
               geometry: this,
               roomX: x - this.wallOffsets.x,
               roomY: y - this.wallOffsets.y,
               roomZ: tile.z,
               edge: true,
-              tileHeight: this.titleHeight,
+              tileHeight: this.tileHeight,
+              color: this.tileColor,
+            })
+          );
+        }
+
+        const direction = getWallDirection(tile);
+
+        if (direction != null && tile.type === "wall") {
+          this.addRoomObject(
+            new Wall({
+              geometry: this,
+              roomX: x - this.wallOffsets.x,
+              roomY: y - this.wallOffsets.y,
+              direction: direction,
+              tileHeight: this.tileHeight,
+              wallHeight: this.wallHeight,
+              roomZ: tile.height,
+              color: "#ffffff",
             })
           );
         }
 
         if (
           tile.type === "wall" &&
-          (tile.kind === "rowWall" || tile.kind === "colWall")
+          (tile.kind === "rowWall" ||
+            tile.kind === "colWall" ||
+            tile.kind === "outerCorner")
         ) {
-          this.addChild(
+        }
+
+        if (tile.type === "wall" && tile.kind === "innerCorner") {
+          this.addRoomObject(
             new Wall({
               geometry: this,
               roomX: x - this.wallOffsets.x,
               roomY: y - this.wallOffsets.y,
-              direction: tile.kind === "rowWall" ? "left" : "right",
-              tileHeight: this.titleHeight,
+              direction: "right",
+              tileHeight: this.tileHeight,
               wallHeight: this.wallHeight,
+              side: false,
+              roomZ: tile.height,
+              color: "#ffffff",
+            })
+          );
+
+          this.addRoomObject(
+            new Wall({
+              geometry: this,
+              roomX: x - this.wallOffsets.x,
+              roomY: y - this.wallOffsets.y,
+              direction: "left",
+              tileHeight: this.tileHeight,
+              wallHeight: this.wallHeight,
+              side: false,
+              roomZ: tile.height,
+              color: "#ffffff",
             })
           );
         }
 
         if (tile.type === "stairs") {
-          this.addChild(
+          this.addRoomObject(
             new Stair({
               geometry: this,
               roomX: x - this.wallOffsets.x,
               roomY: y - this.wallOffsets.y,
-              roomZ: 0,
-              tileHeight: this.titleHeight,
+              roomZ: tile.z,
+              tileHeight: this.tileHeight,
+              color: this.tileColor,
             })
           );
         }
       }
     }
+
+    this.plane.cacheAsBitmap = true;
   }
 }
+
+const getWallDirection = (tile: ParsedTileType) => {
+  if (tile.type !== "wall") return;
+
+  if (tile.kind === "rowWall") return "left" as const;
+  if (tile.kind === "colWall") return "right" as const;
+  if (tile.kind === "outerCorner") return "corner" as const;
+};
