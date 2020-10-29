@@ -14,20 +14,25 @@ interface Props {
   roomZ: number;
   tileHeight: number;
   color: string;
+  direction: 0 | 2;
 }
 
 const positioning = 8;
 
 export class Stair extends RoomObject {
   private sprites: PIXI.DisplayObject[] = [];
+  private container: PIXI.Container | undefined;
 
   constructor(private props: Props) {
     super();
   }
 
   updateSprites() {
+    this.container?.destroy();
+    this.container = new PIXI.Container();
+
     const { geometry } = this.getRoomContext();
-    const { roomX, roomY, roomZ, tileHeight, color } = this.props;
+    const { roomX, roomY, roomZ, tileHeight, color, direction } = this.props;
 
     const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
 
@@ -35,8 +40,8 @@ export class Stair extends RoomObject {
     const yEven = roomY % 2 === 0;
 
     for (let i = 0; i < 4; i++) {
-      this.sprites.push(
-        ...createStairBox({
+      this.container.addChild(
+        ...createStairBoxDirection0({
           x,
           y,
           xEven,
@@ -48,14 +53,11 @@ export class Stair extends RoomObject {
       );
     }
 
-    this.sprites.forEach((sprite) =>
-      this.getRoomContext().plane.addChild(sprite)
-    );
+    this.getRoomContext().plane.addChild(this.container);
   }
 
   destroySprites() {
-    this.sprites.forEach((sprite) => sprite.destroy());
-    this.sprites = [];
+    this.container?.destroy();
   }
 
   destroy(): void {
@@ -67,15 +69,9 @@ export class Stair extends RoomObject {
   }
 }
 
-function createStairBox({
-  x,
-  y,
-  tileHeight,
-  xEven,
-  yEven,
-  index,
-  color,
-}: {
+const stairBase = 8;
+
+interface StairBoxProps {
   x: number;
   y: number;
   index: number;
@@ -83,9 +79,17 @@ function createStairBox({
   xEven: boolean;
   yEven: boolean;
   color: string;
-}): PIXI.DisplayObject[] {
-  const stairBase = 8;
+}
 
+function createStairBoxDirection0({
+  x,
+  y,
+  tileHeight,
+  xEven,
+  yEven,
+  index,
+  color,
+}: StairBoxProps): PIXI.DisplayObject[] {
   const baseX = x + stairBase * index;
   const baseY = y - stairBase * index * 1.5;
 
@@ -143,4 +147,38 @@ function createStairBox({
   });
 
   return [borderLeft, borderRight, tile];
+}
+
+export function createStairBoxDirection2({
+  x,
+  y,
+  tileHeight,
+  xEven,
+  yEven,
+  index,
+  color,
+}: StairBoxProps) {
+  const baseX = x + stairBase * index;
+  const baseY = y - stairBase * index * 1.5;
+
+  const { tileTint, borderRightTint, borderLeftTint } = getTileColors(color);
+
+  const tile = createPlaneSprite({
+    x: baseX,
+    y: baseY,
+    xEven: xEven,
+    yEven: yEven,
+    width: 32,
+    height: stairBase,
+    points: {
+      c: { x: 0, y: 16 },
+      d: { x: 32, y: 0 },
+      a: { x: 64, y: 16 },
+      b: { x: 32, y: 32 },
+    },
+    floor: true,
+    tint: tileTint,
+  });
+
+  return [tile];
 }

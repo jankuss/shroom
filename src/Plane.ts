@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import TileAsset from "./assets/tile.png";
+import TileAsset from "./assets/tile3.png";
 
 interface Props {
   x: number;

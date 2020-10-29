@@ -40,24 +40,26 @@ application.loader
 function init() {
   const room = new Room(
     parseTileMapString(`
-    xxx111111
-    xxx111111
-    xxx111111
-    xxx111111    
-    xxx111111
-    xxx000000
-    xxx000000
-    000000000
-    000000000
-    000000000
-    000000000
-  `)
+    xxx22222211111
+    xxx22222211111
+    xxx22222211111
+    xxx22222200000
+    xxx11111100000
+    xxx00000000000
+    xxx00000000000
+    00000000000000
+    00000000000000
+    00000000000000
+    00000000000000
+  `),
+    animationTicker,
+    furniLoader
   );
 
   const furnis: Furniture[] = [];
 
   room.addRoomObject(
-    new Furniture(animationTicker, furniLoader, `rare_dragonlamp*1`, 2, "1", {
+    new Furniture(`rare_dragonlamp*1`, 2, "1", {
       roomX: 0,
       roomY: 7,
       roomZ: 0,
@@ -65,7 +67,23 @@ function init() {
   );
 
   room.addRoomObject(
-    new Furniture(animationTicker, furniLoader, "hween10_fog", 0, "0", {
+    new Furniture(`rare_dragonlamp*2`, 2, "1", {
+      roomX: 0,
+      roomY: 8,
+      roomZ: 0,
+    })
+  );
+
+  room.addRoomObject(
+    new Furniture(`rare_dragonlamp*3`, 2, "1", {
+      roomX: 0,
+      roomY: 9,
+      roomZ: 0,
+    })
+  );
+
+  room.addRoomObject(
+    new Furniture("hween10_fog", 0, "0", {
       roomX: 3,
       roomY: 7,
       roomZ: 0,
@@ -73,18 +91,11 @@ function init() {
   );
 
   room.addRoomObject(
-    new Furniture(
-      animationTicker,
-      furniLoader,
-      "rare_colourable_scifirocket*2",
-      0,
-      "1",
-      {
-        roomX: 8,
-        roomY: 7,
-        roomZ: 0,
-      }
-    )
+    new Furniture("rare_colourable_scifirocket*2", 0, "1", {
+      roomX: 8,
+      roomY: 7,
+      roomZ: 0,
+    })
   );
 
   const directions = [0, 2, 4, 6];

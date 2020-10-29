@@ -21,18 +21,12 @@ export class Furniture extends RoomObject {
   private cancelTicker: (() => void) | undefined = undefined;
 
   constructor(
-    private animationTicker: IAnimationTicker,
-    private furnitureLoader: IFurnitureLoader,
     private type: string,
     private direction: number,
     private animation: string = "0",
     private position: { roomX: number; roomY: number; roomZ: number }
   ) {
     super();
-    this.furnitureLoader.loadFurni(type).then((result) => {
-      this.loadFurniResult = result;
-      this.updateFurniture();
-    });
   }
 
   setDirection(direction: number) {
@@ -61,6 +55,8 @@ export class Furniture extends RoomObject {
     direction: number,
     animation?: string
   ) {
+    const { animationTicker } = this.getRoomContext();
+
     this.destroySprites();
     const { parts } = loadFurniResult.getDrawDefinition(
       type,
@@ -69,7 +65,7 @@ export class Furniture extends RoomObject {
     );
 
     if (animation != null) {
-      this.cancelTicker = this.animationTicker.subscribe((frame) =>
+      this.cancelTicker = animationTicker.subscribe((frame) =>
         this.setCurrentFrame(frame)
       );
     }
@@ -104,7 +100,7 @@ export class Furniture extends RoomObject {
       this.parent?.addChild(...animatedSprite.frames);
     });
 
-    this.setCurrentFrame(this.animationTicker.current());
+    this.setCurrentFrame(animationTicker.current());
   }
 
   private setCurrentFrame(frame: number) {
@@ -154,7 +150,7 @@ export class Furniture extends RoomObject {
       sprite.alpha = 0.195;
     }
 
-    if (!shadow && sprite.alpha == null) {
+    if (!shadow && layer?.alpha == null && layer?.ink == null) {
       sprite.cacheAsBitmap = true;
     }
 
@@ -223,19 +219,18 @@ export class Furniture extends RoomObject {
   }
 
   registered(): void {
-    const { geometry, container } = this.getRoomContext();
+    const { container } = this.getRoomContext();
 
     this.parent = container;
 
-    if (this.loadFurniResult != null) {
-      this.updateSprites(
-        geometry,
-        this.loadFurniResult,
-        this.type,
-        this.direction,
-        this.animation
-      );
-    }
+    this.getRoomContext()
+      .furnitureLoader.loadFurni(this.type)
+      .then((result) => {
+        this.loadFurniResult = result;
+        this.updateFurniture();
+      });
+
+    this.updateFurniture();
   }
 
   destroy() {
