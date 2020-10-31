@@ -1,9 +1,11 @@
 import * as PIXI from "pixi.js";
-import TileAsset from "./assets/tile.png";
+import TileAsset from "./assets/tile2.png";
+import { createPlaneMatrix } from "./createPlaneMatrix";
 import { getTileColors } from "./getTileColors";
 import { IRoomContext } from "./IRoomContext";
 import { IRoomGeometry } from "./IRoomGeometry";
 import { IRoomObject } from "./IRoomObject";
+import { getFloorMatrix, getLeftMatrix, getRightMatrix } from "./matrixes";
 import { createPlaneSprite } from "./Plane";
 import { RoomObject } from "./RoomObject";
 
@@ -16,6 +18,9 @@ interface Props {
   tileHeight: number;
   color: string;
 }
+
+const texture = PIXI.Texture.from(TileAsset);
+texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
 export class Tile extends RoomObject {
   private container: PIXI.Container | undefined;
@@ -53,62 +58,49 @@ export class Tile extends RoomObject {
 
     const { borderLeftTint, borderRightTint, tileTint } = getTileColors(color);
 
-    const tile = createPlaneSprite({
-      x,
-      y,
-      xEven: xEven,
-      yEven: yEven,
-      width: 32,
-      height: 32,
-      points: {
-        c: { x: 0, y: 16 },
-        d: { x: 32, y: 0 },
-        a: { x: 64, y: 16 },
-        b: { x: 32, y: 32 },
-      },
-      floor: true,
-      tint: tileTint,
-    });
+    const tilePosition = new PIXI.Point(xEven ? 32 : 0, yEven ? 32 : 0);
 
-    const borderLeft = createPlaneSprite({
-      x: x,
-      y: y - 16 + tileHeight,
+    const tileMatrix = getFloorMatrix(x, y);
+
+    const tile = new PIXI.TilingSprite(texture);
+    tile.tilePosition = tilePosition;
+
+    console.log(tileMatrix);
+
+    tile.transform.setFromMatrix(tileMatrix);
+    tile.width = 32;
+    tile.height = 32;
+    tile.tint = tileTint;
+
+    const borderLeftMatrix = getLeftMatrix(x, y, {
       width: 32,
       height: tileHeight,
-      points: {
-        d: { x: 0, y: 0 },
-        a: { x: 32, y: 16 },
-        b: { x: 32, y: 16 + 32 },
-        c: { x: 0, y: 32 },
-      },
-      xEven: xEven,
-      yEven: yEven,
-      floor: true,
-      tint: borderLeftTint,
     });
 
-    const borderRight = createPlaneSprite({
-      x: x + 32,
-      y: y + tileHeight,
+    const borderRightMatrix = getRightMatrix(x, y, {
       width: 32,
       height: tileHeight,
-      points: {
-        d: { x: 0, y: 0 },
-        a: { x: 32, y: -16 },
-        b: { x: 32, y: -16 + 32 },
-        c: { x: 0, y: 32 },
-      },
-      xEven: xEven,
-      yEven: yEven,
-      floor: true,
-      tint: borderRightTint,
     });
+
+    const borderLeft = new PIXI.TilingSprite(texture);
+    borderLeft.transform.setFromMatrix(borderLeftMatrix);
+    borderLeft.width = 32;
+    borderLeft.height = tileHeight;
+    borderLeft.tilePosition = new PIXI.Point(0, 0);
+    borderLeft.tint = borderLeftTint;
+
+    const borderRight = new PIXI.TilingSprite(texture);
+    borderRight.transform.setFromMatrix(borderRightMatrix);
+    borderRight.width = 32;
+    borderRight.height = tileHeight;
+    borderRight.tilePosition = new PIXI.Point(0, 0);
+    borderRight.tint = borderRightTint;
 
     this.sprites.push(this.container);
 
-    this.container.addChild(tile);
-    this.container.addChild(borderRight);
     this.container.addChild(borderLeft);
+    this.container.addChild(borderRight);
+    this.container.addChild(tile);
 
     this.getRoomContext().plane.addChild(this.container);
   }

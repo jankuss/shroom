@@ -15,16 +15,18 @@ const container = document.querySelector("#container") as
   | undefined;
 if (view == null || container == null) throw new Error("Invalid view");
 
-PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 const application = new PIXI.Application({
   view,
   antialias: false,
   resolution: window.devicePixelRatio,
   autoDensity: true,
-  width: 1200,
-  height: 800,
+  width: 1600,
+  height: 900,
   backgroundColor: 0x000000,
 });
+
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+PIXI.settings.ROUND_PIXELS = true;
 
 const animationTicker = new AnimationTicker(application);
 const furniLoader = new FurnitureLoader();
@@ -40,17 +42,32 @@ application.loader
 function init() {
   const room = new Room(
     parseTileMapString(`
-    xxx22222211111
-    xxx22222211111
-    xxx22222211111
-    xxx22222200000
-    xxx11111100000
-    xxx00000000000
-    xxx00000000000
-    00000000000000
-    00000000000000
-    00000000000000
-    00000000000000
+    xxxxxxxxxxxxxxxxxxxxxxxxx
+    xxxxxxxxxxx33333333333333
+    xxxxxxxxxxx33333333333333
+    xxxxxxxxxxx33333333333333
+    xxxxxxxxxxx33333333333333
+    xxxxxxxxxxx33333333333333
+    xxxxxxxxxxx33333333333333
+    xxxxxxx333333333333333333
+    xxxxxxx333333333333333333
+    xxxxxxx333333333333333333
+    xxxxxxx333333333333333333
+    xxxxxxx333333333333333333
+    xxxxxxx333333333333333333
+    x4444433333xxxxxxxxxxxxxx
+    x4444433333xxxxxxxxxxxxxx
+    x44444333333222xx000000xx
+    x44444333333222xx000000xx
+    xxx44xxxxxxxx22xx000000xx
+    xxx33xxxxxxxx11xx000000xx
+    xxx33322222211110000000xx
+    xxx33322222211110000000xx
+    xxxxxxxxxxxxxxxxx000000xx
+    xxxxxxxxxxxxxxxxx000000xx
+    xxxxxxxxxxxxxxxxx000000xx
+    xxxxxxxxxxxxxxxxx000000xx
+    xxxxxxxxxxxxxxxxxxxxxxxxx
   `),
     animationTicker,
     furniLoader
@@ -58,48 +75,17 @@ function init() {
 
   const furnis: Furniture[] = [];
 
-  room.addRoomObject(
-    new Furniture(`rare_dragonlamp*1`, 2, "1", {
-      roomX: 0,
-      roomY: 7,
-      roomZ: 0,
-    })
-  );
-
-  room.addRoomObject(
-    new Furniture(`rare_dragonlamp*2`, 2, "1", {
-      roomX: 0,
-      roomY: 8,
-      roomZ: 0,
-    })
-  );
-
-  room.addRoomObject(
-    new Furniture(`rare_dragonlamp*3`, 2, "1", {
-      roomX: 0,
-      roomY: 9,
-      roomZ: 0,
-    })
-  );
-
-  room.addRoomObject(
-    new Furniture("hween10_fog", 0, "0", {
-      roomX: 3,
-      roomY: 7,
-      roomZ: 0,
-    })
-  );
-
-  room.addRoomObject(
-    new Furniture("rare_colourable_scifirocket*2", 0, "1", {
-      roomX: 8,
-      roomY: 7,
-      roomZ: 0,
-    })
-  );
-
-  const directions = [0, 2, 4, 6];
-  let index = 0;
+  for (let y = 0; y < 10; y++) {
+    for (let x = 10; x < 24; x++) {
+      room.addRoomObject(
+        new Furniture(`rare_colourable_scifirocket*2`, 0, "1", {
+          roomX: x,
+          roomY: y,
+          roomZ: 3,
+        })
+      );
+    }
+  }
 
   room.x = application.screen.width / 2 - room.roomWidth / 2;
   room.y = application.screen.height / 2 - room.roomHeight / 2;

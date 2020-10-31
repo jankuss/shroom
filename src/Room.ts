@@ -36,6 +36,8 @@ export class Room extends PIXI.Container implements IRoomGeometry {
   ) {
     super();
 
+    setInterval(() => console.log(this.container.children.length), 500);
+
     const { largestDiff, tilemap: parsedTileMap } = parseTileMap(tilemap);
 
     this.parsedTileMap = parsedTileMap;

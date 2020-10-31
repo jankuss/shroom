@@ -17,6 +17,7 @@ export type Visualization = {
     direction: number,
     layerId: string
   ) => Layer | undefined;
+  getAnimationDatas(): { id: string; data: AnimationData }[];
 };
 
 export function parseVisualization(xml: VisualizationXml): Visualization {
@@ -57,6 +58,11 @@ export function parseVisualization(xml: VisualizationXml): Visualization {
         getLayer: (layerId) => layerMap.get(layerId),
         getDirectionLayerOverride: (direction, layerId) =>
           directionMap.get(direction)?.get(layerId),
+        getAnimationDatas: () =>
+          Array.from(animationMap).map(([animationId, data]) => ({
+            id: animationId,
+            data,
+          })),
       };
     }
   }

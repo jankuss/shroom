@@ -16,7 +16,14 @@ export class Furniture extends RoomObject {
   private loadFurniResult: LoadFurniResult | undefined;
   private parent: PIXI.Container | undefined;
 
-  private animatedSprites: { frames: PIXI.Sprite[] }[] = [];
+  private animatedSprites: {
+    sprites: Map<string, PIXI.Sprite>;
+    frames: string[];
+  }[] = [];
+
+  private spriteCache: Map<string, PIXI.Sprite> = new Map();
+
+  private getSprite(name: string) {}
 
   private cancelTicker: (() => void) | undefined = undefined;
 
@@ -86,18 +93,13 @@ export class Furniture extends RoomObject {
 
       if (sprite.kind === "simple") {
         this.sprites.push(sprite.sprite);
+        this.parent?.addChild(sprite.sprite);
       } else if (sprite.kind === "animated") {
-        this.animatedSprites.push({ frames: sprite.sprites });
-        this.sprites.push(...sprite.sprites);
+        this.animatedSprites.push(sprite);
+        const sprites = [...sprite.sprites.values()];
+
+        this.parent?.addChild(...sprites);
       }
-    });
-
-    this.sprites.forEach((sprite) => {
-      this.parent?.addChild(sprite);
-    });
-
-    this.animatedSprites.forEach((animatedSprite) => {
-      this.parent?.addChild(...animatedSprite.frames);
     });
 
     this.setCurrentFrame(animationTicker.current());
@@ -108,8 +110,19 @@ export class Furniture extends RoomObject {
       const previousFrameIndex = (frame - 1) % animatedSprite.frames.length;
       const frameIndex = frame % animatedSprite.frames.length;
 
-      animatedSprite.frames[previousFrameIndex].visible = false;
-      animatedSprite.frames[frameIndex].visible = true;
+      const frameIdPrevious = animatedSprite.frames[previousFrameIndex];
+      const frameIdCurrent = animatedSprite.frames[frameIndex];
+
+      const previous = animatedSprite.sprites.get(frameIdPrevious);
+      const current = animatedSprite.sprites.get(frameIdCurrent);
+
+      if (previous) {
+        previous.visible = false;
+      }
+
+      if (current) {
+        current.visible = true;
+      }
     });
   }
 
@@ -164,7 +177,13 @@ export class Furniture extends RoomObject {
     index: number
   ):
     | { kind: "simple"; sprite: PIXI.Sprite }
-    | { kind: "animated"; sprites: PIXI.Sprite[] } {
+    | {
+        kind: "animated";
+        sprites: Map<string, PIXI.Sprite>;
+        frames: string[];
+      } {
+    const getAssetTextureName = (asset: Asset) => asset.source ?? asset.name;
+
     const getAssetTexture = (asset: Asset) =>
       getAsset(asset.source ?? asset.name);
 
@@ -193,27 +212,39 @@ export class Furniture extends RoomObject {
       return { kind: "simple", sprite: new PIXI.Sprite() };
     }
 
+    const sprites = new Map<string, PIXI.Sprite>();
+
+    assets.forEach((spriteFrame) => {
+      const name = getAssetTextureName(spriteFrame);
+      if (sprites.has(name)) return;
+
+      const sprite = this.createSprite(spriteFrame, layer, {
+        x,
+        y,
+        zIndex,
+        tint,
+        shadow,
+      });
+
+      sprite.texture = getAssetTexture(spriteFrame);
+      sprite.visible = false;
+
+      sprites.set(name, sprite);
+    });
+
     return {
       kind: "animated",
-      sprites: assets.map((spriteFrame) => {
-        const sprite = this.createSprite(spriteFrame, layer, {
-          x,
-          y,
-          zIndex,
-          tint,
-          shadow,
-        });
-
-        sprite.texture = getAssetTexture(spriteFrame);
-        sprite.visible = false;
-
-        return sprite;
-      }),
+      sprites: sprites,
+      frames: assets.map((asset) => getAssetTextureName(asset)),
     };
   }
 
   destroySprites() {
     this.sprites.forEach((sprite) => sprite.destroy());
+    this.animatedSprites.forEach((sprite) =>
+      sprite.sprites.forEach((sprite) => sprite.destroy())
+    );
+
     this.sprites = [];
     this.animatedSprites = [];
   }
