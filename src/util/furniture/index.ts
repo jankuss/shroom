@@ -16,5 +16,7 @@ export const layerToChar = [
   "j",
   "k",
   "l",
-  "m"
+  "m",
+  "n",
+  "o",
 ];

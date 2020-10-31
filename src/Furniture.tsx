@@ -14,7 +14,6 @@ import { getZOrder } from "./util/getZOrder";
 export class Furniture extends RoomObject {
   private sprites: PIXI.DisplayObject[] = [];
   private loadFurniResult: LoadFurniResult | undefined;
-  private parent: PIXI.Container | undefined;
 
   private animatedSprites: {
     sprites: Map<string, PIXI.Sprite>;
@@ -44,7 +43,7 @@ export class Furniture extends RoomObject {
   updateFurniture() {
     const { geometry } = this.getRoomContext();
 
-    if (this.loadFurniResult != null && this.parent != null) {
+    if (this.loadFurniResult != null) {
       this.updateSprites(
         geometry,
         this.loadFurniResult,
@@ -62,6 +61,8 @@ export class Furniture extends RoomObject {
     direction: number,
     animation?: string
   ) {
+    const { container } = this.getRoomContext();
+
     const { animationTicker } = this.getRoomContext();
 
     this.destroySprites();
@@ -93,12 +94,12 @@ export class Furniture extends RoomObject {
 
       if (sprite.kind === "simple") {
         this.sprites.push(sprite.sprite);
-        this.parent?.addChild(sprite.sprite);
+        container.addChild(sprite.sprite);
       } else if (sprite.kind === "animated") {
         this.animatedSprites.push(sprite);
         const sprites = [...sprite.sprites.values()];
 
-        this.parent?.addChild(...sprites);
+        container.addChild(...sprites);
       }
     });
 
@@ -188,9 +189,14 @@ export class Furniture extends RoomObject {
       getAsset(asset.source ?? asset.name);
 
     const zIndex =
-      getZOrder(this.position.roomX, this.position.roomY, 0) +
+      getZOrder(this.position.roomX, this.position.roomY, this.position.roomZ) +
       (z ?? 0) +
       index * 0.01;
+
+    if (isNaN(zIndex)) {
+      console.log("DATA", asset, z, layer);
+      throw new Error("invalid zindex");
+    }
 
     if (assets == null || assets.length === 1) {
       const actualAsset =
@@ -252,8 +258,6 @@ export class Furniture extends RoomObject {
   registered(): void {
     const { container } = this.getRoomContext();
 
-    this.parent = container;
-
     this.getRoomContext()
       .furnitureLoader.loadFurni(this.type)
       .then((result) => {
@@ -266,7 +270,6 @@ export class Furniture extends RoomObject {
 
   destroy() {
     this.destroySprites();
-    this.parent = undefined;
 
     if (this.cancelTicker != null) {
       this.cancelTicker();
