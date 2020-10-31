@@ -6,6 +6,10 @@ export class FurnitureLoader implements IFurnitureLoader {
 
   async loadFurni(typeWithColor: string): Promise<LoadFurniResult> {
     const type = typeWithColor.split("*")[0];
+
+    const current = this.furnitureCache.get(type);
+    if (current != null) return current;
+
     let furniture = this.furnitureCache.get(type);
 
     if (furniture != null) {

@@ -1,12 +1,12 @@
 import { TileType, TileTypeNumber } from "../types/TileType";
-import { getTileInfo } from "./getTileInfo";
+import { getNumberOfTileType, getTileInfo } from "./getTileInfo";
 import { isTile } from "./isTile";
 
 export type ParsedTileType =
   | {
       type: "wall";
       kind: "colWall" | "rowWall" | "innerCorner" | "outerCorner";
-      height: TileTypeNumber;
+      height: number;
     }
   | { type: "tile"; z: number }
   | { type: "hidden" }
@@ -191,7 +191,7 @@ function cutoutArray(
   const width = endX - startX;
   const height = endY - startY;
 
-  const result = initialize2DArray<TileType>(width, height, 0);
+  const result = initialize2DArray<TileType>(width, height, "0");
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -245,7 +245,7 @@ function findLastColumnIndex(tilemap: TileType[][]) {
   for (let x = 0; x < tilemap[0].length; x++) {
     let hasTile = false;
     for (let y = 0; y < tilemap.length; y++) {
-      hasTile = hasTile || isTile(tilemap[y][x]);
+      hasTile = hasTile || isTile(getNumberOfTileType(tilemap[y][x]));
     }
 
     if (hasTile) {
@@ -261,7 +261,7 @@ function findLastRowIndex(tilemap: TileType[][]) {
   for (let y = 0; y < tilemap.length; y++) {
     let hasTile = false;
     for (let x = 0; x < tilemap.length; x++) {
-      hasTile = hasTile || isTile(tilemap[y][x]);
+      hasTile = hasTile || isTile(getNumberOfTileType(tilemap[y][x]));
     }
 
     if (hasTile) {

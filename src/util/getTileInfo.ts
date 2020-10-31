@@ -7,6 +7,20 @@ const offsets = {
   left: { x: -1, y: 0 },
 };
 
+export function getNumberOfTileType(tileType: TileType): number | "x" {
+  if (tileType === "x" || tileType == null) return "x";
+
+  const parsedNumber = Number(tileType);
+
+  if (isNaN(parsedNumber)) {
+    const offset = 9;
+
+    return tileType.charCodeAt(0) - 96 + offset;
+  }
+
+  return parsedNumber;
+}
+
 const getTile = (
   tiles: TileType[][],
   x: number,
@@ -19,7 +33,7 @@ const getTile = (
   if (tiles[y] == null) return "x";
   if (tiles[y][x] == null) return "x";
 
-  return tiles[y][x];
+  return getNumberOfTileType(tiles[y][x]);
 };
 
 export function getTileInfo(tiles: TileType[][], x: number, y: number) {
