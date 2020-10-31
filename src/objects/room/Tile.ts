@@ -1,13 +1,9 @@
 import * as PIXI from "pixi.js";
-import TileAsset from "./assets/tile2.png";
-import { createPlaneMatrix } from "./createPlaneMatrix";
-import { getTileColors } from "./getTileColors";
-import { IRoomContext } from "./IRoomContext";
-import { IRoomGeometry } from "./IRoomGeometry";
-import { IRoomObject } from "./IRoomObject";
+import { IRoomGeometry } from "../../IRoomGeometry";
+import { RoomObject } from "../../RoomObject";
+import TileAsset from "../../assets/tile2.png";
 import { getFloorMatrix, getLeftMatrix, getRightMatrix } from "./matrixes";
-import { createPlaneSprite } from "./Plane";
-import { RoomObject } from "./RoomObject";
+import { getTileColors } from "./util/getTileColors";
 
 interface Props {
   geometry: IRoomGeometry;
@@ -65,8 +61,6 @@ export class Tile extends RoomObject {
     const tile = new PIXI.TilingSprite(texture);
     tile.tilePosition = tilePosition;
 
-    console.log(tileMatrix);
-
     tile.transform.setFromMatrix(tileMatrix);
     tile.width = 32;
     tile.height = 32;
@@ -102,7 +96,7 @@ export class Tile extends RoomObject {
     this.container.addChild(borderRight);
     this.container.addChild(tile);
 
-    this.getRoomContext().plane.addChild(this.container);
+    this.visualization.addPlaneChild(this.container);
   }
 
   destroy(): void {

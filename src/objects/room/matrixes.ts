@@ -1,4 +1,4 @@
-import { createPlaneMatrix } from "./createPlaneMatrix";
+import { createPlaneMatrix } from "./util/createPlaneMatrix";
 
 export function getFloorMatrix(x: number, y: number) {
   return createPlaneMatrix(

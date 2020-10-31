@@ -1,10 +1,9 @@
 import * as PIXI from "pixi.js";
-import { IRoomGeometry } from "./IRoomGeometry";
-import WallAsset from "./assets/wall2.png";
-import { getWallColors } from "./getTileColors";
-import { IRoomObject } from "./IRoomObject";
-import { IRoomContext } from "./IRoomContext";
-import { RoomObject } from "./RoomObject";
+import { IRoomGeometry } from "../../IRoomGeometry";
+import { RoomObject } from "../../RoomObject";
+
+import WallAsset from "../../assets/wall2.png";
+import { getWallColors } from "./util/getTileColors";
 
 interface Props {
   geometry: IRoomGeometry;
@@ -349,6 +348,6 @@ export class Wall extends RoomObject {
       }
     }
 
-    this.getRoomContext().plane.addChild(this.container);
+    this.visualization.addPlaneChild(this.container);
   }
 }
