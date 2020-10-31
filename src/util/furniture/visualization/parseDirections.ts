@@ -17,11 +17,11 @@ export function parseDirections(
       const layer = directionLayers[j]["$"];
 
       layerMap.set(layer.id, {
-        zIndex: Number(layer.z),
+        zIndex: layer != null && layer.z != null ? Number(layer.z) : undefined,
         tag: undefined,
         ink: undefined,
         alpha: undefined,
-        ignoreMouse: undefined
+        ignoreMouse: undefined,
       });
     }
 

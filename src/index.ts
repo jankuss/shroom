@@ -87,6 +87,38 @@ function init() {
     }
   }
 
+  room.addRoomObject(
+    new Furniture(`reef_aquarium`, 2, "0", {
+      roomX: 6,
+      roomY: 6,
+      roomZ: 3,
+    })
+  );
+
+  room.addRoomObject(
+    new Furniture(`party_ravel`, 4, "1", {
+      roomX: 6,
+      roomY: 10,
+      roomZ: 3,
+    })
+  );
+
+  room.addRoomObject(
+    new Furniture(`party_ravel`, 4, "0", {
+      roomX: 6,
+      roomY: 11,
+      roomZ: 3,
+    })
+  );
+
+  room.addRoomObject(
+    new Furniture(`party_ravel`, 4, "1", {
+      roomX: 6,
+      roomY: 12,
+      roomZ: 3,
+    })
+  );
+
   room.x = application.screen.width / 2 - room.roomWidth / 2;
   room.y = application.screen.height / 2 - room.roomHeight / 2;
 

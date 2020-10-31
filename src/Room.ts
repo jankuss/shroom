@@ -35,17 +35,12 @@ export class Room extends PIXI.Container implements IRoomGeometry {
     private furniLoader: IFurnitureLoader
   ) {
     super();
-
-    setInterval(() => console.log(this.container.children.length), 500);
-
     const { largestDiff, tilemap: parsedTileMap } = parseTileMap(tilemap);
 
     this.parsedTileMap = parsedTileMap;
     this.wallHeight = this.wallHeight + largestDiff * 32;
 
     const { rows, columns } = this.getTileDimensions();
-
-    this.container.sortableChildren = true;
 
     const leftWidth = (rows - this.wallOffsets.y) * 32;
 
@@ -59,6 +54,8 @@ export class Room extends PIXI.Container implements IRoomGeometry {
 
     this.roomWidth = width;
     this.roomHeight = height;
+
+    this.container.sortableChildren = true;
 
     this.addChild(this.plane);
     this.addChild(this.container);
