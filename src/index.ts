@@ -119,6 +119,38 @@ function init() {
     })
   );
 
+  room.addRoomObject(
+    new Furniture(`party_floor`, 0, "1", {
+      roomX: 6,
+      roomY: 10,
+      roomZ: 3,
+    })
+  );
+
+  room.addRoomObject(
+    new Furniture(`party_floor`, 0, "1", {
+      roomX: 8,
+      roomY: 10,
+      roomZ: 3,
+    })
+  );
+
+  room.addRoomObject(
+    new Furniture(`party_floor`, 0, "1", {
+      roomX: 10,
+      roomY: 10,
+      roomZ: 3,
+    })
+  );
+
+  room.addRoomObject(
+    new Furniture(`party_floor`, 0, "1", {
+      roomX: 12,
+      roomY: 10,
+      roomZ: 3,
+    })
+  );
+
   room.x = application.screen.width / 2 - room.roomWidth / 2;
   room.y = application.screen.height / 2 - room.roomHeight / 2;
 
