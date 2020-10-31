@@ -1,13 +1,14 @@
 import * as PIXI from "pixi.js";
+
 import { parseTileMapString } from "./util/parseTileMapString";
-import { Room } from "./Room";
-import { Furniture } from "./Furniture";
-import { FurnitureLoader } from "./FurnitureLoader";
+import { Furniture } from "./objects/furniture/Furniture";
 import { AnimationTicker } from "./AnimationTicker";
 
 import TileAsset from "./assets/tile.png";
 import WallAsset from "./assets/wall.png";
 import Wall2Asset from "./assets/wall2.png";
+import { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
+import { Room } from "./objects/room/Room";
 
 const view = document.querySelector("#root") as HTMLCanvasElement | undefined;
 const container = document.querySelector("#container") as
@@ -30,8 +31,6 @@ PIXI.settings.ROUND_PIXELS = true;
 
 const animationTicker = new AnimationTicker(application);
 const furniLoader = new FurnitureLoader();
-
-console.log(TileAsset, WallAsset);
 
 application.loader
   .add(TileAsset)

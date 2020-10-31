@@ -1,13 +1,12 @@
 import * as PIXI from "pixi.js";
-import TileAsset from "./assets/tile2.png";
-import { createPlaneMatrix } from "./createPlaneMatrix";
-import { getTileColors } from "./getTileColors";
-import { IRoomContext } from "./IRoomContext";
-import { IRoomGeometry } from "./IRoomGeometry";
-import { IRoomObject } from "./IRoomObject";
+import TileAsset from "../../assets/tile2.png";
+import { createPlaneMatrix } from "./util/createPlaneMatrix";
+import { getTileColors } from "./util/getTileColors";
+import { IRoomContext } from "../../IRoomContext";
+import { IRoomGeometry } from "../../IRoomGeometry";
+import { IRoomObject } from "../../IRoomObject";
 import { getFloorMatrix, getLeftMatrix, getRightMatrix } from "./matrixes";
-import { createPlaneSprite } from "./Plane";
-import { RoomObject } from "./RoomObject";
+import { RoomObject } from "../../RoomObject";
 
 interface Props {
   geometry: IRoomGeometry;
@@ -35,10 +34,9 @@ export class Stair extends RoomObject {
     this.container?.destroy();
     this.container = new PIXI.Container();
 
-    const { geometry } = this.getRoomContext();
     const { roomX, roomY, roomZ, tileHeight, color, direction } = this.props;
 
-    const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
+    const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
 
     const xEven = roomX % 2 === 0;
     const yEven = roomY % 2 === 0;
@@ -61,7 +59,7 @@ export class Stair extends RoomObject {
       }
     }
 
-    this.getRoomContext().plane.addChild(this.container);
+    this.visualization.addPlaneChild(this.container);
   }
 
   destroySprites() {

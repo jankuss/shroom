@@ -1,10 +1,27 @@
+import { IFurnitureLoader } from "./IFurnitureLoader";
 import { IRoomContext } from "./IRoomContext";
 import { IRoomObject } from "./IRoomObject";
 
 export abstract class RoomObject implements IRoomObject {
   private context: IRoomContext | undefined;
 
-  getRoomContext(): IRoomContext {
+  get furnitureLoader() {
+    return this.getRoomContext().furnitureLoader;
+  }
+
+  get animationTicker() {
+    return this.getRoomContext().animationTicker;
+  }
+
+  get visualization() {
+    return this.getRoomContext().visualization;
+  }
+
+  get geometry() {
+    return this.getRoomContext().geometry;
+  }
+
+  private getRoomContext(): IRoomContext {
     if (this.context == null) throw new Error("Invalid context");
 
     return this.context;

@@ -1,25 +1,23 @@
 import * as PIXI from "pixi.js";
-import { TileType } from "./types/TileType";
-import { ParsedTileType, parseTileMap } from "./util/parseTileMap";
-import { Tile } from "./Tile";
-import { IRoomGeometry } from "./IRoomGeometry";
-import { Furniture } from "./Furniture";
-import { Wall } from "./Wall";
+import { IAnimationTicker } from "../../IAnimationTicker";
+import { IFurnitureLoader } from "../../IFurnitureLoader";
+import { IRoomGeometry } from "../../IRoomGeometry";
+import { IRoomObject } from "../../IRoomObject";
+import { TileType } from "../../types/TileType";
+import { ParsedTileType, parseTileMap } from "../../util/parseTileMap";
+import { RoomVisualization } from "./RoomVisualization";
 import { Stair } from "./Stair";
-import { IRoomObject } from "./IRoomObject";
-import { IAnimationTicker } from "./IAnimationTicker";
-import { IFurnitureLoader } from "./IFurnitureLoader";
+import { Tile } from "./Tile";
+import { getTileMapBounds } from "./util/getTileMapBounds";
+import { Wall } from "./Wall";
 
 export class Room extends PIXI.Container implements IRoomGeometry {
   private roomObjects: IRoomObject[] = [];
 
-  private offsetX: number;
-  private offsetY: number;
   private wallOffsets = { x: 1, y: 1 };
-  private parsedTileMap: ParsedTileType[][];
+  public readonly parsedTileMap: ParsedTileType[][];
 
-  private container: PIXI.Container = new PIXI.Container();
-  private plane: PIXI.Container = new PIXI.Container();
+  private visualization: RoomVisualization;
 
   public roomWidth: number;
   public roomHeight: number;
@@ -28,6 +26,8 @@ export class Room extends PIXI.Container implements IRoomGeometry {
   private tileHeight = 8;
 
   private tileColor: string = "#989865";
+
+  private bounds: { minX: number; minY: number; maxX: number; maxY: number };
 
   constructor(
     tilemap: TileType[][],
@@ -40,25 +40,15 @@ export class Room extends PIXI.Container implements IRoomGeometry {
     this.parsedTileMap = parsedTileMap;
     this.wallHeight = this.wallHeight + largestDiff * 32;
 
-    const { rows, columns } = this.getTileDimensions();
+    this.visualization = new RoomVisualization();
 
-    const leftWidth = (rows - this.wallOffsets.y) * 32;
-
-    this.offsetX = leftWidth;
-    this.offsetY = -32 * this.wallOffsets.y;
-
+    this.bounds = getTileMapBounds(parsedTileMap, this.wallOffsets);
     this.initTiles(this.parsedTileMap);
 
-    const width = rows * 32 + columns * 32;
-    const height = columns * 16 + rows * 16;
+    this.roomWidth = this.bounds.maxX - this.bounds.minX;
+    this.roomHeight = this.bounds.maxY - this.bounds.minY;
 
-    this.roomWidth = width;
-    this.roomHeight = height;
-
-    this.container.sortableChildren = true;
-
-    this.addChild(this.plane);
-    this.addChild(this.container);
+    this.addChild(this.visualization);
   }
 
   getTileDimensions() {
@@ -77,10 +67,8 @@ export class Room extends PIXI.Container implements IRoomGeometry {
 
   addRoomObject(object: IRoomObject) {
     object.setParent({
-      container: this.container,
       geometry: this,
-      addRoomObject: (object) => this.addRoomObject(object),
-      plane: this.plane,
+      visualization: this.visualization,
       animationTicker: this.animationTicker,
       furnitureLoader: this.furniLoader,
     });
@@ -98,8 +86,8 @@ export class Room extends PIXI.Container implements IRoomGeometry {
 
     const base = 32;
 
-    const xPos = this.offsetX + roomX * base - roomY * base;
-    const yPos = this.offsetY + roomX * (base / 2) + roomY * (base / 2);
+    const xPos = -this.bounds.minX + roomX * base - roomY * base;
+    const yPos = -this.bounds.minY + roomX * (base / 2) + roomY * (base / 2);
 
     return {
       x: xPos,
@@ -196,8 +184,6 @@ export class Room extends PIXI.Container implements IRoomGeometry {
         }
       }
     }
-
-    this.plane.cacheAsBitmap = true;
   }
 }
 

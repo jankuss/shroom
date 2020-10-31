@@ -1,15 +1,11 @@
 import * as PIXI from "pixi.js";
-import { IAnimationTicker } from "./IAnimationTicker";
 
-import { IFurnitureLoader } from "./IFurnitureLoader";
-import { IRoomGeometry } from "./IRoomGeometry";
-import { IRoomObject } from "./IRoomObject";
-import { Room } from "./Room";
-import { RoomObject } from "./RoomObject";
-import { Asset, DrawPart } from "./util/furniture";
-import { LoadFurniResult } from "./util/furniture/loadFurni";
-import { Layer } from "./util/furniture/visualization/parseLayers";
-import { getZOrder } from "./util/getZOrder";
+import { IRoomGeometry } from "../../IRoomGeometry";
+import { RoomObject } from "../../RoomObject";
+import { Asset, DrawPart } from "../../util/furniture";
+import { LoadFurniResult } from "../../util/furniture/loadFurni";
+import { Layer } from "../../util/furniture/visualization/parseLayers";
+import { getZOrder } from "../../util/getZOrder";
 
 export class Furniture extends RoomObject {
   private sprites: PIXI.DisplayObject[] = [];
@@ -41,11 +37,8 @@ export class Furniture extends RoomObject {
   }
 
   updateFurniture() {
-    const { geometry } = this.getRoomContext();
-
     if (this.loadFurniResult != null) {
       this.updateSprites(
-        geometry,
         this.loadFurniResult,
         this.type,
         this.direction,
@@ -55,16 +48,11 @@ export class Furniture extends RoomObject {
   }
 
   updateSprites(
-    room: IRoomGeometry,
     loadFurniResult: LoadFurniResult,
     type: string,
     direction: number,
     animation?: string
   ) {
-    const { container } = this.getRoomContext();
-
-    const { animationTicker } = this.getRoomContext();
-
     this.destroySprites();
     const { parts } = loadFurniResult.getDrawDefinition(
       type,
@@ -73,12 +61,12 @@ export class Furniture extends RoomObject {
     );
 
     if (animation != null) {
-      this.cancelTicker = animationTicker.subscribe((frame) =>
+      this.cancelTicker = this.animationTicker.subscribe((frame) =>
         this.setCurrentFrame(frame)
       );
     }
 
-    const position = room.getPosition(
+    const position = this.geometry.getPosition(
       this.position.roomX,
       this.position.roomY,
       this.position.roomZ
@@ -94,16 +82,18 @@ export class Furniture extends RoomObject {
 
       if (sprite.kind === "simple") {
         this.sprites.push(sprite.sprite);
-        container.addChild(sprite.sprite);
+        this.visualization.addContainerChild(sprite.sprite);
       } else if (sprite.kind === "animated") {
         this.animatedSprites.push(sprite);
         const sprites = [...sprite.sprites.values()];
 
-        container.addChild(...sprites);
+        sprites.forEach((sprite) => {
+          this.visualization.addContainerChild(sprite);
+        });
       }
     });
 
-    this.setCurrentFrame(animationTicker.current());
+    this.setCurrentFrame(this.animationTicker.current());
   }
 
   private setCurrentFrame(frame: number) {
@@ -194,7 +184,6 @@ export class Furniture extends RoomObject {
       index * 0.01;
 
     if (isNaN(zIndex)) {
-      console.log("DATA", asset, z, layer);
       throw new Error("invalid zindex");
     }
 
@@ -256,14 +245,10 @@ export class Furniture extends RoomObject {
   }
 
   registered(): void {
-    const { container } = this.getRoomContext();
-
-    this.getRoomContext()
-      .furnitureLoader.loadFurni(this.type)
-      .then((result) => {
-        this.loadFurniResult = result;
-        this.updateFurniture();
-      });
+    this.furnitureLoader.loadFurni(this.type).then((result) => {
+      this.loadFurniResult = result;
+      this.updateFurniture();
+    });
 
     this.updateFurniture();
   }
