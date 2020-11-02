@@ -3,6 +3,7 @@ import { IAnimationTicker } from "../../IAnimationTicker";
 import { IFurnitureLoader } from "../../IFurnitureLoader";
 import { IRoomGeometry } from "../../IRoomGeometry";
 import { IRoomObject } from "../../IRoomObject";
+import { IRoomObjectContainer } from "../../IRoomObjectContainer";
 import { TileType } from "../../types/TileType";
 import { ParsedTileType, parseTileMap } from "../../util/parseTileMap";
 import { RoomVisualization } from "./RoomVisualization";
@@ -11,7 +12,9 @@ import { Tile } from "./Tile";
 import { getTileMapBounds } from "./util/getTileMapBounds";
 import { Wall } from "./Wall";
 
-export class Room extends PIXI.Container implements IRoomGeometry {
+export class Room
+  extends PIXI.Container
+  implements IRoomGeometry, IRoomObjectContainer {
   private roomObjects: IRoomObject[] = [];
 
   private wallOffsets = { x: 1, y: 1 };
@@ -51,26 +54,13 @@ export class Room extends PIXI.Container implements IRoomGeometry {
     this.addChild(this.visualization);
   }
 
-  getTileDimensions() {
-    const rows = this.parsedTileMap.length - this.wallOffsets.y;
-    const columns = this.parsedTileMap[0].length - this.wallOffsets.x;
-
-    return {
-      rows,
-      columns,
-    };
-  }
-
-  calculateBounds() {
-    const { rows, columns } = this.getTileDimensions();
-  }
-
   addRoomObject(object: IRoomObject) {
     object.setParent({
       geometry: this,
       visualization: this.visualization,
       animationTicker: this.animationTicker,
       furnitureLoader: this.furniLoader,
+      roomObjectContainer: this,
     });
 
     this.roomObjects.push(object);

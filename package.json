@@ -12,7 +12,9 @@
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-react": "^7.12.1",
     "@babel/preset-typescript": "^7.12.1",
+    "@types/bluebird": "^3.5.33",
     "@types/jest": "^26.0.15",
+    "@types/node-fetch": "^2.5.7",
     "@types/xml2js": "^0.4.5",
     "babel-loader": "^8.1.0",
     "copy-webpack-plugin": "^6.2.1",
@@ -21,17 +23,21 @@
     "html-webpack-plugin": "^4.5.0",
     "jest": "^26.6.1",
     "ts-jest": "^26.4.3",
+    "ts-node": "^9.0.0",
     "typescript": "^4.0.3",
     "webpack": "^5.2.0",
     "webpack-cli": "^4.1.0",
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "bluebird": "^3.7.2",
+    "node-fetch": "^2.6.1",
     "pixi.js": "^5.3.3",
     "timers-browserify": "^2.0.11",
     "xml2js": "^0.4.23"
   },
   "scripts": {
-    "dev": "webpack serve"
+    "dev": "webpack serve",
+    "dump": "yarn ts-node src/downloading/index.ts"
   }
 }
