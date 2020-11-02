@@ -9,6 +9,7 @@ import WallAsset from "./assets/wall.png";
 import Wall2Asset from "./assets/wall2.png";
 import { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
 import { Room } from "./objects/room/Room";
+import { WallFurniture } from "./objects/furniture/WallFurniture";
 
 const view = document.querySelector("#root") as HTMLCanvasElement | undefined;
 const container = document.querySelector("#container") as
@@ -41,112 +42,44 @@ application.loader
 function init() {
   const room = new Room(
     parseTileMapString(`
-    xxxxxxxxxxxxxxxxxxxxxxxxx
-    xxxxxxxxxxx33333333333333
-    xxxxxxxxxxx33333333333333
-    xxxxxxxxxxx33333333333333
-    xxxxxxxxxxx33333333333333
-    xxxxxxxxxxx33333333333333
-    xxxxxxxxxxx33333333333333
-    xxxxxxx333333333333333333
-    xxxxxxx333333333333333333
-    xxxxxxx333333333333333333
-    xxxxxxx333333333333333333
-    xxxxxxx333333333333333333
-    xxxxxxx333333333333333333
-    x4444433333xxxxxxxxxxxxxx
-    x4444433333xxxxxxxxxxxxxx
-    x44444333333222xx000000xx
-    x44444333333222xx000000xx
-    xxx44xxxxxxxx22xx000000xx
-    xxx33xxxxxxxx11xx000000xx
-    xxx33322222211110000000xx
-    xxx33322222211110000000xx
-    xxxxxxxxxxxxxxxxx000000xx
-    xxxxxxxxxxxxxxxxx000000xx
-    xxxxxxxxxxxxxxxxx000000xx
-    xxxxxxxxxxxxxxxxx000000xx
-    xxxxxxxxxxxxxxxxxxxxxxxxx
+    000
+    000
+    000
   `),
     animationTicker,
     furniLoader
   );
 
   const furnis: Furniture[] = [];
-
-  for (let y = 0; y < 10; y++) {
-    for (let x = 10; x < 24; x++) {
-      room.addRoomObject(
-        new Furniture(`rare_colourable_scifirocket*2`, 0, "1", {
-          roomX: x,
-          roomY: y,
-          roomZ: 3,
-        })
-      );
-    }
-  }
-
   room.addRoomObject(
-    new Furniture(`reef_aquarium`, 2, "0", {
-      roomX: 6,
-      roomY: 6,
-      roomZ: 3,
+    new Furniture(`throne`, 2, "0", {
+      roomX: 0,
+      roomY: 0,
+      roomZ: 0,
     })
   );
 
   room.addRoomObject(
-    new Furniture(`party_ravel`, 4, "1", {
-      roomX: 6,
-      roomY: 10,
-      roomZ: 3,
+    new WallFurniture(`window_nt_skyscraper`, 2, "0", {
+      roomX: 0,
+      roomY: 0,
+      roomZ: 0,
     })
   );
 
   room.addRoomObject(
-    new Furniture(`party_ravel`, 4, "0", {
-      roomX: 6,
-      roomY: 11,
-      roomZ: 3,
+    new WallFurniture(`window_nt_skyscraper`, 2, "0", {
+      roomX: 0,
+      roomY: 1,
+      roomZ: 0,
     })
   );
 
   room.addRoomObject(
-    new Furniture(`party_ravel`, 4, "1", {
-      roomX: 6,
-      roomY: 12,
-      roomZ: 3,
-    })
-  );
-
-  room.addRoomObject(
-    new Furniture(`party_floor`, 0, "1", {
-      roomX: 6,
-      roomY: 10,
-      roomZ: 3,
-    })
-  );
-
-  room.addRoomObject(
-    new Furniture(`party_floor`, 0, "1", {
-      roomX: 8,
-      roomY: 10,
-      roomZ: 3,
-    })
-  );
-
-  room.addRoomObject(
-    new Furniture(`party_floor`, 0, "1", {
-      roomX: 10,
-      roomY: 10,
-      roomZ: 3,
-    })
-  );
-
-  room.addRoomObject(
-    new Furniture(`party_floor`, 0, "1", {
-      roomX: 12,
-      roomY: 10,
-      roomZ: 3,
+    new WallFurniture(`window_nt_skyscraper`, 2, "0", {
+      roomX: 0,
+      roomY: 2,
+      roomZ: 0,
     })
   );
 
