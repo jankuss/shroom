@@ -9,6 +9,7 @@ export type DrawPart = {
   layer: Layer | undefined;
   tint?: string;
   assets?: Asset[];
+  mask?: boolean;
 };
 
 export interface DrawDefinition {

@@ -10,6 +10,9 @@ import Wall2Asset from "./assets/wall2.png";
 import { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
 import { Room } from "./objects/room/Room";
 import { WallFurniture } from "./objects/furniture/WallFurniture";
+import { AvatarLoader } from "./objects/avatar/AvatarLoader";
+import { createLookServer, loadOffsetMapFromJson } from "./objects/avatar/util";
+import { Avatar } from "./objects/avatar/Avatar";
 
 const view = document.querySelector("#root") as HTMLCanvasElement | undefined;
 const container = document.querySelector("#container") as
@@ -32,6 +35,25 @@ PIXI.settings.ROUND_PIXELS = true;
 
 const animationTicker = new AnimationTicker(application);
 const furniLoader = new FurnitureLoader();
+const avatarLoader = new AvatarLoader({
+  createLookServer: async () => {
+    const fetchString = (url: string) =>
+      fetch(url).then((response) => response.text());
+    const fetchJson = (url: string) =>
+      fetch(url).then((response) => response.json());
+
+    return createLookServer({
+      drawOrderString: await fetchString("./draworder.xml"),
+      figureDataString: await fetchString("./figuredata.xml"),
+      figureMapString: await fetchString("./figuremap.xml"),
+      loadOffsetMap: async () =>
+        loadOffsetMapFromJson(await fetchJson("./offsets.json")).getOffset,
+    });
+  },
+  resolveImage: async (id) => {
+    return PIXI.Texture.from(`./figure/${id}.png`);
+  },
+});
 
 application.loader
   .add(TileAsset)
@@ -47,7 +69,8 @@ function init() {
     000
   `),
     animationTicker,
-    furniLoader
+    furniLoader,
+    avatarLoader
   );
 
   const furnis: Furniture[] = [];
@@ -81,6 +104,15 @@ function init() {
       roomY: 2,
       roomZ: 0,
     })
+  );
+
+  room.addRoomObject(
+    new Avatar(
+      "hd-180-1.ch-255-66.lg-280-110.sh-305-62.ha-1012-110.hr-828-61",
+      "std",
+      2,
+      { roomX: 0, roomY: 0, roomZ: 0 }
+    )
   );
 
   room.x = application.screen.width / 2 - room.roomWidth / 2;

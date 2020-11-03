@@ -1,11 +1,10 @@
 import * as PIXI from "pixi.js";
 
-import { IRoomGeometry } from "../../IRoomGeometry";
 import { RoomObject } from "../../RoomObject";
-import { Asset, DrawPart } from "../../util/furniture";
-import { LoadFurniResult } from "../../util/furniture/loadFurni";
-import { Layer } from "../../util/furniture/visualization/parseLayers";
-import { getZOrder } from "../../util/getZOrder";
+import { DrawPart } from "./util/DrawDefinition";
+import { LoadFurniResult } from "./util/loadFurni";
+import { Asset } from "./util/parseAssets";
+import { Layer } from "./util/visualization/parseLayers";
 
 export class BaseFurniture extends RoomObject {
   private sprites: PIXI.DisplayObject[] = [];
@@ -84,9 +83,14 @@ export class BaseFurniture extends RoomObject {
         index
       );
 
-      if (sprite.kind === "simple") {
+      if (sprite.kind === "simple" || sprite.kind === "mask") {
         this.sprites.push(sprite.sprite);
-        this.visualization.addContainerChild(sprite.sprite);
+
+        if (sprite.kind === "mask") {
+          this.visualization.addMask(sprite.sprite);
+        } else {
+          this.visualization.addContainerChild(sprite.sprite);
+        }
       } else if (sprite.kind === "animated") {
         this.animatedSprites.push(sprite);
         const sprites = [...sprite.sprites.values()];
@@ -130,7 +134,15 @@ export class BaseFurniture extends RoomObject {
       zIndex,
       tint,
       shadow = false,
-    }: { x: number; y: number; zIndex: number; tint?: string; shadow?: boolean }
+      mask = false,
+    }: {
+      x: number;
+      y: number;
+      zIndex: number;
+      tint?: string;
+      shadow?: boolean;
+      mask?: boolean;
+    }
   ): PIXI.Sprite {
     const sprite = new PIXI.Sprite();
 
@@ -156,19 +168,22 @@ export class BaseFurniture extends RoomObject {
 
     if (shadow) {
       sprite.alpha = 0.195;
-      console.log(sprite);
+    }
+
+    if (mask) {
+      sprite.tint = 0xffffff;
     }
 
     return sprite;
   }
 
   private createAssetFromPart(
-    { asset, shadow, tint, layer, z, assets }: DrawPart,
+    { asset, shadow, tint, layer, z, assets, mask }: DrawPart,
     { x, y }: { x: number; y: number },
     getAsset: (name: string) => PIXI.Texture,
     index: number
   ):
-    | { kind: "simple"; sprite: PIXI.Sprite }
+    | { kind: "simple" | "mask"; sprite: PIXI.Sprite }
     | {
         kind: "animated";
         sprites: Map<string, PIXI.Sprite>;
@@ -196,10 +211,15 @@ export class BaseFurniture extends RoomObject {
           zIndex,
           shadow,
           tint,
+          mask,
         });
         sprite.texture = getAssetTexture(actualAsset);
 
-        return { kind: "simple", sprite };
+        if (mask != null && mask) {
+          return { kind: "mask", sprite };
+        } else {
+          return { kind: "simple", sprite };
+        }
       }
 
       return { kind: "simple", sprite: new PIXI.Sprite() };

@@ -17,6 +17,8 @@ export class RoomVisualization
     this.addChild(this.container);
   }
 
+  addMask(element: PIXI.Sprite): void {}
+
   addPlaneChild(element: PIXI.DisplayObject): void {
     this.plane.addChild(element);
   }

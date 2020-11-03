@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { IAnimationTicker } from "../../IAnimationTicker";
+import { IAvatarLoader } from "../../IAvatarLoader";
 import { IFurnitureLoader } from "../../IFurnitureLoader";
 import { IRoomGeometry } from "../../IRoomGeometry";
 import { IRoomObject } from "../../IRoomObject";
@@ -35,7 +36,8 @@ export class Room
   constructor(
     tilemap: TileType[][],
     private animationTicker: IAnimationTicker,
-    private furniLoader: IFurnitureLoader
+    private furniLoader: IFurnitureLoader,
+    private avatarLoader: IAvatarLoader
   ) {
     super();
     const { largestDiff, tilemap: parsedTileMap } = parseTileMap(tilemap);
@@ -61,6 +63,7 @@ export class Room
       animationTicker: this.animationTicker,
       furnitureLoader: this.furniLoader,
       roomObjectContainer: this,
+      avatarLoader: this.avatarLoader,
     });
 
     this.roomObjects.push(object);

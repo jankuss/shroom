@@ -5764,6 +5764,11 @@ pirates@^4.0.1:
   dependencies:
     node-modules-regexp "^1.0.0"
 
+pixi-heaven@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/pixi-heaven/-/pixi-heaven-0.2.2.tgz#41d4032a937b933dda381277364ab00d8f54a397"
+  integrity sha512-XShqkUnjnEIovGmDa2YRwYwom1+Dm9pu+aQ3jHNgdIzaByWjxX3ZGUBpJQ6BazNQip7WAshtnWAZyDZOF0RrxQ==
+
 pixi.js@^5.3.3:
   version "5.3.3"
   resolved "https://registry.yarnpkg.com/pixi.js/-/pixi.js-5.3.3.tgz#6e326a52542f4acd97ea3f8593cb0aeae502df9a"

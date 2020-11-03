@@ -25,6 +25,10 @@ export abstract class RoomObject implements IRoomObject {
     return this.getRoomContext().roomObjectContainer;
   }
 
+  get avatarLoader() {
+    return this.getRoomContext().avatarLoader;
+  }
+
   private getRoomContext(): IRoomContext {
     if (this.context == null) throw new Error("Invalid context");
 
