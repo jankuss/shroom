@@ -4,7 +4,7 @@ import { DrawDefinition, DrawPart } from "./DrawDefinition";
 import { layerToChar } from "./index";
 import { FramesData } from "./visualization/parseAnimations";
 
-export function getDrawDefinition({
+export function getFurniDrawDefinition({
   type: typeWithColor,
   direction,
   visualization,
@@ -73,6 +73,24 @@ export function getDrawDefinition({
   };
 
   const shadow = getAsset("sd", -1);
+
+  const mask = assetMap.get(`${type}_${size}_${direction}_mask`);
+
+  if (mask != null) {
+    parts.push({
+      asset: mask,
+      frameRepeat: 1,
+      layer: {
+        zIndex: undefined,
+        alpha: undefined,
+        ignoreMouse: undefined,
+        ink: undefined,
+        tag: undefined,
+      },
+      shadow: false,
+      mask: true,
+    });
+  }
 
   if (shadow != null) {
     parts.push(shadow);

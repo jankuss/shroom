@@ -1,5 +1,5 @@
 import { IFurnitureLoader } from "../../IFurnitureLoader";
-import { loadFurni, LoadFurniResult } from "../../util/furniture/loadFurni";
+import { loadFurni, LoadFurniResult } from "./util/loadFurni";
 
 export class FurnitureLoader implements IFurnitureLoader {
   private furnitureCache: Map<string, Promise<LoadFurniResult>> = new Map();

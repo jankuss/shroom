@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 
 import { DrawDefinition } from "./DrawDefinition";
-import { getDrawDefinition } from "./getDrawDefinition";
+import { getFurniDrawDefinition } from "./getFurniDrawDefinition";
 import { parseAssets } from "./parseAssets";
 import { parseStringAsync } from "./parseStringAsync";
 import { parseVisualization } from "./visualization/parseVisualization";
@@ -130,7 +130,7 @@ export async function loadFurni(
 
   return {
     getDrawDefinition: (type: string, direction: number, animation?: string) =>
-      getDrawDefinition({
+      getFurniDrawDefinition({
         type,
         direction,
         visualization,

@@ -45,10 +45,8 @@ module.exports = {
       new webpack.EnvironmentPlugin({
         NODE_ENV: "development",
       }),
-      new CopyPlugin({
-        patterns: [
-          { from: './public', to: '.' },
-        ],
-      }),
     ],
+    devServer: {
+      contentBase: [path.join(__dirname, 'public')]
+    }
   };
