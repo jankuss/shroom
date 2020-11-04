@@ -13,7 +13,28 @@ export function filterDrawOrder(
     }
   }
 
-  const drawOrderCopy = new Set<string>(drawOrderArray);
+  const drawOrderArrayWithCenterItems: string[] = [];
+
+  drawOrderArray.forEach((item) => {
+    drawOrderArrayWithCenterItems.push(item);
+
+    switch (item) {
+      case "ls":
+        drawOrderArrayWithCenterItems.push("lc");
+        break;
+
+      case "rs":
+        drawOrderArrayWithCenterItems.push("rc");
+        break;
+
+      case "ch":
+        drawOrderArrayWithCenterItems.push("cc");
+        drawOrderArrayWithCenterItems.push("cp");
+        break;
+    }
+  });
+
+  const drawOrderCopy = new Set<string>(drawOrderArrayWithCenterItems);
 
   if (direction === 0 || direction === 7) {
     // Avatar is facing away, no need to draw facial parts.
