@@ -8,7 +8,9 @@ export type GetSetType = (
 ) =>
   | {
       getColor: (colorId: string) => string | undefined;
-      getParts: (setId: string) => { id: string; type: string }[] | undefined;
+      getParts: (
+        setId: string
+      ) => { id: string; type: string; colorable: boolean }[] | undefined;
     }
   | undefined;
 
@@ -19,7 +21,7 @@ export function parseFigureData(
   const palettes: any[] = figureDataXml.figuredata.colors[0].palette;
 
   const paletteMap = new Map<string, Map<string, string>>();
-  palettes.forEach(palette => {
+  palettes.forEach((palette) => {
     const paletteId = palette["$"].id;
 
     const colorMap = new Map<string, string>();
@@ -37,21 +39,25 @@ export function parseFigureData(
     string,
     {
       paletteId: string;
-      partMap: Map<string, { id: string; type: string }[]>;
+      partMap: Map<string, { id: string; type: string; colorable: boolean }[]>;
     }
   >();
-  setTypes.forEach(setType => {
+  setTypes.forEach((setType) => {
     const type = setType["$"].type;
 
-    const map = new Map<string, { id: string; type: string }[]>();
+    const map = new Map<
+      string,
+      { id: string; type: string; colorable: boolean }[]
+    >();
 
     setType.set.forEach((set: any) => {
       const partsXml: any[] = set.part;
 
-      const parts = partsXml.map(part => {
+      const parts = partsXml.map((part) => {
         return {
           id: part["$"].id,
-          type: part["$"].type
+          type: part["$"].type,
+          colorable: part["$"].colorable === "1",
         };
       });
 
@@ -60,7 +66,7 @@ export function parseFigureData(
 
     setTypeMap.set(type, {
       paletteId: setType["$"].paletteid,
-      partMap: map
+      partMap: map,
     });
   });
 
@@ -78,8 +84,8 @@ export function parseFigureData(
         },
         getParts: (id: string) => {
           return setType.partMap.get(id);
-        }
+        },
       };
-    }
+    },
   };
 }

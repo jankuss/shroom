@@ -108,10 +108,37 @@ function init() {
 
   room.addRoomObject(
     new Avatar(
-      "hd-180-1.ch-255-66.lg-280-110.sh-305-62.ha-1012-110.hr-828-61",
-      "std",
+      "hd-180-1.hr-3260-61.ch-215-1430.cc-3326-62.lg-270-110.sh-305-62.wa-2011-62",
+      "sit",
       2,
       { roomX: 0, roomY: 0, roomZ: 0 }
+    )
+  );
+
+  room.addRoomObject(
+    new Avatar(
+      "hd-628-2.hr-890-55.fa-1203-110.ch-3135-66.cc-3157-1328.lg-3174-1327.sh-3419-110",
+      "std",
+      2,
+      { roomX: 0, roomY: 1, roomZ: 0 }
+    )
+  );
+
+  room.addRoomObject(
+    new Avatar(
+      "hd-605-2.hr-3012-45.ch-645-109.lg-720-63.sh-725-92.wa-2001-62",
+      "std",
+      2,
+      { roomX: 0, roomY: 2, roomZ: 0 }
+    )
+  );
+
+  room.addRoomObject(
+    new Avatar(
+      "hd-180-1.hr-831-49.ea-1406-62.ch-210-92.cc-3087-108.lg-3057-110",
+      "std",
+      2,
+      { roomX: 1, roomY: 0, roomZ: 0 }
     )
   );
 

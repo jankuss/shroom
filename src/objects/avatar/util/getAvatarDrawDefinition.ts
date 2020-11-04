@@ -5,6 +5,7 @@ import { GetDrawOrder } from "./parseDrawOrder";
 import { filterDrawOrder } from "./filterDrawOrder";
 import { getNormalizedPart } from "./getNormalizedPart";
 import { GetOffset } from "./loadOffsetMap";
+import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 
 export type AvatarDrawPart = {
   fileId: string;
@@ -60,15 +61,24 @@ export function getAvatarDrawDefinition(
     }
   );
 
-  const map = new Map(
-    parts.map((part) => {
-      return [part.type, part] as const;
-    })
-  );
-
   // Normalize the direction, since the only available directions are 0, 1, 2, 3 and 7.
   // Every other direction can be displayed by mirroring one of the above.
   const normalizedDirection = getNormalizedAvatarDirection(direction);
+
+  const map = new Map<
+    string,
+    {
+      color: string | undefined;
+      id: string;
+      type: string;
+      colorable: boolean;
+    }[]
+  >();
+
+  parts.forEach((part) => {
+    const current = map.get(part.type) ?? [];
+    map.set(part.type, [...current, part]);
+  });
 
   const drawOrderRaw =
     getDrawOrder(action, normalizedDirection.direction.toString()) ||
@@ -88,28 +98,32 @@ export function getAvatarDrawDefinition(
     const rectWidth = 64;
 
     const drawParts = drawOrder
-      .flatMap((type) => {
-        const part = map.get(type);
-        if (part) return [part];
-        return [];
+      .map((type) => {
+        return map.get(type);
       })
-      .map((p) => {
-        const part = getNormalizedPart(action, frame, p.type);
+      .filter(notNullOrUndefined)
+      .flatMap((parts) => {
+        return parts.map((p) => {
+          const part = getNormalizedPart(action, frame, p.type);
 
-        const id = `h_${part.action}_${p.type}_${p.id}_${normalizedDirection.direction}_${part.frame}`;
+          const id = `h_${part.action}_${p.type}_${p.id}_${normalizedDirection.direction}_${part.frame}`;
 
-        const offset = getOffset(id);
-        if (!offset) throw new Error(`No offsets found for ${id}`);
+          const offset = getOffset(id);
+          if (offset == null) return;
 
-        return {
-          fileId: id,
-          x: -offset.offsetX,
-          y: -offset.offsetY,
-          color: `#${p.color}`,
-          mode:
-            p.type !== "ey" ? ("colored" as const) : ("just-image" as const),
-        };
-      });
+          return {
+            fileId: id,
+            x: -offset.offsetX,
+            y: -offset.offsetY,
+            color: `#${p.color}`,
+            mode:
+              p.type !== "ey" && p.colorable
+                ? ("colored" as const)
+                : ("just-image" as const),
+          };
+        });
+      })
+      .filter(notNullOrUndefined);
 
     return {
       height: rectHeight,
