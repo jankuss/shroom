@@ -1,5 +1,6 @@
 import { AvatarLoaderResult, IAvatarLoader } from "../../IAvatarLoader";
 import { createLookServer, LookServer } from "./util";
+import { avatarFrames } from "./util/avatarFrames";
 import {
   getAvatarDrawDefinition,
   Dependencies,
@@ -13,9 +14,10 @@ interface Options {
 }
 
 const directions = [0, 1, 2, 3, 4, 5, 6, 7];
-const frames = [0, 1, 2, 3];
 
 export class AvatarLoader implements IAvatarLoader {
+  private globalCache: Map<string, Promise<PIXI.Texture>> = new Map();
+
   constructor(private options: Options) {}
 
   async getAvatarDrawDefinition(look: string): Promise<AvatarLoaderResult> {
@@ -28,8 +30,15 @@ export class AvatarLoader implements IAvatarLoader {
       getDrawDefinition(look, action, direction, frame)?.parts.forEach(
         (item) => {
           if (loadedFiles.has(item.fileId)) return;
+          const globalFile = this.globalCache.get(item.fileId);
 
-          loadedFiles.set(item.fileId, this.options.resolveImage(item.fileId));
+          if (globalFile != null) {
+            loadedFiles.set(item.fileId, globalFile);
+          } else {
+            const file = this.options.resolveImage(item.fileId);
+            this.globalCache.set(item.fileId, file);
+            loadedFiles.set(item.fileId, file);
+          }
         }
       );
 
@@ -40,12 +49,15 @@ export class AvatarLoader implements IAvatarLoader {
       // Load sitting assets
       if (direction % 2 === 0) {
         loadResources("sit", direction, 0);
+        loadResources("lay", direction, 0);
       }
 
-      loadResources("wav", direction, 0);
-
-      // Load walking assets
-      frames.forEach((frame) => loadResources("wlk", direction, frame));
+      // Load animated assets
+      avatarFrames.forEach((frames, key) => {
+        frames.forEach((frame) => {
+          loadResources(key, direction, frame);
+        });
+      });
     });
 
     const awaitedEntries = await Promise.all(
@@ -57,15 +69,15 @@ export class AvatarLoader implements IAvatarLoader {
     const awaitedFiles = new Map<string, PIXI.Texture>(awaitedEntries);
 
     const obj: AvatarLoaderResult = {
-      getDrawDefinition: (look, direction, action) => {
-        const result = getDrawDefinition(look, action, direction, 0);
+      getDrawDefinition: (look, direction, action, frame) => {
+        const result = getDrawDefinition(look, action, direction, frame);
         if (result == null) throw new Error("Invalid look");
 
         return result;
       },
       getTexture: (id) => {
         const texture = awaitedFiles.get(id);
-        if (texture == null) throw new Error("Invalid texture");
+        if (texture == null) throw new Error(`Invalid texture: ${id}`);
 
         return texture;
       },

@@ -17,8 +17,6 @@ export type AvatarDrawPart = {
 
 export interface AvatarDrawDefinition {
   mirrorHorizontal: boolean;
-  width: number;
-  height: number;
   parts: AvatarDrawPart[];
 }
 
@@ -94,13 +92,8 @@ export function getAvatarDrawDefinition(
       )
     );
 
-    const rectHeight = 110;
-    const rectWidth = 64;
-
     const drawParts = drawOrder
-      .map((type) => {
-        return map.get(type);
-      })
+      .map((type) => map.get(type))
       .filter(notNullOrUndefined)
       .flatMap((parts) => {
         return parts.map((p) => {
@@ -126,8 +119,6 @@ export function getAvatarDrawDefinition(
       .filter(notNullOrUndefined);
 
     return {
-      height: rectHeight,
-      width: rectWidth,
       mirrorHorizontal: normalizedDirection.mirrorHorizontal,
       parts: drawParts,
     };

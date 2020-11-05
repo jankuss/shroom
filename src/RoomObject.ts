@@ -1,6 +1,7 @@
 import { IFurnitureLoader } from "./IFurnitureLoader";
 import { IRoomContext } from "./IRoomContext";
 import { IRoomObject } from "./IRoomObject";
+import { IRoomObjectContainer } from "./IRoomObjectContainer";
 
 export abstract class RoomObject implements IRoomObject {
   private context: IRoomContext | undefined;

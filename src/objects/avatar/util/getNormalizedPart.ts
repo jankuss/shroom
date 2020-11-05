@@ -8,13 +8,15 @@ const walkActionTypes = new Set([
   "lg", // Legs
   "rh", // Right hand
   "rs", // Right side
-  "ri" // Right item
+  "ri", // Right item
+  "rc",
+  "lc",
 ]);
 
 const sitActionTypes = new Set([
   "bd", // Body
   "sh", // Shoes
-  "lg" // Legs
+  "lg", // Legs
 ]);
 
 const wavLeftActionTypes = new Set(["lc", "ls", "lh"]);
@@ -27,26 +29,26 @@ export function getNormalizedPart(
   if (action === "wav" && !wavLeftActionTypes.has(type)) {
     return {
       action: "std",
-      frame: 0
+      frame: 0,
     };
   }
 
   if (action === "wlk" && !walkActionTypes.has(type)) {
     return {
       action: "std",
-      frame: 0
+      frame: 0,
     };
   }
 
   if (action === "sit" && !sitActionTypes.has(type)) {
     return {
       action: "std",
-      frame: 0
+      frame: 0,
     };
   }
 
   return {
     action,
-    frame
+    frame,
   };
 }
