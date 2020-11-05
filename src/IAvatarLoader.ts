@@ -8,7 +8,8 @@ export type AvatarLoaderResult = {
   getDrawDefinition(
     look: string,
     direction: number,
-    action: string
+    action: string,
+    frame: number
   ): AvatarDrawDefinition;
   getTexture: (id: string) => PIXI.Texture;
 };

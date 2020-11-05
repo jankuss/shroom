@@ -51,7 +51,19 @@ const avatarLoader = new AvatarLoader({
     });
   },
   resolveImage: async (id) => {
-    return PIXI.Texture.from(`./figure/${id}.png`);
+    const image = new Image();
+    image.src = `./figure/${id}.png`;
+
+    const dimensions = await new Promise<{
+      width: number;
+      height: number;
+    }>((resolve) => {
+      image.onload = (value) => {
+        resolve({ width: image.width, height: image.height });
+      };
+    });
+
+    return PIXI.Texture.from(image);
   },
 });
 
@@ -64,83 +76,40 @@ application.loader
 function init() {
   const room = new Room(
     parseTileMapString(`
-    000
-    000
-    000
+    000000000000000
+    000000000000000
+    000000000000000
+    000000000000000
+    000000000000000
+    000000000000000
+    000000000000000
+    000000000000000
+    000000000000000
   `),
     animationTicker,
     furniLoader,
     avatarLoader
   );
 
-  const furnis: Furniture[] = [];
-  room.addRoomObject(
-    new Furniture(`throne`, 2, "0", {
-      roomX: 0,
-      roomY: 0,
-      roomZ: 0,
-    })
-  );
-
-  room.addRoomObject(
-    new WallFurniture(`window_nt_skyscraper`, 2, "0", {
-      roomX: 0,
-      roomY: 0,
-      roomZ: 0,
-    })
-  );
-
-  room.addRoomObject(
-    new WallFurniture(`window_nt_skyscraper`, 2, "0", {
-      roomX: 0,
-      roomY: 1,
-      roomZ: 0,
-    })
-  );
-
-  room.addRoomObject(
-    new WallFurniture(`window_nt_skyscraper`, 2, "0", {
-      roomX: 0,
-      roomY: 2,
-      roomZ: 0,
-    })
-  );
-
-  room.addRoomObject(
-    new Avatar(
-      "hd-180-1.hr-3260-61.ch-215-1430.cc-3326-62.lg-270-110.sh-305-62.wa-2011-62",
-      "sit",
-      2,
-      { roomX: 0, roomY: 0, roomZ: 0 }
-    )
-  );
-
-  room.addRoomObject(
-    new Avatar(
-      "hd-628-2.hr-890-55.fa-1203-110.ch-3135-66.cc-3157-1328.lg-3174-1327.sh-3419-110",
-      "std",
-      2,
-      { roomX: 0, roomY: 1, roomZ: 0 }
-    )
-  );
-
-  room.addRoomObject(
-    new Avatar(
-      "hd-605-2.hr-3012-45.ch-645-109.lg-720-63.sh-725-92.wa-2001-62",
-      "std",
-      2,
-      { roomX: 0, roomY: 2, roomZ: 0 }
-    )
-  );
-
-  room.addRoomObject(
-    new Avatar(
+  for (let x = 0; x < 10; x++) {
+    const avatar = new Avatar(
       "hd-180-1.hr-831-49.ea-1406-62.ch-210-92.cc-3087-108.lg-3057-110",
       "std",
       2,
       { roomX: 1, roomY: 0, roomZ: 0 }
-    )
-  );
+    );
+
+    room.addRoomObject(avatar);
+
+    avatar.walk(x, 0, 0, 4);
+    avatar.walk(x, 1, 0, 4);
+    avatar.walk(x, 2, 0, 4);
+    avatar.walk(x, 3, 0, 4);
+    avatar.walk(x + 1, 3, 0, 2);
+    avatar.walk(x + 2, 3, 0, 2);
+    avatar.walk(x + 2, 4, 0, 4);
+    avatar.walk(x + 2, 5, 0, 4);
+  }
 
   room.x = application.screen.width / 2 - room.roomWidth / 2;
   room.y = application.screen.height / 2 - room.roomHeight / 2;
