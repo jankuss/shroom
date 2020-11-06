@@ -1,14 +1,13 @@
 import { RoomObject } from "../../RoomObject";
 import * as PIXI from "pixi.js";
 import { AvatarLoaderResult } from "../../IAvatarLoader";
-import { AvatarDrawPart } from "./util/getAvatarDrawDefinition";
+import { AvatarDrawPart, PrimaryAction } from "./util/getAvatarDrawDefinition";
 import { getZOrder } from "../../util/getZOrder";
 import { avatarFrames } from "./util/avatarFrames";
+import { LookOptions } from "./util/createLookServer";
 
 interface Options {
-  look: string;
-  action: string;
-  direction: number;
+  look: LookOptions;
   position: { x: number; y: number };
   zIndex: number;
 }
@@ -18,6 +17,9 @@ export class AvatarSprites extends RoomObject {
   private avatarLoaderResult: AvatarLoaderResult | undefined;
   private currentFrame: number = 0;
   private mirrored: boolean = true;
+  private frame: number = 0;
+
+  private lookOptions: LookOptions;
 
   private x: number = 0;
   private y: number = 0;
@@ -27,10 +29,11 @@ export class AvatarSprites extends RoomObject {
 
     this.x = this.options.position.x;
     this.y = this.options.position.y;
+    this.lookOptions = options.look;
   }
 
-  setAction(action: string) {
-    this.options.action = action;
+  setLook(options: LookOptions) {
+    this.lookOptions = options;
     this.updateSprites();
   }
 
@@ -46,12 +49,7 @@ export class AvatarSprites extends RoomObject {
     this.updatePosition();
   }
 
-  setDirection(direction: number) {
-    this.options.direction = direction;
-    this.updateSprites();
-  }
-
-  updatePosition() {
+  private updatePosition() {
     if (this.container == null) return;
 
     this.container.x = this.x;
@@ -59,18 +57,14 @@ export class AvatarSprites extends RoomObject {
   }
 
   setCurrentFrame(globalFrame: number) {
-    const activeFrames = avatarFrames.get(this.options.action);
-
-    if (activeFrames != null) {
-      this.currentFrame = activeFrames[globalFrame % activeFrames.length];
-      this.updateSprites();
-    }
+    this.frame = globalFrame;
+    this.updateSprites();
   }
 
   private updateSprites() {
     if (this.avatarLoaderResult == null) return;
 
-    const { look, direction, action, zIndex } = this.options;
+    const { zIndex } = this.options;
 
     this.container?.destroy();
 
@@ -79,10 +73,7 @@ export class AvatarSprites extends RoomObject {
     this.container.zIndex = zIndex;
 
     const definition = this.avatarLoaderResult.getDrawDefinition(
-      look,
-      direction,
-      action,
-      this.currentFrame
+      this.lookOptions
     );
 
     this.mirrored = definition.mirrorHorizontal;
@@ -125,7 +116,7 @@ export class AvatarSprites extends RoomObject {
     return sprite;
   }
 
-  private updateLook(look: string) {
+  private fetchLook(look: string) {
     this.avatarLoader.getAvatarDrawDefinition(look).then((result) => {
       this.avatarLoaderResult = result;
       this.updateSprites();
@@ -135,7 +126,7 @@ export class AvatarSprites extends RoomObject {
   }
 
   registered(): void {
-    this.updateLook(this.options.look);
+    this.fetchLook(this.lookOptions.look);
   }
 
   destroy(): void {

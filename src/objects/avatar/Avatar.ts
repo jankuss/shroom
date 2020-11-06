@@ -1,11 +1,12 @@
 import { RoomObject } from "../../RoomObject";
 import * as PIXI from "pixi.js";
 import { AvatarLoaderResult } from "../../IAvatarLoader";
-import { AvatarDrawPart } from "./util/getAvatarDrawDefinition";
+import { AvatarDrawPart, PrimaryAction } from "./util/getAvatarDrawDefinition";
 import { getZOrder } from "../../util/getZOrder";
 import { AvatarSprites } from "./AvatarSprites";
 import { IAnimationTicker } from "../../IAnimationTicker";
-import { avatarFrames } from "./util/avatarFrames";
+import { avatarFrames, avatarFramesObject } from "./util/avatarFrames";
+import { LookOptions } from "./util/createLookServer";
 
 type RoomPosition = { roomX: number; roomY: number; roomZ: number };
 
@@ -97,56 +98,104 @@ export class Avatar extends RoomObject {
   private avatarSprites: AvatarSprites | undefined;
   private walkAnimation: WalkAnimation | undefined;
   private walking: boolean = false;
+  private waving: boolean = true;
+
   private frame: number = 0;
 
   private cancelAnimation: (() => void) | undefined;
 
   constructor(
     private look: string,
-    private action: string,
     private direction: number,
     private position: { roomX: number; roomY: number; roomZ: number }
   ) {
     super();
   }
 
-  private setAction(action: string) {
-    const activeFrames = avatarFrames.get(action);
+  private getWavingAction() {
+    if (this.waving) {
+      return {
+        frame:
+          avatarFramesObject.wav[this.frame % avatarFramesObject.wav.length],
+      };
+    }
+  }
 
+  private getCurrentPrimaryAction(): PrimaryAction {
+    if (this.walking) {
+      return {
+        kind: "wlk",
+        frame:
+          avatarFramesObject.wlk[this.frame % avatarFramesObject.wlk.length],
+      };
+    }
+
+    return {
+      kind: "std",
+    };
+  }
+
+  private getCurrentLookOptions(): LookOptions {
+    return {
+      action: this.getCurrentPrimaryAction(),
+      actions: {
+        wav: this.getWavingAction(),
+      },
+      direction: this.direction,
+      look: this.look,
+    };
+  }
+
+  private updateAvatarSprites() {
+    const look = this.getCurrentLookOptions();
+    if (this.isAnimating(look)) {
+      this.startAnimation();
+    } else {
+      this.stopAnimation();
+    }
+
+    this.avatarSprites?.setLook(look);
+  }
+
+  private startAnimation() {
+    if (this.cancelAnimation != null) return;
+
+    this.frame++;
+
+    this.cancelAnimation = this.animationTicker.subscribe((value) => {
+      this.frame++;
+      this.updateAvatarSprites();
+    });
+  }
+
+  private stopAnimation() {
+    this.frame = 0;
     if (this.cancelAnimation != null) {
       this.cancelAnimation();
     }
-
-    this.frame = 0;
-
-    if (activeFrames == null || activeFrames.length === 1) {
-      this.updateFrame();
-    } else {
-      this.cancelAnimation = this.animationTicker.subscribe(() => {
-        this.updateFrame();
-        this.frame++;
-      });
-    }
-
-    this.action = action;
-    this.avatarSprites?.setAction(action);
   }
 
-  private updateFrame() {
-    this.avatarSprites?.setCurrentFrame(this.frame);
+  private startWalking(direction: number) {
+    this.walking = true;
+    this.direction = direction;
+    this.updateAvatarSprites();
   }
 
-  private updateAction() {
-    if (this.walking) {
-      this.setAction("wlk");
-    } else {
-      this.setAction("std");
-    }
+  private stopWalking() {
+    this.walking = false;
+    this.updateAvatarSprites();
+  }
+
+  private isAnimating(look: LookOptions) {
+    if (look.action.kind === "wlk") return true;
+    if (look.actions.wav != null) return true;
+
+    return false;
   }
 
   setDirection(direction: number) {
     this.direction = direction;
-    this.avatarSprites?.setDirection(direction);
+    this.updateAvatarSprites();
   }
 
   walk(roomX: number, roomY: number, roomZ: number, direction?: number) {
@@ -175,11 +224,9 @@ export class Avatar extends RoomObject {
 
   registered(): void {
     this.avatarSprites = new AvatarSprites({
-      action: this.action,
-      look: this.look,
+      look: this.getCurrentLookOptions(),
       zIndex: this.calculateZIndex(),
       position: this.calculatePosition(),
-      direction: this.direction,
     });
 
     this.roomObjectContainer.addRoomObject(this.avatarSprites);
@@ -194,13 +241,10 @@ export class Avatar extends RoomObject {
         this.avatarSprites?.setPosition(x, y);
       },
       onStart: (direction: number) => {
-        this.walking = true;
-        this.setDirection(direction);
-        this.updateAction();
+        this.startWalking(direction);
       },
       onStop: () => {
-        this.walking = false;
-        this.updateAction();
+        this.stopWalking();
       },
     });
   }
