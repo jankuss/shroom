@@ -6,9 +6,12 @@ import { LoadFurniResult } from "./util/loadFurni";
 import { Asset } from "./util/parseAssets";
 import { Layer } from "./util/visualization/parseLayers";
 
+const unknownTexture = PIXI.Texture.from("./placeholder.png");
+
 export class BaseFurniture extends RoomObject {
   private sprites: PIXI.DisplayObject[] = [];
   private loadFurniResult: LoadFurniResult | undefined;
+  private unknownSprite: PIXI.Sprite | undefined;
 
   private x: number = 0;
   private y: number = 0;
@@ -53,7 +56,20 @@ export class BaseFurniture extends RoomObject {
         this.direction,
         this.animation
       );
+    } else {
+      this.updateUnknown();
     }
+  }
+
+  updateUnknown() {
+    this.destroySprites();
+
+    this.unknownSprite = new PIXI.Sprite(unknownTexture);
+    this.unknownSprite.x = this.x;
+    this.unknownSprite.y = this.y - 32;
+
+    this.visualization.addContainerChild(this.unknownSprite);
+    this.sprites.push(this.unknownSprite);
   }
 
   updateSprites(
@@ -63,6 +79,7 @@ export class BaseFurniture extends RoomObject {
     animation?: string
   ) {
     this.destroySprites();
+
     const { parts } = loadFurniResult.getDrawDefinition(
       type,
       direction,

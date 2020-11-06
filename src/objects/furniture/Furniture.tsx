@@ -28,11 +28,12 @@ export class Furniture extends RoomObject {
       this.position.roomY,
       this.position.roomZ
     );
+
+    this.roomObjectContainer.addRoomObject(this.baseFurniture);
+
     this.baseFurniture.setPosition(x, y);
     this.baseFurniture.setZIndex(
       getZOrder(this.position.roomX, this.position.roomY, this.position.roomZ)
     );
-
-    this.roomObjectContainer.addRoomObject(this.baseFurniture);
   }
 }

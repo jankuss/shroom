@@ -21,30 +21,58 @@ const sitActionTypes = new Set([
 
 const wavLeftActionTypes = new Set(["lc", "ls", "lh"]);
 
-export function getNormalizedPart(
-  action: string,
-  frame: number,
-  type: string
-): { action: string; frame: number } {
-  if (action === "wav" && !wavLeftActionTypes.has(type)) {
-    return {
-      action: "std",
-      frame: 0,
-    };
+const map = new Map<string, Set<string>>([
+  ["wav", wavLeftActionTypes],
+  ["wlk", walkActionTypes],
+  ["sit", sitActionTypes],
+]);
+
+export function getNormalizedPart({
+  actions,
+  action,
+  frame,
+  type,
+}: {
+  actions: Set<string>;
+  action: string;
+  frame: number;
+  type: string;
+}): { action: string; frame: number } | undefined {
+  const sittingAndWaving = actions.has("sit") && actions.has("wav");
+  const walkingAndWaving = actions.has("wav") && actions.has("wlk");
+
+  if (walkingAndWaving) {
+    if (wavLeftActionTypes.has(type)) {
+      return { action: "wav", frame: 0 };
+    }
+
+    if (walkActionTypes.has(type)) {
+      return { action: "wlk", frame };
+    }
+
+    return { action: "std", frame: 0 };
   }
 
-  if (action === "wlk" && !walkActionTypes.has(type)) {
-    return {
-      action: "std",
-      frame: 0,
-    };
+  if (sittingAndWaving) {
+    if (!wavLeftActionTypes.has(type)) {
+      return;
+    }
+
+    if (!sitActionTypes.has(type)) {
+      return;
+    }
   }
 
-  if (action === "sit" && !sitActionTypes.has(type)) {
-    return {
-      action: "std",
-      frame: 0,
-    };
+  if (actions.has("wlk") && !walkActionTypes.has(type)) {
+    return;
+  }
+
+  if (actions.has("sit") && !sitActionTypes.has(type)) {
+    return;
+  }
+
+  if (actions.has("wav") && !wavLeftActionTypes.has(type)) {
+    return;
   }
 
   return {
