@@ -38,7 +38,12 @@ export async function createLookServer({
 
   return (look: string, action: string, direction: number, frame: number) =>
     getAvatarDrawDefinition(
-      { parsedLook: parseLookString(look), action: action, direction, frame },
+      {
+        parsedLook: parseLookString(look),
+        action: action,
+        direction,
+        frame,
+      },
       { getDrawOrder, getOffset, getSetType }
     );
 }

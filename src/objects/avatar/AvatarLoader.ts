@@ -17,14 +17,17 @@ const directions = [0, 1, 2, 3, 4, 5, 6, 7];
 
 export class AvatarLoader implements IAvatarLoader {
   private globalCache: Map<string, Promise<PIXI.Texture>> = new Map();
+  private lookServer: Promise<LookServer>;
 
-  constructor(private options: Options) {}
+  constructor(private options: Options) {
+    this.lookServer = this.options.createLookServer();
+  }
 
   async getAvatarDrawDefinition(look: string): Promise<AvatarLoaderResult> {
     const parsedLook = parseLookString(look);
     const loadedFiles = new Map<string, Promise<PIXI.Texture>>();
 
-    const getDrawDefinition = await this.options.createLookServer();
+    const getDrawDefinition = await this.lookServer;
 
     const loadResources = (action: string, direction: number, frame: number) =>
       getDrawDefinition(look, action, direction, frame)?.parts.forEach(

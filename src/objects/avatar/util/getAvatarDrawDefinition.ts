@@ -6,6 +6,7 @@ import { filterDrawOrder } from "./filterDrawOrder";
 import { getNormalizedPart } from "./getNormalizedPart";
 import { GetOffset } from "./loadOffsetMap";
 import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
+import { getActionForPart } from "./getActionForPart";
 
 export type AvatarDrawPart = {
   fileId: string;
@@ -29,6 +30,7 @@ export interface Dependencies {
 interface Options {
   parsedLook: ParsedLook;
   action: string;
+  action2?: string;
   frame: number;
   direction: number;
 }
@@ -39,7 +41,7 @@ interface Options {
  * @param dependencies External figure data, draw order and offsets
  */
 export function getAvatarDrawDefinition(
-  { parsedLook, action, direction, frame }: Options,
+  { parsedLook, action, action2, direction, frame }: Options,
   { getDrawOrder, getOffset, getSetType }: Dependencies
 ): AvatarDrawDefinition | undefined {
   const parts = Array.from(parsedLook.entries()).flatMap(
@@ -92,28 +94,38 @@ export function getAvatarDrawDefinition(
       )
     );
 
+    const actions = new Set<string>();
+    actions.add(action);
+    if (action2 != null) {
+      actions.add(action2);
+    }
+
+    actions.add("sit");
+
     const drawParts = drawOrder
       .map((type) => map.get(type))
       .filter(notNullOrUndefined)
       .flatMap((parts) => {
-        return parts.map((p) => {
-          const part = getNormalizedPart(action, frame, p.type);
+        return parts.flatMap((p) => {
+          return Array.from(actions).map((action) => {
+            const part = getActionForPart(actions, frame, p.type);
 
-          const id = `h_${part.action}_${p.type}_${p.id}_${normalizedDirection.direction}_${part.frame}`;
+            const id = `h_${part.action}_${p.type}_${p.id}_${normalizedDirection.direction}_${part.frame}`;
 
-          const offset = getOffset(id);
-          if (offset == null) return;
+            const offset = getOffset(id);
+            if (offset == null) return;
 
-          return {
-            fileId: id,
-            x: -offset.offsetX,
-            y: -offset.offsetY,
-            color: `#${p.color}`,
-            mode:
-              p.type !== "ey" && p.colorable
-                ? ("colored" as const)
-                : ("just-image" as const),
-          };
+            return {
+              fileId: id,
+              x: -offset.offsetX,
+              y: -offset.offsetY,
+              color: `#${p.color}`,
+              mode:
+                p.type !== "ey" && p.colorable
+                  ? ("colored" as const)
+                  : ("just-image" as const),
+            };
+          });
         });
       })
       .filter(notNullOrUndefined);
