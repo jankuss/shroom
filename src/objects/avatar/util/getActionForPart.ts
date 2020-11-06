@@ -1,3 +1,5 @@
+import { avatarFramesObject } from "./avatarFrames";
+
 // Part types which are affected during the walk action
 const walkActionTypes = new Set([
   "li", // Left item
@@ -24,31 +26,42 @@ const wavLeftActionTypes = new Set(["lc", "ls", "lh"]);
 export function getActionForPart(
   actions: Set<string>,
   frame: number,
-  type: string
+  type: string,
+  frameInfo: { waveFrame: number; walkFrame: number }
 ) {
-  const waveFrame = frame % 2;
+  const waveFrame = frameInfo.waveFrame % 2;
+  const walkFrame = frameInfo.walkFrame % 4;
 
   if (actions.has("wav") && actions.has("sit")) {
-    if (wavLeftActionTypes.has(type))
+    if (wavLeftActionTypes.has(type)) {
       return { action: "wav", frame: waveFrame };
+    }
 
-    if (sitActionTypes.has(type)) return { action: "sit", frame: 0 };
+    if (sitActionTypes.has(type)) {
+      return { action: "sit", frame: 0 };
+    }
   }
 
   if (actions.has("wav") && actions.has("wlk")) {
-    if (wavLeftActionTypes.has(type))
+    if (wavLeftActionTypes.has(type)) {
       return { action: "wav", frame: waveFrame };
+    }
 
-    if (walkActionTypes.has(type)) return { action: "wlk", frame: frame };
+    if (walkActionTypes.has(type)) {
+      return { action: "wlk", frame: walkFrame };
+    }
   }
 
   if (actions.has("wlk")) {
-    if (walkActionTypes.has(type)) return { action: "wlk", frame: frame };
+    if (walkActionTypes.has(type)) {
+      return { action: "wlk", frame: walkFrame };
+    }
   }
 
   if (actions.has("wav")) {
-    if (wavLeftActionTypes.has(type))
+    if (wavLeftActionTypes.has(type)) {
       return { action: "wav", frame: waveFrame };
+    }
   }
 
   return { action: "std", frame: 0 };

@@ -96,11 +96,10 @@ function init() {
     new Furniture("throne", 2, "0", { roomX: 0, roomY: 0, roomZ: 0 })
   );
 
-  for (let y = 0; y < 5; y++) {
+  for (let y = 0; y < 3; y++) {
     for (let x = 0; x < 10; x++) {
       const avatar = new Avatar(
         "hd-180-1.hr-831-49.ea-1406-62.ch-210-92.cc-3087-108.lg-3057-110",
-        "std",
         2,
         { roomX: x, roomY: y, roomZ: 0 }
       );

@@ -1,3 +1,4 @@
+import { LookOptions } from "./objects/avatar/util/createLookServer";
 import { AvatarDrawDefinition } from "./objects/avatar/util/getAvatarDrawDefinition";
 
 export interface IAvatarLoader {
@@ -5,11 +6,6 @@ export interface IAvatarLoader {
 }
 
 export type AvatarLoaderResult = {
-  getDrawDefinition(
-    look: string,
-    direction: number,
-    action: string,
-    frame: number
-  ): AvatarDrawDefinition;
+  getDrawDefinition(options: LookOptions): AvatarDrawDefinition;
   getTexture: (id: string) => PIXI.Texture;
 };

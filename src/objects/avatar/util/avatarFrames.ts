@@ -6,9 +6,9 @@ const repeat = <T>(count: number, value: T) => {
   return new Array<T>(count).fill(value);
 };
 
-export const avatarFrames = new Map(
-  Object.entries({
-    wlk: createFrames(4, 2),
-    wav: createFrames(2, 2),
-  })
-);
+export const avatarFramesObject = {
+  wlk: createFrames(4, 2),
+  wav: createFrames(2, 2),
+};
+
+export const avatarFrames = new Map(Object.entries(avatarFramesObject));

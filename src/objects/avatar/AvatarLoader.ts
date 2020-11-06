@@ -1,6 +1,7 @@
 import { AvatarLoaderResult, IAvatarLoader } from "../../IAvatarLoader";
 import { createLookServer, LookServer } from "./util";
-import { avatarFrames } from "./util/avatarFrames";
+import { avatarFrames, avatarFramesObject } from "./util/avatarFrames";
+import { LookOptions } from "./util/createLookServer";
 import {
   getAvatarDrawDefinition,
   Dependencies,
@@ -29,36 +30,63 @@ export class AvatarLoader implements IAvatarLoader {
 
     const getDrawDefinition = await this.lookServer;
 
-    const loadResources = (action: string, direction: number, frame: number) =>
-      getDrawDefinition(look, action, direction, frame)?.parts.forEach(
-        (item) => {
-          if (loadedFiles.has(item.fileId)) return;
-          const globalFile = this.globalCache.get(item.fileId);
+    const loadResources = (options: LookOptions) =>
+      getDrawDefinition(options)?.parts.forEach((item) => {
+        if (loadedFiles.has(item.fileId)) return;
+        const globalFile = this.globalCache.get(item.fileId);
 
-          if (globalFile != null) {
-            loadedFiles.set(item.fileId, globalFile);
-          } else {
-            const file = this.options.resolveImage(item.fileId);
-            this.globalCache.set(item.fileId, file);
-            loadedFiles.set(item.fileId, file);
-          }
+        if (globalFile != null) {
+          loadedFiles.set(item.fileId, globalFile);
+        } else {
+          const file = this.options.resolveImage(item.fileId);
+          this.globalCache.set(item.fileId, file);
+          loadedFiles.set(item.fileId, file);
         }
-      );
+      });
 
     directions.forEach((direction) => {
       // Load standing assets
-      loadResources("std", direction, 0);
+      loadResources({
+        action: { kind: "std" },
+        direction,
+        look,
+        actions: {},
+      });
+
+      avatarFramesObject.wlk.forEach((frame) => {
+        loadResources({
+          action: { kind: "wlk", frame },
+          direction,
+          look,
+          actions: {},
+        });
+      });
 
       // Load sitting assets
       if (direction % 2 === 0) {
-        loadResources("sit", direction, 0);
-        loadResources("lay", direction, 0);
+        loadResources({
+          action: { kind: "sit" },
+          direction,
+          look,
+          actions: {},
+        });
+
+        loadResources({
+          action: { kind: "lay" },
+          direction,
+          look,
+          actions: {},
+        });
       }
 
-      // Load animated assets
-      avatarFrames.forEach((frames, key) => {
-        frames.forEach((frame) => {
-          loadResources(key, direction, frame);
+      avatarFramesObject.wav.forEach((frame) => {
+        loadResources({
+          action: { kind: "std" },
+          direction,
+          look,
+          actions: {
+            wav: { frame },
+          },
         });
       });
     });
@@ -71,9 +99,11 @@ export class AvatarLoader implements IAvatarLoader {
 
     const awaitedFiles = new Map<string, PIXI.Texture>(awaitedEntries);
 
+    console.log("AW", awaitedFiles);
+
     const obj: AvatarLoaderResult = {
-      getDrawDefinition: (look, direction, action, frame) => {
-        const result = getDrawDefinition(look, action, direction, frame);
+      getDrawDefinition: (options) => {
+        const result = getDrawDefinition(options);
         if (result == null) throw new Error("Invalid look");
 
         return result;

@@ -6,13 +6,20 @@ import { GetOffset } from "./loadOffsetMap";
 import {
   getAvatarDrawDefinition,
   AvatarDrawDefinition,
+  PrimaryAction,
+  SecondaryActions,
 } from "./getAvatarDrawDefinition";
 import { parseLookString } from "./parseLookString";
 
+export interface LookOptions {
+  look: string;
+  action: PrimaryAction;
+  actions: SecondaryActions;
+  direction: number;
+}
+
 export interface LookServer {
-  (look: string, action: string, direction: number, frame: number):
-    | AvatarDrawDefinition
-    | undefined;
+  (options: LookOptions): AvatarDrawDefinition | undefined;
 }
 
 export async function createLookServer({
@@ -36,13 +43,13 @@ export async function createLookServer({
 
   const getOffset = await loadOffsetMap(figureMap);
 
-  return (look: string, action: string, direction: number, frame: number) =>
+  return ({ look, action, actions, direction }: LookOptions) =>
     getAvatarDrawDefinition(
       {
         parsedLook: parseLookString(look),
         action: action,
+        actions: actions,
         direction,
-        frame,
       },
       { getDrawOrder, getOffset, getSetType }
     );
