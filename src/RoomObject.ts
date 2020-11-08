@@ -6,27 +6,31 @@ import { IRoomObjectContainer } from "./IRoomObjectContainer";
 export abstract class RoomObject implements IRoomObject {
   private context: IRoomContext | undefined;
 
-  get furnitureLoader() {
+  protected get mounted() {
+    return this.context != null;
+  }
+
+  protected get furnitureLoader() {
     return this.getRoomContext().furnitureLoader;
   }
 
-  get animationTicker() {
+  protected get animationTicker() {
     return this.getRoomContext().animationTicker;
   }
 
-  get visualization() {
+  protected get visualization() {
     return this.getRoomContext().visualization;
   }
 
-  get geometry() {
+  protected get geometry() {
     return this.getRoomContext().geometry;
   }
 
-  get roomObjectContainer() {
+  protected get roomObjectContainer() {
     return this.getRoomContext().roomObjectContainer;
   }
 
-  get avatarLoader() {
+  protected get avatarLoader() {
     return this.getRoomContext().avatarLoader;
   }
 

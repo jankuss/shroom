@@ -99,8 +99,6 @@ export class AvatarLoader implements IAvatarLoader {
 
     const awaitedFiles = new Map<string, PIXI.Texture>(awaitedEntries);
 
-    console.log("AW", awaitedFiles);
-
     const obj: AvatarLoaderResult = {
       getDrawDefinition: (options) => {
         const result = getDrawDefinition(options);

@@ -1,10 +1,15 @@
 import { RoomObject } from "../../RoomObject";
 import * as PIXI from "pixi.js";
 import { AvatarLoaderResult } from "../../IAvatarLoader";
-import { AvatarDrawPart, PrimaryAction } from "./util/getAvatarDrawDefinition";
+import {
+  AvatarDrawDefinition,
+  AvatarDrawPart,
+  PrimaryAction,
+} from "./util/getAvatarDrawDefinition";
 import { getZOrder } from "../../util/getZOrder";
 import { avatarFrames } from "./util/avatarFrames";
 import { LookOptions } from "./util/createLookServer";
+import { DrawDefinition } from "../furniture/util";
 
 interface Options {
   look: LookOptions;
@@ -21,8 +26,24 @@ export class AvatarSprites extends RoomObject {
 
   private lookOptions: LookOptions;
 
-  private x: number = 0;
-  private y: number = 0;
+  private _x: number = 0;
+  private _y: number = 0;
+
+  get x() {
+    return this._x;
+  }
+
+  set x(value) {
+    this._x = value;
+  }
+
+  get y() {
+    return this._y;
+  }
+
+  set y(value) {
+    this._y = value;
+  }
 
   constructor(private options: Options) {
     super();
@@ -37,23 +58,11 @@ export class AvatarSprites extends RoomObject {
     this.updateSprites();
   }
 
-  setPosition(x: number, y: number) {
-    let offset = 0;
-
-    if (this.mirrored) {
-      offset += 64;
-    }
-
-    this.x = x + offset;
-    this.y = y;
-    this.updatePosition();
-  }
-
-  private updatePosition() {
+  private updatePosition(definition: AvatarDrawDefinition) {
     if (this.container == null) return;
 
-    this.container.x = this.x;
-    this.container.y = this.y + 16;
+    this.container.x = this.x + definition.offsetX;
+    this.container.y = this.y + definition.offsetY;
   }
 
   setCurrentFrame(globalFrame: number) {
@@ -77,7 +86,7 @@ export class AvatarSprites extends RoomObject {
     );
 
     this.mirrored = definition.mirrorHorizontal;
-    this.updatePosition();
+    this.updatePosition(definition);
 
     this.container.scale = new PIXI.Point(
       definition.mirrorHorizontal ? -1 : 1,

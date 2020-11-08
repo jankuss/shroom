@@ -96,30 +96,42 @@ function init() {
     new Furniture("throne", 2, "0", { roomX: 0, roomY: 0, roomZ: 0 })
   );
 
-  for (let y = 0; y < 3; y++) {
-    for (let x = 0; x < 10; x++) {
-      const avatar = new Avatar(
-        "hd-180-1.hr-831-49.ea-1406-62.ch-210-92.cc-3087-108.lg-3057-110",
-        2,
-        { roomX: x, roomY: y, roomZ: 0 }
-      );
+  const avatar = new Avatar(
+    "hd-180-1.hr-831-49.ea-1406-62.ch-210-92.cc-3087-108.lg-3057-110",
+    2,
+    { roomX: 1, roomY: 1, roomZ: 0 }
+  );
 
-      room.addRoomObject(avatar);
+  avatar.action = "std";
+  avatar.waving = false;
+  avatar.direction = 4;
 
-      avatar.walk(x, y + 1, 0, 4);
-      avatar.walk(x, y + 2, 0, 4);
-      avatar.walk(x, y + 3, 0, 4);
-      avatar.walk(x + 1, y + 3, 0, 2);
-      avatar.walk(x + 2, y + 3, 0, 2);
-      avatar.walk(x + 2, y + 4, 0, 4);
-      avatar.walk(x + 2, y + 5, 0, 4);
-    }
-  }
+  room.addRoomObject(avatar);
 
   room.x = application.screen.width / 2 - room.roomWidth / 2;
   room.y = application.screen.height / 2 - room.roomHeight / 2;
 
   application.stage.addChild(room);
+
+  createButton("Turn", () => {
+    avatar.direction = (avatar.direction + 1) % 8;
+  });
+
+  createButton("Walk", () => {
+    avatar.action = "wlk";
+  });
+
+  createButton("Lay", () => {
+    avatar.action = "lay";
+  });
+
+  createButton("Sit", () => {
+    avatar.action = "sit";
+  });
+
+  createButton("Wave", () => {
+    avatar.waving = !avatar.waving;
+  });
 
   /*application.stage.addChild(
     new TileTest({ x: 10, y: 10, tileHeight: 10, xEven: false, yEven: false })
@@ -134,4 +146,11 @@ function init() {
     })
   );
   */
+}
+
+function createButton(label: string, onClick: () => void) {
+  const button = document.createElement("button");
+  button.innerText = label;
+  button.addEventListener("click", onClick);
+  document.body.appendChild(button);
 }

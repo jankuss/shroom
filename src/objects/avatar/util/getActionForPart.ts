@@ -64,5 +64,15 @@ export function getActionForPart(
     }
   }
 
+  if (actions.has("sit")) {
+    if (sitActionTypes.has(type)) {
+      return { action: "sit", frame: 0 };
+    }
+  }
+
+  if (actions.has("lay")) {
+    return { action: "lay", frame: 0 };
+  }
+
   return { action: "std", frame: 0 };
 }

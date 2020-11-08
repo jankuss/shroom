@@ -19,6 +19,8 @@ export type AvatarDrawPart = {
 export interface AvatarDrawDefinition {
   mirrorHorizontal: boolean;
   parts: AvatarDrawPart[];
+  offsetX: number;
+  offsetY: number;
 }
 
 export interface Dependencies {
@@ -33,10 +35,14 @@ export type PrimaryAction =
   | { kind: "lay" }
   | { kind: "wlk"; frame: number };
 
+export type PrimaryActionKind = PrimaryAction["kind"];
+
 export type SecondaryActions = {
   wav?: { frame: number };
   item?: { item: number; kind: "drk" | "crr" };
 };
+
+export type SecondaryActionKind = keyof SecondaryActions;
 
 interface Options {
   parsedLook: ParsedLook;
@@ -108,7 +114,11 @@ export function getAvatarDrawDefinition(
     allActions.add(action.kind);
 
     for (const key in actions) {
-      allActions.add(key);
+      const value = actions[key as SecondaryActionKind];
+
+      if (value != null) {
+        allActions.add(key);
+      }
     }
 
     const drawParts = drawOrder
@@ -143,8 +153,23 @@ export function getAvatarDrawDefinition(
     return {
       mirrorHorizontal: normalizedDirection.mirrorHorizontal,
       parts: drawParts,
+      ...getOffsets(action.kind, normalizedDirection.mirrorHorizontal),
     };
   }
 
   return;
+}
+
+function getOffsets(action: PrimaryActionKind, mirror: boolean) {
+  if (action === "lay") {
+    return {
+      offsetX: mirror ? 32 : 48,
+      offsetY: 16,
+    };
+  }
+
+  return {
+    offsetX: mirror ? 64 : 0,
+    offsetY: 16,
+  };
 }
