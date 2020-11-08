@@ -91,25 +91,32 @@ function init() {
     furniLoader,
     avatarLoader
   );
+  room.x = application.screen.width / 2 - room.roomWidth / 2;
+  room.y = application.screen.height / 2 - room.roomHeight / 2;
 
   room.addRoomObject(
-    new Furniture("throne", 2, "0", { roomX: 0, roomY: 0, roomZ: 0 })
+    new Furniture({
+      type: "throne",
+      direction: 2,
+      roomX: 0,
+      roomY: 0,
+      roomZ: 0,
+    })
   );
 
   const avatar = new Avatar(
     "hd-180-1.hr-831-49.ea-1406-62.ch-210-92.cc-3087-108.lg-3057-110",
     2,
-    { roomX: 1, roomY: 1, roomZ: 0 }
+    { roomX: 0, roomY: 0, roomZ: 0 }
   );
 
   avatar.action = "std";
   avatar.waving = false;
-  avatar.direction = 4;
+  avatar.direction = 2;
+  avatar.item = 1;
+  avatar.drinking = true;
 
   room.addRoomObject(avatar);
-
-  room.x = application.screen.width / 2 - room.roomWidth / 2;
-  room.y = application.screen.height / 2 - room.roomHeight / 2;
 
   application.stage.addChild(room);
 
@@ -132,20 +139,6 @@ function init() {
   createButton("Wave", () => {
     avatar.waving = !avatar.waving;
   });
-
-  /*application.stage.addChild(
-    new TileTest({ x: 10, y: 10, tileHeight: 10, xEven: false, yEven: false })
-  );
-  application.stage.addChild(
-    new TileTest({
-      x: 10 + 32,
-      y: 10 + 16,
-      tileHeight: 10,
-      xEven: true,
-      yEven: false,
-    })
-  );
-  */
 }
 
 function createButton(label: string, onClick: () => void) {

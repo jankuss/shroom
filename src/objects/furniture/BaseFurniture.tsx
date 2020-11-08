@@ -48,6 +48,11 @@ export class BaseFurniture extends RoomObject {
     this.updateFurniture();
   }
 
+  setAnimation(animation: string | undefined) {
+    this.animation = animation ?? "0";
+    this.updateFurniture();
+  }
+
   updateFurniture() {
     if (this.loadFurniResult != null) {
       this.updateSprites(

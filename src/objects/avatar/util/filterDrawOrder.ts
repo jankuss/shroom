@@ -1,17 +1,24 @@
+type DrawOrderItem = string | { original: string; override: string };
+
+const replace = (items: DrawOrderItem[], item: string, newItem: string) => {
+  const index = items.indexOf(item);
+
+  if (index !== -1) {
+    items[index] = { original: item, override: newItem };
+  }
+};
+
+const remove = (items: string[], item: string) => {
+  return items.filter((value) => value !== item);
+};
+
 export function filterDrawOrder(
   drawOrder: Set<string>,
   action: string,
+  waving: boolean,
   direction: number
-) {
+): DrawOrderItem[] {
   const drawOrderArray = [...drawOrder];
-
-  if (action === "wlk" && (direction === 1 || direction === 5)) {
-    const index = drawOrderArray.indexOf("ls");
-
-    if (index !== -1) {
-      drawOrderArray[index] = "rs";
-    }
-  }
 
   const drawOrderArrayWithCenterItems: string[] = [];
 
@@ -34,13 +41,24 @@ export function filterDrawOrder(
     }
   });
 
-  const drawOrderCopy = new Set<string>(drawOrderArrayWithCenterItems);
+  if (action !== "wlk" && (direction === 1 || direction === 5)) {
+    if (!waving) {
+      const indexOfLeftSide = drawOrderArrayWithCenterItems.indexOf("ls");
+      replace(drawOrderArrayWithCenterItems, "rs", "ls");
+
+      if (indexOfLeftSide !== -1) {
+        drawOrderArrayWithCenterItems.splice(indexOfLeftSide, 1);
+      }
+    } else {
+      replace(drawOrderArrayWithCenterItems, "rs", "ls");
+    }
+  }
 
   if (direction === 0 || direction === 7) {
     // Avatar is facing away, no need to draw facial parts.
-    drawOrderCopy.delete("fc");
-    drawOrderCopy.delete("ey");
+    remove(drawOrderArrayWithCenterItems, "fc");
+    remove(drawOrderArrayWithCenterItems, "ey");
   }
 
-  return drawOrderCopy;
+  return drawOrderArrayWithCenterItems;
 }

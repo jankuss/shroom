@@ -23,6 +23,8 @@ const sitActionTypes = new Set([
 
 const wavLeftActionTypes = new Set(["lc", "ls", "lh"]);
 
+const carryActionTypes = new Set(["rh", "rc", "ri", "rs"]);
+
 export function getActionForPart(
   actions: Set<string>,
   frame: number,
@@ -42,17 +44,25 @@ export function getActionForPart(
     }
   }
 
-  if (actions.has("wav") && actions.has("wlk")) {
-    if (wavLeftActionTypes.has(type)) {
-      return { action: "wav", frame: waveFrame };
-    }
-
-    if (walkActionTypes.has(type)) {
-      return { action: "wlk", frame: walkFrame };
-    }
-  }
-
   if (actions.has("wlk")) {
+    if (actions.has("crr")) {
+      if (carryActionTypes.has(type)) {
+        return { action: "crr", frame: 0 };
+      }
+    }
+
+    if (actions.has("drk")) {
+      if (carryActionTypes.has(type)) {
+        return { action: "drk", frame: 0 };
+      }
+    }
+
+    if (actions.has("wav")) {
+      if (wavLeftActionTypes.has(type)) {
+        return { action: "wav", frame: waveFrame };
+      }
+    }
+
     if (walkActionTypes.has(type)) {
       return { action: "wlk", frame: walkFrame };
     }
@@ -72,6 +82,18 @@ export function getActionForPart(
 
   if (actions.has("lay")) {
     return { action: "lay", frame: 0 };
+  }
+
+  if (actions.has("crr")) {
+    if (carryActionTypes.has(type)) {
+      return { action: "crr", frame: 0 };
+    }
+  }
+
+  if (actions.has("drk")) {
+    if (carryActionTypes.has(type)) {
+      return { action: "drk", frame: 0 };
+    }
   }
 
   return { action: "std", frame: 0 };

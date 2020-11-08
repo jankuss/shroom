@@ -96,6 +96,17 @@ export function getAvatarDrawDefinition(
     map.set(part.type, [...current, part]);
   });
 
+  if (actions.item != null) {
+    map.set("ri", [
+      {
+        type: "ri",
+        id: actions.item.item.toString(),
+        color: undefined,
+        colorable: false,
+      },
+    ]);
+  }
+
   const drawOrderRaw =
     getDrawOrder(action.kind, normalizedDirection.direction.toString()) ||
     getDrawOrder("std", normalizedDirection.direction.toString());
@@ -106,6 +117,7 @@ export function getAvatarDrawDefinition(
       filterDrawOrder(
         new Set(drawOrderRaw),
         action.kind,
+        actions.wav != null,
         normalizedDirection.direction
       )
     );
@@ -113,20 +125,30 @@ export function getAvatarDrawDefinition(
     const allActions = new Set<string>();
     allActions.add(action.kind);
 
-    for (const key in actions) {
-      const value = actions[key as SecondaryActionKind];
+    if (actions.item != null) {
+      allActions.add(actions.item.kind);
+    }
 
-      if (value != null) {
-        allActions.add(key);
-      }
+    if (actions.wav != null) {
+      allActions.add("wav");
     }
 
     const drawParts = drawOrder
-      .map((type) => map.get(type))
-      .filter(notNullOrUndefined)
-      .flatMap((parts) => {
+      .flatMap((drawOrderItem) => {
+        const parts =
+          map.get(
+            typeof drawOrderItem === "string"
+              ? drawOrderItem
+              : drawOrderItem.override
+          ) ?? [];
+
+        const original =
+          typeof drawOrderItem === "string"
+            ? drawOrderItem
+            : drawOrderItem.original;
+
         return parts.flatMap((p) => {
-          const part = getActionForPart(allActions, 0, p.type, {
+          const part = getActionForPart(allActions, 0, original, {
             walkFrame: action.kind === "wlk" ? action.frame : 0,
             waveFrame: actions.wav != null ? actions.wav.frame : 0,
           });

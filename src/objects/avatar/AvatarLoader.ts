@@ -53,6 +53,24 @@ export class AvatarLoader implements IAvatarLoader {
         actions: {},
       });
 
+      loadResources({
+        action: { kind: "std" },
+        direction,
+        look,
+        actions: {
+          item: { kind: "crr", item: 1 },
+        },
+      });
+
+      loadResources({
+        action: { kind: "std" },
+        direction,
+        look,
+        actions: {
+          item: { kind: "drk", item: 1 },
+        },
+      });
+
       avatarFramesObject.wlk.forEach((frame) => {
         loadResources({
           action: { kind: "wlk", frame },
