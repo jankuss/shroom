@@ -1,7 +1,12 @@
 import { RoomObject } from "../../RoomObject";
 import * as PIXI from "pixi.js";
 import { AvatarLoaderResult } from "../../IAvatarLoader";
-import { AvatarDrawPart, PrimaryAction } from "./util/getAvatarDrawDefinition";
+import {
+  AvatarDrawPart,
+  PrimaryAction,
+  PrimaryActionKind,
+  SecondaryActions,
+} from "./util/getAvatarDrawDefinition";
 import { getZOrder } from "../../util/getZOrder";
 import { AvatarSprites } from "./AvatarSprites";
 import { IAnimationTicker } from "../../IAnimationTicker";
@@ -98,18 +103,51 @@ export class Avatar extends RoomObject {
   private avatarSprites: AvatarSprites | undefined;
   private walkAnimation: WalkAnimation | undefined;
   private walking: boolean = false;
-  private waving: boolean = true;
 
   private frame: number = 0;
 
   private cancelAnimation: (() => void) | undefined;
 
+  private _primaryAction: PrimaryActionKind = "std";
+  private _waving: boolean = false;
+  private _direction: number = 0;
+
   constructor(
     private look: string,
-    private direction: number,
+    direction: number,
     private position: { roomX: number; roomY: number; roomZ: number }
   ) {
     super();
+
+    this._direction = direction;
+  }
+
+  get direction() {
+    return this._direction;
+  }
+
+  set direction(value) {
+    this._direction = value;
+    this.updatePosition();
+    this.updateAvatarSprites();
+  }
+
+  get action() {
+    return this._primaryAction;
+  }
+
+  set action(value) {
+    this._primaryAction = value;
+    this.updateAvatarSprites();
+  }
+
+  get waving() {
+    return this._waving;
+  }
+
+  set waving(value) {
+    this._waving = value;
+    this.updateAvatarSprites();
   }
 
   private getWavingAction() {
@@ -122,16 +160,18 @@ export class Avatar extends RoomObject {
   }
 
   private getCurrentPrimaryAction(): PrimaryAction {
-    if (this.walking) {
+    const walkFrame =
+      avatarFramesObject.wlk[this.frame % avatarFramesObject.wlk.length];
+
+    if (this.walking || this.action === "wlk") {
       return {
         kind: "wlk",
-        frame:
-          avatarFramesObject.wlk[this.frame % avatarFramesObject.wlk.length],
+        frame: walkFrame,
       };
     }
 
     return {
-      kind: "std",
+      kind: this.action,
     };
   }
 
@@ -147,8 +187,14 @@ export class Avatar extends RoomObject {
   }
 
   private updateAvatarSprites() {
+    if (!this.mounted) return;
+
     const look = this.getCurrentLookOptions();
-    if (this.isAnimating(look)) {
+    const animating = this.isAnimating(look);
+
+    console.log("Animating", animating);
+
+    if (animating) {
       this.startAnimation();
     } else {
       this.stopAnimation();
@@ -172,6 +218,7 @@ export class Avatar extends RoomObject {
     this.frame = 0;
     if (this.cancelAnimation != null) {
       this.cancelAnimation();
+      this.cancelAnimation = undefined;
     }
   }
 
@@ -193,16 +240,16 @@ export class Avatar extends RoomObject {
     return false;
   }
 
-  setDirection(direction: number) {
-    this.direction = direction;
-    this.updateAvatarSprites();
-  }
-
-  walk(roomX: number, roomY: number, roomZ: number, direction?: number) {
+  walk(
+    roomX: number,
+    roomY: number,
+    roomZ: number,
+    options?: { direction?: number }
+  ) {
     this.walkAnimation?.walk(
       this.position,
       { roomX, roomY, roomZ },
-      direction ?? this.direction
+      options?.direction ?? this.direction
     );
     this.position = { roomX, roomY, roomZ };
   }
@@ -212,6 +259,21 @@ export class Avatar extends RoomObject {
       getZOrder(this.position.roomX, this.position.roomY, this.position.roomZ) +
       1
     );
+  }
+
+  private updatePosition() {
+    if (!this.mounted) return;
+
+    const { x, y } = this.geometry.getPosition(
+      this.position.roomX,
+      this.position.roomY,
+      this.position.roomZ
+    );
+
+    if (this.avatarSprites != null) {
+      this.avatarSprites.x = x;
+      this.avatarSprites.y = y;
+    }
   }
 
   private calculatePosition() {
@@ -238,7 +300,10 @@ export class Avatar extends RoomObject {
           position.roomZ
         );
 
-        this.avatarSprites?.setPosition(x, y);
+        if (this.avatarSprites != null) {
+          this.avatarSprites.x = x;
+          this.avatarSprites.y = y;
+        }
       },
       onStart: (direction: number) => {
         this.startWalking(direction);
@@ -247,6 +312,8 @@ export class Avatar extends RoomObject {
         this.stopWalking();
       },
     });
+
+    this.updateAvatarSprites();
   }
 
   destroy(): void {
