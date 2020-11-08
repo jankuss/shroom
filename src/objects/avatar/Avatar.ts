@@ -111,6 +111,8 @@ export class Avatar extends RoomObject {
   private _primaryAction: PrimaryActionKind = "std";
   private _waving: boolean = false;
   private _direction: number = 0;
+  private _item: number | undefined;
+  private _drinking: boolean = false;
 
   constructor(
     private look: string,
@@ -120,6 +122,24 @@ export class Avatar extends RoomObject {
     super();
 
     this._direction = direction;
+  }
+
+  get item() {
+    return this._item;
+  }
+
+  set item(value) {
+    this._item = value;
+    this.updateAvatarSprites();
+  }
+
+  get drinking() {
+    return this._drinking;
+  }
+
+  set drinking(value) {
+    this._drinking = value;
+    this.updateAvatarSprites();
   }
 
   get direction() {
@@ -159,6 +179,15 @@ export class Avatar extends RoomObject {
     }
   }
 
+  private getDrinkingAction() {
+    if (this.item != null) {
+      return {
+        kind: this.drinking ? ("drk" as const) : ("crr" as const),
+        item: this.item,
+      };
+    }
+  }
+
   private getCurrentPrimaryAction(): PrimaryAction {
     const walkFrame =
       avatarFramesObject.wlk[this.frame % avatarFramesObject.wlk.length];
@@ -180,6 +209,7 @@ export class Avatar extends RoomObject {
       action: this.getCurrentPrimaryAction(),
       actions: {
         wav: this.getWavingAction(),
+        item: this.getDrinkingAction(),
       },
       direction: this.direction,
       look: this.look,
@@ -191,8 +221,6 @@ export class Avatar extends RoomObject {
 
     const look = this.getCurrentLookOptions();
     const animating = this.isAnimating(look);
-
-    console.log("Animating", animating);
 
     if (animating) {
       this.startAnimation();
