@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { AnimationTicker } from "../../AnimationTicker";
 import { IAnimationTicker } from "../../IAnimationTicker";
 import { IAvatarLoader } from "../../IAvatarLoader";
 import { IFurnitureLoader } from "../../IFurnitureLoader";
@@ -7,11 +8,35 @@ import { IRoomObject } from "../../IRoomObject";
 import { IRoomObjectContainer } from "../../IRoomObjectContainer";
 import { TileType } from "../../types/TileType";
 import { ParsedTileType, parseTileMap } from "../../util/parseTileMap";
+import { parseTileMapString } from "../../util/parseTileMapString";
+import { AvatarLoader } from "../avatar/AvatarLoader";
+import { FurnitureLoader } from "../furniture/FurnitureLoader";
 import { RoomVisualization } from "./RoomVisualization";
 import { Stair } from "./Stair";
 import { Tile } from "./Tile";
 import { getTileMapBounds } from "./util/getTileMapBounds";
 import { Wall } from "./Wall";
+
+function createSimpleConfig(
+  application: PIXI.Application,
+  resourcePath?: string
+): Dependencies {
+  return {
+    animationTicker: AnimationTicker.create(application),
+    avatarLoader: AvatarLoader.create(resourcePath),
+    furnitureLoader: FurnitureLoader.create(resourcePath),
+  };
+}
+
+interface Dependencies {
+  animationTicker: IAnimationTicker;
+  avatarLoader: IAvatarLoader;
+  furnitureLoader: IFurnitureLoader;
+}
+
+type TileMap = TileType[][] | string;
+
+let globalDependencies: Dependencies | undefined;
 
 export class Room
   extends PIXI.Container
@@ -31,16 +56,27 @@ export class Room
 
   private tileColor: string = "#989865";
 
+  private animationTicker: IAnimationTicker;
+  private avatarLoader: IAvatarLoader;
+  private furnitureLoader: IFurnitureLoader;
+
   private bounds: { minX: number; minY: number; maxX: number; maxY: number };
 
-  constructor(
-    tilemap: TileType[][],
-    private animationTicker: IAnimationTicker,
-    private furniLoader: IFurnitureLoader,
-    private avatarLoader: IAvatarLoader
-  ) {
+  constructor({
+    animationTicker,
+    avatarLoader,
+    furnitureLoader,
+    tilemap,
+  }: {
+    tilemap: TileMap;
+  } & Dependencies) {
     super();
-    const { largestDiff, tilemap: parsedTileMap } = parseTileMap(tilemap);
+    const normalizedTileMap =
+      typeof tilemap === "string" ? parseTileMapString(tilemap) : tilemap;
+
+    const { largestDiff, tilemap: parsedTileMap } = parseTileMap(
+      normalizedTileMap
+    );
 
     this.parsedTileMap = parsedTileMap;
     this.wallHeight = this.wallHeight + largestDiff * 32;
@@ -53,7 +89,27 @@ export class Room
     this.roomWidth = this.bounds.maxX - this.bounds.minX;
     this.roomHeight = this.bounds.maxY - this.bounds.minY;
 
+    this.animationTicker = animationTicker;
+    this.furnitureLoader = furnitureLoader;
+    this.avatarLoader = avatarLoader;
+
     this.addChild(this.visualization);
+  }
+
+  static create({
+    application,
+    resourcePath,
+    tilemap,
+  }: {
+    application: PIXI.Application;
+    resourcePath?: string;
+    tilemap: TileMap;
+  }) {
+    if (globalDependencies == null) {
+      globalDependencies = createSimpleConfig(application, resourcePath);
+    }
+
+    return new Room({ ...globalDependencies, tilemap });
   }
 
   addRoomObject(object: IRoomObject) {
@@ -61,7 +117,7 @@ export class Room
       geometry: this,
       visualization: this.visualization,
       animationTicker: this.animationTicker,
-      furnitureLoader: this.furniLoader,
+      furnitureLoader: this.furnitureLoader,
       roomObjectContainer: this,
       avatarLoader: this.avatarLoader,
     });

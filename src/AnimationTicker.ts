@@ -12,6 +12,10 @@ export class AnimationTicker implements IAnimationTicker {
     application.ticker.add(() => this.increment());
   }
 
+  static create(application: PIXI.Application) {
+    return new AnimationTicker(application);
+  }
+
   private increment() {
     this.frame++;
     this.subscriptions.forEach((cb) => cb(this.frame));

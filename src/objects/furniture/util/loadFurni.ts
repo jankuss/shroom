@@ -25,16 +25,17 @@ export type LoadFurniResult = {
 };
 
 export async function loadFurni(
-  typeWithColor: string
+  typeWithColor: string,
+  options: {
+    getAssets: (type: string) => Promise<string>;
+    getVisualization: (type: string) => Promise<string>;
+    getAsset: (type: string, name: string) => Promise<string>;
+  }
 ): Promise<LoadFurniResult> {
   const type = typeWithColor.split("*")[0];
 
-  const assetsString = await fetch(
-    `./hof_furni/${type}/${type}_assets.bin`
-  ).then((resp) => resp.text());
-  const visualizationString = await fetch(
-    `./hof_furni/${type}/${type}_visualization.bin`
-  ).then((resp) => resp.text());
+  const assetsString = await options.getAssets(type);
+  const visualizationString = await options.getVisualization(type);
 
   const assetsXml = await parseStringAsync(assetsString);
   const visualizationXml = await parseStringAsync(visualizationString);
@@ -78,7 +79,7 @@ export async function loadFurni(
     const buffers = new Map(
       await Promise.all(
         assetsToLoad.map(async (asset) => {
-          const imageUrl = `./hof_furni/${type}/${asset.name}.png`;
+          const imageUrl = await options.getAsset(type, asset.name);
 
           const image = new Image();
           image.src = imageUrl;

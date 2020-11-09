@@ -99,6 +99,14 @@ class WalkAnimation {
   }
 }
 
+interface Options {
+  look: string;
+  direction: number;
+  roomX: number;
+  roomY: number;
+  roomZ: number;
+}
+
 export class Avatar extends RoomObject {
   private avatarSprites: AvatarSprites | undefined;
   private walkAnimation: WalkAnimation | undefined;
@@ -113,15 +121,47 @@ export class Avatar extends RoomObject {
   private _direction: number = 0;
   private _item: number | undefined;
   private _drinking: boolean = false;
+  private _look: string;
+  private _roomX: number = 0;
+  private _roomY: number = 0;
+  private _roomZ: number = 0;
+  private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
 
-  constructor(
-    private look: string,
-    direction: number,
-    private position: { roomX: number; roomY: number; roomZ: number }
-  ) {
+  constructor({ look, roomX, roomY, roomZ, direction }: Options) {
     super();
 
     this._direction = direction;
+    this._look = look;
+    this._roomX = roomX;
+    this._roomY = roomY;
+    this._roomZ = roomZ;
+  }
+
+  get roomX() {
+    return this._roomX;
+  }
+
+  set roomX(value) {
+    this._roomX = value;
+    this.updatePosition();
+  }
+
+  get roomY() {
+    return this._roomY;
+  }
+
+  set roomY(value) {
+    this._roomY = value;
+    this.updatePosition();
+  }
+
+  get roomZ() {
+    return this._roomZ;
+  }
+
+  set roomZ(value) {
+    this._roomZ = value;
+    this.updatePosition();
   }
 
   get item() {
@@ -193,6 +233,8 @@ export class Avatar extends RoomObject {
       avatarFramesObject.wlk[this.frame % avatarFramesObject.wlk.length];
 
     if (this.walking || this.action === "wlk") {
+      console.log("Walk frame", walkFrame);
+
       return {
         kind: "wlk",
         frame: walkFrame,
@@ -212,7 +254,7 @@ export class Avatar extends RoomObject {
         item: this.getDrinkingAction(),
       },
       direction: this.direction,
-      look: this.look,
+      look: this._look,
     };
   }
 
@@ -234,7 +276,7 @@ export class Avatar extends RoomObject {
   private startAnimation() {
     if (this.cancelAnimation != null) return;
 
-    this.frame++;
+    this.frame = 0;
 
     this.cancelAnimation = this.animationTicker.subscribe((value) => {
       this.frame++;
@@ -275,28 +317,39 @@ export class Avatar extends RoomObject {
     options?: { direction?: number }
   ) {
     this.walkAnimation?.walk(
-      this.position,
+      { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
       { roomX, roomY, roomZ },
       options?.direction ?? this.direction
     );
-    this.position = { roomX, roomY, roomZ };
+
+    this._roomX = roomX;
+    this._roomY = roomY;
+    this._roomZ = roomZ;
   }
 
   private calculateZIndex() {
-    return (
-      getZOrder(this.position.roomX, this.position.roomY, this.position.roomZ) +
-      1
-    );
+    return getZOrder(this.roomX, this.roomY, this.roomZ) + 1;
+  }
+
+  private getDisplayRoomPosition() {
+    if (this.walking) {
+      return this._animatedPosition;
+    }
+
+    return {
+      roomX: this.roomX,
+      roomY: this.roomY,
+      roomZ: this.roomZ,
+    };
   }
 
   private updatePosition() {
     if (!this.mounted) return;
 
-    const { x, y } = this.geometry.getPosition(
-      this.position.roomX,
-      this.position.roomY,
-      this.position.roomZ
-    );
+    const { roomX, roomY, roomZ } = this.getDisplayRoomPosition();
+    console.log(roomX, roomY, roomZ);
+
+    const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
 
     if (this.avatarSprites != null) {
       this.avatarSprites.x = x;
@@ -305,11 +358,9 @@ export class Avatar extends RoomObject {
   }
 
   private calculatePosition() {
-    return this.geometry.getPosition(
-      this.position.roomX,
-      this.position.roomY,
-      this.position.roomZ
-    );
+    const { roomX, roomY, roomZ } = this.getDisplayRoomPosition();
+
+    return this.geometry.getPosition(roomX, roomY, roomZ);
   }
 
   registered(): void {
@@ -322,16 +373,8 @@ export class Avatar extends RoomObject {
     this.roomObjectContainer.addRoomObject(this.avatarSprites);
     this.walkAnimation = new WalkAnimation(this.animationTicker, {
       onUpdatePosition: (position, direction) => {
-        const { x, y } = this.geometry.getPosition(
-          position.roomX,
-          position.roomY,
-          position.roomZ
-        );
-
-        if (this.avatarSprites != null) {
-          this.avatarSprites.x = x;
-          this.avatarSprites.y = y;
-        }
+        this._animatedPosition = position;
+        this.updatePosition();
       },
       onStart: (direction: number) => {
         this.startWalking(direction);

@@ -33,40 +33,6 @@ const application = new PIXI.Application({
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 PIXI.settings.ROUND_PIXELS = true;
 
-const animationTicker = new AnimationTicker(application);
-const furniLoader = new FurnitureLoader();
-const avatarLoader = new AvatarLoader({
-  createLookServer: async () => {
-    const fetchString = (url: string) =>
-      fetch(url).then((response) => response.text());
-    const fetchJson = (url: string) =>
-      fetch(url).then((response) => response.json());
-
-    return createLookServer({
-      drawOrderString: await fetchString("./draworder.xml"),
-      figureDataString: await fetchString("./figuredata.xml"),
-      figureMapString: await fetchString("./figuremap.xml"),
-      loadOffsetMap: async () =>
-        loadOffsetMapFromJson(await fetchJson("./offsets.json")).getOffset,
-    });
-  },
-  resolveImage: async (id) => {
-    const image = new Image();
-    image.src = `./figure/${id}.png`;
-
-    const dimensions = await new Promise<{
-      width: number;
-      height: number;
-    }>((resolve) => {
-      image.onload = (value) => {
-        resolve({ width: image.width, height: image.height });
-      };
-    });
-
-    return PIXI.Texture.from(image);
-  },
-});
-
 application.loader
   .add(TileAsset)
   .add(WallAsset)
@@ -74,23 +40,18 @@ application.loader
   .load(() => init());
 
 function init() {
-  const room = new Room(
-    parseTileMapString(`
-    000000000000000
-    000000000000000
-    000000000000000
-    000000000000000
-    000000000000000
-    000000000000000
-    000000000000000
-    000000000000000
-    000000000000000
-    000000000000000
-  `),
-    animationTicker,
-    furniLoader,
-    avatarLoader
-  );
+  const room = Room.create({
+    application,
+    tilemap: `
+      00000
+      00000
+      00000
+      00000
+      00000
+      00000
+    `,
+  });
+
   room.x = application.screen.width / 2 - room.roomWidth / 2;
   room.y = application.screen.height / 2 - room.roomHeight / 2;
 
@@ -104,17 +65,33 @@ function init() {
     })
   );
 
-  const avatar = new Avatar(
-    "hd-180-1.hr-831-49.ea-1406-62.ch-210-92.cc-3087-108.lg-3057-110",
-    2,
-    { roomX: 0, roomY: 0, roomZ: 0 }
-  );
+  const avatar = new Avatar({
+    look:
+      "hd-208-1.hr-145-61.ha-1009-93.ea-1406-62.ch-255-66.lg-285-1422.sh-290-1325",
+    direction: 2,
+    roomX: 0,
+    roomY: 0,
+    roomZ: 0,
+  });
 
   avatar.action = "std";
   avatar.waving = false;
   avatar.direction = 2;
-  avatar.item = 1;
-  avatar.drinking = true;
+  avatar.drinking = false;
+
+  setTimeout(() => {
+    avatar.walk(1, 0, 0, { direction: 2 });
+    avatar.walk(2, 0, 0, { direction: 2 });
+    avatar.walk(3, 0, 0, { direction: 2 });
+
+    avatar.walk(3, 1, 0, { direction: 4 });
+    avatar.walk(3, 2, 0, { direction: 4 });
+    avatar.walk(3, 3, 0, { direction: 4 });
+
+    avatar.walk(2, 3, 0, { direction: 6 });
+    avatar.walk(1, 3, 0, { direction: 6 });
+    avatar.walk(0, 3, 0, { direction: 6 });
+  }, 5000);
 
   room.addRoomObject(avatar);
 

@@ -1,5 +1,5 @@
 import { AvatarLoaderResult, IAvatarLoader } from "../../IAvatarLoader";
-import { createLookServer, LookServer } from "./util";
+import { createLookServer, loadOffsetMapFromJson, LookServer } from "./util";
 import { avatarFrames, avatarFramesObject } from "./util/avatarFrames";
 import { LookOptions } from "./util/createLookServer";
 import {
@@ -8,6 +8,7 @@ import {
   AvatarDrawDefinition,
 } from "./util/getAvatarDrawDefinition";
 import { parseLookString } from "./util/parseLookString";
+import * as PIXI from "pixi.js";
 
 interface Options {
   resolveImage: (id: string) => Promise<PIXI.Texture>;
@@ -22,6 +23,42 @@ export class AvatarLoader implements IAvatarLoader {
 
   constructor(private options: Options) {
     this.lookServer = this.options.createLookServer();
+  }
+
+  static create(resourcePath: string = "") {
+    return new AvatarLoader({
+      createLookServer: async () => {
+        const fetchString = (url: string) =>
+          fetch(url).then((response) => response.text());
+        const fetchJson = (url: string) =>
+          fetch(url).then((response) => response.json());
+
+        return createLookServer({
+          drawOrderString: await fetchString(resourcePath + "/draworder.xml"),
+          figureDataString: await fetchString(resourcePath + "/figuredata.xml"),
+          figureMapString: await fetchString(resourcePath + "/figuremap.xml"),
+          loadOffsetMap: async () =>
+            loadOffsetMapFromJson(
+              await fetchJson(resourcePath + "/offsets.json")
+            ).getOffset,
+        });
+      },
+      resolveImage: async (id) => {
+        const image = new Image();
+        image.src = `${resourcePath}/figure/${id}.png`;
+
+        const dimensions = await new Promise<{
+          width: number;
+          height: number;
+        }>((resolve) => {
+          image.onload = (value) => {
+            resolve({ width: image.width, height: image.height });
+          };
+        });
+
+        return PIXI.Texture.from(image);
+      },
+    });
   }
 
   async getAvatarDrawDefinition(look: string): Promise<AvatarLoaderResult> {
