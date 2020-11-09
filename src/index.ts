@@ -52,6 +52,12 @@ function init() {
     `,
   });
 
+  room.wallTexture = new Promise((resolve) =>
+    setTimeout(resolve, 2500)
+  ).then(() => PIXI.Texture.from(WallAsset));
+
+  room.floorTexture = PIXI.Texture.from(TileAsset);
+
   room.x = application.screen.width / 2 - room.roomWidth / 2;
   room.y = application.screen.height / 2 - room.roomHeight / 2;
 
@@ -66,8 +72,7 @@ function init() {
   );
 
   const avatar = new Avatar({
-    look:
-      "hd-208-1.hr-145-61.ha-1009-93.ea-1406-62.ch-255-66.lg-285-1422.sh-290-1325",
+    look: "hd-605-2.hr-3012-45.ch-645-109.lg-720-63.sh-725-92.wa-2001-62",
     direction: 2,
     roomX: 0,
     roomY: 0,

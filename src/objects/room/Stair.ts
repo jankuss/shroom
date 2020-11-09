@@ -7,6 +7,7 @@ import { IRoomGeometry } from "../../IRoomGeometry";
 import { IRoomObject } from "../../IRoomObject";
 import { getFloorMatrix, getLeftMatrix, getRightMatrix } from "./matrixes";
 import { RoomObject } from "../../RoomObject";
+import { ITexturable } from "../../ITextureable";
 
 interface Props {
   geometry: IRoomGeometry;
@@ -16,21 +17,37 @@ interface Props {
   tileHeight: number;
   color: string;
   direction: 0 | 2;
+  texture?: PIXI.Texture;
 }
 
 const positioning = 8;
 
 const texture = PIXI.Texture.from(TileAsset);
 
-export class Stair extends RoomObject {
+export class Stair extends RoomObject implements ITexturable {
   private sprites: PIXI.DisplayObject[] = [];
   private container: PIXI.Container | undefined;
 
+  private _texture: PIXI.Texture | undefined;
+
   constructor(private props: Props) {
     super();
+
+    this._texture = props.texture;
+  }
+
+  get texture() {
+    return this._texture;
+  }
+
+  set texture(value) {
+    this._texture = value;
+    this.updateSprites();
   }
 
   updateSprites() {
+    if (!this.mounted) return;
+
     this.container?.destroy();
     this.container = new PIXI.Container();
 

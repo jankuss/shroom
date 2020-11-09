@@ -4,6 +4,7 @@ import { RoomObject } from "../../RoomObject";
 
 import WallAsset from "../../assets/wall2.png";
 import { getWallColors } from "./util/getTileColors";
+import { getZOrder } from "../../util/getZOrder";
 
 interface Props {
   geometry: IRoomGeometry;
@@ -15,6 +16,7 @@ interface Props {
   wallHeight: number;
   side?: boolean;
   color: string;
+  texture?: PIXI.Texture;
 }
 
 const wallWidth = 32;
@@ -50,11 +52,9 @@ export function createWall({
 export function createBorder({
   height,
   matrix,
-  texture,
 }: {
   height: number;
   matrix: PIXI.Matrix;
-  texture: PIXI.Texture;
 }) {
   const graphics = new PIXI.Graphics();
   graphics.beginFill(0xffffff);
@@ -135,7 +135,6 @@ export function createWallLeft({
   );
 
   const border = createBorder({
-    texture,
     height: wallHeight + tileHeight,
     matrix: new PIXI.Matrix(
       1,
@@ -200,7 +199,6 @@ export function createWallRight({
   );
 
   const border = createBorder({
-    texture,
     height: wallHeight + tileHeight,
     matrix: new PIXI.Matrix(
       -1,
@@ -230,10 +228,9 @@ export function createWallRight({
   };
 }
 
-const wallTexture = PIXI.Texture.from(WallAsset);
-
 export class Wall extends RoomObject {
   private container: PIXI.Container | undefined;
+  private _texture?: PIXI.Texture;
 
   private border: PIXI.DisplayObject | undefined;
   private top: PIXI.DisplayObject | undefined;
@@ -241,6 +238,16 @@ export class Wall extends RoomObject {
 
   constructor(private props: Props) {
     super();
+    this._texture = props.texture;
+  }
+
+  get texture() {
+    return this._texture;
+  }
+
+  set texture(value) {
+    this._texture = value;
+    this.updateSprites();
   }
 
   destroy(): void {
@@ -254,6 +261,8 @@ export class Wall extends RoomObject {
   }
 
   updateSprites() {
+    if (!this.mounted) return;
+
     this.container?.destroy();
     this.container = new PIXI.Container();
 
@@ -271,6 +280,7 @@ export class Wall extends RoomObject {
 
     const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
     const { leftTint, rightTint, topTint } = getWallColors(color);
+    this.container.zIndex = getZOrder(roomX, roomY, roomZ) - 1;
 
     const baseX = x;
     const baseY = y + 16;
@@ -283,7 +293,7 @@ export class Wall extends RoomObject {
           baseX,
           baseY,
           wallHeight: wallHeight - offset,
-          texture: wallTexture,
+          texture: this.texture ?? PIXI.Texture.WHITE,
           tileHeight: tileHeight,
           side,
           offset,
@@ -302,7 +312,7 @@ export class Wall extends RoomObject {
           baseX,
           baseY,
           wallHeight: wallHeight - roomZ * 32,
-          texture: wallTexture,
+          texture: this.texture ?? PIXI.Texture.WHITE,
           tileHeight: tileHeight,
           side,
           offset,

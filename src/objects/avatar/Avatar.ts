@@ -233,8 +233,6 @@ export class Avatar extends RoomObject {
       avatarFramesObject.wlk[this.frame % avatarFramesObject.wlk.length];
 
     if (this.walking || this.action === "wlk") {
-      console.log("Walk frame", walkFrame);
-
       return {
         kind: "wlk",
         frame: walkFrame,
@@ -347,7 +345,6 @@ export class Avatar extends RoomObject {
     if (!this.mounted) return;
 
     const { roomX, roomY, roomZ } = this.getDisplayRoomPosition();
-    console.log(roomX, roomY, roomZ);
 
     const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
 

@@ -6,6 +6,7 @@ import { IFurnitureLoader } from "../../IFurnitureLoader";
 import { IRoomGeometry } from "../../IRoomGeometry";
 import { IRoomObject } from "../../IRoomObject";
 import { IRoomObjectContainer } from "../../IRoomObjectContainer";
+import { ITexturable } from "../../ITextureable";
 import { TileType } from "../../types/TileType";
 import { ParsedTileType, parseTileMap } from "../../util/parseTileMap";
 import { parseTileMapString } from "../../util/parseTileMapString";
@@ -60,7 +61,34 @@ export class Room
   private avatarLoader: IAvatarLoader;
   private furnitureLoader: IFurnitureLoader;
 
+  private walls: Wall[] = [];
+  private floor: ITexturable[] = [];
+
   private bounds: { minX: number; minY: number; maxX: number; maxY: number };
+
+  private _wallTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
+  private _floorTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
+
+  private _currentWallTexture: PIXI.Texture | undefined;
+  private _currentFloorTexture: PIXI.Texture | undefined;
+
+  get wallTexture() {
+    return this._wallTexture;
+  }
+
+  set wallTexture(value) {
+    this._wallTexture = value;
+    this.loadWallTextures();
+  }
+
+  get floorTexture() {
+    return this._floorTexture;
+  }
+
+  set floorTexture(value) {
+    this._floorTexture = value;
+    this.loadFloorTextures();
+  }
 
   constructor({
     animationTicker,
@@ -112,6 +140,31 @@ export class Room
     return new Room({ ...globalDependencies, tilemap });
   }
 
+  private loadWallTextures() {
+    Promise.resolve(this.wallTexture).then((texture) => {
+      this._currentWallTexture = texture;
+      this.updateTextures();
+    });
+  }
+
+  private loadFloorTextures() {
+    Promise.resolve(this.floorTexture).then((texture) => {
+      this._currentFloorTexture = texture;
+      this.updateTextures();
+    });
+  }
+
+  private updateTextures() {
+    this.visualization.disableCache();
+    this.walls.forEach((wall) => {
+      wall.texture = this._currentWallTexture;
+    });
+    this.floor.forEach((floor) => {
+      floor.texture = this._currentFloorTexture;
+    });
+    this.visualization.enableCache();
+  }
+
   addRoomObject(object: IRoomObject) {
     object.setParent({
       geometry: this,
@@ -144,13 +197,23 @@ export class Room
     };
   }
 
+  private registerWall(wall: Wall) {
+    this.walls.push(wall);
+    this.addRoomObject(wall);
+  }
+
+  private registerTile(tile: Stair | Tile) {
+    this.floor.push(tile);
+    this.addRoomObject(tile);
+  }
+
   private initTiles(tiles: ParsedTileType[][]) {
     for (let y = 0; y < tiles.length; y++) {
       for (let x = 0; x < tiles[y].length; x++) {
         const tile = tiles[y][x];
 
         if (tile.type === "tile") {
-          this.addRoomObject(
+          this.registerTile(
             new Tile({
               geometry: this,
               roomX: x - this.wallOffsets.x,
@@ -166,7 +229,7 @@ export class Room
         const direction = getWallDirection(tile);
 
         if (direction != null && tile.type === "wall") {
-          this.addRoomObject(
+          this.registerWall(
             new Wall({
               geometry: this,
               roomX: x - this.wallOffsets.x,
@@ -176,20 +239,13 @@ export class Room
               wallHeight: this.wallHeight,
               roomZ: tile.height,
               color: "#ffffff",
+              texture: this._currentWallTexture,
             })
           );
         }
 
-        if (
-          tile.type === "wall" &&
-          (tile.kind === "rowWall" ||
-            tile.kind === "colWall" ||
-            tile.kind === "outerCorner")
-        ) {
-        }
-
         if (tile.type === "wall" && tile.kind === "innerCorner") {
-          this.addRoomObject(
+          this.registerWall(
             new Wall({
               geometry: this,
               roomX: x - this.wallOffsets.x,
@@ -203,7 +259,7 @@ export class Room
             })
           );
 
-          this.addRoomObject(
+          this.registerWall(
             new Wall({
               geometry: this,
               roomX: x - this.wallOffsets.x,
@@ -219,7 +275,7 @@ export class Room
         }
 
         if (tile.type === "stairs") {
-          this.addRoomObject(
+          this.registerTile(
             new Stair({
               geometry: this,
               roomX: x - this.wallOffsets.x,

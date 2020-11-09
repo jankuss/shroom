@@ -11,6 +11,7 @@ export class RoomVisualization
   constructor() {
     super();
     this.container.sortableChildren = true;
+    this.plane.sortableChildren = true;
     this.plane.cacheAsBitmap = true;
 
     this.addChild(this.plane);
@@ -18,6 +19,14 @@ export class RoomVisualization
   }
 
   addMask(element: PIXI.Sprite): void {}
+
+  disableCache() {
+    this.plane.cacheAsBitmap = false;
+  }
+
+  enableCache() {
+    this.plane.cacheAsBitmap = true;
+  }
 
   addPlaneChild(element: PIXI.DisplayObject): void {
     this.plane.addChild(element);
