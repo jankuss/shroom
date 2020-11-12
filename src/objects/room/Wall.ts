@@ -231,6 +231,7 @@ export function createWallRight({
 export class Wall extends RoomObject {
   private container: PIXI.Container | undefined;
   private _texture?: PIXI.Texture;
+  private _color: string | undefined;
 
   private border: PIXI.DisplayObject | undefined;
   private top: PIXI.DisplayObject | undefined;
@@ -247,6 +248,15 @@ export class Wall extends RoomObject {
 
   set texture(value) {
     this._texture = value;
+    this.updateSprites();
+  }
+
+  get color() {
+    return this._color;
+  }
+
+  set color(value) {
+    this._color = value;
     this.updateSprites();
   }
 
@@ -279,7 +289,9 @@ export class Wall extends RoomObject {
     } = this.props;
 
     const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
-    const { leftTint, rightTint, topTint } = getWallColors(color);
+    const wallColor = this.texture != null ? "#ffffff" : this._color ?? color;
+
+    const { leftTint, rightTint, topTint } = getWallColors(wallColor);
     this.container.zIndex = getZOrder(roomX, roomY, roomZ) - 1;
 
     const baseX = x;

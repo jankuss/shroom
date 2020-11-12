@@ -62,12 +62,15 @@ export class Room
   private furnitureLoader: IFurnitureLoader;
 
   private walls: Wall[] = [];
-  private floor: ITexturable[] = [];
+  private floor: (Tile | Stair)[] = [];
 
   private bounds: { minX: number; minY: number; maxX: number; maxY: number };
 
   private _wallTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
   private _floorTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
+
+  private _wallColor: string | undefined;
+  private _floorColor: string | undefined;
 
   private _currentWallTexture: PIXI.Texture | undefined;
   private _currentFloorTexture: PIXI.Texture | undefined;
@@ -88,6 +91,24 @@ export class Room
   set floorTexture(value) {
     this._floorTexture = value;
     this.loadFloorTextures();
+  }
+
+  get wallColor() {
+    return this._wallColor;
+  }
+
+  set wallColor(value) {
+    this._wallColor = value;
+    this.updateTextures();
+  }
+
+  get floorColor() {
+    return this._floorColor;
+  }
+
+  set floorColor(value) {
+    this._floorColor = value;
+    this.updateTextures();
   }
 
   constructor({
@@ -158,9 +179,11 @@ export class Room
     this.visualization.disableCache();
     this.walls.forEach((wall) => {
       wall.texture = this._currentWallTexture;
+      wall.color = this._wallColor;
     });
     this.floor.forEach((floor) => {
       floor.texture = this._currentFloorTexture;
+      floor.color = this._floorColor;
     });
     this.visualization.enableCache();
   }
@@ -221,7 +244,7 @@ export class Room
               roomZ: tile.z,
               edge: true,
               tileHeight: this.tileHeight,
-              color: this.tileColor,
+              color: this.floorColor ?? this.tileColor,
             })
           );
         }
@@ -238,7 +261,7 @@ export class Room
               tileHeight: this.tileHeight,
               wallHeight: this.wallHeight,
               roomZ: tile.height,
-              color: "#ffffff",
+              color: this.wallColor ?? "#ffffff",
               texture: this._currentWallTexture,
             })
           );

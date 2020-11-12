@@ -5,6 +5,7 @@ import { Furniture } from "./objects/furniture/Furniture";
 import { AnimationTicker } from "./AnimationTicker";
 
 import TileAsset from "./assets/tile.png";
+import TileAsset2 from "./assets/tile2.png";
 import WallAsset from "./assets/wall.png";
 import Wall2Asset from "./assets/wall2.png";
 import { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
@@ -13,6 +14,7 @@ import { WallFurniture } from "./objects/furniture/WallFurniture";
 import { AvatarLoader } from "./objects/avatar/AvatarLoader";
 import { createLookServer, loadOffsetMapFromJson } from "./objects/avatar/util";
 import { Avatar } from "./objects/avatar/Avatar";
+import { loadRoomTexture } from "./util/loadRoomTexture";
 
 const view = document.querySelector("#root") as HTMLCanvasElement | undefined;
 const container = document.querySelector("#container") as
@@ -31,97 +33,92 @@ const application = new PIXI.Application({
 });
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-PIXI.settings.ROUND_PIXELS = true;
 
-application.loader
-  .add(TileAsset)
-  .add(WallAsset)
-  .add(Wall2Asset)
-  .load(() => init());
-
-function init() {
-  const room = Room.create({
-    application,
-    tilemap: `
-      00000
-      00000
-      00000
-      00000
-      00000
-      00000
+const room = Room.create({
+  application,
+  tilemap: `
+      11111xxxxx
+      11111xxxxx
+      11111xxxxx
+      11111xxxxx
+      11111xxxxx
+      11111xxxxx
+      00000xxxxx
+      0000000000
+      0000000000
+      0000000000
+      0000000000
     `,
-  });
+});
 
-  room.wallTexture = new Promise((resolve) =>
-    setTimeout(resolve, 2500)
-  ).then(() => PIXI.Texture.from(WallAsset));
+room.wallTexture = loadRoomTexture(WallAsset);
+room.wallColor = "#ffffff";
 
-  room.floorTexture = PIXI.Texture.from(TileAsset);
+room.floorTexture = loadRoomTexture(TileAsset);
 
-  room.x = application.screen.width / 2 - room.roomWidth / 2;
-  room.y = application.screen.height / 2 - room.roomHeight / 2;
+room.x = application.screen.width / 2 - room.roomWidth / 2;
+room.y = application.screen.height / 2 - room.roomHeight / 2;
 
-  room.addRoomObject(
-    new Furniture({
-      type: "throne",
-      direction: 2,
-      roomX: 0,
-      roomY: 0,
-      roomZ: 0,
-    })
-  );
-
-  const avatar = new Avatar({
-    look: "hd-605-2.hr-3012-45.ch-645-109.lg-720-63.sh-725-92.wa-2001-62",
+room.addRoomObject(
+  new Furniture({
+    type: "throne",
     direction: 2,
     roomX: 0,
     roomY: 0,
     roomZ: 0,
-  });
+  })
+);
 
-  avatar.action = "std";
-  avatar.waving = false;
-  avatar.direction = 2;
-  avatar.drinking = false;
+const avatar = new Avatar({
+  look: "hd-605-2.hr-3012-45.ch-645-109.lg-720-63.sh-725-92.wa-2001-62",
+  direction: 2,
+  roomX: 0,
+  roomY: 0,
+  roomZ: 0,
+});
 
-  setTimeout(() => {
-    avatar.walk(1, 0, 0, { direction: 2 });
-    avatar.walk(2, 0, 0, { direction: 2 });
-    avatar.walk(3, 0, 0, { direction: 2 });
+avatar.action = "std";
+avatar.waving = false;
+avatar.direction = 2;
+avatar.drinking = false;
 
-    avatar.walk(3, 1, 0, { direction: 4 });
-    avatar.walk(3, 2, 0, { direction: 4 });
-    avatar.walk(3, 3, 0, { direction: 4 });
+setTimeout(() => {
+  avatar.walk(1, 0, 0, { direction: 2 });
+  avatar.walk(2, 0, 0, { direction: 2 });
+  avatar.walk(3, 0, 0, { direction: 2 });
 
-    avatar.walk(2, 3, 0, { direction: 6 });
-    avatar.walk(1, 3, 0, { direction: 6 });
-    avatar.walk(0, 3, 0, { direction: 6 });
-  }, 5000);
+  avatar.walk(3, 1, 0, { direction: 4 });
+  avatar.walk(3, 2, 0, { direction: 4 });
+  avatar.walk(3, 3, 0, { direction: 4 });
 
-  room.addRoomObject(avatar);
+  avatar.walk(2, 3, 0, { direction: 6 });
+  avatar.walk(1, 3, 0, { direction: 6 });
+  avatar.walk(0, 3, 0, { direction: 6 });
+}, 5000);
 
-  application.stage.addChild(room);
+room.addRoomObject(avatar);
 
-  createButton("Turn", () => {
-    avatar.direction = (avatar.direction + 1) % 8;
-  });
+application.stage.addChild(room);
 
-  createButton("Walk", () => {
-    avatar.action = "wlk";
-  });
+createButton("Turn", () => {
+  avatar.direction = (avatar.direction + 1) % 8;
+});
 
-  createButton("Lay", () => {
-    avatar.action = "lay";
-  });
+createButton("Walk", () => {
+  avatar.action = "wlk";
+});
 
-  createButton("Sit", () => {
-    avatar.action = "sit";
-  });
+createButton("Lay", () => {
+  avatar.action = "lay";
+});
 
-  createButton("Wave", () => {
-    avatar.waving = !avatar.waving;
-  });
-}
+createButton("Sit", () => {
+  avatar.action = "sit";
+});
+
+createButton("Wave", () => {
+  avatar.waving = !avatar.waving;
+});
 
 function createButton(label: string, onClick: () => void) {
   const button = document.createElement("button");

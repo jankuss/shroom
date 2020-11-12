@@ -8,6 +8,11 @@ import { IRoomObject } from "../../IRoomObject";
 import { getFloorMatrix, getLeftMatrix, getRightMatrix } from "./matrixes";
 import { RoomObject } from "../../RoomObject";
 import { ITexturable } from "../../ITextureable";
+import { getZOrder } from "../../util/getZOrder";
+import {
+  getTilePositionForTile,
+  TilePositionForTile,
+} from "./util/getTilePositionForTile";
 
 interface Props {
   geometry: IRoomGeometry;
@@ -20,15 +25,12 @@ interface Props {
   texture?: PIXI.Texture;
 }
 
-const positioning = 8;
-
-const texture = PIXI.Texture.from(TileAsset);
-
 export class Stair extends RoomObject implements ITexturable {
   private sprites: PIXI.DisplayObject[] = [];
   private container: PIXI.Container | undefined;
 
   private _texture: PIXI.Texture | undefined;
+  private _color: string | undefined;
 
   constructor(private props: Props) {
     super();
@@ -45,6 +47,15 @@ export class Stair extends RoomObject implements ITexturable {
     this.updateSprites();
   }
 
+  get color() {
+    return this._color;
+  }
+
+  set color(value) {
+    this._color = value;
+    this.updateSprites();
+  }
+
   updateSprites() {
     if (!this.mounted) return;
 
@@ -52,21 +63,19 @@ export class Stair extends RoomObject implements ITexturable {
     this.container = new PIXI.Container();
 
     const { roomX, roomY, roomZ, tileHeight, color, direction } = this.props;
+    this.container.zIndex = getZOrder(roomX, roomY, roomZ);
 
     const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
-
-    const xEven = roomX % 2 === 0;
-    const yEven = roomY % 2 === 0;
 
     for (let i = 0; i < 4; i++) {
       const props = {
         x,
         y,
-        xEven,
-        yEven,
         tileHeight,
         index: 3 - i,
-        color,
+        color: this.color ?? color,
+        tilePositions: getTilePositionForTile(roomX, roomY),
+        texture: this.texture ?? PIXI.Texture.WHITE,
       };
 
       if (direction === 0) {
@@ -99,28 +108,32 @@ interface StairBoxProps {
   y: number;
   index: number;
   tileHeight: number;
-  xEven: boolean;
-  yEven: boolean;
   color: string;
+  tilePositions: TilePositionForTile;
+  texture: PIXI.Texture;
 }
 
 function createStairBoxDirection0({
   x,
   y,
   tileHeight,
-  xEven,
-  yEven,
   index,
   color,
+  tilePositions,
+  texture,
 }: StairBoxProps): PIXI.DisplayObject[] {
   const baseX = x + stairBase * index;
   const baseY = y - stairBase * index * 1.5;
 
   const { tileTint, borderRightTint, borderLeftTint } = getTileColors(color);
 
-  function createSprite(matrix: PIXI.Matrix, tint: number) {
+  function createSprite(
+    matrix: PIXI.Matrix,
+    tint: number,
+    tilePosition: PIXI.Point
+  ) {
     const tile = new PIXI.TilingSprite(texture);
-    tile.tilePosition = new PIXI.Point(0, 0);
+    tile.tilePosition = tilePosition;
     tile.transform.setFromMatrix(matrix);
 
     tile.tint = tint;
@@ -128,20 +141,26 @@ function createStairBoxDirection0({
     return tile;
   }
 
-  const tile = createSprite(getFloorMatrix(baseX, baseY), tileTint);
+  const tile = createSprite(
+    getFloorMatrix(baseX, baseY),
+    tileTint,
+    tilePositions.top
+  );
   tile.width = 32;
   tile.height = tileHeight;
 
   const borderLeft = createSprite(
     getLeftMatrix(baseX, baseY, { width: 32, height: tileHeight }),
-    borderLeftTint
+    borderLeftTint,
+    tilePositions.left
   );
   borderLeft.width = 32;
   borderLeft.height = tileHeight;
 
   const borderRight = createSprite(
     getRightMatrix(baseX, baseY, { width: 8, height: tileHeight }),
-    borderRightTint
+    borderRightTint,
+    tilePositions.right
   );
 
   borderRight.width = 8;
@@ -154,10 +173,9 @@ export function createStairBoxDirection2({
   x,
   y,
   tileHeight,
-  xEven,
-  yEven,
   index,
   color,
+  texture,
 }: StairBoxProps) {
   const baseX = x - stairBase * index;
   const baseY = y - stairBase * index * 1.5;
