@@ -289,7 +289,7 @@ export class Wall extends RoomObject {
     } = this.props;
 
     const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
-    const wallColor = this.texture != null ? "#ffffff" : this._color ?? color;
+    const wallColor = this._color ?? color;
 
     const { leftTint, rightTint, topTint } = getWallColors(wallColor);
     this.container.zIndex = getZOrder(roomX, roomY, roomZ) - 1;

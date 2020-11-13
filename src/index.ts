@@ -7,7 +7,8 @@ import { AnimationTicker } from "./AnimationTicker";
 import TileAsset from "./assets/tile.png";
 import TileAsset2 from "./assets/tile2.png";
 import WallAsset from "./assets/wall.png";
-import Wall2Asset from "./assets/wall2.png";
+import WallAsset2 from "./assets/wall2.png";
+import WallAsset3 from "./assets/wall3.png";
 import { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
 import { Room } from "./objects/room/Room";
 import { WallFurniture } from "./objects/furniture/WallFurniture";
@@ -37,13 +38,13 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 const room = Room.create({
   application,
   tilemap: `
-      11111xxxxx
-      11111xxxxx
-      11111xxxxx
-      11111xxxxx
-      11111xxxxx
-      11111xxxxx
-      00000xxxxx
+      1111111111
+      1111111111
+      11111x1111
+      11111x0000
+      11111x0000
+      11111x0000
+      00000x0000
       0000000000
       0000000000
       0000000000
@@ -51,8 +52,8 @@ const room = Room.create({
     `,
 });
 
-room.wallTexture = loadRoomTexture(WallAsset);
-room.wallColor = "#ffffff";
+room.wallTexture = loadRoomTexture(WallAsset3);
+room.wallColor = "#55ffff";
 
 room.floorTexture = loadRoomTexture(TileAsset);
 
