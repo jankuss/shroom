@@ -46,12 +46,13 @@ async function main() {
   const furniFolder = path.join(libraryFolder, "hof_furni");
   await fs.mkdir(furniFolder, { recursive: true });
 
-  await dumpFurniFromFurniData(hofFurniUrl, furniData, furniFolder);
+  await dumpFurniFromFurniData(hofFurniUrl, furniData, furniFolder, () => {});
 
   await dumpFigureLibraries(
     makeAbsolute(gordonUrl),
     figureMapString,
-    figureFolder
+    figureFolder,
+    () => {}
   );
 }
 

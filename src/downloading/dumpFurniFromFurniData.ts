@@ -1,11 +1,13 @@
 import Bluebird = require("bluebird");
 import { parseStringPromise } from "xml2js";
 import { dumpFurni } from "./dumpFurni";
+import { Action } from "./state";
 
 export async function dumpFurniFromFurniData(
   dcrUrl: string,
   furniData: string,
-  folder: string
+  folder: string,
+  dispatch: (action: Action) => void
 ) {
   const data = await parseStringPromise(furniData);
 
@@ -13,20 +15,31 @@ export async function dumpFurniFromFurniData(
   const wallTypes: any[] = data.furnidata.wallitemtypes[0].furnitype;
 
   const usedIds = new Set<string>();
+  const allFurni = [...wallTypes, ...furniTypes];
+
+  dispatch({ type: "FURNI_ASSETS_COUNT", payload: allFurni.length });
 
   await Bluebird.map(
-    [...wallTypes],
+    allFurni,
     async (value) => {
       const name = value["$"].classname.split("*")[0];
 
       if (usedIds.has(name)) return;
       usedIds.add(name);
 
+      const revision = value.revision[0];
       try {
-        await dumpFurni(dcrUrl, value.revision[0], name, folder);
-        console.log("Dumped", name);
+        await dumpFurni(dcrUrl, revision, name, folder);
+        dispatch({
+          type: "FURNI_ASSETS_PROGRESS_SUCCESS",
+          payload: { id: name, revision: revision },
+        });
       } catch (err) {
-        console.log(`Error dumping ${value.revision[0]}/${name}`);
+        //console.log(`Error dumping ${value.revision[0]}/${name}`);
+        dispatch({
+          type: "FURNI_ASSETS_PROGRESS_ERROR",
+          payload: { id: name, revision: revision },
+        });
       }
     },
     { concurrency: 30 }

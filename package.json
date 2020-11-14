@@ -15,10 +15,11 @@
     "@types/bluebird": "^3.5.33",
     "@types/jest": "^26.0.15",
     "@types/node-fetch": "^2.5.7",
+    "@types/react": "^16.9.56",
     "@types/xml2js": "^0.4.5",
     "babel-loader": "^8.1.0",
     "copy-webpack-plugin": "^6.2.1",
-    "docusaurus": "^2.0.0-alpha.67",
+    "docusaurus": "^2.0.0-alpha.66",
     "file-loader": "^6.1.1",
     "fork-ts-checker-webpack-plugin": "^5.2.0",
     "html-webpack-plugin": "^4.5.0",
@@ -32,14 +33,17 @@
   },
   "dependencies": {
     "bluebird": "^3.7.2",
+    "chalk": "^4.1.0",
+    "ink": "^3.0.8",
     "node-fetch": "^2.6.1",
     "pixi-heaven": "^0.2.2",
     "pixi.js": "^5.3.3",
+    "react": "^17.0.1",
     "timers-browserify": "^2.0.11",
     "xml2js": "^0.4.23"
   },
   "scripts": {
     "dev": "webpack serve",
-    "dump": "yarn ts-node src/downloading/index.ts"
+    "dump": "yarn ts-node src/downloading/cli.tsx"
   }
 }
