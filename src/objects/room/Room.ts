@@ -1,8 +1,10 @@
 import * as PIXI from "pixi.js";
 import { AnimationTicker } from "../../AnimationTicker";
+import { HitDetection } from "../../HitDetection";
 import { IAnimationTicker } from "../../IAnimationTicker";
 import { IAvatarLoader } from "../../IAvatarLoader";
 import { IFurnitureLoader } from "../../IFurnitureLoader";
+import { IHitDetection } from "../../IHitDetection";
 import { IRoomGeometry } from "../../IRoomGeometry";
 import { IRoomObject } from "../../IRoomObject";
 import { IRoomObjectContainer } from "../../IRoomObjectContainer";
@@ -26,6 +28,7 @@ function createSimpleConfig(
     animationTicker: AnimationTicker.create(application),
     avatarLoader: AvatarLoader.create(resourcePath),
     furnitureLoader: FurnitureLoader.create(resourcePath),
+    hitDetection: HitDetection.create(application),
   };
 }
 
@@ -33,6 +36,7 @@ interface Dependencies {
   animationTicker: IAnimationTicker;
   avatarLoader: IAvatarLoader;
   furnitureLoader: IFurnitureLoader;
+  hitDetection: IHitDetection;
 }
 
 type TileMap = TileType[][] | string;
@@ -60,6 +64,7 @@ export class Room
   private animationTicker: IAnimationTicker;
   private avatarLoader: IAvatarLoader;
   private furnitureLoader: IFurnitureLoader;
+  private hitDetection: IHitDetection;
 
   private walls: Wall[] = [];
   private floor: (Tile | Stair)[] = [];
@@ -116,6 +121,7 @@ export class Room
     avatarLoader,
     furnitureLoader,
     tilemap,
+    hitDetection,
   }: {
     tilemap: TileMap;
   } & Dependencies) {
@@ -141,6 +147,7 @@ export class Room
     this.animationTicker = animationTicker;
     this.furnitureLoader = furnitureLoader;
     this.avatarLoader = avatarLoader;
+    this.hitDetection = hitDetection;
 
     this.addChild(this.visualization);
   }
@@ -196,6 +203,7 @@ export class Room
       furnitureLoader: this.furnitureLoader,
       roomObjectContainer: this,
       avatarLoader: this.avatarLoader,
+      hitDetection: this.hitDetection,
     });
 
     this.roomObjects.push(object);

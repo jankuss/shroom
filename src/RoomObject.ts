@@ -34,6 +34,10 @@ export abstract class RoomObject implements IRoomObject {
     return this.getRoomContext().avatarLoader;
   }
 
+  protected get hitDetection() {
+    return this.getRoomContext().hitDetection;
+  }
+
   private getRoomContext(): IRoomContext {
     if (this.context == null) throw new Error("Invalid context");
 

@@ -184,10 +184,10 @@ render(
   <App
     externalVariablesUrl="https://www.habbo.com/gamedata/external_variables/29fd8c5448063b72a92ecdc258c6395c61dcd91f"
     steps={{
-      figureData: false,
-      figureMap: false,
-      furniData: false,
-      figureAssets: true,
+      figureData: true,
+      figureMap: true,
+      furniData: true,
+      figureAssets: false,
       furniAssets: true,
     }}
   />

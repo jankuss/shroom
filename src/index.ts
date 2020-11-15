@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 
 import { parseTileMapString } from "./util/parseTileMapString";
-import { Furniture } from "./objects/furniture/Furniture";
+import { FloorFurniture } from "./objects/furniture/FloorFurniture";
 import { AnimationTicker } from "./AnimationTicker";
 
 import TileAsset from "./assets/tile.png";
@@ -9,11 +9,7 @@ import TileAsset2 from "./assets/tile2.png";
 import WallAsset from "./assets/wall.png";
 import WallAsset2 from "./assets/wall2.png";
 import WallAsset3 from "./assets/wall3.png";
-import { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
 import { Room } from "./objects/room/Room";
-import { WallFurniture } from "./objects/furniture/WallFurniture";
-import { AvatarLoader } from "./objects/avatar/AvatarLoader";
-import { createLookServer, loadOffsetMapFromJson } from "./objects/avatar/util";
 import { Avatar } from "./objects/avatar/Avatar";
 import { loadRoomTexture } from "./util/loadRoomTexture";
 
@@ -61,12 +57,13 @@ room.x = application.screen.width / 2 - room.roomWidth / 2;
 room.y = application.screen.height / 2 - room.roomHeight / 2;
 
 room.addRoomObject(
-  new Furniture({
-    type: "throne",
-    direction: 2,
-    roomX: 0,
-    roomY: 0,
-    roomZ: 0,
+  new FloorFurniture({
+    type: "edicehc",
+    direction: 0,
+    roomX: 1,
+    roomY: 1,
+    roomZ: 1,
+    animation: "1",
   })
 );
 
@@ -75,7 +72,7 @@ const avatar = new Avatar({
   direction: 2,
   roomX: 0,
   roomY: 0,
-  roomZ: 0,
+  roomZ: 1,
 });
 
 avatar.action = "std";
@@ -83,19 +80,7 @@ avatar.waving = false;
 avatar.direction = 2;
 avatar.drinking = false;
 
-setTimeout(() => {
-  avatar.walk(1, 0, 0, { direction: 2 });
-  avatar.walk(2, 0, 0, { direction: 2 });
-  avatar.walk(3, 0, 0, { direction: 2 });
-
-  avatar.walk(3, 1, 0, { direction: 4 });
-  avatar.walk(3, 2, 0, { direction: 4 });
-  avatar.walk(3, 3, 0, { direction: 4 });
-
-  avatar.walk(2, 3, 0, { direction: 6 });
-  avatar.walk(1, 3, 0, { direction: 6 });
-  avatar.walk(0, 3, 0, { direction: 6 });
-}, 5000);
+setTimeout(() => {}, 5000);
 
 room.addRoomObject(avatar);
 

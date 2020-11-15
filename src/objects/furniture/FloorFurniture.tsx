@@ -3,8 +3,9 @@ import * as PIXI from "pixi.js";
 import { RoomObject } from "../../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
+import { IFurniture } from "./IFurniture";
 
-export class Furniture extends RoomObject {
+export class FloorFurniture extends RoomObject implements IFurniture {
   private baseFurniture: BaseFurniture;
   private _roomX: number;
   private _roomY: number;

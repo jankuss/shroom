@@ -1,8 +1,9 @@
 import * as PIXI from "pixi.js";
 
 import { RoomObject } from "../../RoomObject";
+import { FurnitureSprite } from "./FurnitureSprite";
 import { DrawPart } from "./util/DrawDefinition";
-import { LoadFurniResult } from "./util/loadFurni";
+import { Hitmap, LoadFurniResult } from "./util/loadFurni";
 import { Asset } from "./util/parseAssets";
 import { Layer } from "./util/visualization/parseLayers";
 
@@ -101,7 +102,7 @@ export class BaseFurniture extends RoomObject {
       const sprite = this.createAssetFromPart(
         part,
         { x: this.x, y: this.y },
-        loadFurniResult.getAsset,
+        loadFurniResult,
         index
       );
 
@@ -150,6 +151,7 @@ export class BaseFurniture extends RoomObject {
   private createSprite(
     asset: Asset,
     layer: Layer | undefined,
+    getHitmap: () => Hitmap,
     {
       x,
       y,
@@ -166,7 +168,11 @@ export class BaseFurniture extends RoomObject {
       mask?: boolean;
     }
   ): PIXI.Sprite {
-    const sprite = new PIXI.Sprite();
+    const sprite = new FurnitureSprite(
+      this.hitDetection,
+      getHitmap,
+      asset.flipH
+    );
 
     const scaleX = asset.flipH ? -1 : 1;
     sprite.x = x + (32 - asset.x * scaleX);
@@ -202,7 +208,7 @@ export class BaseFurniture extends RoomObject {
   private createAssetFromPart(
     { asset, shadow, tint, layer, z, assets, mask }: DrawPart,
     { x, y }: { x: number; y: number },
-    getAsset: (name: string) => PIXI.Texture,
+    loadFurniResult: LoadFurniResult,
     index: number
   ):
     | { kind: "simple" | "mask"; sprite: PIXI.Sprite }
@@ -214,7 +220,10 @@ export class BaseFurniture extends RoomObject {
     const getAssetTextureName = (asset: Asset) => asset.source ?? asset.name;
 
     const getAssetTexture = (asset: Asset) =>
-      getAsset(asset.source ?? asset.name);
+      loadFurniResult.getAsset(getAssetTextureName(asset));
+
+    const getAssetHitMap = (asset: Asset) =>
+      loadFurniResult.getHitMap(getAssetTextureName(asset));
 
     const zIndex = this.zIndex + (z ?? 0) + index * 0.01;
 
@@ -227,14 +236,19 @@ export class BaseFurniture extends RoomObject {
         assets != null && assets.length === 1 ? assets[0] : asset;
 
       if (actualAsset != null) {
-        const sprite = this.createSprite(actualAsset, layer, {
-          x,
-          y,
-          zIndex,
-          shadow,
-          tint,
-          mask,
-        });
+        const sprite = this.createSprite(
+          actualAsset,
+          layer,
+          () => getAssetHitMap(actualAsset),
+          {
+            x,
+            y,
+            zIndex,
+            shadow,
+            tint,
+            mask,
+          }
+        );
         sprite.texture = getAssetTexture(actualAsset);
 
         if (mask != null && mask) {
@@ -250,16 +264,22 @@ export class BaseFurniture extends RoomObject {
     const sprites = new Map<string, PIXI.Sprite>();
 
     assets.forEach((spriteFrame) => {
+      const hitmap = getAssetHitMap(spriteFrame);
       const name = getAssetTextureName(spriteFrame);
       if (sprites.has(name)) return;
 
-      const sprite = this.createSprite(spriteFrame, layer, {
-        x,
-        y,
-        zIndex,
-        tint,
-        shadow,
-      });
+      const sprite = this.createSprite(
+        spriteFrame,
+        layer,
+        () => getAssetHitMap(spriteFrame),
+        {
+          x,
+          y,
+          zIndex,
+          tint,
+          shadow,
+        }
+      );
 
       sprite.texture = getAssetTexture(spriteFrame);
       sprite.visible = false;
