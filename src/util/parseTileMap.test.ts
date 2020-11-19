@@ -1,5 +1,5 @@
 import { parseTileMap, ParsedTileType } from "./parseTileMap";
-
+/*
 function wall(
   kind: "colWall" | "rowWall" | "outerCorner" | "innerCorner"
 ): ParsedTileType {
@@ -134,4 +134,4 @@ test("handles stairs", () => {
     [R, S0, S0, S0],
     [R, T, T, T],
   ]);
-});
+});*/

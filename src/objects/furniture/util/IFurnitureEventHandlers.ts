@@ -1,4 +1,4 @@
-import { HitEvent } from "../../../IHitDetection";
+import { HitEvent } from "../../../interfaces/IHitDetection";
 
 export interface IFurnitureEventHandlers {
   onClick?: (event: HitEvent) => void;

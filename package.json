@@ -1,7 +1,7 @@
 {
-  "name": "shroom-rendering",
+  "name": "shroom",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.12.3",
