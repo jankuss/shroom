@@ -1,4 +1,3 @@
-import { AvatarLoaderResult, IAvatarLoader } from "../../IAvatarLoader";
 import { createLookServer, loadOffsetMapFromJson, LookServer } from "./util";
 import { avatarFrames, avatarFramesObject } from "./util/avatarFrames";
 import { LookOptions } from "./util/createLookServer";
@@ -9,6 +8,10 @@ import {
 } from "./util/getAvatarDrawDefinition";
 import { parseLookString } from "./util/parseLookString";
 import * as PIXI from "pixi.js";
+import {
+  AvatarLoaderResult,
+  IAvatarLoader,
+} from "../../interfaces/IAvatarLoader";
 
 interface Options {
   resolveImage: (id: string) => Promise<PIXI.Texture>;

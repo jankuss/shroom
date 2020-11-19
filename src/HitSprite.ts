@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-
 import {
   HitDetectionElement,
   HitDetectionNode,
@@ -7,7 +6,8 @@ import {
   HitEventType,
   IHitDetection,
   Rect,
-} from "./IHitDetection";
+} from "./interfaces/IHitDetection";
+
 import { Hitmap } from "./objects/furniture/util/loadFurni";
 
 export type HitEventHandler = (event: HitEvent) => void;

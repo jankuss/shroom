@@ -1,15 +1,11 @@
-import { RoomObject } from "../../RoomObject";
+import { RoomObject } from "../RoomObject";
 import * as PIXI from "pixi.js";
-import { AvatarLoaderResult } from "../../IAvatarLoader";
 import {
   AvatarDrawDefinition,
   AvatarDrawPart,
-  PrimaryAction,
 } from "./util/getAvatarDrawDefinition";
-import { getZOrder } from "../../util/getZOrder";
-import { avatarFrames } from "./util/avatarFrames";
 import { LookOptions } from "./util/createLookServer";
-import { DrawDefinition } from "../furniture/util";
+import { AvatarLoaderResult } from "../../interfaces/IAvatarLoader";
 
 interface Options {
   look: LookOptions;

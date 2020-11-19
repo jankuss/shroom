@@ -1,4 +1,10 @@
-import { IAnimationTicker } from "./IAnimationTicker";
+import { IAnimationTicker } from "./interfaces/IAnimationTicker";
+
+const FPS = 24;
+
+export function getFrameCountFromDuration(duration: number) {
+  return Math.floor(duration / FPS);
+}
 
 export class AnimationTicker implements IAnimationTicker {
   private frame: number = 0;

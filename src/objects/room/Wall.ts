@@ -1,10 +1,10 @@
 import * as PIXI from "pixi.js";
-import { IRoomGeometry } from "../../IRoomGeometry";
-import { RoomObject } from "../../RoomObject";
+import { RoomObject } from "../RoomObject";
 
 import WallAsset from "../../assets/wall2.png";
 import { getWallColors } from "./util/getTileColors";
 import { getZOrder } from "../../util/getZOrder";
+import { IRoomGeometry } from "../../interfaces/IRoomGeometry";
 
 interface Props {
   geometry: IRoomGeometry;

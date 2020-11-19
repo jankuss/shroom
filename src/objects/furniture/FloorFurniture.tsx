@@ -1,13 +1,16 @@
 import * as PIXI from "pixi.js";
 import { HitEventHandler } from "../../HitSprite";
 
-import { RoomObject } from "../../RoomObject";
+import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
 import { IFurniture } from "./IFurniture";
+import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 
 export class FloorFurniture extends RoomObject implements IFurniture {
   private baseFurniture: BaseFurniture;
+  private movementAnimation: ObjectAnimation | undefined;
+
   private _roomX: number;
   private _roomY: number;
   private _roomZ: number;
@@ -128,6 +131,12 @@ export class FloorFurniture extends RoomObject implements IFurniture {
 
   registered(): void {
     this.roomObjectContainer.addRoomObject(this.baseFurniture);
+    this.movementAnimation = new ObjectAnimation(this.animationTicker, {
+      onStart: () => {},
+      onStop: () => {},
+      onUpdatePosition: (position, direction) => {},
+    });
+
     this.updatePosition();
   }
 }

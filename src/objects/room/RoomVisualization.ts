@@ -1,11 +1,11 @@
 import * as PIXI from "pixi.js";
-
-import { IRoomVisualization } from "../../IRoomVisualization";
+import { IRoomVisualization } from "../../interfaces/IRoomVisualization";
 
 export class RoomVisualization
   extends PIXI.Container
   implements IRoomVisualization {
   private container: PIXI.Container = new PIXI.Container();
+  private cursorLayer: PIXI.Container = new PIXI.Container();
   private plane: PIXI.Container = new PIXI.Container();
 
   constructor() {
@@ -16,6 +16,11 @@ export class RoomVisualization
 
     this.addChild(this.plane);
     this.addChild(this.container);
+    this.addChild(this.cursorLayer);
+  }
+
+  addCursorChild(element: PIXI.DisplayObject): void {
+    this.cursorLayer.addChild(element);
   }
 
   addMask(element: PIXI.Sprite): void {}

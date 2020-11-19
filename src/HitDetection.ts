@@ -3,7 +3,7 @@ import {
   HitDetectionNode,
   HitEvent,
   IHitDetection,
-} from "./IHitDetection";
+} from "./interfaces/IHitDetection";
 
 export class HitDetection implements IHitDetection {
   private counter: number = 0;

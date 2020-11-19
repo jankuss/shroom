@@ -1,4 +1,4 @@
-import { IFurnitureLoader } from "../../IFurnitureLoader";
+import { IFurnitureLoader } from "../../interfaces/IFurnitureLoader";
 import { loadFurni, LoadFurniResult } from "./util/loadFurni";
 
 export class FurnitureLoader implements IFurnitureLoader {

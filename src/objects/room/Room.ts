@@ -1,14 +1,14 @@
 import * as PIXI from "pixi.js";
 import { AnimationTicker } from "../../AnimationTicker";
 import { HitDetection } from "../../HitDetection";
-import { IAnimationTicker } from "../../IAnimationTicker";
-import { IAvatarLoader } from "../../IAvatarLoader";
-import { IFurnitureLoader } from "../../IFurnitureLoader";
-import { IHitDetection } from "../../IHitDetection";
-import { IRoomGeometry } from "../../IRoomGeometry";
-import { IRoomObject } from "../../IRoomObject";
-import { IRoomObjectContainer } from "../../IRoomObjectContainer";
-import { ITexturable } from "../../ITextureable";
+import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
+import { IAvatarLoader } from "../../interfaces/IAvatarLoader";
+import { IFurnitureLoader } from "../../interfaces/IFurnitureLoader";
+import { IHitDetection } from "../../interfaces/IHitDetection";
+import { IRoomGeometry } from "../../interfaces/IRoomGeometry";
+import { IRoomObject } from "../../interfaces/IRoomObject";
+import { IRoomObjectContainer } from "../../interfaces/IRoomObjectContainer";
+import { RoomPosition } from "../../types/RoomPosition";
 import { TileType } from "../../types/TileType";
 import { ParsedTileType, parseTileMap } from "../../util/parseTileMap";
 import { parseTileMapString } from "../../util/parseTileMapString";
@@ -17,6 +17,7 @@ import { FurnitureLoader } from "../furniture/FurnitureLoader";
 import { RoomVisualization } from "./RoomVisualization";
 import { Stair } from "./Stair";
 import { Tile } from "./Tile";
+import { TileCursor } from "./TileCursor";
 import { getTileMapBounds } from "./util/getTileMapBounds";
 import { Wall } from "./Wall";
 
@@ -79,6 +80,16 @@ export class Room
 
   private _currentWallTexture: PIXI.Texture | undefined;
   private _currentFloorTexture: PIXI.Texture | undefined;
+
+  private _onTileClick: ((position: RoomPosition) => void) | undefined;
+
+  get onTileClick() {
+    return this._onTileClick;
+  }
+
+  set onTileClick(value) {
+    this._onTileClick = value;
+  }
 
   get wallTexture() {
     return this._wallTexture;
@@ -238,6 +249,14 @@ export class Room
     this.addRoomObject(tile);
   }
 
+  private registerTileCursor(position: RoomPosition) {
+    this.addRoomObject(
+      new TileCursor(position, (position) => {
+        this.onTileClick && this.onTileClick(position);
+      })
+    );
+  }
+
   private initTiles(tiles: ParsedTileType[][]) {
     for (let y = 0; y < tiles.length; y++) {
       for (let x = 0; x < tiles[y].length; x++) {
@@ -255,6 +274,12 @@ export class Room
               color: this.floorColor ?? this.tileColor,
             })
           );
+
+          this.registerTileCursor({
+            roomX: x - this.wallOffsets.x,
+            roomY: y - this.wallOffsets.y,
+            roomZ: tile.z,
+          });
         }
 
         const direction = getWallDirection(tile);
@@ -317,6 +342,12 @@ export class Room
               direction: tile.kind,
             })
           );
+
+          this.registerTileCursor({
+            roomX: x - this.wallOffsets.x,
+            roomY: y - this.wallOffsets.y,
+            roomZ: tile.z,
+          });
         }
       }
     }

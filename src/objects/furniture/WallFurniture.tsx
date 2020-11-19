@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 
-import { RoomObject } from "../../RoomObject";
+import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
 import { IFurniture } from "./IFurniture";

@@ -48,6 +48,8 @@ const room = Room.create({
     `,
 });
 
+room.onTileClick = (position) => console.log(position);
+
 room.wallTexture = loadRoomTexture(WallAsset3);
 room.wallColor = "#55ffff";
 

@@ -1,12 +1,12 @@
 import * as PIXI from "pixi.js";
-import { IRoomGeometry } from "../../IRoomGeometry";
-import { RoomObject } from "../../RoomObject";
-import TileAsset from "../../assets/tile2.png";
+
+import { RoomObject } from "../RoomObject";
 import { getFloorMatrix, getLeftMatrix, getRightMatrix } from "./matrixes";
 import { getTileColors } from "./util/getTileColors";
 import { getZOrder } from "../../util/getZOrder";
-import { ITexturable } from "../../ITextureable";
 import { getTilePositionForTile } from "./util/getTilePositionForTile";
+import { IRoomGeometry } from "../../interfaces/IRoomGeometry";
+import { ITexturable } from "../../interfaces/ITextureable";
 
 interface Props {
   geometry: IRoomGeometry;

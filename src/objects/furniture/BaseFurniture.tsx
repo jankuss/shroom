@@ -1,8 +1,8 @@
 import * as PIXI from "pixi.js";
 import { HitEventHandler, HitSprite } from "../../HitSprite";
-import { HitEvent } from "../../IHitDetection";
+import { HitEvent } from "../../interfaces/IHitDetection";
 
-import { RoomObject } from "../../RoomObject";
+import { RoomObject } from "../RoomObject";
 import { DrawPart } from "./util/DrawDefinition";
 import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
 import { Hitmap, LoadFurniResult } from "./util/loadFurni";
@@ -101,6 +101,7 @@ export class BaseFurniture
     this.unknownSprite = new PIXI.Sprite(unknownTexture);
     this.unknownSprite.x = this.x;
     this.unknownSprite.y = this.y - 32;
+    this.unknownSprite.zIndex = this.zIndex;
 
     this.visualization.addContainerChild(this.unknownSprite);
     this.sprites.push(this.unknownSprite);
