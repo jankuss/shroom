@@ -1,5 +1,3 @@
-import * as PIXI from "pixi.js";
-
 import {
   HitDetectionElement,
   HitDetectionNode,
@@ -7,14 +5,12 @@ import {
   HitEventType,
   IHitDetection,
   Rect,
-} from "../../IHitDetection";
-import { Hitmap } from "./util/loadFurni";
+} from "./IHitDetection";
+import { Hitmap } from "./objects/furniture/util/loadFurni";
 
-type HitEventHandler = (event: HitEvent) => void;
+export type HitEventHandler = (event: HitEvent) => void;
 
-export class FurnitureSprite
-  extends PIXI.Sprite
-  implements HitDetectionElement {
+export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
   private hitDetectionNode: HitDetectionNode | undefined;
 
   private _handlers = new Map<HitEventType, Set<HitEventHandler>>();
@@ -22,7 +18,8 @@ export class FurnitureSprite
   constructor(
     private hitDetection: IHitDetection,
     private getHitmap: () => Hitmap,
-    private mirrored: boolean
+    private mirrored: boolean,
+    private tag?: string
   ) {
     super();
 
@@ -36,7 +33,7 @@ export class FurnitureSprite
   trigger(type: HitEventType, event: HitEvent): void {
     const handlers = this._handlers.get(type);
 
-    handlers?.forEach((handler) => handler(event));
+    handlers?.forEach((handler) => handler({ ...event, tag: this.tag }));
   }
 
   addEventListener(type: HitEventType, handler: HitEventHandler) {
@@ -58,8 +55,6 @@ export class FurnitureSprite
   }
 
   getHitBox(): Rect {
-    console.log(this.worldTransform);
-
     if (this.mirrored) {
       return {
         x: this.worldTransform.tx - this.texture.width,
@@ -77,10 +72,6 @@ export class FurnitureSprite
       height: this.texture.height,
       zIndex: this.zIndex,
     };
-  }
-
-  triggerClick(event: HitEvent): void {
-    event.stopPropagation();
   }
 
   hits(x: number, y: number): boolean {

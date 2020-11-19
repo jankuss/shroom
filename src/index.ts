@@ -56,16 +56,23 @@ room.floorTexture = loadRoomTexture(TileAsset);
 room.x = application.screen.width / 2 - room.roomWidth / 2;
 room.y = application.screen.height / 2 - room.roomHeight / 2;
 
-room.addRoomObject(
-  new FloorFurniture({
-    type: "edicehc",
-    direction: 0,
-    roomX: 1,
-    roomY: 1,
-    roomZ: 1,
-    animation: "1",
-  })
-);
+const furni = new FloorFurniture({
+  type: "edicehc",
+  direction: 0,
+  roomX: 1,
+  roomY: 1,
+  roomZ: 1,
+  animation: "1",
+});
+
+let rolling = false;
+
+furni.onDoubleClick = (event) => {
+  rolling = !rolling;
+  furni.animation = rolling ? "-1" : "0";
+};
+
+room.addRoomObject(furni);
 
 const avatar = new Avatar({
   look: "hd-605-2.hr-3012-45.ch-645-109.lg-720-63.sh-725-92.wa-2001-62",

@@ -1,15 +1,19 @@
 import * as PIXI from "pixi.js";
+import { HitEventHandler, HitSprite } from "../../HitSprite";
+import { HitEvent } from "../../IHitDetection";
 
 import { RoomObject } from "../../RoomObject";
-import { FurnitureSprite } from "./FurnitureSprite";
 import { DrawPart } from "./util/DrawDefinition";
+import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
 import { Hitmap, LoadFurniResult } from "./util/loadFurni";
 import { Asset } from "./util/parseAssets";
 import { Layer } from "./util/visualization/parseLayers";
 
 const unknownTexture = PIXI.Texture.from("./placeholder.png");
 
-export class BaseFurniture extends RoomObject {
+export class BaseFurniture
+  extends RoomObject
+  implements IFurnitureEventHandlers {
   private sprites: PIXI.DisplayObject[] = [];
   private loadFurniResult: LoadFurniResult | undefined;
   private unknownSprite: PIXI.Sprite | undefined;
@@ -17,6 +21,30 @@ export class BaseFurniture extends RoomObject {
   private x: number = 0;
   private y: number = 0;
   private zIndex: number = 0;
+
+  private _onClick: HitEventHandler | undefined;
+  private _onDoubleClick: HitEventHandler | undefined;
+
+  private _doubleClickInfo?: {
+    initialEvent: HitEvent;
+    timeout: number;
+  };
+
+  public get onClick() {
+    return this._onClick;
+  }
+
+  public set onClick(value) {
+    this._onClick = value;
+  }
+
+  public get onDoubleClick() {
+    return this._onDoubleClick;
+  }
+
+  public set onDoubleClick(value) {
+    this._onDoubleClick = value;
+  }
 
   private animatedSprites: {
     sprites: Map<string, PIXI.Sprite>;
@@ -148,6 +176,33 @@ export class BaseFurniture extends RoomObject {
     });
   }
 
+  private resetDoubleClick() {
+    if (this._doubleClickInfo == null) return;
+
+    clearTimeout(this._doubleClickInfo.timeout);
+    this._doubleClickInfo = undefined;
+  }
+
+  private startDoubleClick(event: HitEvent) {
+    this._doubleClickInfo = {
+      initialEvent: event,
+      timeout: window.setTimeout(() => this.resetDoubleClick(), 350),
+    };
+  }
+
+  private _handleSpriteClick(event: HitEvent) {
+    event.stopPropagation();
+
+    if (this._doubleClickInfo == null) {
+      this.onClick && this.onClick(event);
+      this.startDoubleClick(event);
+    } else {
+      this.onDoubleClick &&
+        this.onDoubleClick(this._doubleClickInfo.initialEvent);
+      this.resetDoubleClick();
+    }
+  }
+
   private createSprite(
     asset: Asset,
     layer: Layer | undefined,
@@ -168,11 +223,14 @@ export class BaseFurniture extends RoomObject {
       mask?: boolean;
     }
   ): PIXI.Sprite {
-    const sprite = new FurnitureSprite(
+    const sprite = new HitSprite(
       this.hitDetection,
       getHitmap,
-      asset.flipH
+      asset.flipH,
+      layer?.tag
     );
+
+    sprite.addEventListener("click", (event) => this._handleSpriteClick(event));
 
     const scaleX = asset.flipH ? -1 : 1;
     sprite.x = x + (32 - asset.x * scaleX);

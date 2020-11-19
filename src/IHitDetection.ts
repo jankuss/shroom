@@ -10,6 +10,7 @@ export type HitEventType = "click";
 
 export interface HitEvent {
   stopPropagation(): void;
+  tag?: string;
 }
 
 export interface HitDetectionElement {

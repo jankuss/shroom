@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { HitEventHandler } from "../../HitSprite";
 
 import { RoomObject } from "../../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
@@ -12,6 +13,27 @@ export class FloorFurniture extends RoomObject implements IFurniture {
   private _roomZ: number;
   private _direction: number;
   private _animation?: string;
+
+  private _onClick: HitEventHandler | undefined;
+  private _onDoubleClick: HitEventHandler | undefined;
+
+  public get onClick() {
+    return this._onClick;
+  }
+
+  public set onClick(value) {
+    this._onClick = value;
+    this.baseFurniture.onClick = this.onClick;
+  }
+
+  public get onDoubleClick() {
+    return this._onDoubleClick;
+  }
+
+  public set onDoubleClick(value) {
+    this._onDoubleClick = value;
+    this.baseFurniture.onDoubleClick = this.onDoubleClick;
+  }
 
   constructor(options: {
     roomX: number;
