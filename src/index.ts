@@ -4,3 +4,4 @@ export { FloorFurniture } from "./objects/furniture/FloorFurniture";
 export { WallFurniture } from "./objects/furniture/WallFurniture";
 export { Room } from "./objects/room/Room";
 export { loadRoomTexture } from "./util/loadRoomTexture";
+export { parseTileMapString } from "./util/parseTileMapString";

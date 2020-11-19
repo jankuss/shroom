@@ -188,9 +188,10 @@ export class Avatar extends RoomObject {
     if (this.cancelAnimation != null) return;
 
     this.frame = 0;
+    const start = this.animationTicker.current();
 
     this.cancelAnimation = this.animationTicker.subscribe((value) => {
-      this.frame++;
+      this.frame = value - start;
       this.updateAvatarSprites();
     });
   }

@@ -10,6 +10,27 @@ const points = {
   p4: { x: 32, y: 32 },
 };
 
+function drawBorder(
+  graphics: PIXI.Graphics,
+  color: number,
+  alpha = 1,
+  offsetY: number
+) {
+  graphics.beginFill(color, alpha);
+  graphics.moveTo(points.p1.x, points.p1.y + offsetY);
+  graphics.lineTo(points.p2.x, points.p2.y + offsetY);
+  graphics.lineTo(points.p3.x, points.p3.y + offsetY);
+  graphics.lineTo(points.p4.x, points.p4.y + offsetY);
+  graphics.endFill();
+
+  graphics.beginHole();
+  graphics.moveTo(points.p1.x + 8, points.p1.y + offsetY);
+  graphics.lineTo(points.p2.x, points.p2.y + 4 + offsetY);
+  graphics.lineTo(points.p3.x - 8, points.p3.y + offsetY);
+  graphics.lineTo(points.p4.x, points.p4.y - 4 + offsetY);
+  graphics.endHole();
+}
+
 export class TileCursor extends RoomObject {
   private _roomX: number;
   private _roomY: number;
@@ -68,19 +89,8 @@ export class TileCursor extends RoomObject {
     graphics.clear();
 
     if (this.hover) {
-      graphics.beginFill(0xffffff);
-      graphics.moveTo(points.p1.x, points.p1.y);
-      graphics.lineTo(points.p2.x, points.p2.y);
-      graphics.lineTo(points.p3.x, points.p3.y);
-      graphics.lineTo(points.p4.x, points.p4.y);
-      graphics.endFill();
-
-      graphics.beginHole();
-      graphics.moveTo(points.p1.x + 8, points.p1.y);
-      graphics.lineTo(points.p2.x, points.p2.y + 4);
-      graphics.lineTo(points.p3.x - 8, points.p3.y);
-      graphics.lineTo(points.p4.x, points.p4.y - 4);
-      graphics.endHole();
+      drawBorder(graphics, 0x000000, 0.33, 0);
+      drawBorder(graphics, 0xffffff, 1, -2);
     }
   }
 }

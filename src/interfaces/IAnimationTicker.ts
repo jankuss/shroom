@@ -1,4 +1,4 @@
 export interface IAnimationTicker {
-  subscribe(cb: (frame: number) => void): () => void;
+  subscribe(cb: (frame: number, accurateFrame: number) => void): () => void;
   current(): number;
 }

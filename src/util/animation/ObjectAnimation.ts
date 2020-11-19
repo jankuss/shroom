@@ -59,7 +59,17 @@ export class ObjectAnimation {
       cancel();
     };
 
-    const cancel = this.animationTicker.subscribe(() => {
+    this.callbacks.onUpdatePosition(
+      {
+        roomX: this.current.roomX,
+        roomY: this.current.roomY,
+        roomZ: this.current.roomZ,
+      },
+      direction
+    );
+
+    const start = this.animationTicker.current();
+    const cancel = this.animationTicker.subscribe((value, accurate) => {
       const factor = this.currentFrame / (this.frameDuration - 1);
       const current = this.current;
       const diff = this.diff;
@@ -80,7 +90,7 @@ export class ObjectAnimation {
         return;
       }
 
-      this.currentFrame++;
+      this.currentFrame = accurate - start;
     });
   }
 }

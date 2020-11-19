@@ -22,6 +22,7 @@
     "webpack-cli": "^4.2.0"
   },
   "dependencies": {
+    "easystarjs": "^0.4.4",
     "shroom": "file:../dist"
   },
   "scripts": {

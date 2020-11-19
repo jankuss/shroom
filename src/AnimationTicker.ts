@@ -1,20 +1,20 @@
 import { IAnimationTicker } from "./interfaces/IAnimationTicker";
 
-const FPS = 24;
-
-export function getFrameCountFromDuration(duration: number) {
-  return Math.floor(duration / FPS);
-}
+const ANIM_FPS = 24;
+const TARGET_FPS = 60;
 
 export class AnimationTicker implements IAnimationTicker {
   private frame: number = 0;
 
   private idCounter: number = 0;
-  private subscriptions = new Map<number, (frame: number) => void>();
+  private subscriptions = new Map<
+    number,
+    (frame: number, accurateFrame: number) => void
+  >();
 
   constructor(application: PIXI.Application) {
-    application.ticker.maxFPS = 24;
-    application.ticker.minFPS = 24;
+    application.ticker.maxFPS = TARGET_FPS;
+    application.ticker.minFPS = TARGET_FPS;
     application.ticker.add(() => this.increment());
   }
 
@@ -22,9 +22,18 @@ export class AnimationTicker implements IAnimationTicker {
     return new AnimationTicker(application);
   }
 
+  private getNormalizedFrame(frame: number) {
+    const factor = ANIM_FPS / TARGET_FPS;
+    const calculatedFrame = frame * factor;
+
+    return { rounded: Math.floor(calculatedFrame), pure: calculatedFrame };
+  }
+
   private increment() {
     this.frame++;
-    this.subscriptions.forEach((cb) => cb(this.frame));
+    const data = this.getNormalizedFrame(this.frame);
+
+    this.subscriptions.forEach((cb) => cb(data.rounded, data.pure));
   }
 
   subscribe(cb: (frame: number) => void): () => void {
@@ -35,6 +44,6 @@ export class AnimationTicker implements IAnimationTicker {
   }
 
   current(): number {
-    return this.frame;
+    return this.getNormalizedFrame(this.frame).rounded;
   }
 }
