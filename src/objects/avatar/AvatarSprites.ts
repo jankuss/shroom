@@ -19,11 +19,13 @@ export class AvatarSprites extends RoomObject {
   private currentFrame: number = 0;
   private mirrored: boolean = true;
   private frame: number = 0;
+  private avatarDrawDefinition: AvatarDrawDefinition | undefined;
 
   private lookOptions: LookOptions;
 
   private _x: number = 0;
   private _y: number = 0;
+  private _zIndex: number = 0;
 
   get x() {
     return this._x;
@@ -31,6 +33,7 @@ export class AvatarSprites extends RoomObject {
 
   set x(value) {
     this._x = value;
+    this._positionChanged();
   }
 
   get y() {
@@ -39,6 +42,16 @@ export class AvatarSprites extends RoomObject {
 
   set y(value) {
     this._y = value;
+    this._positionChanged();
+  }
+
+  get zIndex() {
+    return this._zIndex;
+  }
+
+  set zIndex(value) {
+    this._zIndex = value;
+    this._positionChanged();
   }
 
   constructor(private options: Options) {
@@ -46,7 +59,13 @@ export class AvatarSprites extends RoomObject {
 
     this.x = this.options.position.x;
     this.y = this.options.position.y;
+    this._zIndex = options.zIndex;
     this.lookOptions = options.look;
+  }
+
+  private _positionChanged() {
+    if (this.avatarDrawDefinition == null) return;
+    this.updatePosition(this.avatarDrawDefinition);
   }
 
   setLook(options: LookOptions) {
@@ -59,6 +78,7 @@ export class AvatarSprites extends RoomObject {
 
     this.container.x = this.x + definition.offsetX;
     this.container.y = this.y + definition.offsetY;
+    this.container.zIndex = this.zIndex;
   }
 
   setCurrentFrame(globalFrame: number) {
@@ -75,11 +95,11 @@ export class AvatarSprites extends RoomObject {
 
     this.container = new PIXI.Container();
 
-    this.container.zIndex = zIndex;
-
     const definition = this.avatarLoaderResult.getDrawDefinition(
       this.lookOptions
     );
+
+    this.avatarDrawDefinition = definition;
 
     this.mirrored = definition.mirrorHorizontal;
     this.updatePosition(definition);

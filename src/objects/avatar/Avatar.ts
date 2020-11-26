@@ -240,7 +240,7 @@ export class Avatar extends RoomObject {
   }
 
   private calculateZIndex() {
-    return getZOrder(this.roomX, this.roomY, this.roomZ) + 1;
+    return this._getZIndexAtPosition(this.roomX, this.roomY, this.roomZ);
   }
 
   private getDisplayRoomPosition() {
@@ -255,6 +255,10 @@ export class Avatar extends RoomObject {
     };
   }
 
+  private _getZIndexAtPosition(roomX: number, roomY: number, roomZ: number) {
+    return getZOrder(roomX, roomY, roomZ) + 1;
+  }
+
   private updatePosition() {
     if (!this.mounted) return;
 
@@ -263,8 +267,13 @@ export class Avatar extends RoomObject {
     const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
 
     if (this.avatarSprites != null) {
-      this.avatarSprites.x = x;
-      this.avatarSprites.y = y;
+      this.avatarSprites.x = Math.round(x);
+      this.avatarSprites.y = Math.round(y);
+      this.avatarSprites.zIndex = this._getZIndexAtPosition(
+        roomX,
+        roomY,
+        roomZ
+      );
     }
   }
 
@@ -280,6 +289,7 @@ export class Avatar extends RoomObject {
       zIndex: this.calculateZIndex(),
       position: this.calculatePosition(),
     });
+    this.updatePosition();
 
     this.roomObjectContainer.addRoomObject(this.avatarSprites);
     this.walkAnimation = new ObjectAnimation(this.animationTicker, {

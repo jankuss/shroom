@@ -1,5 +1,12 @@
-import { Avatar, Room, parseTileMapString } from "shroom";
+import {
+  Avatar,
+  Room,
+  parseTileMapString,
+  loadRoomTexture,
+  FloorFurniture,
+} from "shroom";
 import EasyStar from "easystarjs";
+import { DiceBehavior } from "./DiceBehavior";
 
 export class ConnectedRoom {
   private room: Room;
@@ -30,18 +37,97 @@ export class ConnectedRoom {
       resourcePath: ".",
     });
 
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 0,
+        roomY: 0,
+        roomZ: 1,
+        direction: 0,
+        type: "edicehc",
+        behaviors: [new DiceBehavior()],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 0,
+        roomY: 0,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 2,
+        roomY: 0,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 4,
+        roomY: 0,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 6,
+        roomY: 0,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 8,
+        roomY: 0,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 0,
+        roomY: 1,
+        roomZ: 1,
+        direction: 0,
+        type: "throne",
+        animation: "0",
+        behaviors: [],
+      })
+    );
+
+    this.room.floorTexture = loadRoomTexture("./tile.png");
+
     this.room.onTileClick = (position) => {
       const easystar = new EasyStar.js();
 
-      console.log(
-        "EasyStar",
-        this.ownAvatar.roomX,
-        this.ownAvatar.roomY,
-        position
-      );
-
       easystar.setGrid(grid);
       easystar.setAcceptableTiles([1, 0]);
+      easystar.enableDiagonals();
 
       easystar.findPath(
         this.ownAvatar.roomX,
@@ -49,14 +135,38 @@ export class ConnectedRoom {
         position.roomX,
         position.roomY,
         (result) => {
+          let currentPosition = {
+            x: this.ownAvatar.roomX,
+            y: this.ownAvatar.roomY,
+          };
+
           result.forEach((position, index) => {
             if (index === 0) return;
 
-            this.ownAvatar.walk(
-              position.x,
-              position.y,
-              Number(tilemap[position.y][position.x])
+            const direction = getAvatarDirectionFromDiff(
+              position.x - currentPosition.x,
+              position.y - currentPosition.y
             );
+
+            const tile = this.room.getTileAtPosition(position.x, position.y);
+
+            if (tile != null) {
+              const getHeight = () => {
+                if (tile.type === "tile") return tile.z;
+                if (tile.type === "stairs") return tile.z + 0.5;
+
+                return 0;
+              };
+
+              this.ownAvatar.walk(position.x, position.y, getHeight(), {
+                direction,
+              });
+
+              currentPosition = {
+                x: position.x,
+                y: position.y,
+              };
+            }
           });
         }
       );
@@ -67,7 +177,7 @@ export class ConnectedRoom {
     this.ownAvatar = new Avatar({
       look: "hd-605-2.hr-3012-45.ch-645-109.lg-720-63.sh-725-92.wa-2001-62",
       direction: 2,
-      roomX: 0,
+      roomX: 1,
       roomY: 0,
       roomZ: 1,
     });
@@ -78,5 +188,43 @@ export class ConnectedRoom {
     this.room.y = application.screen.height / 2 - this.room.roomHeight / 2;
 
     application.stage.addChild(this.room);
+  }
+}
+
+function getAvatarDirectionFromDiff(diffX: number, diffY: number) {
+  const signX = Math.sign(diffX) as -1 | 0 | 1;
+  const signY = Math.sign(diffY) as -1 | 0 | 1;
+
+  switch (signX) {
+    case -1:
+      switch (signY) {
+        case -1:
+          return 7;
+        case 0:
+          return 6;
+        case 1:
+          return 5;
+      }
+      break;
+
+    case 0:
+      switch (signY) {
+        case -1:
+          return 0;
+        case 1:
+          return 4;
+      }
+      break;
+
+    case 1:
+      switch (signY) {
+        case -1:
+          return 1;
+        case 0:
+          return 2;
+        case 1:
+          return 3;
+      }
+      break;
   }
 }

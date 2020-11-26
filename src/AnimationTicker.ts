@@ -36,7 +36,7 @@ export class AnimationTicker implements IAnimationTicker {
     this.subscriptions.forEach((cb) => cb(data.rounded, data.pure));
   }
 
-  subscribe(cb: (frame: number) => void): () => void {
+  subscribe(cb: (frame: number, accurateFrame: number) => void): () => void {
     const id = this.idCounter++;
 
     this.subscriptions.set(id, cb);

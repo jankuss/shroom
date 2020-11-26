@@ -4,10 +4,12 @@ import { HitEventHandler } from "../../HitSprite";
 import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
-import { IFurniture } from "./IFurniture";
+import { IFurniture, IFurnitureBehavior } from "./IFurniture";
 import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 
-export class FloorFurniture extends RoomObject implements IFurniture {
+export class FloorFurniture
+  extends RoomObject
+  implements IFurniture<FloorFurniture> {
   private baseFurniture: BaseFurniture;
   private movementAnimation: ObjectAnimation | undefined;
 
@@ -45,6 +47,7 @@ export class FloorFurniture extends RoomObject implements IFurniture {
     direction: number;
     type: string;
     animation?: string;
+    behaviors?: IFurnitureBehavior<FloorFurniture>[];
   }) {
     super();
 
@@ -59,6 +62,8 @@ export class FloorFurniture extends RoomObject implements IFurniture {
       options.direction,
       options.animation
     );
+
+    options.behaviors?.forEach((behavior) => behavior.setParent(this));
   }
 
   get animation() {

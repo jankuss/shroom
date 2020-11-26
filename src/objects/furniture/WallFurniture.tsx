@@ -4,8 +4,11 @@ import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
 import { IFurniture } from "./IFurniture";
+import { HitEvent } from "../../interfaces/IHitDetection";
 
-export class WallFurniture extends RoomObject implements IFurniture {
+export class WallFurniture
+  extends RoomObject
+  implements IFurniture<WallFurniture> {
   private baseFurniture: BaseFurniture;
 
   constructor(
@@ -18,6 +21,9 @@ export class WallFurniture extends RoomObject implements IFurniture {
 
     this.baseFurniture = new BaseFurniture(type, direction, animation);
   }
+
+  onClick?: ((event: HitEvent) => void) | undefined;
+  onDoubleClick?: ((event: HitEvent) => void) | undefined;
 
   direction: number = 0;
   animation: string = "0";

@@ -83,6 +83,8 @@ export class BaseFurniture
   }
 
   updateFurniture() {
+    if (!this.mounted) return;
+
     if (this.loadFurniResult != null) {
       this.updateSprites(
         this.loadFurniResult,

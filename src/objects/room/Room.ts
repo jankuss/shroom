@@ -83,6 +83,23 @@ export class Room
 
   private _onTileClick: ((position: RoomPosition) => void) | undefined;
 
+  private _getTilePositionWithOffset(roomX: number, roomY: number) {
+    return {
+      x: roomX + this.wallOffsets.x,
+      y: roomY + this.wallOffsets.y,
+    };
+  }
+
+  getTileAtPosition(roomX: number, roomY: number) {
+    const { x, y } = this._getTilePositionWithOffset(roomX, roomY);
+
+    const row = this.parsedTileMap[y];
+    if (row == null) return;
+    if (row[x] == null) return;
+
+    return row[x];
+  }
+
   get onTileClick() {
     return this._onTileClick;
   }
@@ -225,13 +242,12 @@ export class Room
     roomY: number,
     roomZ: number
   ): { x: number; y: number } {
-    roomX = roomX + this.wallOffsets.x;
-    roomY = roomY + this.wallOffsets.y;
+    const { x, y } = this._getTilePositionWithOffset(roomX, roomY);
 
     const base = 32;
 
-    const xPos = -this.bounds.minX + roomX * base - roomY * base;
-    const yPos = -this.bounds.minY + roomX * (base / 2) + roomY * (base / 2);
+    const xPos = -this.bounds.minX + x * base - y * base;
+    const yPos = -this.bounds.minY + x * (base / 2) + y * (base / 2);
 
     return {
       x: xPos,
@@ -347,6 +363,12 @@ export class Room
             roomX: x - this.wallOffsets.x,
             roomY: y - this.wallOffsets.y,
             roomZ: tile.z,
+          });
+
+          this.registerTileCursor({
+            roomX: x - this.wallOffsets.x,
+            roomY: y - this.wallOffsets.y,
+            roomZ: tile.z + 1,
           });
         }
       }
