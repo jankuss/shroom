@@ -16,16 +16,14 @@ interface Options {
 export class AvatarSprites extends RoomObject {
   private container: PIXI.Container | undefined;
   private avatarLoaderResult: AvatarLoaderResult | undefined;
-  private currentFrame: number = 0;
-  private mirrored: boolean = true;
-  private frame: number = 0;
   private avatarDrawDefinition: AvatarDrawDefinition | undefined;
 
-  private lookOptions: LookOptions;
+  private _lookOptions: LookOptions;
 
   private _x: number = 0;
   private _y: number = 0;
   private _zIndex: number = 0;
+  private _currentFrame: number = 0;
 
   get x() {
     return this._x;
@@ -50,30 +48,45 @@ export class AvatarSprites extends RoomObject {
   }
 
   set zIndex(value) {
+    if (value === this._zIndex) return;
+
     this._zIndex = value;
     this._positionChanged();
+  }
+
+  get lookOptions() {
+    return this._lookOptions;
+  }
+
+  set lookOptions(lookOptions) {
+    this._lookOptions = lookOptions;
+    this._updateSprites();
+  }
+
+  get currentFrame() {
+    return this._currentFrame;
+  }
+
+  set currentFrame(value) {
+    this._currentFrame = value;
+    this._updateSprites();
   }
 
   constructor(private options: Options) {
     super();
 
-    this.x = this.options.position.x;
-    this.y = this.options.position.y;
+    this._x = options.position.x;
+    this._y = options.position.y;
     this._zIndex = options.zIndex;
-    this.lookOptions = options.look;
+    this._lookOptions = options.look;
   }
 
   private _positionChanged() {
     if (this.avatarDrawDefinition == null) return;
-    this.updatePosition(this.avatarDrawDefinition);
+    this._updatePosition(this.avatarDrawDefinition);
   }
 
-  setLook(options: LookOptions) {
-    this.lookOptions = options;
-    this.updateSprites();
-  }
-
-  private updatePosition(definition: AvatarDrawDefinition) {
+  private _updatePosition(definition: AvatarDrawDefinition) {
     if (this.container == null) return;
 
     this.container.x = this.x + definition.offsetX;
@@ -81,12 +94,7 @@ export class AvatarSprites extends RoomObject {
     this.container.zIndex = this.zIndex;
   }
 
-  setCurrentFrame(globalFrame: number) {
-    this.frame = globalFrame;
-    this.updateSprites();
-  }
-
-  private updateSprites() {
+  private _updateSprites() {
     if (this.avatarLoaderResult == null) return;
 
     const { zIndex } = this.options;
@@ -100,9 +108,7 @@ export class AvatarSprites extends RoomObject {
     );
 
     this.avatarDrawDefinition = definition;
-
-    this.mirrored = definition.mirrorHorizontal;
-    this.updatePosition(definition);
+    this._updatePosition(definition);
 
     this.container.scale = new PIXI.Point(
       definition.mirrorHorizontal ? -1 : 1,
@@ -144,10 +150,10 @@ export class AvatarSprites extends RoomObject {
   private fetchLook(look: string) {
     this.avatarLoader.getAvatarDrawDefinition(look).then((result) => {
       this.avatarLoaderResult = result;
-      this.updateSprites();
+      this._updateSprites();
     });
 
-    this.updateSprites();
+    this._updateSprites();
   }
 
   registered(): void {

@@ -7,6 +7,7 @@ import {
 } from "shroom";
 import EasyStar from "easystarjs";
 import { DiceBehavior } from "./DiceBehavior";
+import { MultiStateBehavior } from "./MultiStateBehavior";
 
 export class ConnectedRoom {
   private room: Room;
@@ -16,12 +17,11 @@ export class ConnectedRoom {
     const tilemap = parseTileMapString(`
         1111111111
         1111111111
-        11111x1111
-        11111x0000
-        11111x0000
-        11111x0000
-        00000x0000
-        0000000000
+        1111111111
+        1111111111
+        111111xx00
+        111111xx00
+        000000xx00
         0000000000
         0000000000
         0000000000
@@ -55,8 +55,8 @@ export class ConnectedRoom {
         roomZ: 1,
         direction: 0,
         type: "party_floor",
-        animation: "1",
-        behaviors: [],
+        animation: "0",
+        behaviors: [new MultiStateBehavior({ initialState: 1, count: 10 })],
       })
     );
 
@@ -68,7 +68,7 @@ export class ConnectedRoom {
         direction: 0,
         type: "party_floor",
         animation: "1",
-        behaviors: [],
+        behaviors: [new MultiStateBehavior({ initialState: 1, count: 10 })],
       })
     );
 
@@ -80,7 +80,7 @@ export class ConnectedRoom {
         direction: 0,
         type: "party_floor",
         animation: "1",
-        behaviors: [],
+        behaviors: [new MultiStateBehavior({ initialState: 1, count: 10 })],
       })
     );
 
@@ -88,6 +88,42 @@ export class ConnectedRoom {
       new FloorFurniture({
         roomX: 6,
         roomY: 0,
+        roomZ: 1,
+        direction: 6,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [new MultiStateBehavior({ initialState: 1, count: 10 })],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 8,
+        roomY: 0,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [new MultiStateBehavior({ initialState: 1, count: 10 })],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 8,
+        roomY: 2,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [new MultiStateBehavior({ initialState: 1, count: 10 })],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 6,
+        roomY: 2,
         roomZ: 1,
         direction: 0,
         type: "party_floor",
@@ -98,8 +134,68 @@ export class ConnectedRoom {
 
     this.room.addRoomObject(
       new FloorFurniture({
-        roomX: 8,
-        roomY: 0,
+        roomX: 0,
+        roomY: 2,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 2,
+        roomY: 2,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 4,
+        roomY: 2,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 0,
+        roomY: 4,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 2,
+        roomY: 4,
+        roomZ: 1,
+        direction: 0,
+        type: "party_floor",
+        animation: "1",
+        behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 4,
+        roomY: 4,
         roomZ: 1,
         direction: 0,
         type: "party_floor",
@@ -117,6 +213,20 @@ export class ConnectedRoom {
         type: "throne",
         animation: "0",
         behaviors: [],
+      })
+    );
+
+    //
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 1,
+        roomY: 0,
+        roomZ: 1,
+        direction: 2,
+        type: "party_ravel",
+        animation: "0",
+        behaviors: [new MultiStateBehavior({ initialState: 0, count: 2 })],
       })
     );
 

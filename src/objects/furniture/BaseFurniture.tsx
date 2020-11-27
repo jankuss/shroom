@@ -18,9 +18,12 @@ export class BaseFurniture
   private loadFurniResult: LoadFurniResult | undefined;
   private unknownSprite: PIXI.Sprite | undefined;
 
-  private x: number = 0;
-  private y: number = 0;
-  private zIndex: number = 0;
+  private _x: number = 0;
+  private _y: number = 0;
+  private _zIndex: number = 0;
+  private _direction: number = 0;
+  private _animation: string | undefined;
+  private _type: string;
 
   private _onClick: HitEventHandler | undefined;
   private _onDoubleClick: HitEventHandler | undefined;
@@ -46,6 +49,51 @@ export class BaseFurniture
     this._onDoubleClick = value;
   }
 
+  public get x() {
+    return this._x;
+  }
+
+  public set x(value) {
+    this._x = value;
+    this.updateFurniture();
+  }
+
+  public get y() {
+    return this._y;
+  }
+
+  public set y(value) {
+    this._y = value;
+    this.updateFurniture();
+  }
+
+  public get zIndex() {
+    return this._zIndex;
+  }
+
+  public set zIndex(value) {
+    this._zIndex = value;
+    this.updateFurniture();
+  }
+
+  public get direction() {
+    return this._direction;
+  }
+
+  public set direction(value) {
+    this._direction = value;
+    this.updateFurniture();
+  }
+
+  public get animation() {
+    return this._animation;
+  }
+
+  public set animation(value) {
+    this._animation = value;
+    this.updateFurniture();
+  }
+
   private animatedSprites: {
     sprites: Map<string, PIXI.Sprite>;
     frames: string[];
@@ -53,33 +101,11 @@ export class BaseFurniture
 
   private cancelTicker: (() => void) | undefined = undefined;
 
-  constructor(
-    private type: string,
-    private direction: number,
-    private animation: string = "0"
-  ) {
+  constructor(type: string, direction: number, animation: string = "0") {
     super();
-  }
-
-  setPosition(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-    this.updateFurniture();
-  }
-
-  setZIndex(zIndex: number) {
-    this.zIndex = zIndex;
-    this.updateFurniture();
-  }
-
-  setDirection(direction: number) {
-    this.direction = direction;
-    this.updateFurniture();
-  }
-
-  setAnimation(animation: string | undefined) {
-    this.animation = animation ?? "0";
-    this.updateFurniture();
+    this._direction = direction;
+    this._animation = animation;
+    this._type = type;
   }
 
   updateFurniture() {
@@ -88,7 +114,7 @@ export class BaseFurniture
     if (this.loadFurniResult != null) {
       this.updateSprites(
         this.loadFurniResult,
-        this.type,
+        this._type,
         this.direction,
         this.animation
       );
@@ -233,7 +259,11 @@ export class BaseFurniture
       layer?.tag
     );
 
-    sprite.addEventListener("click", (event) => this._handleSpriteClick(event));
+    if (layer?.ignoreMouse !== "1") {
+      sprite.addEventListener("click", (event) =>
+        this._handleSpriteClick(event)
+      );
+    }
 
     const scaleX = asset.flipH ? -1 : 1;
     sprite.x = x + (32 - asset.x * scaleX);
@@ -366,7 +396,7 @@ export class BaseFurniture
   }
 
   registered(): void {
-    this.furnitureLoader.loadFurni(this.type).then((result) => {
+    this.furnitureLoader.loadFurni(this._type).then((result) => {
       this.loadFurniResult = result;
       this.updateFurniture();
     });

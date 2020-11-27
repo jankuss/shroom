@@ -50,8 +50,9 @@ export class WallFurniture
       this.position.roomZ
     );
 
-    this.baseFurniture.setPosition(base.x + offsets.x, base.y + offsets.y);
-    this.baseFurniture.setZIndex(0);
+    this.baseFurniture.x = base.x + offsets.x;
+    this.baseFurniture.y = base.y + offsets.y;
+    this.baseFurniture.zIndex = 0;
 
     this.roomObjectContainer.addRoomObject(this.baseFurniture);
   }

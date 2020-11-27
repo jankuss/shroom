@@ -72,7 +72,7 @@ export class FloorFurniture
 
   set animation(value) {
     this._animation = value;
-    this.updateAnimation();
+    this._updateAnimation();
   }
 
   get direction() {
@@ -81,7 +81,7 @@ export class FloorFurniture
 
   set direction(value) {
     this._direction = value;
-    this.updateDirection();
+    this._updateDirection();
   }
 
   get roomX() {
@@ -90,7 +90,7 @@ export class FloorFurniture
 
   set roomX(value) {
     this._roomX = value;
-    this.updatePosition();
+    this._updatePosition();
   }
 
   get roomY() {
@@ -99,7 +99,7 @@ export class FloorFurniture
 
   set roomY(value) {
     this._roomY = value;
-    this.updatePosition();
+    this._updatePosition();
   }
 
   get roomZ() {
@@ -108,26 +108,27 @@ export class FloorFurniture
 
   set roomZ(value) {
     this._roomZ = value;
-    this.updatePosition();
+    this._updatePosition();
   }
 
-  private updateDirection() {
-    this.baseFurniture.setDirection(this.direction);
+  private _updateDirection() {
+    this.baseFurniture.direction = this.direction;
   }
 
-  private updatePosition() {
+  private _updatePosition() {
     const { x, y } = this.geometry.getPosition(
       this.roomX,
       this.roomY,
       this.roomZ
     );
 
-    this.baseFurniture.setPosition(x, y);
-    this.baseFurniture.setZIndex(getZOrder(this.roomX, this.roomY, this.roomZ));
+    this.baseFurniture.x = x;
+    this.baseFurniture.y = y;
+    this.baseFurniture.zIndex = getZOrder(this.roomX, this.roomY, this.roomZ);
   }
 
-  private updateAnimation() {
-    this.baseFurniture.setAnimation(this.animation);
+  private _updateAnimation() {
+    this.baseFurniture.animation = this.animation;
   }
 
   destroy(): void {
@@ -142,6 +143,6 @@ export class FloorFurniture
       onUpdatePosition: (position, direction) => {},
     });
 
-    this.updatePosition();
+    this._updatePosition();
   }
 }

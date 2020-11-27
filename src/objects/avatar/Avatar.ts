@@ -181,7 +181,11 @@ export class Avatar extends RoomObject {
       this.stopAnimation();
     }
 
-    this.avatarSprites?.setLook(look);
+    const avatarSprites = this.avatarSprites;
+
+    if (avatarSprites != null) {
+      avatarSprites.lookOptions = look;
+    }
   }
 
   private startAnimation() {
@@ -270,9 +274,9 @@ export class Avatar extends RoomObject {
       this.avatarSprites.x = Math.round(x);
       this.avatarSprites.y = Math.round(y);
       this.avatarSprites.zIndex = this._getZIndexAtPosition(
-        roomX,
-        roomY,
-        roomZ
+        Math.round(roomX),
+        Math.round(roomY),
+        Math.round(roomZ)
       );
     }
   }
