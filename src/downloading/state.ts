@@ -37,7 +37,8 @@ export type Action =
     }
   | { type: "FURNI_ASSETS_SUCCESS" }
   | { type: "FURNI_ASSETS_COUNT"; payload: number }
-  | { type: "FIGURE_ASSETS_COUNT"; payload: number };
+  | { type: "FIGURE_ASSETS_COUNT"; payload: number }
+  | { type: "STARTED" };
 
 export interface State {
   figureData: StepState;
@@ -51,6 +52,7 @@ export interface State {
   furniAssetsCompletedCount?: number;
   figureAssetsCount?: number;
   figureAssetsCompletedCount?: number;
+  started: boolean;
 }
 
 function makeAbsolute(url: string) {
@@ -61,12 +63,20 @@ function makeAbsolute(url: string) {
   return url;
 }
 
-export async function run(
-  externalVarsUrl: string,
-  steps: Steps,
-  dispatch: (action: Action) => void
-) {
-  const libraryFolder = "./resources";
+export async function run({
+  dispatch,
+  externalVarsUrl,
+  steps,
+  location,
+}: {
+  externalVarsUrl: string;
+  steps: Steps;
+  location: string;
+  dispatch: (action: Action) => void;
+}) {
+  dispatch({ type: "STARTED" });
+
+  const libraryFolder = location;
 
   await fs.mkdir(libraryFolder, { recursive: true });
 
@@ -139,6 +149,13 @@ export async function run(
 }
 
 export function reducer(state: State, action: Action): State {
+  if (action.type === "STARTED") {
+    return {
+      ...state,
+      started: true,
+    };
+  }
+
   if (action.type === "FIGURE_MAP_LOADING") {
     return {
       ...state,
@@ -255,4 +272,5 @@ export const initialState: State = {
   furniData: "pending",
   figureAssets: "pending",
   furniAssets: "pending",
+  started: false,
 };

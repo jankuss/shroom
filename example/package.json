@@ -27,6 +27,6 @@
   },
   "scripts": {
     "dev": "webpack serve",
-    "dump": "yarn ts-node src/downloading/cli.tsx"
+    "dump": "shroom dump --url https://www.habbo.com/gamedata/external_variables/326b0a1abf9e2571d541ac05e6eb3173b83bddea --location ./public/resources"
   }
 }

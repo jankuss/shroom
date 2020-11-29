@@ -40,10 +40,14 @@
     "pixi.js": "^5.3.3",
     "react": "^17.0.1",
     "timers-browserify": "^2.0.11",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.4.23",
+    "yargs": "^16.1.1"
   },
   "scripts": {
     "dev": "webpack serve",
     "dump": "yarn ts-node src/downloading/cli.tsx"
+  },
+  "bin": {
+    "shroom": "dist/downloading/cli/index.js"
   }
 }

@@ -1,10 +1,6 @@
-import React, { useState, useEffect, useReducer } from "react";
-import { Box, Newline, render, Text } from "ink";
-import { getVariables } from "./getVariables";
-import { promises as fs } from "fs";
-import { tryFetchString } from "./fetching";
-import * as path from "path";
-import { initialState, reducer, run, Steps, StepState } from "./state";
+import React, { useReducer } from "react";
+import { Box, Newline, Text } from "ink";
+import { initialState, reducer, run, Steps, StepState } from "../state";
 
 const stepMap: {
   [k in keyof Steps]: string;
@@ -82,20 +78,34 @@ const ProgressDisplay = ({
   );
 };
 
-const App = ({
+export const App = ({
   externalVariablesUrl,
   steps,
+  location,
 }: {
   externalVariablesUrl: string;
   steps: Steps;
+  location: string;
 }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const keys = Object.keys(steps) as (keyof Steps)[];
-  const externalVariablesUrlRef = React.useRef(externalVariablesUrl);
+  const options = React.useRef({
+    externalVariablesUrl,
+    location,
+  });
 
-  React.useEffect(() => {
-    run(externalVariablesUrlRef.current, steps, dispatch);
+  React.useLayoutEffect(() => {
+    run({
+      dispatch,
+      externalVarsUrl: options.current.externalVariablesUrl,
+      location: options.current.location,
+      steps: steps,
+    }).catch((error) => {
+      //console.clear();
+      console.error(error);
+      process.exit(1);
+    });
   }, []);
 
   const renderFurniAssetsExtra = () => {
@@ -130,6 +140,8 @@ const App = ({
       </ProgressDisplay>
     );
   };
+
+  if (!state.started) return null;
 
   return (
     <>
@@ -179,16 +191,3 @@ const App = ({
     </>
   );
 };
-
-render(
-  <App
-    externalVariablesUrl="https://www.habbo.com/gamedata/external_variables/29fd8c5448063b72a92ecdc258c6395c61dcd91f"
-    steps={{
-      figureData: true,
-      figureMap: true,
-      furniData: true,
-      figureAssets: false,
-      furniAssets: true,
-    }}
-  />
-);
