@@ -78,9 +78,13 @@ export class ObjectAnimation {
 
     const start = this.animationTicker.current();
     const cancel = this.animationTicker.subscribe((value, accurate) => {
-      const factor = this.currentFrame / (this.frameDuration - 1);
+      let factor = this.currentFrame / (this.frameDuration - 1);
       const current = this.current;
       const diff = this.diff;
+
+      if (factor > 1) {
+        factor = 1;
+      }
 
       if (current != null && diff != null) {
         this.callbacks.onUpdatePosition(
