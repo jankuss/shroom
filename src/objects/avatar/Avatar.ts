@@ -123,6 +123,16 @@ export class Avatar extends RoomObject {
     this.updateAvatarSprites();
   }
 
+  clearWalk() {
+    const current = this.walkAnimation?.clear();
+
+    if (current != null) {
+      this.roomX = current.roomX;
+      this.roomY = current.roomY;
+      this.roomZ = current.roomZ;
+    }
+  }
+
   private getWavingAction() {
     if (this.waving) {
       return {

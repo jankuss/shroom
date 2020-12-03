@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 
 import { Room, loadRoomTexture, FloorFurniture, Avatar } from "shroom";
-import { ConnectedRoom } from "./ConnectedRoom";
+import { DummyRoom } from "./DummyRoom";
 
 const view = document.querySelector("#root") as HTMLCanvasElement | undefined;
 const container = document.querySelector("#container") as
@@ -21,4 +21,4 @@ const application = new PIXI.Application({
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
-const connectedRoom = new ConnectedRoom(application);
+const connectedRoom = new DummyRoom(application);

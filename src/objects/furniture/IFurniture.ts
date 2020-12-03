@@ -1,7 +1,6 @@
 import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
 
-export interface IFurniture<T extends IFurniture<any> = any>
-  extends IFurnitureEventHandlers {
+export interface IFurniture extends IFurnitureEventHandlers {
   roomX: number;
   roomY: number;
   roomZ: number;
@@ -9,6 +8,6 @@ export interface IFurniture<T extends IFurniture<any> = any>
   animation: string | undefined;
 }
 
-export type IFurnitureBehavior<T extends IFurniture<any> = any> = {
+export type IFurnitureBehavior<T extends IFurniture> = {
   setParent(furniture: T): void;
 };

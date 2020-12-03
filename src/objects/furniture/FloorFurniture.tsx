@@ -7,9 +7,7 @@ import { BaseFurniture } from "./BaseFurniture";
 import { IFurniture, IFurnitureBehavior } from "./IFurniture";
 import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 
-export class FloorFurniture
-  extends RoomObject
-  implements IFurniture<FloorFurniture> {
+export class FloorFurniture extends RoomObject implements IFurniture {
   private baseFurniture: BaseFurniture;
   private movementAnimation: ObjectAnimation | undefined;
 

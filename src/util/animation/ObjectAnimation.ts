@@ -10,6 +10,7 @@ export class ObjectAnimation {
     newPosition: RoomPosition;
     direction: number;
   }[] = [];
+  private nextPosition: RoomPosition | undefined;
 
   constructor(
     private animationTicker: IAnimationTicker,
@@ -20,6 +21,11 @@ export class ObjectAnimation {
     },
     private frameDuration: number = 12
   ) {}
+
+  clear() {
+    this.enqueued = [];
+    return this.nextPosition;
+  }
 
   walk(
     currentPos: { roomX: number; roomY: number; roomZ: number },
@@ -43,6 +49,8 @@ export class ObjectAnimation {
       roomY: newPos.roomY - currentPos.roomY,
       roomZ: newPos.roomZ - currentPos.roomZ,
     };
+
+    this.nextPosition = newPos;
     this.currentFrame = 0;
 
     const handleFinish = () => {

@@ -91,7 +91,7 @@ export class DiceBehavior implements IFurnitureBehavior {
     }
   }
 
-  setParent(furniture: IFurniture<any>): void {
+  setParent(furniture: IFurniture): void {
     this.furniture = furniture;
 
     furniture.onDoubleClick = (event) => {

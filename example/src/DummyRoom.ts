@@ -6,12 +6,40 @@ import {
   FloorFurniture,
 } from "shroom";
 import EasyStar from "easystarjs";
-import { DiceBehavior } from "./DiceBehavior";
-import { MultiStateBehavior } from "./MultiStateBehavior";
+import { MultiStateBehavior } from "./behaviors/MultiStateBehavior";
+import { DiceBehavior } from "./behaviors/DiceBehavior";
+import { FurniInfoBehavior } from "./behaviors/FurniInfoBehavior";
 
-export class ConnectedRoom {
+export class DummyRoom {
   private room: Room;
   private ownAvatar: Avatar;
+  private path: {
+    roomX: number;
+    roomY: number;
+    roomZ: number;
+    direction: number | undefined;
+  }[] = [];
+  private grid: number[][];
+  private roomTick = setInterval(() => {
+    const next = this.path[0];
+    const afterNext = this.path[1];
+
+    if (next != null) {
+      this.ownAvatar.walk(next.roomX, next.roomY, next.roomZ, {
+        direction: next.direction,
+      });
+
+      this.path.shift();
+    }
+
+    if (afterNext != null) {
+      this.ownAvatar.walk(afterNext.roomX, afterNext.roomY, afterNext.roomZ, {
+        direction: afterNext.direction,
+      });
+
+      this.path.shift();
+    }
+  }, 500);
 
   constructor(application: PIXI.Application) {
     const tilemap = parseTileMapString(`
@@ -27,7 +55,7 @@ export class ConnectedRoom {
         0000000000
     `);
 
-    const grid = tilemap.map((row) =>
+    this.grid = tilemap.map((row) =>
       row.map((type) => (type !== "x" ? Number(type) : -1))
     );
 
@@ -44,7 +72,7 @@ export class ConnectedRoom {
         roomZ: 1,
         direction: 0,
         type: "edicehc",
-        behaviors: [new DiceBehavior()],
+        behaviors: [new DiceBehavior(), new FurniInfoBehavior()],
       })
     );
 
@@ -216,8 +244,6 @@ export class ConnectedRoom {
       })
     );
 
-    //
-
     this.room.addRoomObject(
       new FloorFurniture({
         roomX: 1,
@@ -232,23 +258,63 @@ export class ConnectedRoom {
 
     this.room.floorTexture = loadRoomTexture("./tile.png");
 
-    this.room.onTileClick = (position) => {
+    this.room.onTileClick = async (position) => {
+      this.ownAvatar.clearWalk();
+
+      const path = await this.findPath(position);
+      this.path = path;
+    };
+
+    this.ownAvatar = new Avatar({
+      look: "hd-605-2.hr-3012-45.ch-645-109.lg-720-63.sh-725-92.wa-2001-62",
+      direction: 2,
+      roomX: 1,
+      roomY: 0,
+      roomZ: 1,
+    });
+
+    this.room.addRoomObject(this.ownAvatar);
+
+    this.room.x = application.screen.width / 2 - this.room.roomWidth / 2;
+    this.room.y = application.screen.height / 2 - this.room.roomHeight / 2;
+
+    application.stage.addChild(this.room);
+  }
+
+  private handleRoomTick() {}
+
+  private findPath(target: { roomX: number; roomY: number }) {
+    return new Promise<
+      {
+        roomX: number;
+        roomY: number;
+        roomZ: number;
+        direction: number | undefined;
+      }[]
+    >((resolve) => {
       const easystar = new EasyStar.js();
 
-      easystar.setGrid(grid);
+      easystar.setGrid(this.grid);
       easystar.setAcceptableTiles([1, 0]);
       easystar.enableDiagonals();
 
       easystar.findPath(
         this.ownAvatar.roomX,
         this.ownAvatar.roomY,
-        position.roomX,
-        position.roomY,
+        target.roomX,
+        target.roomY,
         (result) => {
           let currentPosition = {
             x: this.ownAvatar.roomX,
             y: this.ownAvatar.roomY,
           };
+
+          const path: {
+            roomX: number;
+            roomY: number;
+            roomZ: number;
+            direction: number | undefined;
+          }[] = [];
 
           result.forEach((position, index) => {
             if (index === 0) return;
@@ -268,7 +334,10 @@ export class ConnectedRoom {
                 return 0;
               };
 
-              this.ownAvatar.walk(position.x, position.y, getHeight(), {
+              path.push({
+                roomX: position.x,
+                roomY: position.y,
+                roomZ: getHeight(),
                 direction,
               });
 
@@ -278,26 +347,13 @@ export class ConnectedRoom {
               };
             }
           });
+
+          resolve(path);
         }
       );
 
       easystar.calculate();
-    };
-
-    this.ownAvatar = new Avatar({
-      look: "hd-605-2.hr-3012-45.ch-645-109.lg-720-63.sh-725-92.wa-2001-62",
-      direction: 2,
-      roomX: 1,
-      roomY: 0,
-      roomZ: 1,
     });
-
-    this.room.addRoomObject(this.ownAvatar);
-
-    this.room.x = application.screen.width / 2 - this.room.roomWidth / 2;
-    this.room.y = application.screen.height / 2 - this.room.roomHeight / 2;
-
-    application.stage.addChild(this.room);
   }
 }
 

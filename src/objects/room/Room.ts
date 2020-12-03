@@ -3,6 +3,7 @@ import { AnimationTicker } from "../../AnimationTicker";
 import { HitDetection } from "../../HitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { IAvatarLoader } from "../../interfaces/IAvatarLoader";
+import { IConfiguration } from "../../interfaces/IConfiguration";
 import { IFurnitureLoader } from "../../interfaces/IFurnitureLoader";
 import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IRoomGeometry } from "../../interfaces/IRoomGeometry";
@@ -21,15 +22,19 @@ import { TileCursor } from "./TileCursor";
 import { getTileMapBounds } from "./util/getTileMapBounds";
 import { Wall } from "./Wall";
 
+const defaultConfig: IConfiguration = {};
+
 function createSimpleConfig(
   application: PIXI.Application,
-  resourcePath?: string
+  resourcePath?: string,
+  configuration: IConfiguration = defaultConfig
 ): Dependencies {
   return {
     animationTicker: AnimationTicker.create(application),
     avatarLoader: AvatarLoader.create(resourcePath),
     furnitureLoader: FurnitureLoader.create(resourcePath),
     hitDetection: HitDetection.create(application),
+    configuration: configuration,
   };
 }
 
@@ -38,6 +43,7 @@ interface Dependencies {
   avatarLoader: IAvatarLoader;
   furnitureLoader: IFurnitureLoader;
   hitDetection: IHitDetection;
+  configuration: IConfiguration;
 }
 
 type TileMap = TileType[][] | string;
@@ -66,6 +72,7 @@ export class Room
   private avatarLoader: IAvatarLoader;
   private furnitureLoader: IFurnitureLoader;
   private hitDetection: IHitDetection;
+  private configuration: IConfiguration;
 
   private walls: Wall[] = [];
   private floor: (Tile | Stair)[] = [];
@@ -150,6 +157,7 @@ export class Room
     furnitureLoader,
     tilemap,
     hitDetection,
+    configuration,
   }: {
     tilemap: TileMap;
   } & Dependencies) {
@@ -176,6 +184,7 @@ export class Room
     this.furnitureLoader = furnitureLoader;
     this.avatarLoader = avatarLoader;
     this.hitDetection = hitDetection;
+    this.configuration = configuration;
 
     this.addChild(this.visualization);
   }
@@ -184,13 +193,19 @@ export class Room
     application,
     resourcePath,
     tilemap,
+    configuration,
   }: {
     application: PIXI.Application;
     resourcePath?: string;
     tilemap: TileMap;
+    configuration?: IConfiguration;
   }) {
     if (globalDependencies == null) {
-      globalDependencies = createSimpleConfig(application, resourcePath);
+      globalDependencies = createSimpleConfig(
+        application,
+        resourcePath,
+        configuration
+      );
     }
 
     return new Room({ ...globalDependencies, tilemap });
@@ -232,6 +247,7 @@ export class Room
       roomObjectContainer: this,
       avatarLoader: this.avatarLoader,
       hitDetection: this.hitDetection,
+      configuration: this.configuration,
     });
 
     this.roomObjects.push(object);

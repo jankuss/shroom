@@ -6,9 +6,7 @@ import { BaseFurniture } from "./BaseFurniture";
 import { IFurniture } from "./IFurniture";
 import { HitEvent } from "../../interfaces/IHitDetection";
 
-export class WallFurniture
-  extends RoomObject
-  implements IFurniture<WallFurniture> {
+export class WallFurniture extends RoomObject implements IFurniture {
   private baseFurniture: BaseFurniture;
 
   constructor(

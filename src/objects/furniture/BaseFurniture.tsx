@@ -9,8 +9,6 @@ import { Hitmap, LoadFurniResult } from "./util/loadFurni";
 import { Asset } from "./util/parseAssets";
 import { Layer } from "./util/visualization/parseLayers";
 
-const unknownTexture = PIXI.Texture.from("./placeholder.png");
-
 export class BaseFurniture
   extends RoomObject
   implements IFurnitureEventHandlers {
@@ -27,6 +25,8 @@ export class BaseFurniture
 
   private _onClick: HitEventHandler | undefined;
   private _onDoubleClick: HitEventHandler | undefined;
+
+  private _unknownTexture: PIXI.Texture | undefined;
 
   private _doubleClickInfo?: {
     initialEvent: HitEvent;
@@ -126,7 +126,7 @@ export class BaseFurniture
   updateUnknown() {
     this.destroySprites();
 
-    this.unknownSprite = new PIXI.Sprite(unknownTexture);
+    this.unknownSprite = new PIXI.Sprite(this._unknownTexture);
     this.unknownSprite.x = this.x;
     this.unknownSprite.y = this.y - 32;
     this.unknownSprite.zIndex = this.zIndex;
@@ -396,6 +396,8 @@ export class BaseFurniture
   }
 
   registered(): void {
+    this._unknownTexture = this.configuration.placeholder ?? undefined;
+
     this.furnitureLoader.loadFurni(this._type).then((result) => {
       this.loadFurniResult = result;
       this.updateFurniture();

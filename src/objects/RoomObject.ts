@@ -8,6 +8,10 @@ export abstract class RoomObject implements IRoomObject {
     return this.context != null;
   }
 
+  protected get configuration() {
+    return this.getRoomContext().configuration;
+  }
+
   protected get furnitureLoader() {
     return this.getRoomContext().furnitureLoader;
   }
