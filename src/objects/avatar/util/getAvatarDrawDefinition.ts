@@ -7,6 +7,7 @@ import { getNormalizedPart } from "./getNormalizedPart";
 import { GetOffset } from "./loadOffsetMap";
 import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import { getActionForPart } from "./getActionForPart";
+import { getDrawOrder } from "./drawOrder";
 
 export type AvatarDrawPart = {
   fileId: string;
@@ -25,7 +26,6 @@ export interface AvatarDrawDefinition {
 
 export interface Dependencies {
   getSetType: GetSetType;
-  getDrawOrder: GetDrawOrder;
   getOffset: GetOffset;
 }
 
@@ -58,7 +58,7 @@ interface Options {
  */
 export function getAvatarDrawDefinition(
   { parsedLook, action, actions, direction }: Options,
-  { getDrawOrder, getOffset, getSetType }: Dependencies
+  { getOffset, getSetType }: Dependencies
 ): AvatarDrawDefinition | undefined {
   const parts = Array.from(parsedLook.entries()).flatMap(
     ([type, { setId, colorId }]) => {
@@ -107,9 +107,22 @@ export function getAvatarDrawDefinition(
     ]);
   }
 
+  function getDrawOrderType() {
+    switch (action.kind) {
+      case "sit":
+        return "sit";
+      case "lay":
+        return "lay";
+      case "wlk":
+        return "std";
+    }
+
+    return "std";
+  }
+
   const drawOrderRaw =
-    getDrawOrder(action.kind, normalizedDirection.direction.toString()) ||
-    getDrawOrder("std", normalizedDirection.direction.toString());
+    getDrawOrder(getDrawOrderType(), normalizedDirection.direction) ||
+    getDrawOrder("std", normalizedDirection.direction);
 
   if (drawOrderRaw) {
     // Filter the draw order, since in some directions not every part needs to be drawn.

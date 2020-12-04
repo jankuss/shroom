@@ -25,19 +25,15 @@ export interface LookServer {
 export async function createLookServer({
   figureDataString,
   figureMapString,
-  drawOrderString,
   loadOffsetMap,
 }: {
   figureMapString: string;
   figureDataString: string;
-  drawOrderString: string;
   loadOffsetMap: (figureMap: string[]) => Promise<GetOffset>;
 }): Promise<LookServer> {
   const figureDataXml = await parseStringAsync(figureDataString);
-  const drawOrderXml = await parseStringAsync(drawOrderString);
   const figureMapXml = await parseStringAsync(figureMapString);
 
-  const { getDrawOrder } = parseDrawOrder(drawOrderXml);
   const { getSetType } = parseFigureData(figureDataXml);
   const figureMap = parseFigureMap(figureMapXml);
 
@@ -51,6 +47,6 @@ export async function createLookServer({
         actions: actions,
         direction,
       },
-      { getDrawOrder, getOffset, getSetType }
+      { getOffset, getSetType }
     );
 }

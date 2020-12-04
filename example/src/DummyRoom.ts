@@ -62,7 +62,7 @@ export class DummyRoom {
     this.room = Room.create({
       application,
       tilemap: tilemap,
-      resourcePath: ".",
+      resourcePath: "./resources",
     });
 
     this.room.addRoomObject(
@@ -241,6 +241,18 @@ export class DummyRoom {
         type: "throne",
         animation: "0",
         behaviors: [],
+      })
+    );
+
+    this.room.addRoomObject(
+      new FloorFurniture({
+        roomX: 1,
+        roomY: 0,
+        roomZ: 1,
+        direction: 2,
+        type: "party_ravel",
+        animation: "0",
+        behaviors: [new MultiStateBehavior({ initialState: 0, count: 2 })],
       })
     );
 

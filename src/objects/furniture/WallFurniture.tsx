@@ -8,50 +8,121 @@ import { HitEvent } from "../../interfaces/IHitDetection";
 
 export class WallFurniture extends RoomObject implements IFurniture {
   private baseFurniture: BaseFurniture;
+  private _type: string;
+  private _roomX: number;
+  private _roomY: number;
+  private _roomZ: number;
+  private _animation: string | undefined;
+  private _direction: number;
 
-  constructor(
-    type: string,
-    direction: number,
-    animation: string,
-    private position: { roomX: number; roomY: number; roomZ: number }
-  ) {
+  constructor(options: {
+    roomX: number;
+    roomZ: number;
+    roomY: number;
+    type: string;
+    direction: number;
+    animation?: string;
+  }) {
     super();
 
-    this.baseFurniture = new BaseFurniture(type, direction, animation);
+    this._type = options.type;
+    this.baseFurniture = new BaseFurniture(
+      options.type,
+      options.direction,
+      options.animation
+    );
+
+    this._roomX = options.roomX;
+    this._roomY = options.roomY;
+    this._roomZ = options.roomZ;
+    this._animation = options.animation;
+    this._direction = options.direction;
+  }
+
+  public get type() {
+    return this._type;
+  }
+
+  public get animation() {
+    return this._animation;
+  }
+
+  public set animation(value) {
+    this._animation = value;
+    this.updateAnimation();
+  }
+
+  public get direction() {
+    return this._direction;
+  }
+
+  public set direction(value) {
+    this._direction = value;
+    this.updateDirection();
+  }
+
+  public get roomX() {
+    return this._roomX;
+  }
+
+  public set roomX(value) {
+    this._roomX = value;
+    this.updatePosition();
+  }
+
+  public get roomY() {
+    return this._roomY;
+  }
+
+  public set roomY(value) {
+    this._roomY = value;
+    this.updatePosition();
+  }
+
+  public get roomZ() {
+    return this._roomZ;
+  }
+
+  public set roomZ(value) {
+    this._roomZ = value;
+    this.updatePosition();
   }
 
   onClick?: ((event: HitEvent) => void) | undefined;
   onDoubleClick?: ((event: HitEvent) => void) | undefined;
 
-  direction: number = 0;
-  animation: string = "0";
-  roomX: number = 0;
-  roomY: number = 0;
-  roomZ: number = 0;
+  private updateAnimation() {
+    this.baseFurniture.animation = this.animation;
+  }
+
+  private updateDirection() {
+    this.baseFurniture.direction = this.direction;
+  }
 
   private getOffsets(direction: number) {
-    if (direction === 2) return { x: -16, y: -64 };
-    if (direction === 4) return { x: 16, y: -64 };
+    if (direction === 2 || direction === 6) return { x: -16, y: -64 };
+    if (direction === 4 || direction === 0) return { x: 16, y: -64 };
+
+    throw new Error("Invalid direction for wall item");
   }
 
   destroy(): void {
     this.baseFurniture.destroy();
   }
 
-  registered(): void {
+  private updatePosition() {
     const offsets = this.getOffsets(this.direction);
     if (offsets == null) return;
 
-    const base = this.geometry.getPosition(
-      this.position.roomX,
-      this.position.roomY,
-      this.position.roomZ
-    );
+    const base = this.geometry.getPosition(this.roomX, this.roomY, this.roomZ);
 
     this.baseFurniture.x = base.x + offsets.x;
     this.baseFurniture.y = base.y + offsets.y;
     this.baseFurniture.zIndex = 0;
+  }
 
+  registered(): void {
+    this.updatePosition();
     this.roomObjectContainer.addRoomObject(this.baseFurniture);
   }
 }

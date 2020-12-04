@@ -1,9 +1,11 @@
 import * as PIXI from "pixi.js";
 import { AnimationTicker } from "../../AnimationTicker";
+import { FurnitureData } from "../../FurnitureData";
 import { HitDetection } from "../../HitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { IAvatarLoader } from "../../interfaces/IAvatarLoader";
 import { IConfiguration } from "../../interfaces/IConfiguration";
+import { IFurnitureData } from "../../interfaces/IFurnitureData";
 import { IFurnitureLoader } from "../../interfaces/IFurnitureLoader";
 import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IRoomGeometry } from "../../interfaces/IRoomGeometry";
@@ -29,12 +31,15 @@ function createSimpleConfig(
   resourcePath?: string,
   configuration: IConfiguration = defaultConfig
 ): Dependencies {
+  const furnitureData = FurnitureData.create(resourcePath);
+
   return {
     animationTicker: AnimationTicker.create(application),
     avatarLoader: AvatarLoader.create(resourcePath),
-    furnitureLoader: FurnitureLoader.create(resourcePath),
+    furnitureLoader: FurnitureLoader.create(furnitureData, resourcePath),
     hitDetection: HitDetection.create(application),
     configuration: configuration,
+    furnitureData,
   };
 }
 
@@ -44,6 +49,7 @@ interface Dependencies {
   furnitureLoader: IFurnitureLoader;
   hitDetection: IHitDetection;
   configuration: IConfiguration;
+  furnitureData?: IFurnitureData;
 }
 
 type TileMap = TileType[][] | string;

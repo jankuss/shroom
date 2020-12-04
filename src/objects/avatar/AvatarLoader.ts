@@ -37,7 +37,6 @@ export class AvatarLoader implements IAvatarLoader {
           fetch(url).then((response) => response.json());
 
         return createLookServer({
-          drawOrderString: await fetchString(resourcePath + "/draworder.xml"),
           figureDataString: await fetchString(resourcePath + "/figuredata.xml"),
           figureMapString: await fetchString(resourcePath + "/figuremap.xml"),
           loadOffsetMap: async () =>

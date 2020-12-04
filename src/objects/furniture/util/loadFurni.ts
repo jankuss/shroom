@@ -26,16 +26,17 @@ export type LoadFurniResult = {
 
 export async function loadFurni(
   typeWithColor: string,
+  revision: number,
   options: {
-    getAssets: (type: string) => Promise<string>;
-    getVisualization: (type: string) => Promise<string>;
-    getAsset: (type: string, name: string) => Promise<string>;
+    getAssets: (type: string, revision: number) => Promise<string>;
+    getVisualization: (type: string, revision: number) => Promise<string>;
+    getAsset: (type: string, name: string, revision: number) => Promise<string>;
   }
 ): Promise<LoadFurniResult> {
   const type = typeWithColor.split("*")[0];
 
-  const assetsString = await options.getAssets(type);
-  const visualizationString = await options.getVisualization(type);
+  const assetsString = await options.getAssets(type, revision);
+  const visualizationString = await options.getVisualization(type, revision);
 
   const assetsXml = await parseStringAsync(assetsString);
   const visualizationXml = await parseStringAsync(visualizationString);
@@ -79,7 +80,7 @@ export async function loadFurni(
     const buffers = new Map(
       await Promise.all(
         assetsToLoad.map(async (asset) => {
-          const imageUrl = await options.getAsset(type, asset.name);
+          const imageUrl = await options.getAsset(type, asset.name, revision);
 
           const image = new Image();
           image.src = imageUrl;

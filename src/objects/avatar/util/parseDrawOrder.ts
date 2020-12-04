@@ -26,6 +26,6 @@ export function parseDrawOrder(
       if (!directions) return;
 
       return directions.get(direction);
-    }
+    },
   };
 }

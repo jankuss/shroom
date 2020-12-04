@@ -1,3 +1,4 @@
+import { IFurnitureData } from "../../interfaces/IFurnitureData";
 import { IFurnitureLoader } from "../../interfaces/IFurnitureLoader";
 import { loadFurni, LoadFurniResult } from "./util/loadFurni";
 
@@ -6,39 +7,49 @@ export class FurnitureLoader implements IFurnitureLoader {
 
   constructor(
     private options: {
-      getAssets: (type: string) => Promise<string>;
-      getVisualization: (type: string) => Promise<string>;
-      getAsset: (type: string, name: string) => Promise<string>;
+      furnitureData: IFurnitureData;
+      getAssets: (type: string, revision: number) => Promise<string>;
+      getVisualization: (type: string, revision: number) => Promise<string>;
+      getAsset: (
+        type: string,
+        name: string,
+        revision: number
+      ) => Promise<string>;
     }
   ) {}
 
-  static create(resourcePath: string = "") {
+  static create(furnitureData: IFurnitureData, resourcePath: string = "") {
     return new FurnitureLoader({
-      getAssets: (type) =>
+      furnitureData,
+      getAssets: (type, revision) =>
         fetch(
-          `${resourcePath}/hof_furni/${type}/${type}_assets.bin`
+          `${resourcePath}/hof_furni/${revision}/${type}/${type}_assets.bin`
         ).then((response) => response.text()),
-      getVisualization: (type) =>
+      getVisualization: (type, revision) =>
         fetch(
-          `${resourcePath}/hof_furni/${type}/${type}_visualization.bin`
+          `${resourcePath}/hof_furni/${revision}/${type}/${type}_visualization.bin`
         ).then((response) => response.text()),
-      getAsset: async (type, name) => `./hof_furni/${type}/${name}.png`,
+      getAsset: async (type, name, revision) =>
+        `${resourcePath}/hof_furni/${revision}/${type}/${name}.png`,
     });
   }
 
   async loadFurni(typeWithColor: string): Promise<LoadFurniResult> {
     const type = typeWithColor.split("*")[0];
-
-    const current = this.furnitureCache.get(type);
-    if (current != null) return current;
+    const revision = await this.options.furnitureData.getRevisionForType(type);
 
     let furniture = this.furnitureCache.get(type);
+    this.options.furnitureData.getRevisionForType(type);
 
     if (furniture != null) {
       return furniture;
     }
 
-    furniture = loadFurni(type, {
+    if (revision == null) {
+      throw new Error("Couldn't find revision for type " + type);
+    }
+
+    furniture = loadFurni(type, revision, {
       getAssets: this.options.getAssets,
       getVisualization: this.options.getVisualization,
       getAsset: this.options.getAsset,

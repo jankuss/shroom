@@ -16,10 +16,14 @@ export class FloorFurniture extends RoomObject implements IFurniture {
   private _roomZ: number;
   private _direction: number;
   private _animation?: string;
-  private _revision?: number;
+  private _type: string;
 
   private _onClick: HitEventHandler | undefined;
   private _onDoubleClick: HitEventHandler | undefined;
+
+  public get type() {
+    return this._type;
+  }
 
   public get onClick() {
     return this._onClick;
@@ -44,19 +48,19 @@ export class FloorFurniture extends RoomObject implements IFurniture {
     roomY: number;
     roomZ: number;
     direction: number;
-    revision: number;
+
     type: string;
     animation?: string;
     behaviors?: IFurnitureBehavior<FloorFurniture>[];
   }) {
     super();
 
+    this._type = options.type;
     this._roomX = options.roomX;
     this._roomY = options.roomY;
     this._roomZ = options.roomZ;
     this._direction = options.direction;
     this._animation = options.animation;
-    this._revision = options.revision;
 
     this.baseFurniture = new BaseFurniture(
       options.type,
