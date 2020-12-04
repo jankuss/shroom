@@ -1,6 +1,6 @@
 import {
   OffsetMap,
-  parseOffsetsFromManifest
+  parseOffsetsFromManifest,
 } from "./parseOffsetsFromManifest";
 import { parseStringAsync } from "./parseStringAsync";
 
@@ -27,13 +27,12 @@ export async function loadOffsetMap(
       const offsets = parseOffsetsFromManifest(manifestXml);
       offsets.forEach((offset, key) => offsetMap.set(key, offset));
     } catch (e) {
-      console.warn(`Error loading ${fileName}`, e);
       continue;
     }
   }
 
   return {
-    getOffset: name => offsetMap.get(name),
-    offsetMap
+    getOffset: (name) => offsetMap.get(name),
+    offsetMap,
   };
 }

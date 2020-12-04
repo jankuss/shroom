@@ -4,6 +4,7 @@ import { tryFetchString } from "./fetching";
 import * as path from "path";
 import { dumpFigureLibraries } from "./dumpFigureLibraries";
 import { dumpFurniFromFurniData } from "./dumpFurniFromFurniData";
+import { createOffsetSnapshot } from "../objects/avatar/util";
 
 export type Steps = {
   figureMap: boolean;
@@ -133,6 +134,21 @@ export async function run({
       figureFolder,
       dispatch
     );
+
+    const snapshot = await createOffsetSnapshot(
+      figureMapString,
+      async (name) => {
+        const file = await fs.readFile(
+          path.join(figureFolder, `${name}_manifest.bin`)
+        );
+
+        return file.toString("utf-8");
+      }
+    );
+
+    const offsetsPath = path.join(libraryFolder, "offsets.json");
+
+    await fs.writeFile(offsetsPath, snapshot);
 
     dispatch({ type: "FIGURE_ASSETS_SUCCESS" });
   }

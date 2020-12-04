@@ -10,6 +10,13 @@ export async function dumpFurni(
   name: string,
   folder: string
 ) {
+  const dir = path.join(folder, revision, name);
+
+  try {
+    await fs.stat(dir);
+    return;
+  } catch (e) {}
+
   const data = await fetchFurni(dcrUrl, revision, name);
 
   await fs.mkdir(path.join(folder, revision, data.name), { recursive: true });

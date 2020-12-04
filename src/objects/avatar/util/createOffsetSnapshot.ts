@@ -12,7 +12,11 @@ export async function createOffsetSnapshot(
 
   const { offsetMap } = await loadOffsetMap(figureMap, getManifest);
 
-  const result = JSON.stringify(Object.fromEntries(offsetMap));
+  const obj: any = {};
+
+  offsetMap.forEach((value, key) => (obj[key] = value));
+
+  const result = JSON.stringify(obj);
 
   return result;
 }

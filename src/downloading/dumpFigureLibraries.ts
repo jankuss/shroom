@@ -24,13 +24,22 @@ export async function dumpFigureLibraries(
       const id = item["$"].id;
       const fileName = `${id}.swf`;
       const file = `${gordon}/${fileName}`;
+
+      const resolvedOutPath = path.resolve(out);
+      const swfLocation = path.join(resolvedOutPath, fileName);
+
+      try {
+        await fs.stat(swfLocation);
+        return;
+      } catch (e) {
+        // Continue if file doesnt exist yet
+      }
+
       const response = await fetch(file);
       const buffer = await response.buffer();
 
       if (response.status !== 200) return;
 
-      const resolvedOutPath = path.resolve(out);
-      const swfLocation = path.join(resolvedOutPath, fileName);
       await fs.writeFile(swfLocation, buffer);
       await extractSwf(resolvedOutPath, swfLocation, ["bin"]);
 
