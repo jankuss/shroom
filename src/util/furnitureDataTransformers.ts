@@ -63,7 +63,7 @@ export const furnitureDataTransformers = {
   rentbuyout: transformFirst(booleanTransform, false),
   rentofferid: transformFirst(numberTransform, undefined),
   revision: transformFirst(numberTransform, undefined),
-  specialtype: transformFirst(numberTransform, 0),
+  specialtype: transformFirst(numberTransform, undefined),
   xdim: transformFirst(numberTransform, undefined),
   ydim: transformFirst(numberTransform, undefined),
 };

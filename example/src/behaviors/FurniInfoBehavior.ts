@@ -1,10 +1,16 @@
-import { IFurniture, IFurnitureBehavior } from "../../../dist";
+import { IFurnitureBehavior, IFurniture, IFurnitureData } from "shroom";
 
 export class FurniInfoBehavior implements IFurnitureBehavior {
   private parent: IFurniture | undefined;
 
+  constructor(private furnitureData: IFurnitureData) {}
+
   setParent(furniture: IFurniture): void {
     this.parent = furniture;
-    this.parent.onClick = (e) => {};
+    this.parent.onClick = async (e) => {
+      const info = await this.furnitureData.getInfoForFurniture(furniture);
+
+      console.log("Info", info);
+    };
   }
 }

@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js";
 import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
-import { IFurniture } from "./IFurniture";
+import { IFurniture, IFurnitureBehavior } from "./IFurniture";
 import { HitEvent } from "../../interfaces/IHitDetection";
 
 export class WallFurniture extends RoomObject implements IFurniture {
@@ -22,6 +22,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
     type: string;
     direction: number;
     animation?: string;
+    behaviors?: IFurnitureBehavior<WallFurniture>[];
   }) {
     super();
 
@@ -37,6 +38,8 @@ export class WallFurniture extends RoomObject implements IFurniture {
     this._roomZ = options.roomZ;
     this._animation = options.animation;
     this._direction = options.direction;
+
+    options.behaviors?.forEach((behavior) => behavior.setParent(this));
   }
 
   public get type() {
@@ -88,8 +91,21 @@ export class WallFurniture extends RoomObject implements IFurniture {
     this.updatePosition();
   }
 
-  onClick?: ((event: HitEvent) => void) | undefined;
-  onDoubleClick?: ((event: HitEvent) => void) | undefined;
+  public get onClick() {
+    return this.baseFurniture.onClick;
+  }
+
+  public set onClick(value) {
+    this.baseFurniture.onClick = value;
+  }
+
+  public get onDoubleClick() {
+    return this.baseFurniture.onDoubleClick;
+  }
+
+  public set onDoubleClick(value) {
+    this.baseFurniture.onDoubleClick = value;
+  }
 
   private updateAnimation() {
     this.baseFurniture.animation = this.animation;

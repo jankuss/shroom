@@ -29,10 +29,9 @@ const defaultConfig: IConfiguration = {};
 function createSimpleConfig(
   application: PIXI.Application,
   resourcePath?: string,
-  configuration: IConfiguration = defaultConfig
+  configuration: IConfiguration = defaultConfig,
+  furnitureData: IFurnitureData = FurnitureData.create(resourcePath)
 ): Dependencies {
-  const furnitureData = FurnitureData.create(resourcePath);
-
   return {
     animationTicker: AnimationTicker.create(application),
     avatarLoader: AvatarLoader.create(resourcePath),
@@ -200,11 +199,13 @@ export class Room
     resourcePath,
     tilemap,
     configuration,
+    furnitureData,
   }: {
     application: PIXI.Application;
     resourcePath?: string;
     tilemap: TileMap;
     configuration?: IConfiguration;
+    furnitureData?: IFurnitureData;
   }) {
     if (globalDependencies == null) {
       globalDependencies = createSimpleConfig(

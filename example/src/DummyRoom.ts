@@ -4,6 +4,8 @@ import {
   parseTileMapString,
   loadRoomTexture,
   FloorFurniture,
+  FurnitureData,
+  WallFurniture,
 } from "shroom";
 import EasyStar from "easystarjs";
 import { MultiStateBehavior } from "./behaviors/MultiStateBehavior";
@@ -59,10 +61,13 @@ export class DummyRoom {
       row.map((type) => (type !== "x" ? Number(type) : -1))
     );
 
+    const furnitureData = FurnitureData.create("./resources");
+
     this.room = Room.create({
       application,
       tilemap: tilemap,
       resourcePath: "./resources",
+      furnitureData,
     });
 
     this.room.addRoomObject(
@@ -72,7 +77,7 @@ export class DummyRoom {
         roomZ: 1,
         direction: 0,
         type: "edicehc",
-        behaviors: [new DiceBehavior(), new FurniInfoBehavior()],
+        behaviors: [new DiceBehavior(), new FurniInfoBehavior(furnitureData)],
       })
     );
 
@@ -257,14 +262,14 @@ export class DummyRoom {
     );
 
     this.room.addRoomObject(
-      new FloorFurniture({
-        roomX: 1,
+      new WallFurniture({
+        roomX: 0,
         roomY: 0,
         roomZ: 1,
         direction: 2,
-        type: "party_ravel",
+        type: "window_basic",
         animation: "0",
-        behaviors: [new MultiStateBehavior({ initialState: 0, count: 2 })],
+        behaviors: [new FurniInfoBehavior(furnitureData)],
       })
     );
 

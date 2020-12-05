@@ -28,8 +28,12 @@ export async function dumpFigureLibraries(
       const resolvedOutPath = path.resolve(out);
       const swfLocation = path.join(resolvedOutPath, fileName);
 
+      const success = () =>
+        dispatch({ type: "FIGURE_ASSETS_PROGRESS_SUCCESS", payload: fileName });
+
       try {
         await fs.stat(swfLocation);
+        success();
         return;
       } catch (e) {
         // Continue if file doesnt exist yet
@@ -43,7 +47,7 @@ export async function dumpFigureLibraries(
       await fs.writeFile(swfLocation, buffer);
       await extractSwf(resolvedOutPath, swfLocation, ["bin"]);
 
-      dispatch({ type: "FIGURE_ASSETS_PROGRESS_SUCCESS", payload: fileName });
+      success();
     },
     { concurrency: 30 }
   );

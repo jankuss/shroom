@@ -7,3 +7,5 @@ export { loadRoomTexture } from "./util/loadRoomTexture";
 export { parseTileMapString } from "./util/parseTileMapString";
 export { IFurniture, IFurnitureBehavior } from "./objects/furniture/IFurniture";
 export { HitEvent } from "./interfaces/IHitDetection";
+export { IFurnitureData } from "./interfaces/IFurnitureData";
+export { FurnitureData } from "./FurnitureData";
