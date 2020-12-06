@@ -50,7 +50,7 @@ jobs:
       - name: Release to GitHub Pages
         env:
           USE_SSH: true
-          GIT_USER: git
+          GIT_USER: jankuss
         run: |
           cd docs
           git config --global user.email "actions@gihub.com"
@@ -62,4 +62,4 @@ jobs:
           else
           npm i
           fi
-          npx docusaurus deploy
+          GIT_USER=jankuss npx docusaurus deploy
