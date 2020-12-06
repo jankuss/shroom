@@ -12,8 +12,8 @@ export function getTileColors(color: string) {
 
 export function getWallColors(color: string) {
   const leftTint = fromHex(color);
-  const topTint = fromHex(adjust(color, -60));
-  const rightTint = fromHex(adjust(color, -40));
+  const topTint = fromHex(adjust(color, -103));
+  const rightTint = fromHex(adjust(color, -52));
 
   return {
     topTint,
