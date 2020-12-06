@@ -9,8 +9,6 @@ export class FurniInfoBehavior implements IFurnitureBehavior {
     this.parent = furniture;
     this.parent.onClick = async (e) => {
       const info = await this.furnitureData.getInfoForFurniture(furniture);
-
-      console.log("Info", info);
     };
   }
 }
