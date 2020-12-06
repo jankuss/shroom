@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[12],{71:function(o){o.exports=JSON.parse('{"allTagsPath":"/shroom/blog/tags","slug":"hola","name":"hola","count":1,"permalink":"/shroom/blog/tags/hola"}')}}]);
