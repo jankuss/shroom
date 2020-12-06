@@ -4,7 +4,7 @@ import * as path from "path";
 function execute(command: string) {
   return new Promise((resolve, reject) =>
     exec(command, (error, stdout, stderr) =>
-      error || stderr.length > 0 ? reject(error) : resolve(stdout)
+      error ? reject(error) : resolve(stdout)
     )
   );
 }
@@ -73,9 +73,7 @@ export async function extractSwf(
               path.join(out, `${realFileName}.${fileName[1]}`)
             )} ${path.resolve(swf)}`
           );
-        } catch (e) {
-          console.error("Error");
-        }
+        } catch (e) {}
       }
     }
   }
