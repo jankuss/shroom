@@ -16,6 +16,7 @@ const room = Room.create({
     0000
     0000
    `,
+  resourcePath: "./resources",
 });
 
 const furni = new FloorFurniture({
