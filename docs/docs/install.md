@@ -14,6 +14,9 @@ npm install @jankuss/shroom pixi.js
 
 ### 2. Install `swftools` (http://www.swftools.org/download.html)
 
+Download and install `swftools`. Add the installation directory of `swftools` to your system `PATH` variable.
+**This step is important, or the asset dumper won't work.**
+
 ### 3. Dump assets from external variables into your project
 
 ```
