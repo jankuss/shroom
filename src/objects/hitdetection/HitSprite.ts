@@ -64,7 +64,7 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
     this._tag = tag;
 
     if (this._mirrored && !this._mirrorNotVisually) {
-      this.scale = new PIXI.Point(mirrored ? -1 : 1, 1);
+      this.scale = new PIXI.Point(this._mirrored ? -1 : 1, 1);
     }
 
     this._hitDetectionNode = hitDetection.register(this);

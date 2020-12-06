@@ -57,7 +57,7 @@ export class HitDetection implements IHitDetection {
     }
   }
 
-  private handleClick(event: MouseEvent) {
+  public handleClick(event: MouseEvent) {
     this.triggerEvent(
       event.clientX,
       event.clientY,
