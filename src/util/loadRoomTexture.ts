@@ -4,7 +4,7 @@ export async function loadRoomTexture(url: string): Promise<PIXI.Texture> {
   const image = new Image();
   image.src = url;
 
-  await new Promise((resolve) => {
+  await new Promise<void>((resolve) => {
     image.onload = () => {
       resolve();
     };
