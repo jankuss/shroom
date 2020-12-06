@@ -15,6 +15,7 @@ npm install @jankuss/shroom pixi.js
 ### 2. Install `swftools` (http://www.swftools.org/download.html)
 
 Download and install `swftools`. Add the installation directory of `swftools` to your system `PATH` variable.
+
 **This step is important, or the asset dumper won't work.**
 
 ### 3. Dump assets from external variables into your project
@@ -31,11 +32,15 @@ You will need to serve the created `resources` folder with a http server, so shr
 Lastly, in your code, import and initialize the Shroom instance.
 
 ```ts
+import * as PIXI from "pixi.js";
 import { Shroom } from "@jankuss/shroom";
+
+const view = document.querySelector("#root") as HTMLCanvasElement;
+const application = new PIXI.Application({ view });
 
 // Assuming the resources are available under http://localhost:8080/resources
 const shroom = Shroom.create({ application, resourcePath: "./resources" });
 ```
 
 Now, you are fully ready to use shroom.
-Check out the [Guides](create-room.md) section to learn how to use shroom properly.
+Check out the [Guides](create-room.md) section to learn how to use shroom.
