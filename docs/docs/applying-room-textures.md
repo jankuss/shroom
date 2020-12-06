@@ -19,6 +19,9 @@ const room = Room.create({
    `,
 });
 
+room.x = 100;
+room.y = 200;
+
 // Note: If you are using PIXI Loader and the texture has been preloaded,
 // you can also specify the textures like the following.
 

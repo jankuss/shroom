@@ -30,10 +30,22 @@ export class Stair extends RoomObject implements ITexturable {
   private _texture: PIXI.Texture | undefined;
   private _color: string | undefined;
 
+  private _tileHeight: number;
+
+  public get tileHeight() {
+    return this._tileHeight;
+  }
+
+  public set tileHeight(value) {
+    this._tileHeight = value;
+    this.updateSprites();
+  }
+
   constructor(private props: Props) {
     super();
 
     this._texture = props.texture;
+    this._tileHeight = props.tileHeight;
   }
 
   get texture() {
@@ -60,7 +72,7 @@ export class Stair extends RoomObject implements ITexturable {
     this.container?.destroy();
     this.container = new PIXI.Container();
 
-    const { roomX, roomY, roomZ, tileHeight, color, direction } = this.props;
+    const { roomX, roomY, roomZ, color, direction } = this.props;
     this.container.zIndex = getZOrder(roomX, roomY, roomZ);
 
     const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
@@ -69,7 +81,7 @@ export class Stair extends RoomObject implements ITexturable {
       const props = {
         x,
         y,
-        tileHeight,
+        tileHeight: this.tileHeight,
         index: 3 - i,
         color: this.color ?? color,
         tilePositions: getTilePositionForTile(roomX, roomY),

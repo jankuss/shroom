@@ -20,17 +20,29 @@ interface Props {
 }
 
 export class Tile extends RoomObject implements ITexturable {
-  private container: PIXI.Container | undefined;
-  private sprites: PIXI.DisplayObject[] = [];
+  private _container: PIXI.Container | undefined;
+  private _sprites: PIXI.DisplayObject[] = [];
 
   private _texture: PIXI.Texture | undefined;
   private _color: string | undefined;
+
+  private _tileHeight: number;
+
+  public get tileHeight() {
+    return this._tileHeight;
+  }
+
+  public set tileHeight(value) {
+    this._tileHeight = value;
+    this.updateSprites();
+  }
 
   constructor(private props: Props) {
     super();
 
     this._texture = props.texture;
     this._color = props.color;
+    this._tileHeight = props.tileHeight;
   }
 
   get texture() {
@@ -52,29 +64,22 @@ export class Tile extends RoomObject implements ITexturable {
   }
 
   private destroySprites() {
-    this.sprites = [];
-    this.sprites.forEach((sprite) => sprite.destroy());
+    this._sprites = [];
+    this._sprites.forEach((sprite) => sprite.destroy());
   }
 
   private updateSprites() {
     if (!this.mounted) return;
 
-    this.container?.destroy();
-    this.container = new PIXI.Container();
+    this._container?.destroy();
+    this._container = new PIXI.Container();
 
     this.destroySprites();
 
-    const {
-      geometry,
-      roomX,
-      roomY,
-      roomZ,
-      edge = false,
-      tileHeight,
-    } = this.props;
+    const { geometry, roomX, roomY, roomZ, edge = false } = this.props;
 
     const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
-    this.container.zIndex = getZOrder(roomX, roomY, roomZ);
+    this._container.zIndex = getZOrder(roomX, roomY, roomZ);
 
     const { borderLeftTint, borderRightTint, tileTint } = getTileColors(
       this._color ?? this.props.color
@@ -94,12 +99,12 @@ export class Tile extends RoomObject implements ITexturable {
 
     const borderLeftMatrix = getLeftMatrix(x, y, {
       width: 32,
-      height: tileHeight,
+      height: this.tileHeight,
     });
 
     const borderRightMatrix = getRightMatrix(x, y, {
       width: 32,
-      height: tileHeight,
+      height: this.tileHeight,
     });
 
     const borderLeft = new PIXI.TilingSprite(
@@ -107,7 +112,7 @@ export class Tile extends RoomObject implements ITexturable {
     );
     borderLeft.transform.setFromMatrix(borderLeftMatrix);
     borderLeft.width = 32;
-    borderLeft.height = tileHeight;
+    borderLeft.height = this.tileHeight;
     borderLeft.tilePosition = tilePositions.left;
     borderLeft.tint = borderLeftTint;
 
@@ -116,17 +121,17 @@ export class Tile extends RoomObject implements ITexturable {
     );
     borderRight.transform.setFromMatrix(borderRightMatrix);
     borderRight.width = 32;
-    borderRight.height = tileHeight;
+    borderRight.height = this.tileHeight;
     borderRight.tilePosition = tilePositions.right;
     borderRight.tint = borderRightTint;
 
-    this.sprites.push(this.container);
+    this._sprites.push(this._container);
 
-    this.container.addChild(borderLeft);
-    this.container.addChild(borderRight);
-    this.container.addChild(tile);
+    this._container.addChild(borderLeft);
+    this._container.addChild(borderRight);
+    this._container.addChild(tile);
 
-    this.visualization.addPlaneChild(this.container);
+    this.visualization.addPlaneChild(this._container);
   }
 
   destroy(): void {

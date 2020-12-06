@@ -68,9 +68,6 @@ export class Room
   public roomWidth: number;
   public roomHeight: number;
 
-  private wallHeight = 135;
-  private tileHeight = 8;
-
   private tileColor: string = "#989865";
 
   private animationTicker: IAnimationTicker;
@@ -94,6 +91,70 @@ export class Room
   private _currentFloorTexture: PIXI.Texture | undefined;
 
   private _onTileClick: ((position: RoomPosition) => void) | undefined;
+
+  private _wallDepth: number = 8;
+  private _wallHeight: number = 115;
+  private _tileHeight: number = 8;
+
+  private _largestDiff: number;
+
+  public get wallHeight() {
+    return this._wallHeight + this._largestDiff * 32;
+  }
+
+  public set wallHeight(value) {
+    this._wallHeight = value;
+    this._updateWallHeight();
+  }
+
+  private get wallHeightWithZ() {
+    return this._wallHeight + this._largestDiff * 32;
+  }
+
+  public get tileHeight() {
+    return this._tileHeight;
+  }
+
+  public set tileHeight(value) {
+    this._tileHeight = value;
+    this._updateTileHeight();
+  }
+
+  public get wallDepth() {
+    return this._wallDepth;
+  }
+
+  public set wallDepth(value) {
+    this._wallDepth = value;
+    this._updateWallDepth();
+  }
+
+  private _updateWallDepth() {
+    this.visualization.disableCache();
+    this.walls.forEach((wall) => {
+      wall.wallDepth = this.wallDepth;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _updateWallHeight() {
+    this.visualization.disableCache();
+    this.walls.forEach((wall) => {
+      wall.wallHeight = this.wallHeight;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _updateTileHeight() {
+    this.visualization.disableCache();
+    this.floor.forEach((floor) => {
+      floor.tileHeight = this.tileHeight;
+    });
+    this.walls.forEach((wall) => {
+      wall.tileHeight = this.tileHeight;
+    });
+    this.visualization.enableCache();
+  }
 
   private _getTilePositionWithOffset(roomX: number, roomY: number) {
     return {
@@ -174,8 +235,9 @@ export class Room
       normalizedTileMap
     );
 
+    this._largestDiff = largestDiff;
+
     this.parsedTileMap = parsedTileMap;
-    this.wallHeight = this.wallHeight + largestDiff * 32;
 
     this.visualization = new RoomVisualization();
 
@@ -211,7 +273,8 @@ export class Room
       globalDependencies = createSimpleConfig(
         application,
         resourcePath,
-        configuration
+        configuration,
+        furnitureData
       );
     }
 
@@ -331,10 +394,11 @@ export class Room
               roomY: y - this.wallOffsets.y,
               direction: direction,
               tileHeight: this.tileHeight,
-              wallHeight: this.wallHeight,
+              wallHeight: this.wallHeightWithZ,
               roomZ: tile.height,
               color: this.wallColor ?? "#ffffff",
               texture: this._currentWallTexture,
+              wallDepth: this.wallDepth,
             })
           );
         }
@@ -347,10 +411,11 @@ export class Room
               roomY: y - this.wallOffsets.y,
               direction: "right",
               tileHeight: this.tileHeight,
-              wallHeight: this.wallHeight,
+              wallHeight: this.wallHeightWithZ,
               side: false,
               roomZ: tile.height,
               color: "#ffffff",
+              wallDepth: this.wallDepth,
             })
           );
 
@@ -361,10 +426,11 @@ export class Room
               roomY: y - this.wallOffsets.y,
               direction: "left",
               tileHeight: this.tileHeight,
-              wallHeight: this.wallHeight,
+              wallHeight: this.wallHeightWithZ,
               side: false,
               roomZ: tile.height,
               color: "#ffffff",
+              wallDepth: this.wallDepth,
             })
           );
         }

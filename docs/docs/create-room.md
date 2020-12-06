@@ -21,5 +21,8 @@ const room = Room.create({
    `,
 });
 
+room.x = 100;
+room.y = 200;
+
 application.stage.addChild(room);
 ```

@@ -25,10 +25,10 @@ function drawBorder(
   graphics.endFill();
 
   graphics.beginHole();
-  graphics.moveTo(points.p1.x + 8, points.p1.y + offsetY);
-  graphics.lineTo(points.p2.x, points.p2.y + 4 + offsetY);
-  graphics.lineTo(points.p3.x - 8, points.p3.y + offsetY);
-  graphics.lineTo(points.p4.x, points.p4.y - 4 + offsetY);
+  graphics.moveTo(points.p1.x + 6, points.p1.y + offsetY);
+  graphics.lineTo(points.p2.x, points.p2.y + 3 + offsetY);
+  graphics.lineTo(points.p3.x - 6, points.p3.y + offsetY);
+  graphics.lineTo(points.p4.x, points.p4.y - 3 + offsetY);
   graphics.endHole();
 }
 
