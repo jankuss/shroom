@@ -12,7 +12,9 @@ To install shroom in your project, use the following command.
 npm install @jankuss/shroom pixi.js
 ```
 
-### 2. Dump assets from external variables into your project
+### 2. Install `swftools` (http://www.swftools.org/download.html)
+
+### 3. Dump assets from external variables into your project
 
 ```
 npm install -g @jankuss/shroom
@@ -21,7 +23,7 @@ shroom dump --url https://www.habbo.com/gamedata/external_variables/326b0a1abf9e
 
 You will need to serve the created `resources` folder with a http server, so shroom can access the required assets.
 
-### 3. Create the Shroom instance
+### 4. Create the Shroom instance
 
 Lastly, in your code, import and initialize the Shroom instance.
 
