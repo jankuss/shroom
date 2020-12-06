@@ -47,7 +47,8 @@
   "scripts": {
     "dev": "webpack serve",
     "dump": "yarn ts-node src/downloading/cli.tsx",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "bin": {
     "shroom": "dist/downloading/cli/index.js"
