@@ -1,11 +1,11 @@
 import * as PIXI from "pixi.js";
-import { HitEventHandler } from "../../HitSprite";
 
 import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
 import { IFurniture, IFurnitureBehavior } from "./IFurniture";
 import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
+import { HitEventHandler } from "../hitdetection/HitSprite";
 
 export class FloorFurniture extends RoomObject implements IFurniture {
   private baseFurniture: BaseFurniture;

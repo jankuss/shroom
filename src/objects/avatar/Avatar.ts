@@ -21,7 +21,7 @@ interface Options {
 }
 
 export class Avatar extends RoomObject {
-  private avatarSprites: AvatarSprites | undefined;
+  private avatarSprites: AvatarSprites;
   private walkAnimation: ObjectAnimation | undefined;
   private walking: boolean = false;
 
@@ -40,6 +40,22 @@ export class Avatar extends RoomObject {
   private _roomZ: number = 0;
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
 
+  public get onClick() {
+    return this.avatarSprites.onClick;
+  }
+
+  public set onClick(value) {
+    this.avatarSprites.onClick = value;
+  }
+
+  public get onDoubleClick() {
+    return this.avatarSprites.onDoubleClick;
+  }
+
+  public set onDoubleClick(value) {
+    this.avatarSprites.onDoubleClick = value;
+  }
+
   constructor({ look, roomX, roomY, roomZ, direction }: Options) {
     super();
 
@@ -48,6 +64,12 @@ export class Avatar extends RoomObject {
     this._roomX = roomX;
     this._roomY = roomY;
     this._roomZ = roomZ;
+
+    this.avatarSprites = new AvatarSprites({
+      look: this.getCurrentLookOptions(),
+      zIndex: this.calculateZIndex(),
+      position: { x: 0, y: 0 },
+    });
   }
 
   get roomX() {
@@ -242,7 +264,7 @@ export class Avatar extends RoomObject {
     roomZ: number,
     options?: { direction?: number }
   ) {
-    this.walkAnimation?.walk(
+    this.walkAnimation?.move(
       { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
       { roomX, roomY, roomZ },
       options?.direction ?? this.direction
@@ -291,18 +313,7 @@ export class Avatar extends RoomObject {
     }
   }
 
-  private calculatePosition() {
-    const { roomX, roomY, roomZ } = this.getDisplayRoomPosition();
-
-    return this.geometry.getPosition(roomX, roomY, roomZ);
-  }
-
   registered(): void {
-    this.avatarSprites = new AvatarSprites({
-      look: this.getCurrentLookOptions(),
-      zIndex: this.calculateZIndex(),
-      position: this.calculatePosition(),
-    });
     this.updatePosition();
 
     this.roomObjectContainer.addRoomObject(this.avatarSprites);

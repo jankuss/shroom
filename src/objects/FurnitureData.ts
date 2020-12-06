@@ -1,7 +1,7 @@
-import { FurnitureInfo, IFurnitureData } from "./interfaces/IFurnitureData";
+import { FurnitureInfo, IFurnitureData } from "../interfaces/IFurnitureData";
 import { parseStringPromise } from "xml2js";
-import { formatFurnitureData } from "./util/furnitureDataTransformers";
-import { IFurniture } from "./objects/furniture/IFurniture";
+import { formatFurnitureData } from "../util/furnitureDataTransformers";
+import { IFurniture } from "./furniture/IFurniture";
 
 type FurnitureMap = {
   [key: string]: FurnitureInfo | undefined;

@@ -1,16 +1,19 @@
+import * as PIXI from "pixi.js";
 import {
   HitDetectionElement,
   HitDetectionNode,
   HitEvent,
   IHitDetection,
-} from "./interfaces/IHitDetection";
+} from "../../interfaces/IHitDetection";
 
 export class HitDetection implements IHitDetection {
   private counter: number = 0;
   private map: Map<number, HitDetectionElement> = new Map();
 
   constructor(private app: PIXI.Application) {
-    this.app.view.addEventListener("click", (event) => this.handleClick(event));
+    window.addEventListener("click", (event) => this.handleClick(event), {
+      capture: true,
+    });
   }
 
   static create(application: PIXI.Application) {
@@ -31,7 +34,8 @@ export class HitDetection implements IHitDetection {
   private triggerEvent(
     x: number,
     y: number,
-    invoke: (element: HitDetectionElement, event: HitEvent) => void
+    invoke: (element: HitDetectionElement, event: HitEvent) => void,
+    domEvent?: Event
   ) {
     const elements = this.performHitTest(x, y);
     let stopped = false;
@@ -39,6 +43,9 @@ export class HitDetection implements IHitDetection {
     const event: HitEvent = {
       stopPropagation: () => {
         stopped = true;
+      },
+      absorb: () => {
+        domEvent?.stopImmediatePropagation();
       },
     };
 
@@ -51,8 +58,11 @@ export class HitDetection implements IHitDetection {
   }
 
   private handleClick(event: MouseEvent) {
-    this.triggerEvent(event.clientX, event.clientY, (element, event) =>
-      element.trigger("click", event)
+    this.triggerEvent(
+      event.clientX,
+      event.clientY,
+      (element, event) => element.trigger("click", event),
+      event
     );
   }
 

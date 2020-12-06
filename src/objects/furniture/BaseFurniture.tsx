@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
-import { HitEventHandler, HitSprite } from "../../HitSprite";
+import { ClickHandler } from "../ClickHandler";
 import { HitEvent } from "../../interfaces/IHitDetection";
+import { HitSprite } from "../hitdetection/HitSprite";
 
 import { RoomObject } from "../RoomObject";
 import { DrawPart } from "./util/DrawDefinition";
@@ -22,11 +23,8 @@ export class BaseFurniture
   private _direction: number = 0;
   private _animation: string | undefined;
   private _type: string;
-
-  private _onClick: HitEventHandler | undefined;
-  private _onDoubleClick: HitEventHandler | undefined;
-
   private _unknownTexture: PIXI.Texture | undefined;
+  private _clickHandler = new ClickHandler();
 
   private _doubleClickInfo?: {
     initialEvent: HitEvent;
@@ -34,19 +32,19 @@ export class BaseFurniture
   };
 
   public get onClick() {
-    return this._onClick;
+    return this._clickHandler.onClick;
   }
 
   public set onClick(value) {
-    this._onClick = value;
+    this._clickHandler.onClick = value;
   }
 
   public get onDoubleClick() {
-    return this._onDoubleClick;
+    return this._clickHandler.onDoubleClick;
   }
 
   public set onDoubleClick(value) {
-    this._onDoubleClick = value;
+    this._clickHandler.onDoubleClick = value;
   }
 
   public get x() {
@@ -219,19 +217,6 @@ export class BaseFurniture
     };
   }
 
-  private _handleSpriteClick(event: HitEvent) {
-    event.stopPropagation();
-
-    if (this._doubleClickInfo == null) {
-      this.onClick && this.onClick(event);
-      this.startDoubleClick(event);
-    } else {
-      this.onDoubleClick &&
-        this.onDoubleClick(this._doubleClickInfo.initialEvent);
-      this.resetDoubleClick();
-    }
-  }
-
   private createSprite(
     asset: Asset,
     layer: Layer | undefined,
@@ -252,16 +237,16 @@ export class BaseFurniture
       mask?: boolean;
     }
   ): PIXI.Sprite {
-    const sprite = new HitSprite(
-      this.hitDetection,
-      getHitmap,
-      asset.flipH,
-      layer?.tag
-    );
+    const sprite = new HitSprite({
+      hitDetection: this.hitDetection,
+      getHitmap: getHitmap,
+      mirrored: asset.flipH,
+      tag: layer?.tag,
+    });
 
     if (layer?.ignoreMouse !== "1") {
       sprite.addEventListener("click", (event) =>
-        this._handleSpriteClick(event)
+        this._clickHandler.handleClick(event)
       );
     }
 

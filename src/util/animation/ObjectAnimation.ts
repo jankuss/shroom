@@ -27,7 +27,7 @@ export class ObjectAnimation {
     return this.nextPosition;
   }
 
-  walk(
+  move(
     currentPos: { roomX: number; roomY: number; roomZ: number },
     newPos: { roomX: number; roomY: number; roomZ: number },
     direction: number
@@ -59,7 +59,7 @@ export class ObjectAnimation {
 
       const next = this.enqueued.shift();
       if (next != null) {
-        this.walk(next.currentPosition, next.newPosition, next.direction);
+        this.move(next.currentPosition, next.newPosition, next.direction);
       } else {
         this.callbacks.onStop();
       }

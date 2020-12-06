@@ -290,6 +290,10 @@ export class DummyRoom {
       roomZ: 1,
     });
 
+    this.ownAvatar.onClick = (event) => {
+      event.absorb();
+    };
+
     this.room.addRoomObject(this.ownAvatar);
 
     this.room.x = application.screen.width / 2 - this.room.roomWidth / 2;

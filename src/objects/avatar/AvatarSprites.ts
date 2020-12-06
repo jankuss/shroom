@@ -6,6 +6,8 @@ import {
 } from "./util/getAvatarDrawDefinition";
 import { LookOptions } from "./util/createLookServer";
 import { AvatarLoaderResult } from "../../interfaces/IAvatarLoader";
+import { ClickHandler } from "../ClickHandler";
+import { HitSprite } from "../hitdetection/HitSprite";
 
 interface Options {
   look: LookOptions;
@@ -19,11 +21,28 @@ export class AvatarSprites extends RoomObject {
   private avatarDrawDefinition: AvatarDrawDefinition | undefined;
 
   private _lookOptions: LookOptions;
-
   private _x: number = 0;
   private _y: number = 0;
   private _zIndex: number = 0;
   private _currentFrame: number = 0;
+  private _clickHandler: ClickHandler = new ClickHandler();
+  private _assets: PIXI.Sprite[] = [];
+
+  get onClick() {
+    return this._clickHandler.onClick;
+  }
+
+  set onClick(value) {
+    this._clickHandler.onClick = value;
+  }
+
+  get onDoubleClick() {
+    return this._clickHandler.onDoubleClick;
+  }
+
+  set onDoubleClick(value) {
+    this._clickHandler.onDoubleClick = value;
+  }
 
   get x() {
     return this._x;
@@ -72,7 +91,7 @@ export class AvatarSprites extends RoomObject {
     this._updateSprites();
   }
 
-  constructor(private options: Options) {
+  constructor(options: Options) {
     super();
 
     this._x = options.position.x;
@@ -97,8 +116,8 @@ export class AvatarSprites extends RoomObject {
   private _updateSprites() {
     if (this.avatarLoaderResult == null) return;
 
-    const { zIndex } = this.options;
-
+    this._assets.forEach((value) => value.destroy());
+    this._assets = [];
     this.container?.destroy();
 
     this.container = new PIXI.Container();
@@ -116,16 +135,17 @@ export class AvatarSprites extends RoomObject {
     );
 
     definition.parts.forEach((part) => {
-      const asset = this.createAsset(part);
+      const asset = this.createAsset(part, definition.mirrorHorizontal);
       if (asset == null) return;
 
       this.container?.addChild(asset);
+      this._assets.push(asset);
     });
 
     this.visualization.addContainerChild(this.container);
   }
 
-  private createAsset(part: AvatarDrawPart) {
+  private createAsset(part: AvatarDrawPart, mirrored: boolean) {
     if (this.avatarLoaderResult == null)
       throw new Error(
         "Cant create asset when avatar loader result not present"
@@ -134,11 +154,19 @@ export class AvatarSprites extends RoomObject {
 
     if (texture == null) return;
 
-    const sprite = new PIXI.Sprite();
-    sprite.texture = texture;
+    const sprite = new HitSprite({
+      hitDetection: this.hitDetection,
+      mirroredNotVisually: mirrored,
+    });
+
+    sprite.zIndex = this.zIndex;
+    sprite.hitTexture = texture;
 
     sprite.x = part.x;
     sprite.y = part.y;
+    sprite.addEventListener("click", (event) => {
+      this._clickHandler.handleClick(event);
+    });
 
     if (part.color != null && part.mode === "colored") {
       sprite.tint = parseInt(part.color.slice(1), 16);

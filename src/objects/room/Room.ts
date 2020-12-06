@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
-import { AnimationTicker } from "../../AnimationTicker";
-import { FurnitureData } from "../../FurnitureData";
-import { HitDetection } from "../../HitDetection";
+import { AnimationTicker } from "../AnimationTicker";
+import { FurnitureData } from "../FurnitureData";
+import { HitDetection } from "../hitdetection/HitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { IAvatarLoader } from "../../interfaces/IAvatarLoader";
 import { IConfiguration } from "../../interfaces/IConfiguration";

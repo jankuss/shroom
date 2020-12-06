@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { HitTexture } from "../../hitdetection/HitTexture";
 
 import { DrawDefinition } from "./DrawDefinition";
 import { getFurniDrawDefinition } from "./getFurniDrawDefinition";
@@ -81,44 +82,9 @@ export async function loadFurni(
       await Promise.all(
         assetsToLoad.map(async (asset) => {
           const imageUrl = await options.getAsset(type, asset.name, revision);
+          const image = await HitTexture.fromUrl(imageUrl);
 
-          const image = new Image();
-          image.src = imageUrl;
-
-          const dimensions = await new Promise<{
-            width: number;
-            height: number;
-          }>((resolve) => {
-            image.onload = (value) => {
-              resolve({ width: image.width, height: image.height });
-            };
-          });
-
-          const texture = PIXI.Texture.from(image);
-
-          const canvas = document.createElement("canvas");
-          canvas.width = image.width;
-          canvas.height = image.height;
-          const context = canvas.getContext("2d");
-
-          if (context == null) throw new Error("Failed to create 2d context");
-          context.drawImage(image, 0, 0);
-
-          let generated: Uint32Array | undefined;
-
-          return [
-            asset.name,
-            {
-              texture,
-              generateHitMap: () => {
-                if (generated != null) return generated;
-
-                generated = generateHitMap(image);
-
-                return generated;
-              },
-            },
-          ] as const;
+          return [asset.name, image] as const;
         })
       )
     );
@@ -140,31 +106,17 @@ export async function loadFurni(
         animation,
       }),
     getAsset: (name) => {
-      const buffer = textures.get(name);
+      const hitTexture = textures.get(name);
+      if (hitTexture == null) throw new Error("Invalid asset: " + name);
 
-      if (buffer == null) throw new Error("Invalid asset: " + name);
-
-      return buffer.texture;
+      return hitTexture.texture;
     },
     getHitMap: (name) => {
-      const buffer = textures.get(name);
-      if (buffer == null) throw new Error("Invalid asset: " + name);
-
-      const hitmap = buffer.generateHitMap();
-
-      const texture = buffer.texture;
-      const baseTexture = texture.baseTexture;
+      const hitTexture = textures.get(name);
+      if (hitTexture == null) throw new Error("Invalid asset: " + name);
 
       return (x: number, y: number, transform: { x: number; y: number }) => {
-        x = x - transform.x;
-        y = y - transform.y;
-
-        let dx = Math.round(x * baseTexture.resolution);
-        let dy = Math.round(y * baseTexture.resolution);
-        let ind = dx + dy * baseTexture.realWidth;
-        let ind1 = ind % 32;
-        let ind2 = (ind / 32) | 0;
-        return (hitmap[ind2] & (1 << ind1)) !== 0;
+        return hitTexture.hits(x, y, transform);
       };
     },
   };

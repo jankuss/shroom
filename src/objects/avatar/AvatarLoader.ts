@@ -12,16 +12,17 @@ import {
   AvatarLoaderResult,
   IAvatarLoader,
 } from "../../interfaces/IAvatarLoader";
+import { HitTexture } from "../hitdetection/HitTexture";
 
 interface Options {
-  resolveImage: (id: string) => Promise<PIXI.Texture>;
+  resolveImage: (id: string) => Promise<HitTexture>;
   createLookServer: () => Promise<LookServer>;
 }
 
 const directions = [0, 1, 2, 3, 4, 5, 6, 7];
 
 export class AvatarLoader implements IAvatarLoader {
-  private globalCache: Map<string, Promise<PIXI.Texture>> = new Map();
+  private globalCache: Map<string, Promise<HitTexture>> = new Map();
   private lookServer: Promise<LookServer>;
 
   constructor(private options: Options) {
@@ -46,26 +47,14 @@ export class AvatarLoader implements IAvatarLoader {
         });
       },
       resolveImage: async (id) => {
-        const image = new Image();
-        image.src = `${resourcePath}/figure/${id}.png`;
-
-        const dimensions = await new Promise<{
-          width: number;
-          height: number;
-        }>((resolve) => {
-          image.onload = (value) => {
-            resolve({ width: image.width, height: image.height });
-          };
-        });
-
-        return PIXI.Texture.from(image);
+        return HitTexture.fromUrl(`${resourcePath}/figure/${id}.png`);
       },
     });
   }
 
   async getAvatarDrawDefinition(look: string): Promise<AvatarLoaderResult> {
     const parsedLook = parseLookString(look);
-    const loadedFiles = new Map<string, Promise<PIXI.Texture>>();
+    const loadedFiles = new Map<string, Promise<HitTexture>>();
 
     const getDrawDefinition = await this.lookServer;
 
@@ -154,7 +143,7 @@ export class AvatarLoader implements IAvatarLoader {
       )
     );
 
-    const awaitedFiles = new Map<string, PIXI.Texture>(awaitedEntries);
+    const awaitedFiles = new Map<string, HitTexture>(awaitedEntries);
 
     const obj: AvatarLoaderResult = {
       getDrawDefinition: (options) => {

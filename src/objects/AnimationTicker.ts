@@ -1,4 +1,4 @@
-import { IAnimationTicker } from "./interfaces/IAnimationTicker";
+import { IAnimationTicker } from "../interfaces/IAnimationTicker";
 
 const ANIM_FPS = 24;
 const TARGET_FPS = 60;
