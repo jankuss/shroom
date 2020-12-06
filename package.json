@@ -1,6 +1,6 @@
 {
   "name": "shroom",
-  "version": "1.0.0",
+  "version": "0.1.0-alpha.0",
   "main": "dist/index.js",
   "license": "MIT",
   "devDependencies": {
@@ -48,7 +48,8 @@
     "dev": "webpack serve",
     "dump": "yarn ts-node src/downloading/cli.tsx",
     "test": "jest",
-    "build": "tsc"
+    "build": "rm -rf dist && tsc",
+    "prepublishOnly": "yarn build"
   },
   "bin": {
     "shroom": "dist/downloading/cli/index.js"
