@@ -90,7 +90,9 @@ export class TileCursor extends RoomObject {
 
     if (this.hover) {
       drawBorder(graphics, 0x000000, 0.33, 0);
-      drawBorder(graphics, 0xffffff, 1, -2);
+
+      drawBorder(graphics, 0xa7d1e0, 1, -2);
+      drawBorder(graphics, 0xffffff, 1, -3);
     }
   }
 
