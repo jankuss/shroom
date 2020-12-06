@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 
-import { Room, loadRoomTexture, FloorFurniture, Avatar } from "shroom";
+import { Room, FloorFurniture, Avatar, Shroom } from "@jankuss/shroom";
 import { DummyRoom } from "./DummyRoom";
 
 const view = document.querySelector("#root") as HTMLCanvasElement | undefined;
@@ -21,14 +21,13 @@ const application = new PIXI.Application({
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
-const room = Room.create({
-  application,
+const shroom = Shroom.create({ application, resourcePath: "./resources" });
+const room = Room.create(shroom, {
   tilemap: `
     0000
     0000
     0000
    `,
-  resourcePath: "./resources",
 });
 
 const furni = new FloorFurniture({

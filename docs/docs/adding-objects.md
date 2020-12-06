@@ -6,17 +6,20 @@ title: Adding objects
 The room is so empty right now. Let's add a character and a sofa for him to sit on.
 
 ```ts
+import * as PIXI from "pixi.js";
+
+import { Room, FloorFurniture, Avatar, Shroom } from "@jankuss/shroom";
+
 const view = document.querySelector("#root") as HTMLCanvasElement;
 const application = new PIXI.Application({ view });
 
-const room = Room.create({
-  application,
+const shroom = Shroom.create({ application, resourcePath: "./resources" });
+const room = Room.create(shroom, {
   tilemap: `
     0000
     0000
     0000
    `,
-  resourcePath: "./resources",
 });
 
 const furni = new FloorFurniture({

@@ -23,26 +23,9 @@ import { Tile } from "./Tile";
 import { TileCursor } from "./TileCursor";
 import { getTileMapBounds } from "./util/getTileMapBounds";
 import { Wall } from "./Wall";
+import { Shroom } from "../Shroom";
 
-const defaultConfig: IConfiguration = {};
-
-function createSimpleConfig(
-  application: PIXI.Application,
-  resourcePath?: string,
-  configuration: IConfiguration = defaultConfig,
-  furnitureData: IFurnitureData = FurnitureData.create(resourcePath)
-): Dependencies {
-  return {
-    animationTicker: AnimationTicker.create(application),
-    avatarLoader: AvatarLoader.create(resourcePath),
-    furnitureLoader: FurnitureLoader.create(furnitureData, resourcePath),
-    hitDetection: HitDetection.create(application),
-    configuration: configuration,
-    furnitureData,
-  };
-}
-
-interface Dependencies {
+export interface Dependencies {
   animationTicker: IAnimationTicker;
   avatarLoader: IAvatarLoader;
   furnitureLoader: IFurnitureLoader;
@@ -52,8 +35,6 @@ interface Dependencies {
 }
 
 type TileMap = TileType[][] | string;
-
-let globalDependencies: Dependencies | undefined;
 
 export class Room
   extends PIXI.Container
@@ -256,29 +237,8 @@ export class Room
     this.addChild(this.visualization);
   }
 
-  static create({
-    application,
-    resourcePath,
-    tilemap,
-    configuration,
-    furnitureData,
-  }: {
-    application: PIXI.Application;
-    resourcePath?: string;
-    tilemap: TileMap;
-    configuration?: IConfiguration;
-    furnitureData?: IFurnitureData;
-  }) {
-    if (globalDependencies == null) {
-      globalDependencies = createSimpleConfig(
-        application,
-        resourcePath,
-        configuration,
-        furnitureData
-      );
-    }
-
-    return new Room({ ...globalDependencies, tilemap });
+  static create(shroom: Shroom, { tilemap }: { tilemap: TileMap }) {
+    return new Room({ ...shroom.dependencies, tilemap });
   }
 
   private loadWallTextures() {
