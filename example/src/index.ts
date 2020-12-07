@@ -24,13 +24,11 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 const shroom = Shroom.create({ application, resourcePath: "./resources" });
 const room = Room.create(shroom, {
   tilemap: `
-    0
+    0000
+    0000
+    0000
    `,
 });
-
-room.wallDepth = 0;
-room.wallHeight = 32;
-room.tileHeight = 0;
 
 room.x = 100;
 room.y = 200;
