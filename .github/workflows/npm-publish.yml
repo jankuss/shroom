@@ -36,7 +36,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: "Version {{ EVENT_PAYLOAD.release.tag_name }} has been published on npm."
+          args: "Version `{{ EVENT_PAYLOAD.release.tag_name }}` has been published on npm."
 
   publish-gpr:
     needs: build

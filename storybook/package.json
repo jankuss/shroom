@@ -17,7 +17,8 @@
     "@storybook/addon-essentials": "^6.2.0-alpha.4",
     "@storybook/addon-links": "^6.2.0-alpha.4",
     "@storybook/html": "^6.2.0-alpha.4",
-    "babel-loader": "^8.2.2"
+    "babel-loader": "^8.2.2",
+    "chromatic": "^5.4.0"
   },
   "dependencies": {
     "@jankuss/shroom": "file:../",

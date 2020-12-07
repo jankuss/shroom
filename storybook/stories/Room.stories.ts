@@ -1,5 +1,7 @@
-import { Room } from "@jankuss/shroom";
+import { loadRoomTexture, Room } from "@jankuss/shroom";
+
 import { createShroom } from "./common/createShroom";
+import tile from "./assets/tile.png";
 
 export function DefaultRoom() {
   return createShroom(({ application, shroom }) => {
@@ -109,6 +111,108 @@ export function HiddenWalls() {
     room.x = application.screen.width / 2 - room.roomWidth / 2;
     room.y = application.screen.height / 2 - room.roomHeight / 2;
     room.hideWalls = true;
+
+    application.stage.addChild(room);
+  });
+}
+
+export function TileTexture() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxx000
+        xxx000
+        xxx000
+        000000
+        000000
+        000000
+      `,
+    });
+
+    room.floorTexture = loadRoomTexture(tile);
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    application.stage.addChild(room);
+  });
+}
+
+export function WallTexture() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxx000
+        xxx000
+        xxx000
+        000000
+        000000
+        000000
+      `,
+    });
+
+    room.wallTexture = loadRoomTexture(tile);
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    application.stage.addChild(room);
+  });
+}
+
+export function CustomLook() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxx11100
+        xxx11100
+        xxx00000
+        00000000
+        00000000
+        00000000
+      `,
+    });
+
+    const tileTexture = loadRoomTexture(tile);
+    room.wallTexture = tileTexture;
+    room.floorTexture = tileTexture;
+
+    room.wallHeight = 128;
+    room.tileHeight = 2;
+    room.wallDepth = 2;
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    application.stage.addChild(room);
+  });
+}
+
+export function CustomColor() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxx11100
+        xxx11100
+        xxx00000
+        00000000
+        00000000
+        00000000
+      `,
+    });
+
+    const tileTexture = loadRoomTexture(tile);
+    room.wallTexture = tileTexture;
+    room.floorTexture = tileTexture;
+
+    room.wallHeight = 128;
+    room.tileHeight = 2;
+    room.wallDepth = 2;
+    room.wallColor = "#cceeee";
+    room.floorColor = "#f3f3f3";
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
 
     application.stage.addChild(room);
   });

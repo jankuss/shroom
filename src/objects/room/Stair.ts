@@ -157,7 +157,7 @@ function createStairBoxDirection0({
     tilePositions.top
   );
   tile.width = 32;
-  tile.height = tileHeight;
+  tile.height = 8;
 
   const borderLeft = createSprite(
     getLeftMatrix(baseX, baseY, { width: 32, height: tileHeight }),
