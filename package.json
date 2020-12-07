@@ -2,7 +2,7 @@
   "name": "@jankuss/shroom",
   "version": "0.1.0-alpha.11",
   "main": "dist/index.js",
-  "license": "MPL-2.0",
+  "license": "LGPL-3.0-or-later",
   "repository": {
     "type": "git",
     "url": "https://github.com/jankuss/shroom.git"
