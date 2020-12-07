@@ -390,7 +390,11 @@ export class Wall extends RoomObject {
             1,
             -0.5,
             baseX + wallWidth - this.wallDepth,
-            baseY - this.wallHeight + wallWidth / 2 - this.wallDepth / 2
+            baseY -
+              this.wallHeight +
+              wallWidth / 2 -
+              this.wallDepth / 2 +
+              roomZ * 32
           ),
           this.wallDepth
         );
