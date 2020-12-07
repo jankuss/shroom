@@ -45,5 +45,8 @@
   },
   "bin": {
     "shroom": "dist/downloading/cli/index.js"
-  }
+  },
+  "files": [
+    "/dist"
+  ]
 }
