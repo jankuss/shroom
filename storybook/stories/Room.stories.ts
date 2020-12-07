@@ -93,6 +93,27 @@ export function AngledRoom() {
   });
 }
 
+export function HiddenWalls() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxx000
+        xxx000
+        xxx000
+        000000
+        000000
+        000000
+      `,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    room.hideWalls = true;
+
+    application.stage.addChild(room);
+  });
+}
+
 export default {
   title: "Room",
 };
