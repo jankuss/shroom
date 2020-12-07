@@ -1,4 +1,4 @@
-import { IFurniture, IFurnitureBehavior } from "shroom";
+import { IFurniture, IFurnitureBehavior } from "@jankuss/shroom";
 
 export class MultiStateBehavior implements IFurnitureBehavior {
   private furniture: IFurniture | undefined;

@@ -1,4 +1,8 @@
-import { IFurnitureBehavior, IFurniture, IFurnitureData } from "shroom";
+import {
+  IFurnitureBehavior,
+  IFurniture,
+  IFurnitureData,
+} from "@jankuss/shroom";
 
 export class FurniInfoBehavior implements IFurnitureBehavior {
   private parent: IFurniture | undefined;

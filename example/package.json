@@ -17,14 +17,19 @@
     "file-loader": "^6.2.0",
     "fork-ts-checker-webpack-plugin": "^6.0.3",
     "html-webpack-plugin": "^4.5.0",
+    "stream-browserify": "^3.0.0",
     "typescript": "^4.0.5",
     "webpack": "^5.6.0",
     "webpack-cli": "^4.2.0",
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "@jankuss/shroom": "file:..",
     "easystarjs": "^0.4.4",
-    "@jankuss/shroom": "file:.."
+    "events": "^3.2.0",
+    "pixi.js": "^5.3.3",
+    "stream": "0.0.2",
+    "timers": "^0.1.1"
   },
   "scripts": {
     "dev": "webpack serve",

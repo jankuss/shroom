@@ -1,4 +1,4 @@
-import { IFurnitureBehavior, HitEvent, IFurniture } from "shroom";
+import { IFurnitureBehavior, HitEvent, IFurniture } from "@jankuss/shroom";
 
 interface DiceState {
   state: "rolling" | "value" | "closed";

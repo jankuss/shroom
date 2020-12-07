@@ -13,7 +13,12 @@ module.exports = {
     devtool: "source-map",
     resolve: {
       extensions: [".tsx", ".ts", ".js", ".mjs"],
-      fallback: { "buffer": false, "timers": false }
+      fallback: { 
+        "buffer": false, 
+        "timers": false, 
+        "events": require.resolve("events"), 
+        "stream": require.resolve("stream-browserify") 
+      }
     },
     module: {
       rules: [

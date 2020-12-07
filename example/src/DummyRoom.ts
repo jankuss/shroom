@@ -6,7 +6,8 @@ import {
   FloorFurniture,
   FurnitureData,
   WallFurniture,
-} from "shroom";
+  Shroom,
+} from "@jankuss/shroom";
 import EasyStar from "easystarjs";
 import { MultiStateBehavior } from "./behaviors/MultiStateBehavior";
 import { DiceBehavior } from "./behaviors/DiceBehavior";
@@ -63,11 +64,14 @@ export class DummyRoom {
 
     const furnitureData = FurnitureData.create("./resources");
 
-    this.room = Room.create({
+    const shroom = Shroom.create({
       application,
-      tilemap: tilemap,
       resourcePath: "./resources",
       furnitureData,
+    });
+
+    this.room = Room.create(shroom, {
+      tilemap: tilemap,
     });
 
     this.room.addRoomObject(
