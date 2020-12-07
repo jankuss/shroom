@@ -64,8 +64,8 @@ export class Tile extends RoomObject implements ITexturable {
   }
 
   private destroySprites() {
-    this._sprites = [];
     this._sprites.forEach((sprite) => sprite.destroy());
+    this._sprites = [];
   }
 
   private updateSprites() {

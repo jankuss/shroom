@@ -57,10 +57,16 @@ export class Room
   private hitDetection: IHitDetection;
   private configuration: IConfiguration;
 
-  private walls: Wall[] = [];
-  private floor: (Tile | Stair)[] = [];
+  private _walls: Wall[] = [];
+  private _floor: (Tile | Stair)[] = [];
+  private _cursors: TileCursor[] = [];
 
-  private bounds: { minX: number; minY: number; maxX: number; maxY: number };
+  private _roomBounds: {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+  };
 
   private _wallTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
   private _floorTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
@@ -71,6 +77,9 @@ export class Room
   private _currentWallTexture: PIXI.Texture | undefined;
   private _currentFloorTexture: PIXI.Texture | undefined;
 
+  private _hideWalls = false;
+  private _hideFloor = false;
+
   private _onTileClick: ((position: RoomPosition) => void) | undefined;
 
   private _wallDepth: number = 8;
@@ -78,6 +87,24 @@ export class Room
   private _tileHeight: number = 8;
 
   private _largestDiff: number;
+
+  public get hideWalls() {
+    return this._hideWalls;
+  }
+
+  public set hideWalls(value) {
+    this._hideWalls = value;
+    this.updateTiles();
+  }
+
+  public get hideFloor() {
+    return this._hideFloor;
+  }
+
+  public set hideFloor(value) {
+    this._hideFloor = value;
+    this.updateTiles();
+  }
 
   public get wallHeight() {
     return this._wallHeight + this._largestDiff * 32;
@@ -112,7 +139,7 @@ export class Room
 
   private _updateWallDepth() {
     this.visualization.disableCache();
-    this.walls.forEach((wall) => {
+    this._walls.forEach((wall) => {
       wall.wallDepth = this.wallDepth;
     });
     this.visualization.enableCache();
@@ -120,7 +147,7 @@ export class Room
 
   private _updateWallHeight() {
     this.visualization.disableCache();
-    this.walls.forEach((wall) => {
+    this._walls.forEach((wall) => {
       wall.wallHeight = this.wallHeight;
     });
     this.visualization.enableCache();
@@ -128,10 +155,10 @@ export class Room
 
   private _updateTileHeight() {
     this.visualization.disableCache();
-    this.floor.forEach((floor) => {
+    this._floor.forEach((floor) => {
       floor.tileHeight = this.tileHeight;
     });
-    this.walls.forEach((wall) => {
+    this._walls.forEach((wall) => {
       wall.tileHeight = this.tileHeight;
     });
     this.visualization.enableCache();
@@ -222,11 +249,10 @@ export class Room
 
     this.visualization = new RoomVisualization();
 
-    this.bounds = getTileMapBounds(parsedTileMap, this.wallOffsets);
-    this.initTiles(this.parsedTileMap);
+    this._roomBounds = getTileMapBounds(parsedTileMap, this.wallOffsets);
 
-    this.roomWidth = this.bounds.maxX - this.bounds.minX;
-    this.roomHeight = this.bounds.maxY - this.bounds.minY;
+    this.roomWidth = this._roomBounds.maxX - this._roomBounds.minX;
+    this.roomHeight = this._roomBounds.maxY - this._roomBounds.minY;
 
     this.animationTicker = animationTicker;
     this.furnitureLoader = furnitureLoader;
@@ -234,6 +260,7 @@ export class Room
     this.hitDetection = hitDetection;
     this.configuration = configuration;
 
+    this.updateTiles();
     this.addChild(this.visualization);
   }
 
@@ -257,11 +284,11 @@ export class Room
 
   private updateTextures() {
     this.visualization.disableCache();
-    this.walls.forEach((wall) => {
+    this._walls.forEach((wall) => {
       wall.texture = this._currentWallTexture;
       wall.color = this._wallColor;
     });
-    this.floor.forEach((floor) => {
+    this._floor.forEach((floor) => {
       floor.texture = this._currentFloorTexture;
       floor.color = this._floorColor;
     });
@@ -292,8 +319,8 @@ export class Room
 
     const base = 32;
 
-    const xPos = -this.bounds.minX + x * base - y * base;
-    const yPos = -this.bounds.minY + x * (base / 2) + y * (base / 2);
+    const xPos = -this._roomBounds.minX + x * base - y * base;
+    const yPos = -this._roomBounds.minY + x * (base / 2) + y * (base / 2);
 
     return {
       x: xPos,
@@ -302,24 +329,44 @@ export class Room
   }
 
   private registerWall(wall: Wall) {
-    this.walls.push(wall);
+    if (this.hideWalls || this.hideFloor) return;
+
+    this._walls.push(wall);
     this.addRoomObject(wall);
   }
 
   private registerTile(tile: Stair | Tile) {
-    this.floor.push(tile);
+    if (this.hideFloor) return;
+
+    this._floor.push(tile);
     this.addRoomObject(tile);
   }
 
   private registerTileCursor(position: RoomPosition) {
-    this.addRoomObject(
-      new TileCursor(position, (position) => {
-        this.onTileClick && this.onTileClick(position);
-      })
-    );
+    const cursor = new TileCursor(position, (position) => {
+      this.onTileClick && this.onTileClick(position);
+    });
+
+    this._cursors.push(cursor);
+
+    this.addRoomObject(cursor);
   }
 
-  private initTiles(tiles: ParsedTileType[][]) {
+  private resetTiles() {
+    [...this._floor, ...this._walls, ...this._cursors].forEach((value) =>
+      value.destroy()
+    );
+
+    this._floor = [];
+    this._walls = [];
+    this._cursors = [];
+  }
+
+  private updateTiles() {
+    this.resetTiles();
+
+    const tiles = this.parsedTileMap;
+
     for (let y = 0; y < tiles.length; y++) {
       for (let x = 0; x < tiles[y].length; x++) {
         const tile = tiles[y][x];
