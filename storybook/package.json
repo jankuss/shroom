@@ -1,0 +1,29 @@
+{
+  "name": "storybook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "@storybook/addon-actions": "^6.2.0-alpha.4",
+    "@storybook/addon-essentials": "^6.2.0-alpha.4",
+    "@storybook/addon-links": "^6.2.0-alpha.4",
+    "@storybook/html": "^6.2.0-alpha.4",
+    "babel-loader": "^8.2.2"
+  },
+  "dependencies": {
+    "@jankuss/shroom": "file:../",
+    "pixi.js": "^5.3.3"
+  },
+  "nohoist": [
+    "**/@storybook/**"
+  ]
+}
