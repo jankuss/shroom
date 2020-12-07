@@ -12,13 +12,27 @@ To install shroom in your project, use the following command.
 npm install @jankuss/shroom pixi.js
 ```
 
-### 2. Install `swftools` (http://www.swftools.org/download.html)
+If you are using `yarn`, you can use
 
-Download and install `swftools`. Add the installation directory of `swftools` to your system `PATH` variable.
+```
+yarn add @jankuss/shroom pixi.js
+```
 
-**This step is important, or the asset dumper won't work.**
+### 2. Install `swftools` (http://www.swftools.org/)
 
-### 3. Dump assets from external variables into your project
+For the asset dumping process to work correctly, `swftools` needs to be installed in your system.
+Download `swftools` [here](http://www.swftools.org/download.html) and install it.
+
+After installation, add the installation directory of `swftools` to your systems `PATH` variable.
+In the end, the commands `swfdump` and `swfextract` should be callable from the command line.
+
+If that's the case, you can continue to the next step.
+
+### 3. Dump assets into your project
+
+Run the following commands to dump the required assets into your project directory. This will take some time.
+The `--url` option specifies the url to the external variables to use. The `--location` option specifies the location where the assets should get dumped into.
+You can adjust both as needed.
 
 ```
 npm install -g @jankuss/shroom
@@ -45,4 +59,5 @@ const shroom = Shroom.create({ application, resourcePath: "./resources" });
 Now, you are fully ready to use shroom.
 Check out the [Guides](create-room.md) section to learn how to use shroom.
 
-Also, take a look at the [example project](https://github.com/jankuss/shroom/tree/master/example) in the shroom repository.
+Also, take a look at the [example project](https://github.com/jankuss/shroom/tree/master/example) in the shroom repository for a basic project depending on shroom.
+You can use it as a boilerplate for your own.
