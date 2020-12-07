@@ -27,11 +27,20 @@ jobs:
       - run: npm run build
       - run: npm test
   chromatic:
+    defaults:
+      run:
+        working-directory: storybook
     runs-on: ubuntu-latest
     steps:
-    — uses: actions/checkout@v1
-    — run: yarn install
-    — uses: chromaui/action@releases/v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        appCode: ${{ secrets.AppCode }}
+      - uses: actions/checkout@v1
+      - run: |
+          cd ..
+          npm install
+          npm run build
+          cd storybook
+      - run: npm install
+      - run: npm run build-storybook
+      - uses: chromaui/action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          appCode: ${{ secrets.AppCode }}
