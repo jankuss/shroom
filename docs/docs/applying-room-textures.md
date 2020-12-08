@@ -50,6 +50,15 @@ The default tile texture commonly used looks like the following.
 
 Be creative and create your unique wall and floor textures. I'm sure your users will enjoy it!
 
+## Adding colors
+
+While we are at it, let's add some colors to the room.
+
+```ts
+room.wallColor = "#dbbe6e";
+room.floorColor = "#eeeeee";
+```
+
 ### Important note
 
 Both `wallTexture` and `roomTexture` expect a **loaded** texture to work properly.
@@ -58,7 +67,7 @@ which resolves after the texture is loaded. If the texture is not loaded before,
 
 ## Result
 
-Your room will now look like this, depending on the textures you provided.
-In this example, we used the tile picture both for floor and the wall.
+Your room will now look like this, depending on the textures and colors you provided.
+In this example, we used the tile picture above both for floor and the wall.
 
 <img alt="Docusaurus with Keytar" src={useBaseUrl('img/textured.png')} />

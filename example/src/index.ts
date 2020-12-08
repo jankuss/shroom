@@ -1,6 +1,12 @@
 import * as PIXI from "pixi.js";
 
-import { Room, FloorFurniture, Avatar, Shroom } from "@jankuss/shroom";
+import {
+  Room,
+  FloorFurniture,
+  Avatar,
+  Shroom,
+  loadRoomTexture,
+} from "@jankuss/shroom";
 import { DummyRoom } from "./DummyRoom";
 
 const view = document.querySelector("#root") as HTMLCanvasElement | undefined;
@@ -32,5 +38,10 @@ const room = Room.create(shroom, {
 
 room.x = 100;
 room.y = 200;
+
+room.wallTexture = loadRoomTexture("./images/tile.png");
+room.floorTexture = loadRoomTexture("./images/tile.png");
+room.wallColor = "#dbbe6e";
+room.floorColor = "#eeeeee";
 
 application.stage.addChild(room);
