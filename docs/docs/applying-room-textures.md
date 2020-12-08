@@ -3,6 +3,8 @@ id: applying-room-textures
 title: Applying room textures
 ---
 
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
 To make a plain room look more exciting, we can add room textures for floors and walls.
 We do this by specifying the `wallTexture` and `floorTexture` of the room.
 
@@ -33,14 +35,30 @@ room.y = 200;
 
 // The important thing here is that the texture is loaded before use.
 
-room.wallTexture = loadRoomTexture("./wall.png");
-room.floorTexture = loadRoomTexture("./floor.png");
+room.wallTexture = loadRoomTexture("./images/wall.png");
+room.floorTexture = loadRoomTexture("./images/floor.png");
 
 application.stage.addChild(room);
 ```
+
+## Texture Format
+
+The texture you provide should have a normal two dimensional look. You don't need to skew it to make it look isometric, since shroom will take care of that automatically.
+
+The default tile texture commonly used looks like the following.
+<img alt="Docusaurus with Keytar" src={useBaseUrl('img/tile.png')} />
+
+Be creative and create your unique wall and floor textures. I'm sure your users will enjoy it!
 
 ### Important note
 
 Both `wallTexture` and `roomTexture` expect a **loaded** texture to work properly.
 Another way is to supply a Promise (i.e. by using `loadRoomTexture`),
 which resolves after the texture is loaded. If the texture is not loaded before, the room will fail to render properly.
+
+## Result
+
+Your room will now look like this, depending on the textures you provided.
+In this example, we used the tile picture both for floor and the wall.
+
+<img alt="Docusaurus with Keytar" src={useBaseUrl('img/textured.png')} />
