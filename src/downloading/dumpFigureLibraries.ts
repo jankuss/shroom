@@ -25,7 +25,9 @@ export async function dumpFigureLibraries(
       const fileName = `${id}.swf`;
       const file = `${gordon}/${fileName}`;
 
-      const resolvedOutPath = path.resolve(out);
+      const resolvedOutPath = path.resolve(path.join(out, id));
+      await fs.mkdir(resolvedOutPath, { recursive: true });
+
       const swfLocation = path.join(resolvedOutPath, fileName);
 
       const success = () =>

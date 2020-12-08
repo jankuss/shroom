@@ -1,13 +1,6 @@
 import { createLookServer, loadOffsetMapFromJson, LookServer } from "./util";
-import { avatarFrames, avatarFramesObject } from "./util/avatarFrames";
+import { avatarFramesObject } from "./util/avatarFrames";
 import { LookOptions } from "./util/createLookServer";
-import {
-  getAvatarDrawDefinition,
-  Dependencies,
-  AvatarDrawDefinition,
-} from "./util/getAvatarDrawDefinition";
-import { parseLookString } from "./util/parseLookString";
-import * as PIXI from "pixi.js";
 import {
   AvatarLoaderResult,
   IAvatarLoader,
@@ -15,7 +8,7 @@ import {
 import { HitTexture } from "../hitdetection/HitTexture";
 
 interface Options {
-  resolveImage: (id: string) => Promise<HitTexture>;
+  resolveImage: (id: string, library: string) => Promise<HitTexture>;
   createLookServer: () => Promise<LookServer>;
 }
 
@@ -46,14 +39,13 @@ export class AvatarLoader implements IAvatarLoader {
             ).getOffset,
         });
       },
-      resolveImage: async (id) => {
-        return HitTexture.fromUrl(`${resourcePath}/figure/${id}.png`);
+      resolveImage: async (id, type) => {
+        return HitTexture.fromUrl(`${resourcePath}/figure/${type}/${id}.png`);
       },
     });
   }
 
   async getAvatarDrawDefinition(look: string): Promise<AvatarLoaderResult> {
-    const parsedLook = parseLookString(look);
     const loadedFiles = new Map<string, Promise<HitTexture>>();
 
     const getDrawDefinition = await this.lookServer;
@@ -66,7 +58,7 @@ export class AvatarLoader implements IAvatarLoader {
         if (globalFile != null) {
           loadedFiles.set(item.fileId, globalFile);
         } else {
-          const file = this.options.resolveImage(item.fileId);
+          const file = this.options.resolveImage(item.fileId, item.library);
           this.globalCache.set(item.fileId, file);
           loadedFiles.set(item.fileId, file);
         }

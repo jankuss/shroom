@@ -37,7 +37,7 @@ export async function createLookServer({
   const { getSetType } = parseFigureData(figureDataXml);
   const figureMap = parseFigureMap(figureMapXml);
 
-  const getOffset = await loadOffsetMap(figureMap);
+  const getOffset = await loadOffsetMap(figureMap.libraries);
 
   return ({ look, action, actions, direction }: LookOptions) =>
     getAvatarDrawDefinition(
@@ -47,6 +47,6 @@ export async function createLookServer({
         actions: actions,
         direction,
       },
-      { getOffset, getSetType }
+      { getOffset, getSetType, getLibraryOfPart: figureMap.getLibraryOfPart }
     );
 }
