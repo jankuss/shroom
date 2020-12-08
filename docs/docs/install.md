@@ -23,10 +23,31 @@ yarn add @jankuss/shroom pixi.js
 For the asset dumping process to work correctly, `swftools` needs to be installed in your system.
 Download `swftools` [here](http://www.swftools.org/download.html) and install it.
 
+---
+
+**Notice:** Please use one of the following versions of `swftools`, as they have been tested out and work. Other versions may not work correctly.
+
+#### Windows
+
+- `swftools 2013-04-09-1007` http://www.swftools.org/swftools-2013-04-09-1007.exe
+
+#### Linux
+
+- `swftools 2013-04-09-1007` http://www.swftools.org/swftools-2013-04-09-1007.tar.gz
+- `swftools 0.9.2` http://www.swftools.org/swftools-0.9.2.tar.gz
+
+---
+
 After installation, add the installation directory of `swftools` to your systems `PATH` variable.
 In the end, the commands `swfdump` and `swfextract` should be callable from the command line.
+You can check by running the following commands
 
-If that's the case, you can continue to the next step.
+```
+swfdump --version
+swfextract --version
+```
+
+If this works, you can continue to the next step.
 
 ### 3. Dump assets into your project
 
