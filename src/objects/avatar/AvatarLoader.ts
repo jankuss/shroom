@@ -39,8 +39,10 @@ export class AvatarLoader implements IAvatarLoader {
             ).getOffset,
         });
       },
-      resolveImage: async (id, type) => {
-        return HitTexture.fromUrl(`${resourcePath}/figure/${type}/${id}.png`);
+      resolveImage: async (id, library) => {
+        return HitTexture.fromUrl(
+          `${resourcePath}/figure/${library}/${id}.png`
+        );
       },
     });
   }
