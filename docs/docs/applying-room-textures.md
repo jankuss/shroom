@@ -41,6 +41,12 @@ room.floorTexture = loadRoomTexture("./images/floor.png");
 application.stage.addChild(room);
 ```
 
+### Important note
+
+Both `wallTexture` and `roomTexture` expect a **loaded** texture to work properly.
+Another way is to supply a Promise (i.e. by using `loadRoomTexture`),
+which resolves after the texture is loaded. If the texture is not loaded before, the room will fail to render properly.
+
 ## Texture Format
 
 The texture you provide should have a normal two dimensional look. You don't need to skew it to make it look isometric, since shroom will take care of that automatically.
@@ -58,12 +64,6 @@ While we are at it, let's add some colors to the room.
 room.wallColor = "#dbbe6e";
 room.floorColor = "#eeeeee";
 ```
-
-### Important note
-
-Both `wallTexture` and `roomTexture` expect a **loaded** texture to work properly.
-Another way is to supply a Promise (i.e. by using `loadRoomTexture`),
-which resolves after the texture is loaded. If the texture is not loaded before, the room will fail to render properly.
 
 ## Result
 
