@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Door visualization for room
 
+### Changed
+
+- Figure assets dumping behavior
+
 ### Fixed
 
-- Furniture & Avatar textures when display has scaling
+- Furniture & Avatar textures when display is scaled
+
+**Breaking Change**: Figure images now get dumped into a separate subdirectory corresponding to the library name. You will need to delete your old `figure` folder and rerun the `shroom dump` command to regenerate those resources.
