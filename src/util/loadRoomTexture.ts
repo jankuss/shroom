@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { applyTextureProperties } from "./applyTextureProperties";
 
 export async function loadRoomTexture(url: string): Promise<PIXI.Texture> {
   const image = new Image();
@@ -10,5 +11,8 @@ export async function loadRoomTexture(url: string): Promise<PIXI.Texture> {
     };
   });
 
-  return PIXI.Texture.from(image);
+  const texture = PIXI.Texture.from(image);
+  applyTextureProperties(texture);
+
+  return texture;
 }

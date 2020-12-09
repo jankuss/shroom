@@ -19,6 +19,7 @@ interface Props {
   color: string;
   texture?: PIXI.Texture;
   hideBorder?: boolean;
+  doorHeight?: number;
 }
 
 const wallWidth = 32;
@@ -115,6 +116,7 @@ export function createWallLeft({
   topTint,
   wallTint,
   borderWidth,
+  doorHeight,
 }: {
   baseX: number;
   baseY: number;
@@ -127,6 +129,7 @@ export function createWallLeft({
   wallTint: number;
   topTint: number;
   borderWidth: number;
+  doorHeight?: number;
 }) {
   const top = createTopBorder(
     new PIXI.Matrix(
@@ -153,9 +156,15 @@ export function createWallLeft({
     borderWidth,
   });
 
+  const actualWallHeight = doorHeight != null ? doorHeight : wallHeight;
+  const actualOffset =
+    doorHeight != null
+      ? (offset ?? 0) + (wallHeight - doorHeight)
+      : offset ?? 0;
+
   const primary = createWall({
     texture,
-    height: wallHeight,
+    height: actualWallHeight,
     matrix: new PIXI.Matrix(
       -1,
       0.5,
@@ -164,7 +173,7 @@ export function createWallLeft({
       baseX + 2 * wallWidth,
       baseY - wallHeight
     ),
-    offset,
+    offset: actualOffset,
   });
 
   border.tint = borderTint;
@@ -252,6 +261,7 @@ export class Wall extends RoomObject {
   private _tileHeight: number;
   private _wallDepth: number;
   private _hideBorder: boolean;
+  private _doorHeight: number | undefined;
 
   public get wallDepth() {
     return this._wallDepth;
@@ -287,6 +297,7 @@ export class Wall extends RoomObject {
     this._tileHeight = props.tileHeight;
     this._wallDepth = props.wallDepth;
     this._hideBorder = props.hideBorder ?? false;
+    this._doorHeight = props.doorHeight;
   }
 
   get texture() {
@@ -333,7 +344,7 @@ export class Wall extends RoomObject {
       color,
     } = this.props;
 
-    const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
+    const { x, y } = geometry.getPosition(roomX, roomY, roomZ, "plane");
     const wallColor = this._color ?? color;
 
     const { leftTint, rightTint, topTint } = getWallColors(wallColor);
@@ -358,6 +369,7 @@ export class Wall extends RoomObject {
           wallTint: rightTint,
           topTint: topTint,
           borderWidth: this.wallDepth,
+          doorHeight: this._doorHeight,
         });
 
         if (!this._hideBorder) {

@@ -30,18 +30,31 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 const shroom = Shroom.create({ application, resourcePath: "./resources" });
 const room = Room.create(shroom, {
   tilemap: `
-    x0000
-    00000
-    x0000
+  xxxxxxxxxxxx
+  xxxxxxxxxxxx
+  xxxxx111111x
+  xxxxx111111x
+  xxxx1111111x
+  xxxxx111111x
+  xxxxx111111x
+  xxxxx000000x
+  xxxxx000000x
+  xxx00000000x
+  xxx00000000x
+  xxx00000000x
+  xxx00000000x
+  xxxxxxxxxxxx
+  xxxxxxxxxxxx
+  xxxxxxxxxxxx
    `,
 });
 
 const avatar = new Avatar({
   look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
-  direction: 4,
+  direction: 2,
   roomX: 0,
-  roomY: 1,
-  roomZ: 0,
+  roomY: 2,
+  roomZ: 1,
 });
 
 room.x = 100;
@@ -53,10 +66,10 @@ room.wallColor = "#dbbe6e";
 room.floorColor = "#eeeeee";
 
 const furniture = new FloorFurniture({
-  roomX: 3,
-  roomY: 1,
+  roomX: 4,
+  roomY: 0,
   direction: 2,
-  roomZ: 0,
+  roomZ: 1,
   type: "exe_table",
   animation: "1",
 });
@@ -65,7 +78,7 @@ room.addRoomObject(avatar);
 room.addRoomObject(furniture);
 
 setTimeout(() => {
-  avatar.walk(1, 1, 0, { direction: 2 });
+  //avatar.walk(0, 1, 1, { direction: 2 });
 }, 2000);
 
 application.stage.addChild(room);

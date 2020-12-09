@@ -301,7 +301,7 @@ export class Avatar extends RoomObject {
 
     const { roomX, roomY, roomZ } = this.getDisplayRoomPosition();
 
-    const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
+    const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ, "object");
 
     const roomXrounded = Math.round(roomX);
     const roomYrounded = Math.round(roomY);

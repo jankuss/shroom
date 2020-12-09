@@ -54,7 +54,8 @@ export function getTileInfo(tiles: TileType[][], x: number, y: number) {
     topLeftDiagonalType === "x" &&
     bottomType === "x" &&
     bottomLeftDiagonalType === "x" &&
-    isTile(rightType);
+    isTile(rightType) &&
+    isTile(type);
 
   return {
     rowEdge: leftType === "x" && isTile(type),

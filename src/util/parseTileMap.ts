@@ -16,7 +16,12 @@ export type ParsedTileType =
 
 export function parseTileMap(
   tilemap: TileType[][]
-): { tilemap: ParsedTileType[][]; largestDiff: number } {
+): {
+  tilemap: ParsedTileType[][];
+  largestDiff: number;
+  wallOffsets: { x: number; y: number };
+  positionOffsets: { x: number; y: number };
+} {
   const startIndexColumn = findFirstNonEmptyColumnIndex(tilemap);
   const startIndexRow = findFirstNonEmptyRowIndex(tilemap);
 
@@ -43,18 +48,11 @@ export function parseTileMap(
   const rowWallMinimum = new RowWall();
 
   let colWallMinimumY = -1;
-
   let globalWallStartX = -1;
-
-  const getTile = (x: number, y: number) => {
-    if (cutoutTilemap[y] == null) return "x";
-    if (cutoutTilemap[y][x] == null) return "x";
-
-    return cutoutTilemap[y][x];
-  };
 
   let lowestTile: number | undefined;
   let highestTile: number | undefined;
+  let hasDoor: boolean = false;
 
   function applyHighLowTile(current: number) {
     if (highestTile == null || current > highestTile) {
@@ -78,7 +76,7 @@ export function parseTileMap(
 
       const tileInfo = getTileInfo(cutoutTilemap, x, y);
 
-      if (!tileInfo.rowDoor) {
+      if (!tileInfo.rowDoor || hasDoor) {
         const rowWallAllowed = rowWallMinimum.isWallAllowed(wallPositionX);
         if (tileInfo.rowEdge && tileInfo.height != null && rowWallAllowed) {
           const belowTileInfo = getTileInfo(cutoutTilemap, x - 1, y + 1);
@@ -150,6 +148,7 @@ export function parseTileMap(
           applyHighLowTile(tileInfo.height);
         }
       } else {
+        hasDoor = true;
         result[resultY][resultX] = { type: "door", z: tileInfo.height ?? 0 };
       }
 
@@ -168,7 +167,18 @@ export function parseTileMap(
     largestDiff = highestTile - lowestTile;
   }
 
-  return { tilemap: result, largestDiff };
+  return {
+    tilemap: result,
+    largestDiff,
+    wallOffsets: {
+      x: 1,
+      y: 1,
+    },
+    positionOffsets: {
+      x: 1 + (hasDoor ? 1 : 0),
+      y: 1,
+    },
+  };
 }
 
 class RowWall {

@@ -42,7 +42,9 @@ export class Room
   implements IRoomGeometry, IRoomObjectContainer, ITileMap {
   private roomObjects: IRoomObject[] = [];
 
-  private wallOffsets = { x: 1, y: 1 };
+  private _wallOffsets = { x: 1, y: 1 };
+  private _positionOffsets = { x: 1, y: 1 };
+
   public readonly parsedTileMap: ParsedTileType[][];
 
   private visualization: RoomVisualization;
@@ -61,6 +63,7 @@ export class Room
   private _walls: Wall[] = [];
   private _floor: (Tile | Stair)[] = [];
   private _cursors: TileCursor[] = [];
+  private _doorWall: Wall | undefined;
 
   private _roomBounds: {
     minX: number;
@@ -165,15 +168,22 @@ export class Room
     this.visualization.enableCache();
   }
 
+  private _getObjectPositionWithOffset(roomX: number, roomY: number) {
+    return {
+      x: roomX + this._positionOffsets.x,
+      y: roomY + this._positionOffsets.y,
+    };
+  }
+
   private _getTilePositionWithOffset(roomX: number, roomY: number) {
     return {
-      x: roomX + this.wallOffsets.x,
-      y: roomY + this.wallOffsets.y,
+      x: roomX + this._wallOffsets.x,
+      y: roomY + this._wallOffsets.y,
     };
   }
 
   getTileAtPosition(roomX: number, roomY: number) {
-    const { x, y } = this._getTilePositionWithOffset(roomX, roomY);
+    const { x, y } = this._getObjectPositionWithOffset(roomX, roomY);
 
     const row = this.parsedTileMap[y];
     if (row == null) return;
@@ -240,9 +250,15 @@ export class Room
     const normalizedTileMap =
       typeof tilemap === "string" ? parseTileMapString(tilemap) : tilemap;
 
-    const { largestDiff, tilemap: parsedTileMap } = parseTileMap(
-      normalizedTileMap
-    );
+    const {
+      largestDiff,
+      tilemap: parsedTileMap,
+      wallOffsets,
+      positionOffsets,
+    } = parseTileMap(normalizedTileMap);
+
+    this._wallOffsets = wallOffsets;
+    this._positionOffsets = positionOffsets;
 
     this._largestDiff = largestDiff;
 
@@ -250,7 +266,7 @@ export class Room
 
     this.visualization = new RoomVisualization();
 
-    this._roomBounds = getTileMapBounds(parsedTileMap, this.wallOffsets);
+    this._roomBounds = getTileMapBounds(parsedTileMap, this._wallOffsets);
 
     this.roomWidth = this._roomBounds.maxX - this._roomBounds.minX;
     this.roomHeight = this._roomBounds.maxY - this._roomBounds.minY;
@@ -315,9 +331,13 @@ export class Room
   getPosition(
     roomX: number,
     roomY: number,
-    roomZ: number
+    roomZ: number,
+    type: "plane" | "object"
   ): { x: number; y: number } {
-    const { x, y } = this._getTilePositionWithOffset(roomX, roomY);
+    const { x, y } =
+      type === "plane"
+        ? this._getTilePositionWithOffset(roomX, roomY)
+        : this._getObjectPositionWithOffset(roomX, roomY);
 
     const base = 32;
 
@@ -344,8 +364,8 @@ export class Room
     this.addRoomObject(tile);
   }
 
-  private registerTileCursor(position: RoomPosition) {
-    const cursor = new TileCursor(position, (position) => {
+  private registerTileCursor(position: RoomPosition, door: boolean = false) {
+    const cursor = new TileCursor(position, door, (position) => {
       this.onTileClick && this.onTileClick(position);
     });
 
@@ -362,6 +382,7 @@ export class Room
     this._floor = [];
     this._walls = [];
     this._cursors = [];
+    this._doorWall = undefined;
   }
 
   private updateTiles() {
@@ -377,8 +398,8 @@ export class Room
           this.registerTile(
             new Tile({
               geometry: this,
-              roomX: x - this.wallOffsets.x,
-              roomY: y - this.wallOffsets.y,
+              roomX: x - this._wallOffsets.x,
+              roomY: y - this._wallOffsets.y,
               roomZ: tile.z,
               edge: true,
               tileHeight: this.tileHeight,
@@ -386,14 +407,42 @@ export class Room
               door: true,
             })
           );
+
+          const wall = new Wall({
+            geometry: this,
+            roomX: x - this._wallOffsets.x,
+            roomY: y - this._wallOffsets.y,
+            direction: "left",
+            tileHeight: this.tileHeight,
+            wallHeight: this.wallHeightWithZ,
+            roomZ: tile.z,
+            color: this.wallColor ?? "#ffffff",
+            texture: this._currentWallTexture,
+            wallDepth: this.wallDepth,
+            hideBorder: true,
+            doorHeight: 30,
+          });
+
+          this.registerWall(wall);
+
+          this._doorWall = wall;
+
+          this.registerTileCursor(
+            {
+              roomX: x - this._wallOffsets.x,
+              roomY: y - this._wallOffsets.y,
+              roomZ: tile.z,
+            },
+            true
+          );
         }
 
         if (tile.type === "tile") {
           this.registerTile(
             new Tile({
               geometry: this,
-              roomX: x - this.wallOffsets.x,
-              roomY: y - this.wallOffsets.y,
+              roomX: x - this._wallOffsets.x,
+              roomY: y - this._wallOffsets.y,
               roomZ: tile.z,
               edge: true,
               tileHeight: this.tileHeight,
@@ -402,8 +451,8 @@ export class Room
           );
 
           this.registerTileCursor({
-            roomX: x - this.wallOffsets.x,
-            roomY: y - this.wallOffsets.y,
+            roomX: x - this._wallOffsets.x,
+            roomY: y - this._wallOffsets.y,
             roomZ: tile.z,
           });
         }
@@ -414,8 +463,8 @@ export class Room
           this.registerWall(
             new Wall({
               geometry: this,
-              roomX: x - this.wallOffsets.x,
-              roomY: y - this.wallOffsets.y,
+              roomX: x - this._wallOffsets.x,
+              roomY: y - this._wallOffsets.y,
               direction: direction,
               tileHeight: this.tileHeight,
               wallHeight: this.wallHeightWithZ,
@@ -432,8 +481,8 @@ export class Room
           this.registerWall(
             new Wall({
               geometry: this,
-              roomX: x - this.wallOffsets.x,
-              roomY: y - this.wallOffsets.y,
+              roomX: x - this._wallOffsets.x,
+              roomY: y - this._wallOffsets.y,
               direction: "right",
               tileHeight: this.tileHeight,
               wallHeight: this.wallHeightWithZ,
@@ -447,8 +496,8 @@ export class Room
           this.registerWall(
             new Wall({
               geometry: this,
-              roomX: x - this.wallOffsets.x,
-              roomY: y - this.wallOffsets.y,
+              roomX: x - this._wallOffsets.x,
+              roomY: y - this._wallOffsets.y,
               direction: "left",
               tileHeight: this.tileHeight,
               wallHeight: this.wallHeightWithZ,
@@ -464,8 +513,8 @@ export class Room
           this.registerTile(
             new Stair({
               geometry: this,
-              roomX: x - this.wallOffsets.x,
-              roomY: y - this.wallOffsets.y,
+              roomX: x - this._wallOffsets.x,
+              roomY: y - this._wallOffsets.y,
               roomZ: tile.z,
               tileHeight: this.tileHeight,
               color: this.tileColor,
@@ -474,14 +523,14 @@ export class Room
           );
 
           this.registerTileCursor({
-            roomX: x - this.wallOffsets.x,
-            roomY: y - this.wallOffsets.y,
+            roomX: x - this._wallOffsets.x,
+            roomY: y - this._wallOffsets.y,
             roomZ: tile.z,
           });
 
           this.registerTileCursor({
-            roomX: x - this.wallOffsets.x,
-            roomY: y - this.wallOffsets.y,
+            roomX: x - this._wallOffsets.x,
+            roomY: y - this._wallOffsets.y,
             roomZ: tile.z + 1,
           });
         }

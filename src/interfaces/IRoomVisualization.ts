@@ -3,6 +3,7 @@ export interface IRoomVisualization {
   addWallChild(element: PIXI.DisplayObject): void;
   addBehindWallChild(element: PIXI.DisplayObject): void;
   addContainerChild(element: PIXI.DisplayObject): void;
+  addTileCursorChild(element: PIXI.DisplayObject): void;
 
   removeBehindWallChild(element: PIXI.DisplayObject): void;
   removeContainerChild(element: PIXI.DisplayObject): void;

@@ -11,6 +11,7 @@ export class RoomVisualization
   private behindWallPlane: PIXI.Container = new PIXI.Container();
   private floorPlane: PIXI.Container = new PIXI.Container();
   private wallPlane: PIXI.Container = new PIXI.Container();
+  private tileCursorPlane: PIXI.Container = new PIXI.Container();
 
   constructor() {
     super();
@@ -25,8 +26,13 @@ export class RoomVisualization
 
     this.addChild(this.behindWallPlane);
     this.addChild(this.plane);
+    this.addChild(this.tileCursorPlane);
     this.addChild(this.container);
     this.addChild(this.cursorLayer);
+  }
+
+  addTileCursorChild(element: PIXI.DisplayObject): void {
+    this.tileCursorPlane.addChild(element);
   }
 
   removeBehindWallChild(element: PIXI.DisplayObject): void {

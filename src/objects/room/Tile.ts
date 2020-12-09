@@ -82,7 +82,7 @@ export class Tile extends RoomObject implements ITexturable {
 
     const { geometry, roomX, roomY, roomZ, edge = false } = this.props;
 
-    const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
+    const { x, y } = geometry.getPosition(roomX, roomY, roomZ, "plane");
     this._container.zIndex = getZOrder(roomX, roomY, roomZ);
 
     const { borderLeftTint, borderRightTint, tileTint } = getTileColors(
