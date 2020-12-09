@@ -139,7 +139,7 @@ export async function run({
       figureMapString,
       async (name) => {
         const file = await fs.readFile(
-          path.join(figureFolder, `${name}_manifest.bin`)
+          path.join(figureFolder, `${name}/${name}_manifest.bin`)
         );
 
         return file.toString("utf-8");

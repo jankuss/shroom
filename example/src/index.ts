@@ -53,6 +53,6 @@ room.floorColor = "#eeeeee";
 
 room.addRoomObject(avatar);
 
-application.stage.addChild(new RoomCamera(room));
+// application.stage.addChild(new RoomCamera(room));
 
-// application.stage.addChild(room);
+application.stage.addChild(room);
