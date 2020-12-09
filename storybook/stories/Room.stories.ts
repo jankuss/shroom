@@ -218,6 +218,28 @@ export function CustomColor() {
   });
 }
 
+export function Door() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        x0000
+        00000
+        x0000
+        x0000
+      `,
+    });
+
+    const tileTexture = loadRoomTexture(tile);
+    room.wallTexture = tileTexture;
+    room.floorTexture = tileTexture;
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    application.stage.addChild(room);
+  });
+}
+
 export default {
   title: "Room",
 };

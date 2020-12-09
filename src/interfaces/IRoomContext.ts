@@ -6,6 +6,7 @@ import { IHitDetection } from "./IHitDetection";
 import { IRoomGeometry } from "./IRoomGeometry";
 import { IRoomObjectContainer } from "./IRoomObjectContainer";
 import { IRoomVisualization } from "./IRoomVisualization";
+import { ITileMap } from "./ITileMap";
 
 export interface IRoomContext {
   geometry: IRoomGeometry;
@@ -16,4 +17,5 @@ export interface IRoomContext {
   roomObjectContainer: IRoomObjectContainer;
   hitDetection: IHitDetection;
   configuration: IConfiguration;
+  tilemap: ITileMap;
 }

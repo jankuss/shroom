@@ -17,6 +17,7 @@ interface Props {
   tileHeight: number;
   color: string;
   texture?: PIXI.Texture;
+  door?: boolean;
 }
 
 export class Tile extends RoomObject implements ITexturable {
@@ -27,6 +28,8 @@ export class Tile extends RoomObject implements ITexturable {
   private _color: string | undefined;
 
   private _tileHeight: number;
+
+  private _door: boolean;
 
   public get tileHeight() {
     return this._tileHeight;
@@ -43,6 +46,7 @@ export class Tile extends RoomObject implements ITexturable {
     this._texture = props.texture;
     this._color = props.color;
     this._tileHeight = props.tileHeight;
+    this._door = props.door ?? false;
   }
 
   get texture() {
@@ -78,7 +82,7 @@ export class Tile extends RoomObject implements ITexturable {
 
     const { geometry, roomX, roomY, roomZ, edge = false } = this.props;
 
-    const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
+    const { x, y } = geometry.getPosition(roomX, roomY, roomZ, "plane");
     this._container.zIndex = getZOrder(roomX, roomY, roomZ);
 
     const { borderLeftTint, borderRightTint, tileTint } = getTileColors(
@@ -131,7 +135,12 @@ export class Tile extends RoomObject implements ITexturable {
     this._container.addChild(borderRight);
     this._container.addChild(tile);
 
-    this.visualization.addPlaneChild(this._container);
+    if (!this._door) {
+      this.visualization.addFloorChild(this._container);
+    } else {
+      this.visualization.addBehindWallChild(this._container);
+      this._container.zIndex = -1;
+    }
   }
 
   destroy(): void {

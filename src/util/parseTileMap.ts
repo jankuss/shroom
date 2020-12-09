@@ -7,14 +7,28 @@ export type ParsedTileType =
       type: "wall";
       kind: "colWall" | "rowWall" | "innerCorner" | "outerCorner";
       height: number;
+      hideBorder?: boolean;
     }
   | { type: "tile"; z: number }
   | { type: "hidden" }
-  | { type: "stairs"; kind: 0 | 2; z: number };
+  | { type: "stairs"; kind: 0 | 2; z: number }
+  | { type: "door"; z: number };
 
+/**
+ * Parses the standard tilemap format into a format with the following meta data:
+ * - Walls
+ * - Door
+ * - Stairs
+ * @param tilemap
+ */
 export function parseTileMap(
   tilemap: TileType[][]
-): { tilemap: ParsedTileType[][]; largestDiff: number } {
+): {
+  tilemap: ParsedTileType[][];
+  largestDiff: number;
+  wallOffsets: { x: number; y: number };
+  positionOffsets: { x: number; y: number };
+} {
   const startIndexColumn = findFirstNonEmptyColumnIndex(tilemap);
   const startIndexRow = findFirstNonEmptyRowIndex(tilemap);
 
@@ -41,18 +55,11 @@ export function parseTileMap(
   const rowWallMinimum = new RowWall();
 
   let colWallMinimumY = -1;
-
   let globalWallStartX = -1;
-
-  const getTile = (x: number, y: number) => {
-    if (cutoutTilemap[y] == null) return "x";
-    if (cutoutTilemap[y][x] == null) return "x";
-
-    return cutoutTilemap[y][x];
-  };
 
   let lowestTile: number | undefined;
   let highestTile: number | undefined;
+  let hasDoor: boolean = false;
 
   function applyHighLowTile(current: number) {
     if (highestTile == null || current > highestTile) {
@@ -71,90 +78,93 @@ export function parseTileMap(
       const resultX = x + 1;
       const resultY = y + 1;
 
-      const type = getTile(x, y);
-
-      const leftType = getTile(x - 1, y);
-      const topType = getTile(x, y - 1);
-
-      const topLeftDiagonalType = getTile(x - 1, y - 1);
-      const bottomType = getTile(x, y + 1);
-      const rightType = getTile(x + 1, y);
-
       const wallPositionX = resultX - 1;
       const wallPositionY = resultY - 1;
 
       const tileInfo = getTileInfo(cutoutTilemap, x, y);
 
-      const rowWallAllowed = rowWallMinimum.isWallAllowed(wallPositionX);
+      if (!tileInfo.rowDoor || hasDoor) {
+        const rowWallAllowed = rowWallMinimum.isWallAllowed(wallPositionX);
+        if (tileInfo.rowEdge && tileInfo.height != null && rowWallAllowed) {
+          const belowTileInfo = getTileInfo(cutoutTilemap, x - 1, y + 1);
 
-      if (tileInfo.rowEdge && tileInfo.height != null && rowWallAllowed) {
-        result[resultY][wallPositionX] = {
-          type: "wall",
-          kind: "rowWall",
-          height: tileInfo.height,
-        };
-        rowWallMinimum.setValueIfLower(wallPositionX);
-      }
+          result[resultY][wallPositionX] = {
+            type: "wall",
+            kind: "rowWall",
+            height: tileInfo.height,
+            hideBorder: belowTileInfo.rowDoor,
+          };
 
-      const columnWallAllowed =
-        colWallMinimumY === -1 ||
-        colWallMinimumY >= wallPositionY ||
-        (globalWallStartX !== -1 && wallPositionX < globalWallStartX);
-
-      if (tileInfo.colEdge && tileInfo.height != null && columnWallAllowed) {
-        result[wallPositionY][resultX] = {
-          type: "wall",
-          kind: "colWall",
-          height: tileInfo.height,
-        };
-        colWallMinimumY = wallPositionY;
-
-        if (rowWallStartX === -1) {
-          rowWallStartX = wallPositionX;
+          rowWallMinimum.setValueIfLower(wallPositionX);
         }
+
+        const columnWallAllowed =
+          colWallMinimumY === -1 ||
+          colWallMinimumY >= wallPositionY ||
+          (globalWallStartX !== -1 && wallPositionX < globalWallStartX);
+
+        if (tileInfo.colEdge && tileInfo.height != null && columnWallAllowed) {
+          result[wallPositionY][resultX] = {
+            type: "wall",
+            kind: "colWall",
+            height: tileInfo.height,
+          };
+          colWallMinimumY = wallPositionY;
+
+          if (rowWallStartX === -1) {
+            rowWallStartX = wallPositionX;
+          }
+        }
+
+        if (
+          tileInfo.rowEdge &&
+          tileInfo.colEdge &&
+          tileInfo.height != null &&
+          rowWallAllowed &&
+          columnWallAllowed
+        ) {
+          result[wallPositionY][wallPositionX] = {
+            type: "wall",
+            kind: "outerCorner",
+            height: tileInfo.height,
+          };
+        }
+
+        if (
+          tileInfo.innerEdge &&
+          tileInfo.height != null &&
+          columnWallAllowed
+        ) {
+          result[wallPositionY][wallPositionX] = {
+            type: "wall",
+            kind: "innerCorner",
+            height: tileInfo.height,
+          };
+        }
+
+        if (tileInfo.stairs != null && tileInfo.height != null) {
+          result[resultY][resultX] = {
+            type: "stairs",
+            kind: tileInfo.stairs.direction,
+            z: tileInfo.height,
+          };
+
+          applyHighLowTile(tileInfo.height);
+        } else if (tileInfo.height != null) {
+          result[resultY][resultX] = { type: "tile", z: tileInfo.height };
+          applyHighLowTile(tileInfo.height);
+        }
+      } else {
+        hasDoor = true;
+        result[resultY][resultX] = { type: "door", z: tileInfo.height ?? 0 };
       }
 
       if (
-        tileInfo.rowEdge &&
-        tileInfo.colEdge &&
-        tileInfo.height != null &&
-        rowWallAllowed &&
-        columnWallAllowed
+        globalWallStartX === -1 ||
+        (rowWallStartX !== -1 && rowWallStartX < globalWallStartX)
       ) {
-        result[wallPositionY][wallPositionX] = {
-          type: "wall",
-          kind: "outerCorner",
-          height: tileInfo.height,
-        };
+        globalWallStartX = rowWallStartX;
       }
-
-      if (tileInfo.innerEdge && tileInfo.height != null && columnWallAllowed) {
-        result[wallPositionY][wallPositionX] = {
-          type: "wall",
-          kind: "innerCorner",
-          height: tileInfo.height,
-        };
-      }
-
-      if (tileInfo.stairs != null && tileInfo.height != null) {
-        result[resultY][resultX] = {
-          type: "stairs",
-          kind: tileInfo.stairs.direction,
-          z: tileInfo.height,
-        };
-
-        applyHighLowTile(tileInfo.height);
-      } else if (tileInfo.height != null) {
-        result[resultY][resultX] = { type: "tile", z: tileInfo.height };
-        applyHighLowTile(tileInfo.height);
-      }
-    }
-
-    if (
-      globalWallStartX === -1 ||
-      (rowWallStartX !== -1 && rowWallStartX < globalWallStartX)
-    ) {
-      globalWallStartX = rowWallStartX;
     }
   }
 
@@ -164,7 +174,21 @@ export function parseTileMap(
     largestDiff = highestTile - lowestTile;
   }
 
-  return { tilemap: result, largestDiff };
+  return {
+    tilemap: result,
+    largestDiff,
+    wallOffsets: {
+      x: 1,
+      y: 1,
+    },
+    // When the tilemap has a door, we offset the objects in the room by one in the x direction.
+    // This makes it so objects appear at the same position, for a room without a door
+    // and for a room with a door.
+    positionOffsets: {
+      x: 1 + (hasDoor ? 1 : 0),
+      y: 1,
+    },
+  };
 }
 
 class RowWall {
