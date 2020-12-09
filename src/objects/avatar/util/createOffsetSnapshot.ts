@@ -10,7 +10,7 @@ export async function createOffsetSnapshot(
   const figureMapXml = await parseStringAsync(figureMapStr);
   const figureMap = parseFigureMap(figureMapXml);
 
-  const { offsetMap } = await loadOffsetMap(figureMap, getManifest);
+  const { offsetMap } = await loadOffsetMap(figureMap.libraries, getManifest);
 
   const obj: any = {};
 
