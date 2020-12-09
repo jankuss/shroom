@@ -1,7 +1,4 @@
 import * as PIXI from "pixi.js";
-import { AnimationTicker } from "../AnimationTicker";
-import { FurnitureData } from "../FurnitureData";
-import { HitDetection } from "../hitdetection/HitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { IAvatarLoader } from "../../interfaces/IAvatarLoader";
 import { IConfiguration } from "../../interfaces/IConfiguration";
@@ -15,8 +12,6 @@ import { RoomPosition } from "../../types/RoomPosition";
 import { TileType } from "../../types/TileType";
 import { ParsedTileType, parseTileMap } from "../../util/parseTileMap";
 import { parseTileMapString } from "../../util/parseTileMapString";
-import { AvatarLoader } from "../avatar/AvatarLoader";
-import { FurnitureLoader } from "../furniture/FurnitureLoader";
 import { RoomVisualization } from "./RoomVisualization";
 import { Stair } from "./Stair";
 import { Tile } from "./Tile";
@@ -32,6 +27,7 @@ export interface Dependencies {
   hitDetection: IHitDetection;
   configuration: IConfiguration;
   furnitureData?: IFurnitureData;
+  application: PIXI.Application;
 }
 
 type TileMap = TileType[][] | string;
@@ -56,6 +52,7 @@ export class Room
   private furnitureLoader: IFurnitureLoader;
   private hitDetection: IHitDetection;
   private configuration: IConfiguration;
+  public readonly application: PIXI.Application;
 
   private _walls: Wall[] = [];
   private _floor: (Tile | Stair)[] = [];
@@ -232,6 +229,7 @@ export class Room
     tilemap,
     hitDetection,
     configuration,
+    application,
   }: {
     tilemap: TileMap;
   } & Dependencies) {
@@ -259,6 +257,7 @@ export class Room
     this.avatarLoader = avatarLoader;
     this.hitDetection = hitDetection;
     this.configuration = configuration;
+    this.application = application;
 
     this.updateTiles();
     this.addChild(this.visualization);

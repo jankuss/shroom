@@ -1,5 +1,4 @@
 import { IConfiguration } from "../interfaces/IConfiguration";
-import { IFurnitureData } from "../interfaces/IFurnitureData";
 import { AnimationTicker } from "./AnimationTicker";
 import { AvatarLoader } from "./avatar/AvatarLoader";
 import { FurnitureLoader } from "./furniture/FurnitureLoader";
@@ -36,6 +35,7 @@ export class Shroom {
       hitDetection: hitDetection ?? HitDetection.create(application),
       configuration: configuration ?? {},
       furnitureData,
+      application,
     };
 
     return new Shroom(realDependencies);
