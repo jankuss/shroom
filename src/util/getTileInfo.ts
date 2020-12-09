@@ -47,7 +47,7 @@ export function getTileInfo(tiles: TileType[][], x: number, y: number) {
   const bottomType = getTile(tiles, x, y + 1);
   const rightType = getTile(tiles, x + 1, y);
 
-  // A row door can be identified if its surrounded by nothing to the left
+  // A row door can be identified if its surrounded by nothing to the left, top and bottom.
   const rowDoor =
     topType === "x" &&
     leftType === "x" &&

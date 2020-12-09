@@ -14,6 +14,13 @@ export type ParsedTileType =
   | { type: "stairs"; kind: 0 | 2; z: number }
   | { type: "door"; z: number };
 
+/**
+ * Parses the standard tilemap format into a format with the following meta data:
+ * - Walls
+ * - Door
+ * - Stairs
+ * @param tilemap
+ */
 export function parseTileMap(
   tilemap: TileType[][]
 ): {
@@ -174,6 +181,9 @@ export function parseTileMap(
       x: 1,
       y: 1,
     },
+    // When the tilemap has a door, we offset the objects in the room by one in the x direction.
+    // This makes it so objects appear at the same position, for a room without a door
+    // and for a room with a door.
     positionOffsets: {
       x: 1 + (hasDoor ? 1 : 0),
       y: 1,
