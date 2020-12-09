@@ -203,20 +203,6 @@ export class BaseFurniture
     });
   }
 
-  private resetDoubleClick() {
-    if (this._doubleClickInfo == null) return;
-
-    clearTimeout(this._doubleClickInfo.timeout);
-    this._doubleClickInfo = undefined;
-  }
-
-  private startDoubleClick(event: HitEvent) {
-    this._doubleClickInfo = {
-      initialEvent: event,
-      timeout: window.setTimeout(() => this.resetDoubleClick(), 350),
-    };
-  }
-
   private createSprite(
     asset: Asset,
     layer: Layer | undefined,

@@ -52,11 +52,20 @@ room.floorTexture = loadRoomTexture("./images/tile.png");
 room.wallColor = "#dbbe6e";
 room.floorColor = "#eeeeee";
 
+const furniture = new FloorFurniture({
+  roomX: 3,
+  roomY: 1,
+  direction: 2,
+  roomZ: 0,
+  type: "exe_table",
+  animation: "1",
+});
+
 room.addRoomObject(avatar);
+room.addRoomObject(furniture);
 
 setTimeout(() => {
   avatar.walk(1, 1, 0, { direction: 2 });
-  avatar.walk(2, 1, 0, { direction: 2 });
 }, 2000);
 
 application.stage.addChild(room);

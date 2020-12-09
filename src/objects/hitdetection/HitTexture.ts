@@ -15,6 +15,7 @@ export class HitTexture {
 
     this._image = image;
     this._texture = PIXI.Texture.from(image);
+    //this._texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   }
 
   private getHitMap() {
