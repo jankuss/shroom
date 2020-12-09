@@ -67,18 +67,18 @@ You will need to serve the created `resources` folder with a http server, so shr
 Lastly, in your code, import and initialize the Shroom instance.
 
 ```ts
-import * as PIXI from "pixi.js";
-import { Shroom } from "@jankuss/shroom";
+import * as PIXI from 'pixi.js';
+import { Shroom } from '@jankuss/shroom';
 
-const view = document.querySelector("#root") as HTMLCanvasElement;
+const view = document.querySelector('#root') as HTMLCanvasElement;
 const application = new PIXI.Application({ view });
 
 // Assuming the resources are available under http://localhost:8080/resources
-const shroom = Shroom.create({ application, resourcePath: "./resources" });
+const shroom = Shroom.create({ application, resourcePath: './resources' });
 ```
 
 Now, you are fully ready to use shroom.
-Check out the [Guides](create-room.md) section to learn how to use shroom.
+Check out the [Guides](guides/create-room.md) section to learn how to use shroom.
 
 Also, take a look at the [example project](https://github.com/jankuss/shroom/tree/master/example) in the shroom repository for a basic project depending on shroom.
 You can use it as a boilerplate for your own.

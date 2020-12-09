@@ -1,11 +1,11 @@
-import * as PIXI from "pixi.js";
+import * as PIXI from 'pixi.js';
 
-import { RoomObject } from "../RoomObject";
-import { getZOrder } from "../../util/getZOrder";
-import { BaseFurniture } from "./BaseFurniture";
-import { IFurniture, IFurnitureBehavior } from "./IFurniture";
-import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
-import { HitEventHandler } from "../hitdetection/HitSprite";
+import { RoomObject } from '../RoomObject';
+import { getZOrder } from '../../util/getZOrder';
+import { BaseFurniture } from './BaseFurniture';
+import { IFurniture, IFurnitureBehavior } from './IFurniture';
+import { ObjectAnimation } from '../../util/animation/ObjectAnimation';
+import { HitEventHandler } from '../hitdetection/HitSprite';
 
 export class FloorFurniture extends RoomObject implements IFurniture {
   private baseFurniture: BaseFurniture;
@@ -125,7 +125,7 @@ export class FloorFurniture extends RoomObject implements IFurniture {
       this.roomX,
       this.roomY,
       this.roomZ,
-      "object"
+      'object'
     );
 
     this.baseFurniture.x = x;
