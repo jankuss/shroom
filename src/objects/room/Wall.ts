@@ -18,6 +18,7 @@ interface Props {
   side?: boolean;
   color: string;
   texture?: PIXI.Texture;
+  hideBorder?: boolean;
 }
 
 const wallWidth = 32;
@@ -250,6 +251,7 @@ export class Wall extends RoomObject {
   private _wallHeight: number;
   private _tileHeight: number;
   private _wallDepth: number;
+  private _hideBorder: boolean;
 
   public get wallDepth() {
     return this._wallDepth;
@@ -284,6 +286,7 @@ export class Wall extends RoomObject {
     this._wallHeight = props.wallHeight;
     this._tileHeight = props.tileHeight;
     this._wallDepth = props.wallDepth;
+    this._hideBorder = props.hideBorder ?? false;
   }
 
   get texture() {
@@ -357,7 +360,9 @@ export class Wall extends RoomObject {
           borderWidth: this.wallDepth,
         });
 
-        this._border = left.border;
+        if (!this._hideBorder) {
+          this._border = left.border;
+        }
         this._primary = left.primary;
         this._top = left.top;
         break;
@@ -419,6 +424,6 @@ export class Wall extends RoomObject {
       }
     }
 
-    this.visualization.addPlaneChild(this._container);
+    this.visualization.addWallChild(this._container);
   }
 }

@@ -28,6 +28,18 @@ export class AvatarSprites extends RoomObject {
   private _clickHandler: ClickHandler = new ClickHandler();
   private _assets: PIXI.Sprite[] = [];
 
+  private _layer: "door" | "tile" = "tile";
+
+  public get layer() {
+    return this._layer;
+  }
+
+  public set layer(value) {
+    this._updateLayer(this._layer, value);
+
+    this._layer = value;
+  }
+
   get onClick() {
     return this._clickHandler.onClick;
   }
@@ -100,6 +112,24 @@ export class AvatarSprites extends RoomObject {
     this._lookOptions = options.look;
   }
 
+  private _updateLayer(
+    oldLayer: "door" | "tile" | undefined,
+    newLayer: "door" | "tile"
+  ) {
+    if (this.container == null) return;
+    if (oldLayer === newLayer) return;
+
+    this.visualization.removeBehindWallChild(this.container);
+    this.visualization.removeContainerChild(this.container);
+
+    if (newLayer === "door") {
+      this.visualization.addBehindWallChild(this.container);
+      return;
+    }
+
+    this.visualization.addContainerChild(this.container);
+  }
+
   private _positionChanged() {
     if (this.avatarDrawDefinition == null) return;
     this._updatePosition(this.avatarDrawDefinition);
@@ -142,7 +172,7 @@ export class AvatarSprites extends RoomObject {
       this._assets.push(asset);
     });
 
-    this.visualization.addContainerChild(this.container);
+    this._updateLayer(undefined, this.layer);
   }
 
   private createAsset(part: AvatarDrawPart, mirrored: boolean) {

@@ -24,6 +24,7 @@ import { TileCursor } from "./TileCursor";
 import { getTileMapBounds } from "./util/getTileMapBounds";
 import { Wall } from "./Wall";
 import { Shroom } from "../Shroom";
+import { ITileMap } from "../../interfaces/ITileMap";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -38,7 +39,7 @@ type TileMap = TileType[][] | string;
 
 export class Room
   extends PIXI.Container
-  implements IRoomGeometry, IRoomObjectContainer {
+  implements IRoomGeometry, IRoomObjectContainer, ITileMap {
   private roomObjects: IRoomObject[] = [];
 
   private wallOffsets = { x: 1, y: 1 };
@@ -305,6 +306,7 @@ export class Room
       avatarLoader: this.avatarLoader,
       hitDetection: this.hitDetection,
       configuration: this.configuration,
+      tilemap: this,
     });
 
     this.roomObjects.push(object);
@@ -371,6 +373,21 @@ export class Room
       for (let x = 0; x < tiles[y].length; x++) {
         const tile = tiles[y][x];
 
+        if (tile.type === "door") {
+          this.registerTile(
+            new Tile({
+              geometry: this,
+              roomX: x - this.wallOffsets.x,
+              roomY: y - this.wallOffsets.y,
+              roomZ: tile.z,
+              edge: true,
+              tileHeight: this.tileHeight,
+              color: this.floorColor ?? this.tileColor,
+              door: true,
+            })
+          );
+        }
+
         if (tile.type === "tile") {
           this.registerTile(
             new Tile({
@@ -406,6 +423,7 @@ export class Room
               color: this.wallColor ?? "#ffffff",
               texture: this._currentWallTexture,
               wallDepth: this.wallDepth,
+              hideBorder: tile.hideBorder,
             })
           );
         }

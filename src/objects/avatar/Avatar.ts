@@ -11,6 +11,7 @@ import { avatarFramesObject } from "./util/avatarFrames";
 import { LookOptions } from "./util/createLookServer";
 import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
+import { ParsedTileType } from "../../util/parseTileMap";
 
 interface Options {
   look: string;
@@ -302,21 +303,29 @@ export class Avatar extends RoomObject {
 
     const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
 
+    const roomXrounded = Math.round(roomX);
+    const roomYrounded = Math.round(roomY);
+    const roomZrounded = Math.round(roomZ);
+
     if (this.avatarSprites != null) {
       this.avatarSprites.x = Math.round(x);
       this.avatarSprites.y = Math.round(y);
       this.avatarSprites.zIndex = this._getZIndexAtPosition(
-        Math.round(roomX),
-        Math.round(roomY),
-        Math.round(roomZ)
+        roomXrounded,
+        roomYrounded,
+        roomZrounded
       );
     }
+
+    const item = this.tilemap.getTileAtPosition(roomXrounded, roomYrounded);
+
+    this.avatarSprites.layer = item?.type === "door" ? "door" : "tile";
   }
 
   registered(): void {
     this.updatePosition();
-
     this.roomObjectContainer.addRoomObject(this.avatarSprites);
+
     this.walkAnimation = new ObjectAnimation(this.animationTicker, {
       onUpdatePosition: (position, direction) => {
         this._animatedPosition = position;
