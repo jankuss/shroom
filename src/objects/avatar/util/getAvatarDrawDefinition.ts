@@ -11,6 +11,7 @@ import { getDrawOrder } from "./drawOrder";
 
 export type AvatarDrawPart = {
   fileId: string;
+  library: string;
   x: number;
   y: number;
   color: string | undefined;
@@ -27,6 +28,7 @@ export interface AvatarDrawDefinition {
 export interface Dependencies {
   getSetType: GetSetType;
   getOffset: GetOffset;
+  getLibraryOfPart: (id: string, type: string) => string | undefined;
 }
 
 export type PrimaryAction =
@@ -58,7 +60,7 @@ interface Options {
  */
 export function getAvatarDrawDefinition(
   { parsedLook, action, actions, direction }: Options,
-  { getOffset, getSetType }: Dependencies
+  { getOffset, getSetType, getLibraryOfPart }: Dependencies
 ): AvatarDrawDefinition | undefined {
   const parts = Array.from(parsedLook.entries()).flatMap(
     ([type, { setId, colorId }]) => {
@@ -171,8 +173,14 @@ export function getAvatarDrawDefinition(
           const offset = getOffset(id);
           if (offset == null) return;
 
+          const library = getLibraryOfPart(p.id, p.type);
+          if (library == null) {
+            throw new Error(`Invalid library ${id} ${p.type}`);
+          }
+
           return {
             fileId: id,
+            library: library,
             x: -offset.offsetX,
             y: -offset.offsetY,
             color: `#${p.color}`,

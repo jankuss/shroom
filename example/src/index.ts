@@ -36,6 +36,14 @@ const room = Room.create(shroom, {
    `,
 });
 
+const avatar = new Avatar({
+  look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
+  direction: 4,
+  roomX: 0,
+  roomY: 0,
+  roomZ: 0,
+});
+
 room.x = 100;
 room.y = 200;
 
@@ -50,6 +58,8 @@ const avatar = new Avatar({
   roomY: 0,
   roomZ: 0,
 });
+
+room.addRoomObject(avatar);
 
 room.addRoomObject(avatar);
 
