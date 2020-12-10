@@ -130,7 +130,12 @@ export class WallFurniture extends RoomObject implements IFurniture {
     const offsets = this.getOffsets(this.direction);
     if (offsets == null) return;
 
-    const base = this.geometry.getPosition(this.roomX, this.roomY, this.roomZ);
+    const base = this.geometry.getPosition(
+      this.roomX,
+      this.roomY,
+      this.roomZ,
+      "object"
+    );
 
     this.baseFurniture.x = base.x + offsets.x;
     this.baseFurniture.y = base.y + offsets.y;

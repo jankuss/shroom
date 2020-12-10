@@ -124,7 +124,8 @@ export class FloorFurniture extends RoomObject implements IFurniture {
     const { x, y } = this.geometry.getPosition(
       this.roomX,
       this.roomY,
-      this.roomZ
+      this.roomZ,
+      "object"
     );
 
     this.baseFurniture.x = x;

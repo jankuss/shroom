@@ -78,7 +78,7 @@ const shroom = Shroom.create({ application, resourcePath: "./resources" });
 ```
 
 Now, you are fully ready to use shroom.
-Check out the [Guides](create-room.md) section to learn how to use shroom.
+Check out the [Guides](guides/create-room.md) section to learn how to use shroom.
 
 Also, take a look at the [example project](https://github.com/jankuss/shroom/tree/master/example) in the shroom repository for a basic project depending on shroom.
 You can use it as a boilerplate for your own.

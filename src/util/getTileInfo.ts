@@ -43,8 +43,19 @@ export function getTileInfo(tiles: TileType[][], x: number, y: number) {
   const topType = getTile(tiles, x, y - 1);
 
   const topLeftDiagonalType = getTile(tiles, x - 1, y - 1);
+  const bottomLeftDiagonalType = getTile(tiles, x - 1, y + 1);
   const bottomType = getTile(tiles, x, y + 1);
   const rightType = getTile(tiles, x + 1, y);
+
+  // A row door can be identified if its surrounded by nothing to the left, top and bottom.
+  const rowDoor =
+    topType === "x" &&
+    leftType === "x" &&
+    topLeftDiagonalType === "x" &&
+    bottomType === "x" &&
+    bottomLeftDiagonalType === "x" &&
+    isTile(rightType) &&
+    isTile(type);
 
   return {
     rowEdge: leftType === "x" && isTile(type),
@@ -56,6 +67,7 @@ export function getTileInfo(tiles: TileType[][], x: number, y: number) {
       isTile(leftType),
     stairs: getStairs(tiles, x, y),
     height: isTile(type) ? type : undefined,
+    rowDoor: rowDoor,
   };
 }
 

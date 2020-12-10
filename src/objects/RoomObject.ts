@@ -40,6 +40,10 @@ export abstract class RoomObject implements IRoomObject {
     return this.getRoomContext().hitDetection;
   }
 
+  protected get tilemap() {
+    return this.getRoomContext().tilemap;
+  }
+
   private getRoomContext(): IRoomContext {
     if (this.context == null) throw new Error("Invalid context");
 

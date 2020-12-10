@@ -1,6 +1,6 @@
 module.exports = {
   someSidebar: {
     "Getting Started": ['install'],
-    "Guides": ["create-room", "applying-room-textures", "adding-objects"]
+    "Guides": ["guides/create-room", "guides/applying-room-textures", "guides/adding-objects"]
   },
 };

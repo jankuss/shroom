@@ -1,5 +1,6 @@
 import { reject } from "bluebird";
 import * as PIXI from "pixi.js";
+import { applyTextureProperties } from "../../util/applyTextureProperties";
 
 export class HitTexture {
   private _texture: PIXI.Texture;
@@ -15,6 +16,7 @@ export class HitTexture {
 
     this._image = image;
     this._texture = PIXI.Texture.from(image);
+    applyTextureProperties(this._texture);
   }
 
   private getHitMap() {
