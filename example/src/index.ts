@@ -6,6 +6,7 @@ import {
   Avatar,
   Shroom,
   loadRoomTexture,
+  WallFurniture,
 } from "@jankuss/shroom";
 import { DummyRoom } from "./DummyRoom";
 
@@ -61,7 +62,43 @@ const furniture = new FloorFurniture({
   animation: "1",
 });
 
+const wallFurniture1 = new WallFurniture({
+  roomX: 0,
+  roomY: 2,
+  roomZ: 0,
+  direction: 2,
+  type: "window_skyscraper",
+});
+
+const wallFurniture2 = new WallFurniture({
+  roomX: 0,
+  roomY: 1,
+  roomZ: 0,
+  direction: 2,
+  type: "window_skyscraper",
+});
+
+const wallFurniture3 = new WallFurniture({
+  roomX: 0,
+  roomY: 0,
+  roomZ: 0,
+  direction: 2,
+  type: "window_skyscraper",
+});
+
+const wallFurniture4 = new WallFurniture({
+  roomX: 1.5,
+  roomY: 0,
+  roomZ: 0,
+  direction: 4,
+  type: "window_triple",
+});
+
 room.addRoomObject(avatar);
-room.addRoomObject(furniture);
+//room.addRoomObject(furniture);
+room.addRoomObject(wallFurniture1);
+room.addRoomObject(wallFurniture2);
+room.addRoomObject(wallFurniture3);
+room.addRoomObject(wallFurniture4);
 
 application.stage.addChild(room);

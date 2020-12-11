@@ -33,6 +33,7 @@ export interface Dependencies {
   hitDetection: IHitDetection;
   configuration: IConfiguration;
   furnitureData?: IFurnitureData;
+  application: PIXI.Application;
 }
 
 type TileMap = TileType[][] | string;
@@ -89,6 +90,7 @@ export class Room
   private _wallDepth: number = 8;
   private _wallHeight: number = 115;
   private _tileHeight: number = 8;
+  private _application: PIXI.Application;
 
   private _largestDiff: number;
 
@@ -243,6 +245,7 @@ export class Room
     tilemap,
     hitDetection,
     configuration,
+    application,
   }: {
     tilemap: TileMap;
   } & Dependencies) {
@@ -264,7 +267,7 @@ export class Room
 
     this.parsedTileMap = parsedTileMap;
 
-    this.visualization = new RoomVisualization();
+    this._application = application;
 
     this._roomBounds = getTileMapBounds(parsedTileMap, this._wallOffsets);
 
@@ -276,6 +279,13 @@ export class Room
     this.avatarLoader = avatarLoader;
     this.hitDetection = hitDetection;
     this.configuration = configuration;
+
+    console.log("RHRW", this.roomWidth, this.roomHeight);
+
+    this.visualization = new RoomVisualization(
+      this,
+      this._application.renderer
+    );
 
     this.updateTiles();
     this.addChild(this.visualization);

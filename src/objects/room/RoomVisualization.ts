@@ -1,5 +1,7 @@
 import * as PIXI from "pixi.js";
 import { IRoomVisualization } from "../../interfaces/IRoomVisualization";
+import { CombinedSprite } from "../CombinedSprite";
+import { Room } from "./Room";
 
 export class RoomVisualization
   extends PIXI.Container
@@ -12,9 +14,21 @@ export class RoomVisualization
   private floorPlane: PIXI.Container = new PIXI.Container();
   private wallPlane: PIXI.Container = new PIXI.Container();
   private tileCursorPlane: PIXI.Container = new PIXI.Container();
+  private landscapeContainer: PIXI.Container = new PIXI.Container();
+  private masks: PIXI.Container = new PIXI.Container();
 
-  constructor() {
+  private masksSprites: CombinedSprite;
+
+  private landscape: PIXI.Sprite = new PIXI.TilingSprite(
+    PIXI.Texture.from("./images/landscape.png"),
+    1000,
+    1000
+  );
+
+  constructor(room: Room, private renderer: PIXI.Renderer) {
     super();
+    console.log("AA RHRW", room.roomWidth, room.roomHeight);
+
     this.container.sortableChildren = true;
     this.behindWallPlane.sortableChildren = true;
 
@@ -24,11 +38,28 @@ export class RoomVisualization
     this.plane.sortableChildren = true;
     this.plane.cacheAsBitmap = true;
 
+    this.landscapeContainer.addChild(this.landscape);
+    this.landscapeContainer.addChild(this.masks);
+
+    this.landscape.x -= 500;
+    this.landscape.y -= 500;
+
+    this.masksSprites = new CombinedSprite({
+      width: room.roomWidth,
+      height: room.roomHeight,
+      renderer: this.renderer,
+      wallHeight: room.wallHeight,
+    });
+
+    this.landscape.mask = this.masksSprites;
+
     this.addChild(this.behindWallPlane);
     this.addChild(this.plane);
     this.addChild(this.tileCursorPlane);
+    this.addChild(this.landscapeContainer);
     this.addChild(this.container);
     this.addChild(this.cursorLayer);
+    this.addChild(this.masksSprites);
   }
 
   addTileCursorChild(element: PIXI.DisplayObject): void {
@@ -55,7 +86,9 @@ export class RoomVisualization
     this.cursorLayer.addChild(element);
   }
 
-  addMask(element: PIXI.Sprite): void {}
+  addMask(element: PIXI.Sprite): void {
+    this.masksSprites.addSprite(element);
+  }
 
   disableCache() {
     this.plane.cacheAsBitmap = false;

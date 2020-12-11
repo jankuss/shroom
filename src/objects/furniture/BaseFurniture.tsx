@@ -165,6 +165,7 @@ export class BaseFurniture
         this.sprites.push(sprite.sprite);
 
         if (sprite.kind === "mask") {
+          console.log("ADD MASK");
           this.visualization.addMask(sprite.sprite);
         } else {
           this.visualization.addContainerChild(sprite.sprite);
