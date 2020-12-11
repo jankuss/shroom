@@ -44,6 +44,10 @@ export abstract class RoomObject implements IRoomObject {
     return this.getRoomContext().tilemap;
   }
 
+  protected get landscapeContainer() {
+    return this.getRoomContext().landscapeContainer;
+  }
+
   private getRoomContext(): IRoomContext {
     if (this.context == null) throw new Error("Invalid context");
 

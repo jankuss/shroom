@@ -1,3 +1,4 @@
+import { ILandscapeContainer } from "../objects/room/ILandscapeContainer";
 import { IAnimationTicker } from "./IAnimationTicker";
 import { IAvatarLoader } from "./IAvatarLoader";
 import { IConfiguration } from "./IConfiguration";
@@ -18,4 +19,5 @@ export interface IRoomContext {
   hitDetection: IHitDetection;
   configuration: IConfiguration;
   tilemap: ITileMap;
+  landscapeContainer: ILandscapeContainer;
 }

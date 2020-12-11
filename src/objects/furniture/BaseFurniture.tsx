@@ -92,18 +92,35 @@ export class BaseFurniture
     this.updateFurniture();
   }
 
+  public get maskLevel() {
+    return this._maskLevel;
+  }
+
+  public set maskLevel(value) {
+    this._maskLevel = value;
+    this.updateFurniture();
+  }
+
   private animatedSprites: {
     sprites: Map<string, PIXI.Sprite>;
     frames: string[];
   }[] = [];
 
+  private _maskLevel: { roomX: number; roomY: number } | undefined;
+
   private cancelTicker: (() => void) | undefined = undefined;
 
-  constructor(type: string, direction: number, animation: string = "0") {
+  constructor(
+    type: string,
+    direction: number,
+    animation: string = "0",
+    maskLevel?: { roomX: number; roomY: number }
+  ) {
     super();
     this._direction = direction;
     this._animation = animation;
     this._type = type;
+    this._maskLevel = maskLevel;
   }
 
   updateFurniture() {
@@ -164,9 +181,18 @@ export class BaseFurniture
       if (sprite.kind === "simple" || sprite.kind === "mask") {
         this.sprites.push(sprite.sprite);
 
-        if (sprite.kind === "mask") {
-          console.log("ADD MASK");
-          this.visualization.addMask(sprite.sprite);
+        if (sprite.kind === "mask" && this._maskLevel != null) {
+          if (this.direction === 4) {
+            this.visualization.addYLevelMask(
+              this._maskLevel.roomY,
+              sprite.sprite
+            );
+          } else if (this.direction === 2) {
+            this.visualization.addXLevelMask(
+              this._maskLevel.roomX,
+              sprite.sprite
+            );
+          }
         } else {
           this.visualization.addContainerChild(sprite.sprite);
         }

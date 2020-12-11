@@ -7,6 +7,7 @@ import {
   Shroom,
   loadRoomTexture,
   WallFurniture,
+  Landscape,
 } from "@jankuss/shroom";
 import { DummyRoom } from "./DummyRoom";
 
@@ -31,9 +32,13 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 const shroom = Shroom.create({ application, resourcePath: "./resources" });
 const room = Room.create(shroom, {
   tilemap: `
-    0000
-    0000
-    0000
+    000000
+    000000
+    000000
+    000000
+    000000
+    xx00xx
+    xx00xx
    `,
 });
 
@@ -45,8 +50,8 @@ const avatar = new Avatar({
   roomZ: 0,
 });
 
-room.x = 100;
-room.y = 200;
+room.x = application.screen.width / 2 - room.roomWidth / 2;
+room.y = application.screen.height / 2 - room.roomHeight / 2;
 
 room.wallTexture = loadRoomTexture("./images/tile.png");
 room.floorTexture = loadRoomTexture("./images/tile.png");
@@ -64,7 +69,7 @@ const furniture = new FloorFurniture({
 
 const wallFurniture1 = new WallFurniture({
   roomX: 0,
-  roomY: 2,
+  roomY: 4,
   roomZ: 0,
   direction: 2,
   type: "window_skyscraper",
@@ -72,7 +77,7 @@ const wallFurniture1 = new WallFurniture({
 
 const wallFurniture2 = new WallFurniture({
   roomX: 0,
-  roomY: 1,
+  roomY: 3,
   roomZ: 0,
   direction: 2,
   type: "window_skyscraper",
@@ -80,18 +85,50 @@ const wallFurniture2 = new WallFurniture({
 
 const wallFurniture3 = new WallFurniture({
   roomX: 0,
-  roomY: 0,
+  roomY: 2,
   roomZ: 0,
   direction: 2,
   type: "window_skyscraper",
 });
 
 const wallFurniture4 = new WallFurniture({
-  roomX: 1.5,
+  roomX: 0,
+  roomY: 0,
+  roomZ: 0,
+  direction: 2,
+  type: "window_skyscraper",
+});
+
+const wallFurniture5 = new WallFurniture({
+  roomX: 0,
+  roomY: 1,
+  roomZ: 0,
+  direction: 2,
+  type: "window_skyscraper",
+});
+
+const wallFurniture6 = new WallFurniture({
+  roomX: 0,
   roomY: 0,
   roomZ: 0,
   direction: 4,
-  type: "window_triple",
+  type: "window_skyscraper",
+});
+
+const wallFurniture7 = new WallFurniture({
+  roomX: 1,
+  roomY: 0,
+  roomZ: 0,
+  direction: 4,
+  type: "window_skyscraper",
+});
+
+const wallFurniture8 = new WallFurniture({
+  roomX: 2,
+  roomY: 0,
+  roomZ: 0,
+  direction: 4,
+  type: "window_skyscraper",
 });
 
 room.addRoomObject(avatar);
@@ -100,5 +137,15 @@ room.addRoomObject(wallFurniture1);
 room.addRoomObject(wallFurniture2);
 room.addRoomObject(wallFurniture3);
 room.addRoomObject(wallFurniture4);
+room.addRoomObject(wallFurniture5);
+room.addRoomObject(wallFurniture6);
+room.addRoomObject(wallFurniture7);
+room.addRoomObject(wallFurniture8);
 
 application.stage.addChild(room);
+
+const landscape = new Landscape(room);
+landscape.leftTexture = loadRoomTexture("./images/a1.png");
+landscape.rightTexture = loadRoomTexture("./images/a2.png");
+
+room.addRoomObject(landscape);

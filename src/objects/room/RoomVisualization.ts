@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { IRoomVisualization } from "../../interfaces/IRoomVisualization";
 import { RoomLandscapeMaskSprite } from "./RoomLandscapeMaskSprite";
 import { Room } from "./Room";
+import { getLeftMatrix, getRightMatrix } from "./matrixes";
 
 export class RoomVisualization
   extends PIXI.Container
@@ -16,15 +17,11 @@ export class RoomVisualization
   private _tileCursorPlane: PIXI.Container = new PIXI.Container();
   private _landscapeContainer: PIXI.Container = new PIXI.Container();
 
-  private _masksSprites: RoomLandscapeMaskSprite;
+  private _masksContainer = new PIXI.Container();
+  private _xLevelMask = new Map<number, RoomLandscapeMaskSprite>();
+  private _yLevelMask = new Map<number, RoomLandscapeMaskSprite>();
 
-  private _landscape: PIXI.Sprite = new PIXI.TilingSprite(
-    PIXI.Texture.from("./images/landscape.png"),
-    1000,
-    1000
-  );
-
-  constructor(room: Room, private renderer: PIXI.Renderer) {
+  constructor(private room: Room, private renderer: PIXI.Renderer) {
     super();
     this._container.sortableChildren = true;
     this._behindWallPlane.sortableChildren = true;
@@ -35,31 +32,68 @@ export class RoomVisualization
     this._plane.sortableChildren = true;
     this._plane.cacheAsBitmap = true;
 
-    this._landscapeContainer.addChild(this._landscape);
-
-    this._landscape.x -= 500;
-    this._landscape.y -= 500;
-
-    this._masksSprites = new RoomLandscapeMaskSprite({
-      width: room.roomWidth,
-      height: room.roomHeight,
-      renderer: this.renderer,
-      wallHeight: room.wallHeight,
-    });
-
-    this._landscape.mask = this._masksSprites;
+    //this._landscape.mask = this._masksSprites;
 
     this.addChild(this._behindWallPlane);
     this.addChild(this._plane);
-    this.addChild(this._masksSprites);
+    this.addChild(this._masksContainer);
     this.addChild(this._tileCursorPlane);
     this.addChild(this._landscapeContainer);
     this.addChild(this._container);
     this.addChild(this._cursorLayer);
   }
 
+  addXLevelMask(level: number, element: PIXI.Sprite): void {
+    console.log(level, "X LEVEL");
+    const current =
+      this._xLevelMask.get(level) ??
+      new RoomLandscapeMaskSprite({
+        renderer: this.renderer,
+        width: this.room.roomWidth,
+        height: this.room.roomHeight,
+        wallHeight: this.room.wallHeight,
+      });
+
+    current.addSprite(element);
+    //this._masksContainer.addChild(current);
+
+    this._xLevelMask.set(level, current);
+    this.updateRoom(this.room);
+  }
+
+  addYLevelMask(level: number, element: PIXI.Sprite): void {
+    console.log(level, "Y LEVEL");
+    const current =
+      this._yLevelMask.get(level) ??
+      new RoomLandscapeMaskSprite({
+        renderer: this.renderer,
+        width: this.room.roomWidth,
+        height: this.room.roomHeight,
+        wallHeight: this.room.wallHeight,
+      });
+
+    current.addSprite(element);
+    //this._masksContainer.addChild(current);
+
+    this._yLevelMask.set(level, current);
+    this.updateRoom(this.room);
+  }
+
+  addLandscape(element: PIXI.DisplayObject): void {
+    this._landscapeContainer.addChild(element);
+  }
+
   updateRoom(room: Room) {
-    this._masksSprites.updateRoom(room);
+    console.log("MASKS", this._yLevelMask, this._xLevelMask);
+
+    this._yLevelMask.forEach((mask, level) => {
+      mask.updateRoom(room);
+      room.landscape?.setYLevelMasks(level, mask);
+    });
+    this._xLevelMask.forEach((mask, level) => {
+      mask.updateRoom(room);
+      room.landscape?.setXLevelMasks(level, mask);
+    });
   }
 
   addTileCursorChild(element: PIXI.DisplayObject): void {
@@ -84,10 +118,6 @@ export class RoomVisualization
 
   addCursorChild(element: PIXI.DisplayObject): void {
     this._cursorLayer.addChild(element);
-  }
-
-  addMask(element: PIXI.Sprite): void {
-    this._masksSprites.addSprite(element);
   }
 
   disableCache() {

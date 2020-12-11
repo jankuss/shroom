@@ -25,6 +25,8 @@ import { getTileMapBounds } from "./util/getTileMapBounds";
 import { Wall } from "./Wall";
 import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
+import { ILandscape } from "./ILandscape";
+import { ILandscapeContainer } from "./ILandscapeContainer";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -66,6 +68,8 @@ export class Room
   private _cursors: TileCursor[] = [];
   private _doorWall: Wall | undefined;
 
+  private _landscape: ILandscape | undefined;
+
   private _roomBounds: {
     minX: number;
     minY: number;
@@ -94,6 +98,17 @@ export class Room
 
   private _largestDiff: number;
 
+  private _landscapeContainer: ILandscapeContainer = {
+    setLandscape: (value) => {
+      this._updateLandscape(value);
+    },
+    unsetLandscapeIfEquals: (value) => {
+      if (this._landscape === value) {
+        this._updateLandscape(undefined);
+      }
+    },
+  };
+
   public get hideWalls() {
     return this._hideWalls;
   }
@@ -101,6 +116,15 @@ export class Room
   public set hideWalls(value) {
     this._hideWalls = value;
     this.updateTiles();
+  }
+
+  public get landscape() {
+    return this._landscape;
+  }
+
+  private _updateLandscape(newValue: ILandscape | undefined) {
+    this._landscape = newValue;
+    this.visualization.updateRoom(this);
   }
 
   public get hideFloor() {
@@ -334,6 +358,7 @@ export class Room
       hitDetection: this.hitDetection,
       configuration: this.configuration,
       tilemap: this,
+      landscapeContainer: this._landscapeContainer,
     });
 
     this.roomObjects.push(object);
@@ -343,12 +368,20 @@ export class Room
     roomX: number,
     roomY: number,
     roomZ: number,
-    type: "plane" | "object"
+    type: "plane" | "object" | "none"
   ): { x: number; y: number } {
-    const { x, y } =
-      type === "plane"
-        ? this._getTilePositionWithOffset(roomX, roomY)
-        : this._getObjectPositionWithOffset(roomX, roomY);
+    const getBasePosition = () => {
+      switch (type) {
+        case "plane":
+          return this._getTilePositionWithOffset(roomX, roomY);
+        case "object":
+          return this._getObjectPositionWithOffset(roomX, roomY);
+      }
+
+      return { x: roomX, y: roomY };
+    };
+
+    const { x, y } = getBasePosition();
 
     const base = 32;
 

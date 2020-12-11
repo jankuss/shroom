@@ -9,5 +9,8 @@ export interface IRoomVisualization {
   removeContainerChild(element: PIXI.DisplayObject): void;
 
   addCursorChild(element: PIXI.DisplayObject): void;
-  addMask(element: PIXI.DisplayObject): void;
+  addXLevelMask(level: number, element: PIXI.Sprite): void;
+  addYLevelMask(level: number, element: PIXI.Sprite): void;
+
+  addLandscape(element: PIXI.DisplayObject): void;
 }
