@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { IRoomVisualization } from "../../interfaces/IRoomVisualization";
-import { CombinedSprite } from "../CombinedSprite";
+import { RoomLandscapeMaskSprite } from "./RoomLandscapeMaskSprite";
 import { Room } from "./Room";
 
 export class RoomVisualization
@@ -17,7 +17,7 @@ export class RoomVisualization
   private landscapeContainer: PIXI.Container = new PIXI.Container();
   private masks: PIXI.Container = new PIXI.Container();
 
-  private masksSprites: CombinedSprite;
+  private masksSprites: RoomLandscapeMaskSprite;
 
   private landscape: PIXI.Sprite = new PIXI.TilingSprite(
     PIXI.Texture.from("./images/landscape.png"),
@@ -27,8 +27,6 @@ export class RoomVisualization
 
   constructor(room: Room, private renderer: PIXI.Renderer) {
     super();
-    console.log("AA RHRW", room.roomWidth, room.roomHeight);
-
     this.container.sortableChildren = true;
     this.behindWallPlane.sortableChildren = true;
 
@@ -44,7 +42,7 @@ export class RoomVisualization
     this.landscape.x -= 500;
     this.landscape.y -= 500;
 
-    this.masksSprites = new CombinedSprite({
+    this.masksSprites = new RoomLandscapeMaskSprite({
       width: room.roomWidth,
       height: room.roomHeight,
       renderer: this.renderer,
@@ -60,6 +58,10 @@ export class RoomVisualization
     this.addChild(this.container);
     this.addChild(this.cursorLayer);
     this.addChild(this.masksSprites);
+  }
+
+  updateRoom(room: Room) {
+    this.masksSprites.updateRoom(room);
   }
 
   addTileCursorChild(element: PIXI.DisplayObject): void {

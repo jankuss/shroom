@@ -152,6 +152,7 @@ export class Room
   }
 
   private _updateWallHeight() {
+    this.visualization.updateRoom(this);
     this.visualization.disableCache();
     this._walls.forEach((wall) => {
       wall.wallHeight = this.wallHeight;
