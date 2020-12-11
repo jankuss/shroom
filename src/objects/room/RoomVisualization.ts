@@ -6,20 +6,19 @@ import { Room } from "./Room";
 export class RoomVisualization
   extends PIXI.Container
   implements IRoomVisualization {
-  private container: PIXI.Container = new PIXI.Container();
-  private cursorLayer: PIXI.Container = new PIXI.Container();
-  private plane: PIXI.Container = new PIXI.Container();
+  private _container: PIXI.Container = new PIXI.Container();
+  private _cursorLayer: PIXI.Container = new PIXI.Container();
+  private _plane: PIXI.Container = new PIXI.Container();
 
-  private behindWallPlane: PIXI.Container = new PIXI.Container();
-  private floorPlane: PIXI.Container = new PIXI.Container();
-  private wallPlane: PIXI.Container = new PIXI.Container();
-  private tileCursorPlane: PIXI.Container = new PIXI.Container();
-  private landscapeContainer: PIXI.Container = new PIXI.Container();
-  private masks: PIXI.Container = new PIXI.Container();
+  private _behindWallPlane: PIXI.Container = new PIXI.Container();
+  private _floorPlane: PIXI.Container = new PIXI.Container();
+  private _wallPlane: PIXI.Container = new PIXI.Container();
+  private _tileCursorPlane: PIXI.Container = new PIXI.Container();
+  private _landscapeContainer: PIXI.Container = new PIXI.Container();
 
-  private masksSprites: RoomLandscapeMaskSprite;
+  private _masksSprites: RoomLandscapeMaskSprite;
 
-  private landscape: PIXI.Sprite = new PIXI.TilingSprite(
+  private _landscape: PIXI.Sprite = new PIXI.TilingSprite(
     PIXI.Texture.from("./images/landscape.png"),
     1000,
     1000
@@ -27,84 +26,83 @@ export class RoomVisualization
 
   constructor(room: Room, private renderer: PIXI.Renderer) {
     super();
-    this.container.sortableChildren = true;
-    this.behindWallPlane.sortableChildren = true;
+    this._container.sortableChildren = true;
+    this._behindWallPlane.sortableChildren = true;
 
-    this.plane.addChild(this.wallPlane);
-    this.plane.addChild(this.floorPlane);
+    this._plane.addChild(this._wallPlane);
+    this._plane.addChild(this._floorPlane);
 
-    this.plane.sortableChildren = true;
-    this.plane.cacheAsBitmap = true;
+    this._plane.sortableChildren = true;
+    this._plane.cacheAsBitmap = true;
 
-    this.landscapeContainer.addChild(this.landscape);
-    this.landscapeContainer.addChild(this.masks);
+    this._landscapeContainer.addChild(this._landscape);
 
-    this.landscape.x -= 500;
-    this.landscape.y -= 500;
+    this._landscape.x -= 500;
+    this._landscape.y -= 500;
 
-    this.masksSprites = new RoomLandscapeMaskSprite({
+    this._masksSprites = new RoomLandscapeMaskSprite({
       width: room.roomWidth,
       height: room.roomHeight,
       renderer: this.renderer,
       wallHeight: room.wallHeight,
     });
 
-    this.landscape.mask = this.masksSprites;
+    this._landscape.mask = this._masksSprites;
 
-    this.addChild(this.behindWallPlane);
-    this.addChild(this.plane);
-    this.addChild(this.tileCursorPlane);
-    this.addChild(this.landscapeContainer);
-    this.addChild(this.container);
-    this.addChild(this.cursorLayer);
-    this.addChild(this.masksSprites);
+    this.addChild(this._behindWallPlane);
+    this.addChild(this._plane);
+    this.addChild(this._masksSprites);
+    this.addChild(this._tileCursorPlane);
+    this.addChild(this._landscapeContainer);
+    this.addChild(this._container);
+    this.addChild(this._cursorLayer);
   }
 
   updateRoom(room: Room) {
-    this.masksSprites.updateRoom(room);
+    this._masksSprites.updateRoom(room);
   }
 
   addTileCursorChild(element: PIXI.DisplayObject): void {
-    this.tileCursorPlane.addChild(element);
+    this._tileCursorPlane.addChild(element);
   }
 
   removeBehindWallChild(element: PIXI.DisplayObject): void {
-    this.behindWallPlane.removeChild(element);
+    this._behindWallPlane.removeChild(element);
   }
 
   removeContainerChild(element: PIXI.DisplayObject): void {
-    this.container.removeChild(element);
+    this._container.removeChild(element);
   }
 
   addBehindWallChild(element: PIXI.DisplayObject): void {
-    this.behindWallPlane.addChild(element);
+    this._behindWallPlane.addChild(element);
   }
 
   addWallChild(element: PIXI.DisplayObject): void {
-    this.wallPlane.addChild(element);
+    this._wallPlane.addChild(element);
   }
 
   addCursorChild(element: PIXI.DisplayObject): void {
-    this.cursorLayer.addChild(element);
+    this._cursorLayer.addChild(element);
   }
 
   addMask(element: PIXI.Sprite): void {
-    this.masksSprites.addSprite(element);
+    this._masksSprites.addSprite(element);
   }
 
   disableCache() {
-    this.plane.cacheAsBitmap = false;
+    this._plane.cacheAsBitmap = false;
   }
 
   enableCache() {
-    this.plane.cacheAsBitmap = true;
+    this._plane.cacheAsBitmap = true;
   }
 
   addFloorChild(element: PIXI.DisplayObject): void {
-    this.floorPlane.addChild(element);
+    this._floorPlane.addChild(element);
   }
 
   addContainerChild(element: PIXI.DisplayObject): void {
-    this.container.addChild(element);
+    this._container.addChild(element);
   }
 }
