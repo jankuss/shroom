@@ -79,6 +79,8 @@ export class Landscape extends RoomObject implements ILandscape {
     meta.forEach((meta) => {
       const width = Math.abs(meta.end - meta.start) * 32;
 
+      const wall = new PIXI.Container();
+
       if (meta.type === "rowWall" && this._leftTexture != null) {
         const graphics = new PIXI.TilingSprite(
           this._leftTexture,
@@ -89,7 +91,7 @@ export class Landscape extends RoomObject implements ILandscape {
         const mask =
           this._xLevelMasks.get(meta.level) ?? this._createDefaultMask();
         if (mask != null) {
-          graphics.mask = mask;
+          wall.mask = mask;
         }
 
         const position = this.geometry.getPosition(
@@ -101,16 +103,16 @@ export class Landscape extends RoomObject implements ILandscape {
 
         graphics.texture = this._leftTexture;
 
-        graphics.transform.setFromMatrix(new PIXI.Matrix(1, -0.5, 0, 1));
+        wall.transform.setFromMatrix(new PIXI.Matrix(1, -0.5, 0, 1));
 
         graphics.tilePosition = new PIXI.Point(offsetRow, 0);
 
-        graphics.x = position.x;
-        graphics.y = position.y + 16 - this._leftTexture.height;
+        wall.x = position.x;
+        wall.y = position.y + 16 - this._leftTexture.height;
 
         offsetRow += width;
 
-        container.addChild(graphics);
+        wall.addChild(graphics);
       } else if (meta.type === "colWall" && this._rightTexture != null) {
         const graphics = new PIXI.TilingSprite(
           this._rightTexture,
@@ -121,7 +123,7 @@ export class Landscape extends RoomObject implements ILandscape {
         const mask =
           this._yLevelMasks.get(meta.level) ?? this._createDefaultMask();
         if (mask != null) {
-          graphics.mask = mask;
+          wall.mask = mask;
         }
 
         const position = this.geometry.getPosition(
@@ -133,17 +135,19 @@ export class Landscape extends RoomObject implements ILandscape {
 
         graphics.texture = this._rightTexture;
 
-        graphics.transform.setFromMatrix(new PIXI.Matrix(1, 0.5, 0, 1));
+        wall.transform.setFromMatrix(new PIXI.Matrix(1, 0.5, 0, 1));
 
         graphics.tilePosition = new PIXI.Point(offsetCol, 0);
 
-        graphics.x = position.x + 32;
-        graphics.y = position.y - this._rightTexture.height;
+        wall.x = position.x + 32;
+        wall.y = position.y - this._rightTexture.height;
 
         offsetCol += width;
 
-        container.addChild(graphics);
+        wall.addChild(graphics);
       }
+
+      container.addChild(wall);
     });
 
     this._container = container;
