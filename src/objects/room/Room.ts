@@ -1,7 +1,5 @@
 import * as PIXI from "pixi.js";
-import { AnimationTicker } from "../AnimationTicker";
-import { FurnitureData } from "../FurnitureData";
-import { HitDetection } from "../hitdetection/HitDetection";
+
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { IAvatarLoader } from "../../interfaces/IAvatarLoader";
 import { IConfiguration } from "../../interfaces/IConfiguration";
@@ -15,8 +13,6 @@ import { RoomPosition } from "../../types/RoomPosition";
 import { TileType } from "../../types/TileType";
 import { ParsedTileType, parseTileMap } from "../../util/parseTileMap";
 import { parseTileMapString } from "../../util/parseTileMapString";
-import { AvatarLoader } from "../avatar/AvatarLoader";
-import { FurnitureLoader } from "../furniture/FurnitureLoader";
 import { RoomVisualization } from "./RoomVisualization";
 import { Stair } from "./Stair";
 import { Tile } from "./Tile";
@@ -25,7 +21,6 @@ import { getTileMapBounds } from "./util/getTileMapBounds";
 import { Wall } from "./Wall";
 import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
-import { ILandscape } from "./ILandscape";
 import { ILandscapeContainer } from "./ILandscapeContainer";
 
 export interface Dependencies {
@@ -67,8 +62,6 @@ export class Room
   private _floor: (Tile | Stair)[] = [];
   private _cursors: TileCursor[] = [];
   private _doorWall: Wall | undefined;
-
-  private _landscape: ILandscape | undefined;
 
   private _roomBounds: {
     minX: number;
@@ -115,15 +108,6 @@ export class Room
   public set hideWalls(value) {
     this._hideWalls = value;
     this.updateTiles();
-  }
-
-  public get landscape() {
-    return this._landscape;
-  }
-
-  private _updateLandscape(newValue: ILandscape | undefined) {
-    this._landscape = newValue;
-    this.visualization.updateRoom(this);
   }
 
   public get hideFloor() {

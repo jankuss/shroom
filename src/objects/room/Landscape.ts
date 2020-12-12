@@ -1,7 +1,6 @@
 import * as PIXI from "pixi.js";
 import { ParsedTileType } from "../../util/parseTileMap";
 import { RoomObject } from "../RoomObject";
-import { ILandscape } from "./ILandscape";
 import { getMaskId } from "./util/getMaskId";
 
 interface WallCollectionMeta {
@@ -11,7 +10,7 @@ interface WallCollectionMeta {
   level: number;
 }
 
-export class Landscape extends RoomObject implements ILandscape {
+export class Landscape extends RoomObject {
   private _container: PIXI.Container | undefined;
   private _leftTexture: PIXI.Texture | undefined;
   private _rightTexture: PIXI.Texture | undefined;
@@ -112,13 +111,7 @@ export class Landscape extends RoomObject implements ILandscape {
 
       wall.addChild(colored);
 
-      if (meta.type === "rowWall" && this._leftTexture != null) {
-        const graphics = new PIXI.TilingSprite(
-          this._leftTexture,
-          width,
-          this._leftTexture.height
-        );
-
+      if (meta.type === "rowWall") {
         const maskLevel = this.landscapeContainer.getMaskLevel(meta.level, 0);
         const mask = this._getMask(2, maskLevel.roomX, 0);
 
@@ -131,28 +124,27 @@ export class Landscape extends RoomObject implements ILandscape {
           "none"
         );
 
-        graphics.texture = this._leftTexture;
-
         wall.transform.setFromMatrix(new PIXI.Matrix(1, -0.5, 0, 1));
-
-        graphics.tilePosition = new PIXI.Point(offsetRow, 0);
 
         wall.x = position.x;
         wall.y = position.y + 16;
 
-        graphics.x = 0;
-        graphics.y = -this._leftTexture.height;
+        if (this._leftTexture != null) {
+          const graphics = new PIXI.TilingSprite(
+            this._leftTexture,
+            width,
+            this._leftTexture.height
+          );
+
+          graphics.tilePosition = new PIXI.Point(offsetRow, 0);
+          graphics.texture = this._leftTexture;
+          graphics.x = 0;
+          graphics.y = -this._leftTexture.height;
+          wall.addChild(graphics);
+        }
 
         offsetRow += width;
-
-        wall.addChild(graphics);
-      } else if (meta.type === "colWall" && this._rightTexture != null) {
-        const graphics = new PIXI.TilingSprite(
-          this._rightTexture,
-          width,
-          this._rightTexture.height
-        );
-
+      } else if (meta.type === "colWall") {
         const maskLevel = this.landscapeContainer.getMaskLevel(0, meta.level);
         const mask = this._getMask(4, 0, maskLevel.roomY);
         wall.mask = mask;
@@ -164,21 +156,25 @@ export class Landscape extends RoomObject implements ILandscape {
           "none"
         );
 
-        graphics.texture = this._rightTexture;
-
         wall.transform.setFromMatrix(new PIXI.Matrix(1, 0.5, 0, 1));
-
-        graphics.tilePosition = new PIXI.Point(offsetCol, 0);
 
         wall.x = position.x + 32;
         wall.y = position.y;
 
-        graphics.x = 0;
-        graphics.y = -this._rightTexture.height;
+        if (this._rightTexture != null) {
+          const graphics = new PIXI.TilingSprite(
+            this._rightTexture,
+            width,
+            this._rightTexture.height
+          );
+          graphics.texture = this._rightTexture;
+          graphics.x = 0;
+          graphics.y = -this._rightTexture.height;
+          graphics.tilePosition = new PIXI.Point(offsetCol, 0);
+          wall.addChild(graphics);
+        }
 
         offsetCol += width;
-
-        wall.addChild(graphics);
       }
 
       container.addChild(wall);

@@ -39,7 +39,7 @@
     "pixi.js": "^5.3.3"
   },
   "scripts": {
-    "dev": "webpack serve",
+    "dev": "tsc --watch",
     "dump": "yarn ts-node src/downloading/cli.tsx",
     "test": "jest",
     "build": "rm -rf dist && tsc",
