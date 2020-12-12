@@ -146,7 +146,8 @@ export class WallFurniture extends RoomObject implements IFurniture {
       this.roomY
     );
 
-    this.baseFurniture.zIndex = 0;
+    this.baseFurniture.zIndex =
+      getZOrder(this.roomX, this.roomZ, this.roomY) - 1;
   }
 
   registered(): void {

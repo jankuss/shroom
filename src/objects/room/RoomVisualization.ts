@@ -5,7 +5,6 @@ import {
 } from "../../interfaces/IRoomVisualization";
 import { RoomLandscapeMaskSprite } from "./RoomLandscapeMaskSprite";
 import { Room } from "./Room";
-import { getLeftMatrix, getRightMatrix } from "./matrixes";
 
 export class RoomVisualization
   extends PIXI.Container
@@ -40,8 +39,8 @@ export class RoomVisualization
     this.addChild(this._behindWallPlane);
     this.addChild(this._plane);
     this.addChild(this._masksContainer);
-    this.addChild(this._tileCursorPlane);
     this.addChild(this._landscapeContainer);
+    this.addChild(this._tileCursorPlane);
     this.addChild(this._container);
     this.addChild(this._cursorLayer);
   }

@@ -32,9 +32,14 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 const shroom = Shroom.create({ application, resourcePath: "./resources" });
 const room = Room.create(shroom, {
   tilemap: `
-    x000
-    0000
-    x000
+    000000000
+    000000000
+    000000000
+    000000000
+    000000000
+    000000000
+    000000000
+    000000000
   `,
 });
 
@@ -54,21 +59,36 @@ room.floorTexture = loadRoomTexture("./images/tile.png");
 room.wallColor = "#dbbe6e";
 room.floorColor = "#eeeeee";
 
-const furniture = new FloorFurniture({
+const furniture1 = new FloorFurniture({
+  roomX: 0,
+  roomY: 0,
+  roomZ: 0,
+  direction: 2,
+  type: "exe_table",
+});
+
+const furniture2 = new FloorFurniture({
   roomX: 2,
   roomY: 0,
-  direction: 2,
   roomZ: 0,
+  direction: 2,
   type: "exe_table",
-  animation: "1",
+});
+
+const furniture3 = new FloorFurniture({
+  roomX: 4,
+  roomY: 0,
+  roomZ: 0,
+  direction: 2,
+  type: "exe_table",
 });
 
 const wallFurniture1 = new WallFurniture({
   roomX: 0,
-  roomY: 4,
+  roomY: 1,
   roomZ: 0,
   direction: 2,
-  type: "window_skyscraper",
+  type: "window_hole",
 });
 
 const wallFurniture2 = new WallFurniture({
@@ -76,67 +96,43 @@ const wallFurniture2 = new WallFurniture({
   roomY: 3,
   roomZ: 0,
   direction: 2,
-  type: "window_skyscraper",
+  type: "window_70s_wide",
 });
 
 const wallFurniture3 = new WallFurniture({
   roomX: 0,
-  roomY: 2,
+  roomY: 5.5,
   roomZ: 0,
   direction: 2,
-  type: "window_skyscraper",
+  type: "window_grunge",
 });
 
 const wallFurniture4 = new WallFurniture({
-  roomX: 0,
-  roomY: 0,
-  roomZ: 0,
-  direction: 2,
-  type: "window_skyscraper",
-});
-
-const wallFurniture5 = new WallFurniture({
-  roomX: 0,
-  roomY: 1,
-  roomZ: 0,
-  direction: 2,
-  type: "window_skyscraper",
-});
-
-const wallFurniture6 = new WallFurniture({
-  roomX: 0,
-  roomY: 0,
-  roomZ: 0,
-  direction: 4,
-  type: "window_skyscraper",
-});
-
-const wallFurniture7 = new WallFurniture({
   roomX: 1,
   roomY: 0,
   roomZ: 0,
   direction: 4,
-  type: "window_skyscraper",
+  type: "window_diner",
 });
 
-const wallFurniture8 = new WallFurniture({
-  roomX: 2,
+const wallFurniture5 = new WallFurniture({
+  roomX: 5,
   roomY: 0,
   roomZ: 0,
   direction: 4,
-  type: "window_skyscraper",
+  type: "sf_window",
+  animation: "1",
 });
 
 room.addRoomObject(avatar);
-//room.addRoomObject(furniture);
+room.addRoomObject(furniture1);
 room.addRoomObject(wallFurniture1);
 room.addRoomObject(wallFurniture2);
 room.addRoomObject(wallFurniture3);
 room.addRoomObject(wallFurniture4);
 room.addRoomObject(wallFurniture5);
-room.addRoomObject(wallFurniture6);
-room.addRoomObject(wallFurniture7);
-room.addRoomObject(wallFurniture8);
+room.addRoomObject(furniture2);
+room.addRoomObject(furniture3);
 
 application.stage.addChild(room);
 
