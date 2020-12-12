@@ -57,7 +57,7 @@ export class RoomVisualization
       });
 
     current.addSprite(element);
-    //this._masksContainer.addChild(current);
+    this._masksContainer.addChild(current);
 
     this._xLevelMask.set(level, current);
     this.updateRoom(this.room);
@@ -78,7 +78,7 @@ export class RoomVisualization
       });
 
     current.addSprite(element);
-    //this._masksContainer.addChild(current);
+    this._masksContainer.addChild(current);
 
     this._yLevelMask.set(level, current);
     this.updateRoom(this.room);

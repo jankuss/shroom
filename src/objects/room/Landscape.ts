@@ -89,7 +89,6 @@ export class Landscape extends RoomObject implements ILandscape {
         const mask =
           this._xLevelMasks.get(meta.level) ?? this._createDefaultMask();
         if (mask != null) {
-          container.addChild(mask);
           graphics.mask = mask;
         }
 
@@ -110,7 +109,6 @@ export class Landscape extends RoomObject implements ILandscape {
         graphics.y = position.y + 16 - this._leftTexture.height;
 
         offsetRow += width;
-        // offsetCol += width;
 
         container.addChild(graphics);
       } else if (meta.type === "colWall" && this._rightTexture != null) {
@@ -123,7 +121,6 @@ export class Landscape extends RoomObject implements ILandscape {
         const mask =
           this._yLevelMasks.get(meta.level) ?? this._createDefaultMask();
         if (mask != null) {
-          container.addChild(mask);
           graphics.mask = mask;
         }
 
@@ -143,7 +140,6 @@ export class Landscape extends RoomObject implements ILandscape {
         graphics.x = position.x + 32;
         graphics.y = position.y - this._rightTexture.height;
 
-        //offsetRow += width;
         offsetCol += width;
 
         container.addChild(graphics);
