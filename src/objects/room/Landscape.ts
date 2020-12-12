@@ -72,7 +72,6 @@ export class Landscape extends RoomObject implements ILandscape {
     if (!this.mounted) return;
 
     const meta = getWallCollectionMeta(this.room.parsedTileMap);
-
     this._container?.destroy();
     const container = new PIXI.Container();
 
@@ -181,6 +180,7 @@ function getWallCollectionMeta(parsedTileMap: ParsedTileType[][]) {
   let x = startX;
   let y = startY;
   let done = false;
+  let door = false;
   let meta: WallCollectionMeta | undefined = undefined;
   const arr: WallCollectionMeta[] = [];
 
@@ -201,7 +201,11 @@ function getWallCollectionMeta(parsedTileMap: ParsedTileType[][]) {
       rightWallPosition.y
     );
 
-    if (currentWall == null || currentWall.type !== "wall") break;
+    if (
+      currentWall == null ||
+      (currentWall.type !== "wall" && currentWall.type !== "door")
+    )
+      break;
 
     const updateMeta = (newMeta: WallCollectionMeta) => {
       if (meta == null) {
@@ -222,21 +226,26 @@ function getWallCollectionMeta(parsedTileMap: ParsedTileType[][]) {
       };
     };
 
-    switch (currentWall.kind) {
-      case "rowWall":
-      case "innerCorner":
-        updateMeta({ type: "rowWall", start: y, end: y - 1, level: x });
-        break;
+    if (currentWall.type === "wall") {
+      switch (currentWall.kind) {
+        case "rowWall":
+        case "innerCorner":
+          updateMeta({ type: "rowWall", start: y, end: y - 1, level: x });
+          break;
 
-      case "colWall":
-      case "outerCorner":
-        updateMeta({
-          type: "colWall",
-          start: x,
-          end: x + (done ? 0 : 1),
-          level: y,
-        });
-        break;
+        case "colWall":
+        case "outerCorner":
+          updateMeta({
+            type: "colWall",
+            start: x,
+            end: x + (done ? 0 : 1),
+            level: y,
+          });
+          break;
+      }
+    } else if (currentWall.type === "door") {
+      updateMeta({ type: "rowWall", start: y, end: y - 1, level: x });
+      door = true;
     }
 
     if (done) {
@@ -246,7 +255,10 @@ function getWallCollectionMeta(parsedTileMap: ParsedTileType[][]) {
       break;
     }
 
-    if (topWall != null && topWall.type === "wall") {
+    if (
+      topWall != null &&
+      (topWall.type === "wall" || topWall.type === "door")
+    ) {
       x = topWallPosition.x;
       y = topWallPosition.y;
     } else if (rightWall != null && rightWall.type === "wall") {

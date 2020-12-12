@@ -41,8 +41,6 @@ export class WallFurniture extends RoomObject implements IFurniture {
       { roomX: this.roomX, roomY: this.roomY }
     );
 
-    console.log("ROOM X", this.roomX, "ROOM Y", this.roomY);
-
     options.behaviors?.forEach((behavior) => behavior.setParent(this));
   }
 
@@ -143,7 +141,11 @@ export class WallFurniture extends RoomObject implements IFurniture {
 
     this.baseFurniture.x = base.x + offsets.x;
     this.baseFurniture.y = base.y + offsets.y;
-    this.baseFurniture.maskLevel = { roomX: this.roomX, roomY: this.roomY };
+    this.baseFurniture.maskLevel = this.geometry.getMaskLevel(
+      this.roomX,
+      this.roomY
+    );
+
     this.baseFurniture.zIndex = 0;
   }
 

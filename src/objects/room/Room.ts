@@ -95,6 +95,7 @@ export class Room
   private _wallHeight: number = 115;
   private _tileHeight: number = 8;
   private _application: PIXI.Application;
+  private _maskOffsets: { x: number; y: number } = { x: 0, y: 0 };
 
   private _largestDiff: number;
 
@@ -283,10 +284,12 @@ export class Room
       tilemap: parsedTileMap,
       wallOffsets,
       positionOffsets,
+      maskOffsets,
     } = parseTileMap(normalizedTileMap);
 
     this._wallOffsets = wallOffsets;
     this._positionOffsets = positionOffsets;
+    this._maskOffsets = maskOffsets;
 
     this._largestDiff = largestDiff;
 
@@ -305,8 +308,6 @@ export class Room
     this.hitDetection = hitDetection;
     this.configuration = configuration;
 
-    console.log("RHRW", this.roomWidth, this.roomHeight);
-
     this.visualization = new RoomVisualization(
       this,
       this._application.renderer
@@ -314,6 +315,13 @@ export class Room
 
     this.updateTiles();
     this.addChild(this.visualization);
+  }
+
+  getMaskLevel(roomX: number, roomY: number): { roomX: number; roomY: number } {
+    return {
+      roomX: roomX + this._maskOffsets.x,
+      roomY: roomY + this._maskOffsets.y,
+    };
   }
 
   static create(shroom: Shroom, { tilemap }: { tilemap: TileMap }) {
