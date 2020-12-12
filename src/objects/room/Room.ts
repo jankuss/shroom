@@ -100,13 +100,11 @@ export class Room
   private _largestDiff: number;
 
   private _landscapeContainer: ILandscapeContainer = {
-    setLandscape: (value) => {
-      this._updateLandscape(value);
-    },
-    unsetLandscapeIfEquals: (value) => {
-      if (this._landscape === value) {
-        this._updateLandscape(undefined);
-      }
+    getMaskLevel: (roomX, roomY) => {
+      return {
+        roomX: roomX + this._maskOffsets.x,
+        roomY: roomY + this._maskOffsets.y,
+      };
     },
   };
 
@@ -138,7 +136,7 @@ export class Room
   }
 
   public get wallHeight() {
-    return this._wallHeight + this._largestDiff * 32;
+    return this._wallHeight;
   }
 
   public set wallHeight(value) {
@@ -146,8 +144,8 @@ export class Room
     this._updateWallHeight();
   }
 
-  private get wallHeightWithZ() {
-    return this._wallHeight + this._largestDiff * 32;
+  public get wallHeightWithZ() {
+    return this.wallHeight + this._largestDiff * 32;
   }
 
   public get tileHeight() {
@@ -180,7 +178,7 @@ export class Room
     this.visualization.updateRoom(this);
     this.visualization.disableCache();
     this._walls.forEach((wall) => {
-      wall.wallHeight = this.wallHeight;
+      wall.wallHeight = this.wallHeightWithZ;
     });
     this.visualization.enableCache();
   }
@@ -313,19 +311,19 @@ export class Room
       this._application.renderer
     );
 
+    console.log(
+      "ABC",
+      this.wallHeight,
+      this.wallHeightWithZ,
+      this._largestDiff
+    );
+
     this.updateTiles();
     this.addChild(this.visualization);
   }
 
   getParsedTileTypes(): ParsedTileType[][] {
     return this.parsedTileMap;
-  }
-
-  getMaskLevel(roomX: number, roomY: number): { roomX: number; roomY: number } {
-    return {
-      roomX: roomX + this._maskOffsets.x,
-      roomY: roomY + this._maskOffsets.y,
-    };
   }
 
   static create(shroom: Shroom, { tilemap }: { tilemap: TileMap }) {

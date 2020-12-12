@@ -1,3 +1,5 @@
+import { RoomLandscapeMaskSprite } from "../objects/room/RoomLandscapeMaskSprite";
+
 export interface IRoomVisualization {
   addFloorChild(element: PIXI.DisplayObject): void;
   addWallChild(element: PIXI.DisplayObject): void;
@@ -9,12 +11,20 @@ export interface IRoomVisualization {
   removeContainerChild(element: PIXI.DisplayObject): void;
 
   addCursorChild(element: PIXI.DisplayObject): void;
-  addXLevelMask(level: number, element: PIXI.Sprite): MaskNode;
-  addYLevelMask(level: number, element: PIXI.Sprite): MaskNode;
-
   addLandscape(element: PIXI.DisplayObject): void;
+
+  addMask(id: string, element: PIXI.Sprite): MaskNode;
+  subscribeRoomMeta(
+    listener: (value: RoomVisualizationMeta) => void
+  ): { unsubscribe: () => void };
 }
 
 export type MaskNode = {
   remove: () => void;
+};
+
+export type RoomVisualizationMeta = {
+  masks: Map<string, RoomLandscapeMaskSprite>;
+  wallHeight: number;
+  wallHeightWithZ: number;
 };

@@ -5,9 +5,10 @@ import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
 import { IFurniture, IFurnitureBehavior } from "./IFurniture";
 import { HitEvent } from "../../interfaces/IHitDetection";
+import { getMaskId } from "../room/util/getMaskId";
 
 export class WallFurniture extends RoomObject implements IFurniture {
-  private baseFurniture: BaseFurniture;
+  private _baseFurniture: BaseFurniture;
   private _type: string;
   private _roomX: number;
   private _roomY: number;
@@ -34,11 +35,11 @@ export class WallFurniture extends RoomObject implements IFurniture {
     this._animation = options.animation;
     this._direction = options.direction;
 
-    this.baseFurniture = new BaseFurniture(
+    this._baseFurniture = new BaseFurniture(
       options.type,
       options.direction,
       options.animation,
-      { roomX: this.roomX, roomY: this.roomY }
+      (direction) => getMaskId(direction, this.roomX, this.roomY)
     );
 
     options.behaviors?.forEach((behavior) => behavior.setParent(this));
@@ -94,27 +95,27 @@ export class WallFurniture extends RoomObject implements IFurniture {
   }
 
   public get onClick() {
-    return this.baseFurniture.onClick;
+    return this._baseFurniture.onClick;
   }
 
   public set onClick(value) {
-    this.baseFurniture.onClick = value;
+    this._baseFurniture.onClick = value;
   }
 
   public get onDoubleClick() {
-    return this.baseFurniture.onDoubleClick;
+    return this._baseFurniture.onDoubleClick;
   }
 
   public set onDoubleClick(value) {
-    this.baseFurniture.onDoubleClick = value;
+    this._baseFurniture.onDoubleClick = value;
   }
 
   private updateAnimation() {
-    this.baseFurniture.animation = this.animation;
+    this._baseFurniture.animation = this.animation;
   }
 
   private updateDirection() {
-    this.baseFurniture.direction = this.direction;
+    this._baseFurniture.direction = this.direction;
   }
 
   private getOffsets(direction: number) {
@@ -125,7 +126,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
   }
 
   destroy(): void {
-    this.baseFurniture.destroy();
+    this._baseFurniture.destroy();
   }
 
   private updatePosition() {
@@ -139,19 +140,17 @@ export class WallFurniture extends RoomObject implements IFurniture {
       "object"
     );
 
-    this.baseFurniture.x = base.x + offsets.x;
-    this.baseFurniture.y = base.y + offsets.y;
-    this.baseFurniture.maskLevel = this.geometry.getMaskLevel(
-      this.roomX,
-      this.roomY
-    );
+    this._baseFurniture.x = base.x + offsets.x;
+    this._baseFurniture.y = base.y + offsets.y;
+    this._baseFurniture.maskId = (direction) =>
+      getMaskId(direction, this.roomX, this.roomY);
 
-    this.baseFurniture.zIndex =
+    this._baseFurniture.zIndex =
       getZOrder(this.roomX, this.roomZ, this.roomY) - 1;
   }
 
   registered(): void {
     this.updatePosition();
-    this.roomObjectContainer.addRoomObject(this.baseFurniture);
+    this.roomObjectContainer.addRoomObject(this._baseFurniture);
   }
 }

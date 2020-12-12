@@ -11,6 +11,8 @@ import { Asset } from "./util/parseAssets";
 import { Layer } from "./util/visualization/parseLayers";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 
+type MaskIdGetter = (direction: number) => string | undefined;
+
 export class BaseFurniture
   extends RoomObject
   implements IFurnitureEventHandlers {
@@ -93,36 +95,36 @@ export class BaseFurniture
     this.updateFurniture();
   }
 
-  public get maskLevel() {
-    return this._maskLevel;
-  }
-
-  public set maskLevel(value) {
-    this._maskLevel = value;
-    this.updateFurniture();
-  }
-
   private animatedSprites: {
     sprites: Map<string, PIXI.Sprite>;
     frames: string[];
   }[] = [];
 
-  private _maskLevel: { roomX: number; roomY: number } | undefined;
   private _maskNodes: MaskNode[] = [];
 
   private cancelTicker: (() => void) | undefined = undefined;
+
+  private _getMaskId: MaskIdGetter;
+
+  public get maskId() {
+    return this._getMaskId;
+  }
+
+  public set maskId(value) {
+    this._getMaskId = value;
+  }
 
   constructor(
     type: string,
     direction: number,
     animation: string = "0",
-    maskLevel?: { roomX: number; roomY: number }
+    getMaskId: MaskIdGetter = () => undefined
   ) {
     super();
     this._direction = direction;
     this._animation = animation;
     this._type = type;
-    this._maskLevel = maskLevel;
+    this._getMaskId = getMaskId;
   }
 
   updateFurniture() {
@@ -183,21 +185,11 @@ export class BaseFurniture
       if (sprite.kind === "simple" || sprite.kind === "mask") {
         this.sprites.push(sprite.sprite);
 
-        if (sprite.kind === "mask" && this._maskLevel != null) {
-          if (this.direction === 4) {
-            const maskNode = this.visualization.addYLevelMask(
-              this._maskLevel.roomY,
-              sprite.sprite
-            );
+        if (sprite.kind === "mask") {
+          const maskId = this.maskId(this.direction);
 
-            this._maskNodes.push(maskNode);
-          } else if (this.direction === 2) {
-            const maskNode = this.visualization.addXLevelMask(
-              this._maskLevel.roomX,
-              sprite.sprite
-            );
-
-            this._maskNodes.push(maskNode);
+          if (maskId != null) {
+            this.visualization.addMask(maskId, sprite.sprite);
           }
         } else {
           this.visualization.addContainerChild(sprite.sprite);

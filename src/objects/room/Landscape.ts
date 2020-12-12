@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { ParsedTileType } from "../../util/parseTileMap";
 import { RoomObject } from "../RoomObject";
 import { ILandscape } from "./ILandscape";
+import { getMaskId } from "./util/getMaskId";
 
 interface WallCollectionMeta {
   type: "rowWall" | "colWall";
@@ -14,15 +15,27 @@ export class Landscape extends RoomObject implements ILandscape {
   private _container: PIXI.Container | undefined;
   private _leftTexture: PIXI.Texture | undefined;
   private _rightTexture: PIXI.Texture | undefined;
-
-  private _xLevelMasks = new Map<number, PIXI.Sprite>();
-  private _yLevelMasks = new Map<number, PIXI.Sprite>();
+  private _wallHeight: number = 0;
+  private _wallHeightWithZ: number = 0;
 
   private _leftTexturePromise: PIXI.Texture | Promise<PIXI.Texture> | undefined;
   private _rightTexturePromise:
     | PIXI.Texture
     | Promise<PIXI.Texture>
     | undefined;
+
+  private _masks: Map<string, PIXI.Sprite> = new Map();
+  private _color: string | undefined;
+
+  private _unsubscribe = () => {};
+
+  public get color() {
+    return this._color;
+  }
+
+  public set color(value) {
+    this._color = value;
+  }
 
   public get leftTexture() {
     return this._leftTexturePromise;
@@ -52,18 +65,20 @@ export class Landscape extends RoomObject implements ILandscape {
     super();
   }
 
-  setYLevelMasks(level: number, mask: PIXI.Sprite): void {
-    this._yLevelMasks.set(level, mask);
-    this._initLandscapeImages();
-  }
-
-  setXLevelMasks(level: number, mask: PIXI.Sprite): void {
-    this._xLevelMasks.set(level, mask);
-    this._initLandscapeImages();
-  }
-
   private _createDefaultMask() {
     return new PIXI.Graphics();
+  }
+
+  private _getMask(direction: number, roomX: number, roomY: number) {
+    const maskId = getMaskId(direction, roomX, roomY);
+
+    if (maskId != null) {
+      const mask = this._masks.get(maskId);
+
+      if (mask != null) return mask;
+    }
+
+    return this._createDefaultMask();
   }
 
   private _initLandscapeImages() {
@@ -81,6 +96,22 @@ export class Landscape extends RoomObject implements ILandscape {
 
       const wall = new PIXI.Container();
 
+      const colored = new PIXI.TilingSprite(
+        PIXI.Texture.WHITE,
+        width,
+        this._wallHeightWithZ
+      );
+
+      if (this.color != null) {
+        colored.tint = parseInt(this.color.slice(1), 16);
+      } else {
+        colored.tint = 0xffffff;
+      }
+
+      colored.y = -this._wallHeightWithZ;
+
+      wall.addChild(colored);
+
       if (meta.type === "rowWall" && this._leftTexture != null) {
         const graphics = new PIXI.TilingSprite(
           this._leftTexture,
@@ -88,11 +119,10 @@ export class Landscape extends RoomObject implements ILandscape {
           this._leftTexture.height
         );
 
-        const mask =
-          this._xLevelMasks.get(meta.level) ?? this._createDefaultMask();
-        if (mask != null) {
-          wall.mask = mask;
-        }
+        const maskLevel = this.landscapeContainer.getMaskLevel(meta.level, 0);
+        const mask = this._getMask(2, maskLevel.roomX, 0);
+
+        wall.mask = mask;
 
         const position = this.geometry.getPosition(
           meta.level + 1,
@@ -108,7 +138,10 @@ export class Landscape extends RoomObject implements ILandscape {
         graphics.tilePosition = new PIXI.Point(offsetRow, 0);
 
         wall.x = position.x;
-        wall.y = position.y + 16 - this._leftTexture.height;
+        wall.y = position.y + 16;
+
+        graphics.x = 0;
+        graphics.y = -this._leftTexture.height;
 
         offsetRow += width;
 
@@ -120,11 +153,9 @@ export class Landscape extends RoomObject implements ILandscape {
           this._rightTexture.height
         );
 
-        const mask =
-          this._yLevelMasks.get(meta.level) ?? this._createDefaultMask();
-        if (mask != null) {
-          wall.mask = mask;
-        }
+        const maskLevel = this.landscapeContainer.getMaskLevel(0, meta.level);
+        const mask = this._getMask(4, 0, maskLevel.roomY);
+        wall.mask = mask;
 
         const position = this.geometry.getPosition(
           meta.start + 1,
@@ -140,7 +171,10 @@ export class Landscape extends RoomObject implements ILandscape {
         graphics.tilePosition = new PIXI.Point(offsetCol, 0);
 
         wall.x = position.x + 32;
-        wall.y = position.y - this._rightTexture.height;
+        wall.y = position.y;
+
+        graphics.x = 0;
+        graphics.y = -this._rightTexture.height;
 
         offsetCol += width;
 
@@ -156,11 +190,20 @@ export class Landscape extends RoomObject implements ILandscape {
   }
 
   destroy(): void {
-    this.landscapeContainer.unsetLandscapeIfEquals(this);
+    this._unsubscribe();
+    this._container?.destroy();
   }
 
   registered(): void {
-    this.landscapeContainer.setLandscape(this);
+    this._unsubscribe = this.visualization.subscribeRoomMeta(
+      ({ masks, wallHeightWithZ, wallHeight }) => {
+        this._masks = masks;
+        this._wallHeight = wallHeight;
+        this._wallHeightWithZ = wallHeightWithZ;
+        this._initLandscapeImages();
+      }
+    ).unsubscribe;
+
     this._initLandscapeImages();
   }
 }

@@ -2,9 +2,11 @@ import * as PIXI from "pixi.js";
 import {
   IRoomVisualization,
   MaskNode,
+  RoomVisualizationMeta,
 } from "../../interfaces/IRoomVisualization";
 import { RoomLandscapeMaskSprite } from "./RoomLandscapeMaskSprite";
 import { Room } from "./Room";
+import { BehaviorSubject } from "rxjs";
 
 export class RoomVisualization
   extends PIXI.Container
@@ -20,11 +22,35 @@ export class RoomVisualization
   private _landscapeContainer: PIXI.Container = new PIXI.Container();
 
   private _masksContainer = new PIXI.Container();
-  private _xLevelMask = new Map<number, RoomLandscapeMaskSprite>();
-  private _yLevelMask = new Map<number, RoomLandscapeMaskSprite>();
+
+  private _roomVisualizationMetaSubject: BehaviorSubject<RoomVisualizationMeta>;
+
+  public get masks() {
+    return this._roomVisualizationMetaSubject.value.masks;
+  }
+
+  subscribeRoomMeta(
+    listener: (value: RoomVisualizationMeta) => void
+  ): { unsubscribe: () => void } {
+    const subscription = this._roomVisualizationMetaSubject.subscribe((value) =>
+      listener(value)
+    );
+
+    return {
+      unsubscribe: () => subscription.unsubscribe(),
+    };
+  }
 
   constructor(private room: Room, private renderer: PIXI.Renderer) {
     super();
+    this._roomVisualizationMetaSubject = new BehaviorSubject({
+      masks: new Map(),
+      wallHeight: room.wallHeight,
+      wallHeightWithZ: room.wallHeightWithZ,
+    });
+
+    console.log("WHWZ", room.wallHeightWithZ, room.wallHeightWithZ);
+
     this._container.sortableChildren = true;
     this._behindWallPlane.sortableChildren = true;
 
@@ -33,8 +59,6 @@ export class RoomVisualization
 
     this._plane.sortableChildren = true;
     this._plane.cacheAsBitmap = true;
-
-    //this._landscape.mask = this._masksSprites;
 
     this.addChild(this._behindWallPlane);
     this.addChild(this._plane);
@@ -45,30 +69,19 @@ export class RoomVisualization
     this.addChild(this._cursorLayer);
   }
 
-  addXLevelMask(level: number, element: PIXI.Sprite): MaskNode {
-    const current =
-      this._xLevelMask.get(level) ??
-      new RoomLandscapeMaskSprite({
-        renderer: this.renderer,
-        width: this.room.roomWidth,
-        height: this.room.roomHeight,
-        wallHeight: this.room.wallHeight,
-      });
-
-    current.addSprite(element);
-    this._masksContainer.addChild(current);
-
-    this._xLevelMask.set(level, current);
-    this.updateRoom(this.room);
-
-    return {
-      remove: () => current.removeSprite(element),
-    };
+  private _updateRoomVisualizationMeta(meta: Partial<RoomVisualizationMeta>) {
+    this._roomVisualizationMetaSubject.next({
+      masks: this.masks,
+      wallHeight: this.room.wallHeight,
+      wallHeightWithZ: this.room.wallHeightWithZ,
+      ...meta,
+    });
   }
 
-  addYLevelMask(level: number, element: PIXI.Sprite): MaskNode {
+  addMask(id: string, element: PIXI.Sprite): MaskNode {
+    const existing = this.masks.get(id);
     const current =
-      this._yLevelMask.get(level) ??
+      this.masks.get(id) ??
       new RoomLandscapeMaskSprite({
         renderer: this.renderer,
         width: this.room.roomWidth,
@@ -79,8 +92,10 @@ export class RoomVisualization
     current.addSprite(element);
     this._masksContainer.addChild(current);
 
-    this._yLevelMask.set(level, current);
-    this.updateRoom(this.room);
+    if (existing == null) {
+      this.masks.set(id, current);
+      this._updateRoomVisualizationMeta({ masks: this.masks });
+    }
 
     return {
       remove: () => current.removeSprite(element),
@@ -92,13 +107,12 @@ export class RoomVisualization
   }
 
   updateRoom(room: Room) {
-    this._yLevelMask.forEach((mask, level) => {
-      mask.updateRoom(room);
-      room.landscape?.setYLevelMasks(level, mask);
-    });
-    this._xLevelMask.forEach((mask, level) => {
-      mask.updateRoom(room);
-      room.landscape?.setXLevelMasks(level, mask);
+    this.room = room;
+    this.masks.forEach((mask) => mask.updateRoom(room));
+    this._updateRoomVisualizationMeta({
+      masks: this.masks,
+      wallHeight: this.room.wallHeight,
+      wallHeightWithZ: this.room.wallHeightWithZ,
     });
   }
 
