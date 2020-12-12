@@ -317,6 +317,10 @@ export class Room
     this.addChild(this.visualization);
   }
 
+  getParsedTileTypes(): ParsedTileType[][] {
+    return this.parsedTileMap;
+  }
+
   getMaskLevel(roomX: number, roomY: number): { roomX: number; roomY: number } {
     return {
       roomX: roomX + this._maskOffsets.x,

@@ -44,7 +44,6 @@ export class RoomVisualization
   }
 
   addXLevelMask(level: number, element: PIXI.Sprite): void {
-    console.log(level, "X LEVEL");
     const current =
       this._xLevelMask.get(level) ??
       new RoomLandscapeMaskSprite({
@@ -62,7 +61,6 @@ export class RoomVisualization
   }
 
   addYLevelMask(level: number, element: PIXI.Sprite): void {
-    console.log(level, "Y LEVEL");
     const current =
       this._yLevelMask.get(level) ??
       new RoomLandscapeMaskSprite({
@@ -84,8 +82,6 @@ export class RoomVisualization
   }
 
   updateRoom(room: Room) {
-    console.log("MASKS", this._yLevelMask, this._xLevelMask);
-
     this._yLevelMask.forEach((mask, level) => {
       mask.updateRoom(room);
       room.landscape?.setYLevelMasks(level, mask);

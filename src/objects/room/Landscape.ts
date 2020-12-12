@@ -2,8 +2,6 @@ import * as PIXI from "pixi.js";
 import { ParsedTileType } from "../../util/parseTileMap";
 import { RoomObject } from "../RoomObject";
 import { ILandscape } from "./ILandscape";
-import { Room } from "./Room";
-import { RoomLandscapeMaskSprite } from "./RoomLandscapeMaskSprite";
 
 interface WallCollectionMeta {
   type: "rowWall" | "colWall";
@@ -50,7 +48,7 @@ export class Landscape extends RoomObject implements ILandscape {
     });
   }
 
-  constructor(private room: Room) {
+  constructor() {
     super();
   }
 
@@ -71,7 +69,7 @@ export class Landscape extends RoomObject implements ILandscape {
   private _initLandscapeImages() {
     if (!this.mounted) return;
 
-    const meta = getWallCollectionMeta(this.room.parsedTileMap);
+    const meta = getWallCollectionMeta(this.tilemap.getParsedTileTypes());
     this._container?.destroy();
     const container = new PIXI.Container();
 
@@ -95,7 +93,7 @@ export class Landscape extends RoomObject implements ILandscape {
           graphics.mask = mask;
         }
 
-        const position = this.room.getPosition(
+        const position = this.geometry.getPosition(
           meta.level + 1,
           meta.start,
           0,
@@ -129,7 +127,7 @@ export class Landscape extends RoomObject implements ILandscape {
           graphics.mask = mask;
         }
 
-        const position = this.room.getPosition(
+        const position = this.geometry.getPosition(
           meta.start + 1,
           meta.level + 1,
           0,
@@ -291,139 +289,3 @@ function getStartingWall(parsedTileMap: ParsedTileType[][]) {
     }
   }
 }
-
-/*function getWallCollectionMeta(parsedTileMap: ParsedTileType[][]) {
-  const getTile = (x: number, y: number) => {
-    const row = parsedTileMap[y];
-    if (row == null) return;
-
-    return row[x];
-  };
-
-  const startY = parsedTileMap.length - 1;
-
-  let y = startY;
-  let x = 0;
-
-  let trackingWall = false;
-
-  let wallCollectionMeta: WallCollectionMeta | undefined = undefined;
-  let done = false;
-
-  const arr: WallCollectionMeta[] = [];
-
-  while (true) {
-    const current = getTile(x, y);
-
-    if (!trackingWall) {
-      if (current != null && current.type === "wall") {
-        trackingWall = true;
-      } else {
-        y--;
-        if (y < 0) {
-          y = startY;
-          x++;
-        }
-      }
-    } else {
-      const currentWall = getTile(x, y);
-
-      if (currentWall != null && currentWall.type === "wall") {
-        const kind = (() => {
-          switch (currentWall.kind) {
-            case "innerCorner":
-              return "colWall";
-            case "outerCorner":
-              return "rowWall";
-          }
-
-          return currentWall.kind;
-        })();
-
-        if (
-          wallCollectionMeta == null ||
-          done ||
-          ((currentWall.kind === "colWall" ||
-            currentWall.kind === "rowWall" ||
-            currentWall.kind === "outerCorner" ||
-            currentWall.kind === "innerCorner") &&
-            kind !== currentWall.kind)
-        ) {
-          const startNewMeta = (meta: WallCollectionMeta) => {
-            if (wallCollectionMeta != null) {
-              arr.push(wallCollectionMeta);
-            }
-            wallCollectionMeta = meta;
-          };
-
-          if (
-            currentWall.kind === "colWall" ||
-            currentWall.kind === "outerCorner"
-          ) {
-            if (
-              wallCollectionMeta == null ||
-              wallCollectionMeta.type !== "colWall"
-            ) {
-              startNewMeta({
-                type: "colWall",
-                start: x,
-                end: x + 1,
-                level: y,
-              });
-            }
-          } else if (
-            currentWall.kind === "rowWall" ||
-            currentWall.kind === "innerCorner"
-          ) {
-            if (
-              wallCollectionMeta == null ||
-              wallCollectionMeta.type !== "rowWall"
-            ) {
-              startNewMeta({
-                type: "rowWall",
-                start: y,
-                end: y - 1,
-                level: x,
-              });
-            }
-          }
-        } else if (wallCollectionMeta != null) {
-          const meta: WallCollectionMeta = wallCollectionMeta;
-
-          if (currentWall.kind === "colWall") {
-            wallCollectionMeta = { ...meta, end: x + 1 };
-          }
-          if (currentWall.kind === "rowWall") {
-            wallCollectionMeta = { ...meta, end: y - 1 };
-          }
-        }
-
-        const topWallPosition = { x, y: y - 1 };
-        const rightWallPosition = { x: x + 1, y };
-
-        const topWall = getTile(topWallPosition.x, topWallPosition.y);
-        const rightWall = getTile(rightWallPosition.x, rightWallPosition.y);
-
-        if (topWall != null && topWall.type === "wall") {
-          x = topWallPosition.x;
-          y = topWallPosition.y;
-          continue;
-        } else if (rightWall != null && rightWall.type === "wall") {
-          x = rightWallPosition.x;
-          y = rightWallPosition.y;
-          continue;
-        } else {
-          break;
-        }
-      } else {
-      }
-    }
-  }
-
-  if (wallCollectionMeta != null) {
-    arr.push(wallCollectionMeta);
-  }
-
-  return arr;
-}
-*/

@@ -140,7 +140,7 @@ room.addRoomObject(wallFurniture8);
 
 application.stage.addChild(room);
 
-const landscape = new Landscape(room);
+const landscape = new Landscape();
 landscape.leftTexture = loadRoomTexture("./images/a1.png");
 landscape.rightTexture = loadRoomTexture("./images/a2.png");
 
