@@ -1,5 +1,8 @@
 import * as PIXI from "pixi.js";
-import { IRoomVisualization } from "../../interfaces/IRoomVisualization";
+import {
+  IRoomVisualization,
+  MaskNode,
+} from "../../interfaces/IRoomVisualization";
 import { RoomLandscapeMaskSprite } from "./RoomLandscapeMaskSprite";
 import { Room } from "./Room";
 import { getLeftMatrix, getRightMatrix } from "./matrixes";
@@ -43,7 +46,7 @@ export class RoomVisualization
     this.addChild(this._cursorLayer);
   }
 
-  addXLevelMask(level: number, element: PIXI.Sprite): void {
+  addXLevelMask(level: number, element: PIXI.Sprite): MaskNode {
     const current =
       this._xLevelMask.get(level) ??
       new RoomLandscapeMaskSprite({
@@ -58,9 +61,13 @@ export class RoomVisualization
 
     this._xLevelMask.set(level, current);
     this.updateRoom(this.room);
+
+    return {
+      remove: () => current.removeSprite(element),
+    };
   }
 
-  addYLevelMask(level: number, element: PIXI.Sprite): void {
+  addYLevelMask(level: number, element: PIXI.Sprite): MaskNode {
     const current =
       this._yLevelMask.get(level) ??
       new RoomLandscapeMaskSprite({
@@ -75,6 +82,10 @@ export class RoomVisualization
 
     this._yLevelMask.set(level, current);
     this.updateRoom(this.room);
+
+    return {
+      remove: () => current.removeSprite(element),
+    };
   }
 
   addLandscape(element: PIXI.DisplayObject): void {

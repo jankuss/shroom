@@ -22,7 +22,7 @@ negativeFilter.negative(false);
  * into a single texture, and uses that as a texture for itself.
  */
 export class RoomLandscapeMaskSprite extends PIXI.Sprite {
-  private _sprites: PIXI.Sprite[] = [];
+  private _sprites: Set<PIXI.Sprite> = new Set();
   private _roomWidth: number;
   private _roomHeight: number;
   private _wallHeight: number;
@@ -76,7 +76,12 @@ export class RoomLandscapeMaskSprite extends PIXI.Sprite {
   }
 
   addSprite(element: PIXI.Sprite) {
-    this._sprites.push(element);
+    this._sprites.add(element);
+    this._updateTexture();
+  }
+
+  removeSprite(element: PIXI.Sprite) {
+    this._sprites.delete(element);
     this._updateTexture();
   }
 }

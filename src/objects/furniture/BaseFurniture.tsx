@@ -9,6 +9,7 @@ import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
 import { Hitmap, LoadFurniResult } from "./util/loadFurni";
 import { Asset } from "./util/parseAssets";
 import { Layer } from "./util/visualization/parseLayers";
+import { MaskNode } from "../../interfaces/IRoomVisualization";
 
 export class BaseFurniture
   extends RoomObject
@@ -107,6 +108,7 @@ export class BaseFurniture
   }[] = [];
 
   private _maskLevel: { roomX: number; roomY: number } | undefined;
+  private _maskNodes: MaskNode[] = [];
 
   private cancelTicker: (() => void) | undefined = undefined;
 
@@ -183,15 +185,19 @@ export class BaseFurniture
 
         if (sprite.kind === "mask" && this._maskLevel != null) {
           if (this.direction === 4) {
-            this.visualization.addYLevelMask(
+            const maskNode = this.visualization.addYLevelMask(
               this._maskLevel.roomY,
               sprite.sprite
             );
+
+            this._maskNodes.push(maskNode);
           } else if (this.direction === 2) {
-            this.visualization.addXLevelMask(
+            const maskNode = this.visualization.addXLevelMask(
               this._maskLevel.roomX,
               sprite.sprite
             );
+
+            this._maskNodes.push(maskNode);
           }
         } else {
           this.visualization.addContainerChild(sprite.sprite);
@@ -388,6 +394,7 @@ export class BaseFurniture
     this.animatedSprites.forEach((sprite) =>
       sprite.sprites.forEach((sprite) => sprite.destroy())
     );
+    this._maskNodes.forEach((node) => node.remove());
 
     this.sprites = [];
     this.animatedSprites = [];
