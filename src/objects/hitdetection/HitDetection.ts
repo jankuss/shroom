@@ -15,8 +15,6 @@ export class HitDetection implements IHitDetection {
     window.addEventListener("click", (event) => this.handleClick(event), {
       capture: true,
     });
-
-    setInterval(() => this._debugHitDetection(), 1000);
   }
 
   private _debugHitDetection() {

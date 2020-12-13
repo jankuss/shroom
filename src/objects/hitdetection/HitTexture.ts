@@ -34,7 +34,7 @@ export class HitTexture {
     options: { mirrorHorizonally?: boolean } = { mirrorHorizonally: false }
   ) {
     if (options.mirrorHorizonally) {
-      x = transform.x - x;
+      x = -(x - transform.x);
     } else {
       x = x - transform.x;
     }
