@@ -7,4 +7,5 @@ node_modules
 /example/public/figure
 /example/public/resources
 /example/public/images
-/storybook/public
+/storybook/public/resources
+/storybook/public/images

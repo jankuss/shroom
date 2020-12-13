@@ -9,11 +9,32 @@ import {
 export class HitDetection implements IHitDetection {
   private counter: number = 0;
   private map: Map<number, HitDetectionElement> = new Map();
+  private container: PIXI.Container | undefined;
 
   constructor(private app: PIXI.Application) {
     window.addEventListener("click", (event) => this.handleClick(event), {
       capture: true,
     });
+  }
+
+  private _debugHitDetection() {
+    this.container?.destroy();
+    this.container = new PIXI.Container();
+
+    this.map.forEach((value) => {
+      const box = value.getHitBox();
+      const graphics = new PIXI.Graphics();
+
+      graphics.x = box.x;
+      graphics.y = box.y;
+      graphics.beginFill(0x000000, 0.1);
+      graphics.drawRect(0, 0, box.width, box.height);
+      graphics.endFill();
+
+      this.container?.addChild(graphics);
+    });
+
+    this.app.stage.addChild(this.container);
   }
 
   static create(application: PIXI.Application) {
