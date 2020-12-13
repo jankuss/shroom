@@ -36,17 +36,17 @@ export class FurnitureLoader implements IFurnitureLoader {
 
   async loadFurni(typeWithColor: string): Promise<LoadFurniResult> {
     const type = typeWithColor.split("*")[0];
-    const revision = await this.options.furnitureData.getRevisionForType(type);
+    const revision = await this.options.furnitureData.getRevisionForType(
+      typeWithColor
+    );
 
     let furniture = this.furnitureCache.get(type);
-    this.options.furnitureData.getRevisionForType(type);
-
     if (furniture != null) {
       return furniture;
     }
 
     if (revision == null) {
-      throw new Error("Couldn't find revision for type " + type);
+      throw new Error("Couldn't find revision for type " + typeWithColor);
     }
 
     furniture = loadFurni(type, revision, {
