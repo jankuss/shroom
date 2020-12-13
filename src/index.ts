@@ -10,3 +10,4 @@ export { HitEvent } from "./interfaces/IHitDetection";
 export { IFurnitureData } from "./interfaces/IFurnitureData";
 export { FurnitureData } from "./objects/FurnitureData";
 export { Shroom } from "./objects/Shroom";
+export { Landscape } from "./objects/room/Landscape";

@@ -1,7 +1,5 @@
 import * as PIXI from "pixi.js";
-import { AnimationTicker } from "../AnimationTicker";
-import { FurnitureData } from "../FurnitureData";
-import { HitDetection } from "../hitdetection/HitDetection";
+
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { IAvatarLoader } from "../../interfaces/IAvatarLoader";
 import { IConfiguration } from "../../interfaces/IConfiguration";
@@ -15,8 +13,6 @@ import { RoomPosition } from "../../types/RoomPosition";
 import { TileType } from "../../types/TileType";
 import { ParsedTileType, parseTileMap } from "../../util/parseTileMap";
 import { parseTileMapString } from "../../util/parseTileMapString";
-import { AvatarLoader } from "../avatar/AvatarLoader";
-import { FurnitureLoader } from "../furniture/FurnitureLoader";
 import { RoomVisualization } from "./RoomVisualization";
 import { Stair } from "./Stair";
 import { Tile } from "./Tile";
@@ -25,6 +21,7 @@ import { getTileMapBounds } from "./util/getTileMapBounds";
 import { Wall } from "./Wall";
 import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
+import { ILandscapeContainer } from "./ILandscapeContainer";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -33,6 +30,7 @@ export interface Dependencies {
   hitDetection: IHitDetection;
   configuration: IConfiguration;
   furnitureData?: IFurnitureData;
+  application: PIXI.Application;
 }
 
 type TileMap = TileType[][] | string;
@@ -89,8 +87,19 @@ export class Room
   private _wallDepth: number = 8;
   private _wallHeight: number = 115;
   private _tileHeight: number = 8;
+  private _application: PIXI.Application;
+  private _maskOffsets: { x: number; y: number } = { x: 0, y: 0 };
 
   private _largestDiff: number;
+
+  private _landscapeContainer: ILandscapeContainer = {
+    getMaskLevel: (roomX, roomY) => {
+      return {
+        roomX: roomX - this._maskOffsets.x,
+        roomY: roomY - this._maskOffsets.y,
+      };
+    },
+  };
 
   public get hideWalls() {
     return this._hideWalls;
@@ -111,7 +120,7 @@ export class Room
   }
 
   public get wallHeight() {
-    return this._wallHeight + this._largestDiff * 32;
+    return this._wallHeight;
   }
 
   public set wallHeight(value) {
@@ -119,8 +128,8 @@ export class Room
     this._updateWallHeight();
   }
 
-  private get wallHeightWithZ() {
-    return this._wallHeight + this._largestDiff * 32;
+  public get wallHeightWithZ() {
+    return this.wallHeight + this._largestDiff * 32;
   }
 
   public get tileHeight() {
@@ -150,9 +159,10 @@ export class Room
   }
 
   private _updateWallHeight() {
+    this.visualization.updateRoom(this);
     this.visualization.disableCache();
     this._walls.forEach((wall) => {
-      wall.wallHeight = this.wallHeight;
+      wall.wallHeight = this.wallHeightWithZ;
     });
     this.visualization.enableCache();
   }
@@ -243,6 +253,7 @@ export class Room
     tilemap,
     hitDetection,
     configuration,
+    application,
   }: {
     tilemap: TileMap;
   } & Dependencies) {
@@ -255,16 +266,18 @@ export class Room
       tilemap: parsedTileMap,
       wallOffsets,
       positionOffsets,
+      maskOffsets,
     } = parseTileMap(normalizedTileMap);
 
     this._wallOffsets = wallOffsets;
     this._positionOffsets = positionOffsets;
+    this._maskOffsets = maskOffsets;
 
     this._largestDiff = largestDiff;
 
     this.parsedTileMap = parsedTileMap;
 
-    this.visualization = new RoomVisualization();
+    this._application = application;
 
     this._roomBounds = getTileMapBounds(parsedTileMap, this._wallOffsets);
 
@@ -277,8 +290,17 @@ export class Room
     this.hitDetection = hitDetection;
     this.configuration = configuration;
 
+    this.visualization = new RoomVisualization(
+      this,
+      this._application.renderer
+    );
+
     this.updateTiles();
     this.addChild(this.visualization);
+  }
+
+  getParsedTileTypes(): ParsedTileType[][] {
+    return this.parsedTileMap;
   }
 
   static create(shroom: Shroom, { tilemap }: { tilemap: TileMap }) {
@@ -323,6 +345,7 @@ export class Room
       hitDetection: this.hitDetection,
       configuration: this.configuration,
       tilemap: this,
+      landscapeContainer: this._landscapeContainer,
     });
 
     this.roomObjects.push(object);
@@ -332,12 +355,20 @@ export class Room
     roomX: number,
     roomY: number,
     roomZ: number,
-    type: "plane" | "object"
+    type: "plane" | "object" | "none"
   ): { x: number; y: number } {
-    const { x, y } =
-      type === "plane"
-        ? this._getTilePositionWithOffset(roomX, roomY)
-        : this._getObjectPositionWithOffset(roomX, roomY);
+    const getBasePosition = () => {
+      switch (type) {
+        case "plane":
+          return this._getTilePositionWithOffset(roomX, roomY);
+        case "object":
+          return this._getObjectPositionWithOffset(roomX, roomY);
+      }
+
+      return { x: roomX, y: roomY };
+    };
+
+    const { x, y } = getBasePosition();
 
     const base = 32;
 
