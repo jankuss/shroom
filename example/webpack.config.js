@@ -15,6 +15,7 @@ module.exports = {
       extensions: [".tsx", ".ts", ".js", ".mjs"],
       fallback: { "buffer": false, "timers": false }
     },
+    optimization: { splitChunks: { chunks: 'all' }, runtimeChunk: true, minimizer: [] },
     module: {
       rules: [
         {
