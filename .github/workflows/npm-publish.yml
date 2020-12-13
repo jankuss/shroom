@@ -31,10 +31,8 @@ jobs:
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-      - name: Discord notification
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
   notify-discord:
+    if: "!EVENT_PAYLOAD.release.prerelease"
     needs: publish-npm
     runs-on: ubuntu-latest
     defaults:
