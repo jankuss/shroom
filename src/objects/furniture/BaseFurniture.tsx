@@ -6,10 +6,13 @@ import { HitSprite } from "../hitdetection/HitSprite";
 import { RoomObject } from "../RoomObject";
 import { DrawPart } from "./util/DrawDefinition";
 import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
-import { Hitmap, LoadFurniResult } from "./util/loadFurni";
+import { LoadFurniResult } from "./util/loadFurni";
 import { Asset } from "./util/parseAssets";
 import { Layer } from "./util/visualization/parseLayers";
 import { HitTexture } from "../hitdetection/HitTexture";
+import { MaskNode } from "../../interfaces/IRoomVisualization";
+
+type MaskIdGetter = (direction: number) => string | undefined;
 
 export class BaseFurniture
   extends RoomObject
@@ -98,13 +101,31 @@ export class BaseFurniture
     frames: string[];
   }[] = [];
 
+  private _maskNodes: MaskNode[] = [];
+
   private cancelTicker: (() => void) | undefined = undefined;
 
-  constructor(type: string, direction: number, animation: string = "0") {
+  private _getMaskId: MaskIdGetter;
+
+  public get maskId() {
+    return this._getMaskId;
+  }
+
+  public set maskId(value) {
+    this._getMaskId = value;
+  }
+
+  constructor(
+    type: string,
+    direction: number,
+    animation: string = "0",
+    getMaskId: MaskIdGetter = () => undefined
+  ) {
     super();
     this._direction = direction;
     this._animation = animation;
     this._type = type;
+    this._getMaskId = getMaskId;
   }
 
   updateFurniture() {
@@ -166,7 +187,11 @@ export class BaseFurniture
         this.sprites.push(sprite.sprite);
 
         if (sprite.kind === "mask") {
-          this.visualization.addMask(sprite.sprite);
+          const maskId = this.maskId(this.direction);
+
+          if (maskId != null) {
+            this.visualization.addMask(maskId, sprite.sprite);
+          }
         } else {
           this.visualization.addContainerChild(sprite.sprite);
         }
@@ -352,6 +377,7 @@ export class BaseFurniture
     this.animatedSprites.forEach((sprite) =>
       sprite.sprites.forEach((sprite) => sprite.destroy())
     );
+    this._maskNodes.forEach((node) => node.remove());
 
     this.sprites = [];
     this.animatedSprites = [];

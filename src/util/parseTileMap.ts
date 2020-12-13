@@ -28,6 +28,7 @@ export function parseTileMap(
   largestDiff: number;
   wallOffsets: { x: number; y: number };
   positionOffsets: { x: number; y: number };
+  maskOffsets: { x: number; y: number };
 } {
   const startIndexColumn = findFirstNonEmptyColumnIndex(tilemap);
   const startIndexRow = findFirstNonEmptyRowIndex(tilemap);
@@ -174,19 +175,26 @@ export function parseTileMap(
     largestDiff = highestTile - lowestTile;
   }
 
+  const wallOffsets = {
+    x: 1,
+    y: 1,
+  };
+  const doorOffset = hasDoor ? 1 : 0;
+
   return {
     tilemap: result,
     largestDiff,
-    wallOffsets: {
-      x: 1,
-      y: 1,
-    },
+    wallOffsets,
     // When the tilemap has a door, we offset the objects in the room by one in the x direction.
     // This makes it so objects appear at the same position, for a room without a door
     // and for a room with a door.
     positionOffsets: {
-      x: 1 + (hasDoor ? 1 : 0),
-      y: 1,
+      x: wallOffsets.x + doorOffset,
+      y: wallOffsets.y,
+    },
+    maskOffsets: {
+      x: doorOffset,
+      y: 0,
     },
   };
 }

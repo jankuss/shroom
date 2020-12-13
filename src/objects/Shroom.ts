@@ -36,6 +36,7 @@ export class Shroom {
       hitDetection: hitDetection ?? HitDetection.create(application),
       configuration: configuration ?? {},
       furnitureData,
+      application,
     };
 
     return new Shroom(realDependencies);
