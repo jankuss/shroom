@@ -12,7 +12,7 @@ export class HitDetection implements IHitDetection {
   private container: PIXI.Container | undefined;
 
   constructor(private app: PIXI.Application) {
-    window.addEventListener("click", (event) => this.handleClick(event), {
+    app.view.addEventListener("click", (event) => this.handleClick(event), {
       capture: true,
     });
   }
