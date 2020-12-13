@@ -7,6 +7,7 @@ import {
   DragOptions,
   FollowOptions,
   MouseEdgesOptions,
+  MovedEventData,
   PinchOptions,
   SnapOptions,
   SnapZoomOptions,
@@ -17,6 +18,7 @@ import { Room } from "./Room";
 
 export class RoomCamera extends PIXI.Container {
   public readonly viewport: Viewport;
+  private readonly room: Room;
 
   // Plugin functions
 
@@ -32,18 +34,18 @@ export class RoomCamera extends PIXI.Container {
   public readonly mouseEdges: Viewport["mouseEdges"];
 
   constructor(
-    public readonly room: Room,
+    public readonly _room: Room,
     private readonly dragOptions?: DragOptions
   ) {
     super();
 
-    // Viewport instantiating
+    this.room = _room;
 
     this.viewport = new Viewport({
-      worldHeight: room.roomHeight,
-      worldWidth: room.roomWidth,
-      interaction: room.application.renderer.plugins.interaction,
-      ticker: room.application.ticker,
+      worldHeight: this.room.roomHeight,
+      worldWidth: this.room.roomWidth,
+      interaction: this.room.application.renderer.plugins.interaction,
+      ticker: this.room.application.ticker,
     });
 
     // Set viewport plugins
@@ -65,15 +67,36 @@ export class RoomCamera extends PIXI.Container {
     this.mouseEdges = (options?: MouseEdgesOptions) =>
       this.viewport.mouseEdges(options);
 
-    // Calling drag
+    this.viewport.drag({ ...dragOptions, wheel: false });
 
-    this.viewport.drag(dragOptions);
-
-    // Adding room to viewport
-
-    this.viewport.addChild(room);
-
-    // Adding viewport to container
+    this.viewport.addChild(this.room);
     this.addChild(this.viewport);
+
+    this.viewportEvents();
   }
+
+  viewportEvents(): void {
+    // @ts-ignore
+    this.viewport.on("drag-end", this.dragEnd);
+    this.viewport.on("snap-end", () => this.viewport.plugins.remove("snap"));
+  }
+
+  dragEnd = (container: MovedEventData): void => {
+    if (
+      this.room.height - this.room.wallHeight - this.room.tileHeight <
+        container.viewport.top ||
+      container.viewport.worldWidth < container.viewport.left ||
+      container.viewport.bottom + this.room.wallHeight < 0 ||
+      container.viewport.right + this.room.wallDepth < 0
+    ) {
+      this.viewport.snap(
+        (this.room.application.screen.width + this.room.roomWidth) / 8,
+        (this.room.application.screen.height -
+          this.room.roomHeight -
+          this.room.tileHeight -
+          this.room.wallHeight) /
+          8
+      );
+    }
+  };
 }
