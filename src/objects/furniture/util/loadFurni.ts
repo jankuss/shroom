@@ -88,8 +88,6 @@ export async function loadFurni(
       )
     );
 
-    await new Promise((resolve) => setTimeout(resolve, Math.random() * 1000));
-
     return buffers;
   };
 
@@ -106,7 +104,7 @@ export async function loadFurni(
       }),
     getTexture: (name) => {
       const texture = textures.get(name);
-      if (texture == null) throw new Error("Invalid texture");
+      if (texture == null) throw new Error(`Invalid texture: ${name}`);
 
       return texture;
     },
