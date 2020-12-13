@@ -1,0 +1,24 @@
+{
+    "content": "A new version of shroom has been released.",
+    "embeds": [
+      {
+        "title": "shroom v0.1.0-alpha.15",
+        "description": "The following changes have been made. You can view the full CHANGELOG [here](https://github.com/jankuss/shroom/blob/v0.1.0-dev.1/CHANGELOG.md). ```code```",
+        "url": "https://www.npmjs.com/package/shroom/v/0.4.2",
+        "fields": [
+          {
+            "name": "Download with npm",
+            "value": "Download shroom with [npm](https://www.npmjs.com/package/shroom/v/0.4.2)."
+          },
+          {
+            "name": "Report Issues",
+            "value": "Please report any bugs or issues with this version on our [Github Issues](https://github.com/jankuss/shroom/issues)."
+          },
+          {
+            "name": "Need help?",
+            "value": "Ask questions in the #support channel."
+          }
+        ]
+      }
+    ]
+  }
