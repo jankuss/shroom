@@ -32,7 +32,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
   notify-discord:
-    if: "!EVENT_PAYLOAD.release.prerelease"
+    if: "!github.event.release.prerelease"
     needs: publish-npm
     runs-on: ubuntu-latest
     defaults:
@@ -47,7 +47,7 @@ jobs:
       - run: npm start
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          GIT_VERSION_TAG: ${{ EVENT_PAYLOAD.release.tag_name }}
+          GIT_VERSION_TAG: ${{ github.event.release.tag_name }}
 
   publish-gpr:
     needs: build
