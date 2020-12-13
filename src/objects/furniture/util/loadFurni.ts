@@ -1,6 +1,4 @@
-import * as PIXI from "pixi.js";
 import { HitTexture } from "../../hitdetection/HitTexture";
-
 import { DrawDefinition } from "./DrawDefinition";
 import { getFurniDrawDefinition } from "./getFurniDrawDefinition";
 import { parseAssets } from "./parseAssets";
@@ -44,40 +42,12 @@ export async function loadFurni(
   const assetMap = parseAssets(assetsXml);
   const visualization = parseVisualization(visualizationXml);
 
-  function generateHitMap(image: HTMLImageElement) {
-    const canvas = document.createElement("canvas");
-    canvas.width = image.width;
-    canvas.height = image.height;
-    const context = canvas.getContext("2d");
-
-    if (context == null) throw new Error("Invalid context 2d");
-
-    const threshold = 25;
-
-    const w = canvas.width;
-    const h = canvas.height;
-    context.drawImage(image, 0, 0);
-
-    let imageData = context.getImageData(0, 0, w, h);
-
-    let hitmap = new Uint32Array(Math.ceil((w * h) / 32));
-    for (let i = 0; i < w * h; i++) {
-      let ind1 = i % 32;
-      let ind2 = (i / 32) | 0;
-      if (imageData.data[i * 4 + 3] >= threshold) {
-        hitmap[ind2] = hitmap[ind2] | (1 << ind1);
-      }
-    }
-
-    return hitmap;
-  }
-
-  const preloadAssets = async () => {
+  const loadTextures = async () => {
     const assetsToLoad = Array.from(assetMap.values()).filter(
       (asset) => asset.source == null || asset.source === asset.name
     );
 
-    const buffers = new Map(
+    const textures = new Map(
       await Promise.all(
         assetsToLoad.map(async (asset) => {
           const imageUrl = await options.getAsset(type, asset.name, revision);
@@ -88,10 +58,10 @@ export async function loadFurni(
       )
     );
 
-    return buffers;
+    return textures;
   };
 
-  const textures = await preloadAssets();
+  const textures = await loadTextures();
 
   return {
     getDrawDefinition: (type: string, direction: number, animation?: string) =>
