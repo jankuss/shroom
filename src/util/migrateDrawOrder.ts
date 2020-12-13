@@ -25,8 +25,6 @@ export async function migrateDrawOrder() {
 
     obj[actionId] = directionObj;
   });
-
-  console.log("OBJ", obj);
 }
 
 migrateDrawOrder().catch(console.error);
