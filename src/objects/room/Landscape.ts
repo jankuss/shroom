@@ -34,6 +34,7 @@ export class Landscape extends RoomObject {
 
   public set color(value) {
     this._color = value;
+    this._updateLandscapeImages();
   }
 
   public get leftTexture() {
@@ -44,7 +45,7 @@ export class Landscape extends RoomObject {
     this._leftTexturePromise = value;
     Promise.resolve(this._leftTexturePromise).then((value) => {
       this._leftTexture = value;
-      this._initLandscapeImages();
+      this._updateLandscapeImages();
     });
   }
 
@@ -56,7 +57,7 @@ export class Landscape extends RoomObject {
     this._rightTexturePromise = value;
     Promise.resolve(this._rightTexturePromise).then((value) => {
       this._rightTexture = value;
-      this._initLandscapeImages();
+      this._updateLandscapeImages();
     });
   }
 
@@ -80,7 +81,7 @@ export class Landscape extends RoomObject {
     return this._createDefaultMask();
   }
 
-  private _initLandscapeImages() {
+  private _updateLandscapeImages() {
     if (!this.mounted) return;
 
     const meta = getWallCollectionMeta(this.tilemap.getParsedTileTypes());
@@ -196,11 +197,11 @@ export class Landscape extends RoomObject {
         this._masks = masks;
         this._wallHeight = wallHeight;
         this._wallHeightWithZ = wallHeightWithZ;
-        this._initLandscapeImages();
+        this._updateLandscapeImages();
       }
     ).unsubscribe;
 
-    this._initLandscapeImages();
+    this._updateLandscapeImages();
   }
 }
 

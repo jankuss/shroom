@@ -95,8 +95,8 @@ export class Room
   private _landscapeContainer: ILandscapeContainer = {
     getMaskLevel: (roomX, roomY) => {
       return {
-        roomX: roomX + this._maskOffsets.x,
-        roomY: roomY + this._maskOffsets.y,
+        roomX: roomX - this._maskOffsets.x,
+        roomY: roomY - this._maskOffsets.y,
       };
     },
   };
@@ -293,13 +293,6 @@ export class Room
     this.visualization = new RoomVisualization(
       this,
       this._application.renderer
-    );
-
-    console.log(
-      "ABC",
-      this.wallHeight,
-      this.wallHeightWithZ,
-      this._largestDiff
     );
 
     this.updateTiles();

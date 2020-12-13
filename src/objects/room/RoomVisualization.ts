@@ -49,8 +49,6 @@ export class RoomVisualization
       wallHeightWithZ: room.wallHeightWithZ,
     });
 
-    console.log("WHWZ", room.wallHeightWithZ, room.wallHeightWithZ);
-
     this._container.sortableChildren = true;
     this._behindWallPlane.sortableChildren = true;
 
