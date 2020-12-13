@@ -39,7 +39,10 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
         x: number,
         y: number,
         transform: { x: number; y: number }
-      ) => value.hits(x, y, transform);
+      ) =>
+        value.hits(x, y, transform, {
+          mirrorHorizonally: this._mirrored || this._mirrorNotVisually,
+        });
     }
   }
 

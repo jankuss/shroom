@@ -9,6 +9,7 @@ import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
 import { Hitmap, LoadFurniResult } from "./util/loadFurni";
 import { Asset } from "./util/parseAssets";
 import { Layer } from "./util/visualization/parseLayers";
+import { HitTexture } from "../hitdetection/HitTexture";
 
 export class BaseFurniture
   extends RoomObject
@@ -206,7 +207,7 @@ export class BaseFurniture
   private createSprite(
     asset: Asset,
     layer: Layer | undefined,
-    getHitmap: () => Hitmap,
+    texture: HitTexture,
     {
       x,
       y,
@@ -225,10 +226,11 @@ export class BaseFurniture
   ): PIXI.Sprite {
     const sprite = new HitSprite({
       hitDetection: this.hitDetection,
-      getHitmap: getHitmap,
       mirrored: asset.flipH,
       tag: layer?.tag,
     });
+
+    sprite.hitTexture = texture;
 
     if (layer?.ignoreMouse !== "1") {
       sprite.addEventListener("click", (event) =>
@@ -240,7 +242,7 @@ export class BaseFurniture
     sprite.x = x + (32 - asset.x * scaleX);
     sprite.y = y - asset.y + 16;
     sprite.zIndex = zIndex;
-    sprite.scale = new PIXI.Point(scaleX, 1);
+
     if (tint != null) {
       sprite.tint = parseInt(tint, 16);
     }
@@ -281,11 +283,8 @@ export class BaseFurniture
       } {
     const getAssetTextureName = (asset: Asset) => asset.source ?? asset.name;
 
-    const getAssetTexture = (asset: Asset) =>
-      loadFurniResult.getAsset(getAssetTextureName(asset));
-
-    const getAssetHitMap = (asset: Asset) =>
-      loadFurniResult.getHitMap(getAssetTextureName(asset));
+    const getTexture = (asset: Asset) =>
+      loadFurniResult.getTexture(getAssetTextureName(asset));
 
     const zIndex = this.zIndex + (z ?? 0) + index * 0.01;
 
@@ -301,7 +300,7 @@ export class BaseFurniture
         const sprite = this.createSprite(
           actualAsset,
           layer,
-          () => getAssetHitMap(actualAsset),
+          getTexture(actualAsset),
           {
             x,
             y,
@@ -311,8 +310,6 @@ export class BaseFurniture
             mask,
           }
         );
-        sprite.texture = getAssetTexture(actualAsset);
-
         if (mask != null && mask) {
           return { kind: "mask", sprite };
         } else {
@@ -326,24 +323,18 @@ export class BaseFurniture
     const sprites = new Map<string, PIXI.Sprite>();
 
     assets.forEach((spriteFrame) => {
-      const hitmap = getAssetHitMap(spriteFrame);
+      const texture = getTexture(spriteFrame);
       const name = getAssetTextureName(spriteFrame);
       if (sprites.has(name)) return;
 
-      const sprite = this.createSprite(
-        spriteFrame,
-        layer,
-        () => getAssetHitMap(spriteFrame),
-        {
-          x,
-          y,
-          zIndex,
-          tint,
-          shadow,
-        }
-      );
+      const sprite = this.createSprite(spriteFrame, layer, texture, {
+        x,
+        y,
+        zIndex,
+        tint,
+        shadow,
+      });
 
-      sprite.texture = getAssetTexture(spriteFrame);
       sprite.visible = false;
 
       sprites.set(name, sprite);

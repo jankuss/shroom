@@ -21,8 +21,7 @@ export type Hitmap = (
 
 export type LoadFurniResult = {
   getDrawDefinition: GetFurniDrawDefinition;
-  getAsset: (name: string) => PIXI.Texture;
-  getHitMap: (name: string) => Hitmap;
+  getTexture: (name: string) => HitTexture;
 };
 
 export async function loadFurni(
@@ -105,19 +104,11 @@ export async function loadFurni(
         assetMap,
         animation,
       }),
-    getAsset: (name) => {
-      const hitTexture = textures.get(name);
-      if (hitTexture == null) throw new Error("Invalid asset: " + name);
+    getTexture: (name) => {
+      const texture = textures.get(name);
+      if (texture == null) throw new Error("Invalid texture");
 
-      return hitTexture.texture;
-    },
-    getHitMap: (name) => {
-      const hitTexture = textures.get(name);
-      if (hitTexture == null) throw new Error("Invalid asset: " + name);
-
-      return (x: number, y: number, transform: { x: number; y: number }) => {
-        return hitTexture.hits(x, y, transform);
-      };
+      return texture;
     },
   };
 }

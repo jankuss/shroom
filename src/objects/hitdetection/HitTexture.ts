@@ -27,8 +27,17 @@ export class HitTexture {
     return this._cachedHitmap;
   }
 
-  hits(x: number, y: number, transform: { x: number; y: number }) {
-    x = x - transform.x;
+  hits(
+    x: number,
+    y: number,
+    transform: { x: number; y: number },
+    options: { mirrorHorizonally?: boolean } = { mirrorHorizonally: false }
+  ) {
+    if (options.mirrorHorizonally) {
+      x = transform.x - x;
+    } else {
+      x = x - transform.x;
+    }
     y = y - transform.y;
 
     const baseTexture = this._texture.baseTexture;
