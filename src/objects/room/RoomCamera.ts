@@ -1,102 +1,227 @@
 import * as PIXI from "pixi.js";
-import {
-  BounceOptions,
-  ClampOptions,
-  ClampZoomOptions,
-  DecelerateOptions,
-  DragOptions,
-  FollowOptions,
-  MouseEdgesOptions,
-  MovedEventData,
-  PinchOptions,
-  SnapOptions,
-  SnapZoomOptions,
-  Viewport,
-  WheelOptions,
-} from "pixi-viewport";
+
 import { Room } from "./Room";
 
+const TWEEN = require("tween.js");
+
+type RoomCameraState =
+  | { type: "WAITING" }
+  | {
+      type: "WAIT_FOR_DISTANCE";
+      startX: number;
+      startY: number;
+      pointerId: number;
+    }
+  | {
+      type: "DRAGGING";
+      currentX: number;
+      currentY: number;
+      pointerId: number;
+      startX: number;
+      startY: number;
+    }
+  | {
+      type: "ANIMATE_ZERO";
+      currentX: number;
+      currentY: number;
+      startX: number;
+      startY: number;
+    };
+
 export class RoomCamera extends PIXI.Container {
-  public readonly viewport: Viewport;
-  private readonly room: Room;
+  private _state: RoomCameraState = { type: "WAITING" };
 
-  // Plugin functions
+  private _offsets: { x: number; y: number } = { x: 0, y: 0 };
+  private _animatedOffsets: { x: number; y: number } = { x: 0, y: 0 };
 
-  public readonly snapZoom: Viewport["snapZoom"];
-  public readonly clamp: Viewport["clamp"];
-  public readonly decelerate: Viewport["decelerate"];
-  public readonly bounce: Viewport["bounce"];
-  public readonly pinch: Viewport["pinch"];
-  public readonly snap: Viewport["snap"];
-  public readonly follow: Viewport["follow"];
-  public readonly wheel: Viewport["wheel"];
-  public readonly clampZoom: Viewport["clampZoom"];
-  public readonly mouseEdges: Viewport["mouseEdges"];
+  private _container: PIXI.Container;
 
   constructor(
-    public readonly _room: Room,
-    private readonly dragOptions?: DragOptions
+    private readonly _room: Room,
+    private readonly _parent: PIXI.Container,
+    private readonly _parentBounds: PIXI.Rectangle,
+    private readonly _app: PIXI.Application
   ) {
     super();
 
-    this.room = _room;
+    const interactionManager: PIXI.InteractionManager = this._app.renderer
+      .plugins.interaction;
 
-    this.viewport = new Viewport({
-      worldHeight: this.room.roomHeight,
-      worldWidth: this.room.roomWidth,
-      interaction: this.room.application.renderer.plugins.interaction,
-      ticker: this.room.application.ticker,
+    interactionManager.addListener(
+      "pointerdown",
+      (event: PIXI.InteractionEvent) => {
+        this._handlePointerDown(event);
+      }
+    );
+
+    interactionManager.addListener(
+      "pointermove",
+      (event: PIXI.InteractionEvent) => {
+        this._handlePointerMove(event);
+      }
+    );
+
+    interactionManager.addListener(
+      "pointerup",
+      (event: PIXI.InteractionEvent) => {
+        this._handlePointerUp(event);
+      }
+    );
+
+    this._container = new PIXI.Container();
+    this._container.addChild(this._room);
+    this._parent.addChild(this._container);
+
+    let last: number | undefined;
+    this._app.ticker.add(() => {
+      if (last == null) last = performance.now();
+      const value = performance.now() - last;
+
+      TWEEN.update(value);
+      this._updatePosition();
     });
-
-    // Set viewport plugins
-
-    this.snapZoom = (options?: SnapZoomOptions) =>
-      this.viewport.snapZoom(options);
-    this.clamp = (options?: ClampOptions) => this.viewport.clamp(options);
-    this.decelerate = (options?: DecelerateOptions) =>
-      this.viewport.decelerate(options);
-    this.bounce = (options?: BounceOptions) => this.viewport.bounce(options);
-    this.pinch = (options?: PinchOptions) => this.viewport.pinch(options);
-    this.snap = (x: number, y: number, options?: SnapOptions) =>
-      this.viewport.snap(x, y, options);
-    this.follow = (target: PIXI.DisplayObject, options?: FollowOptions) =>
-      this.viewport.follow(target, options);
-    this.wheel = (options?: WheelOptions) => this.viewport.wheel(options);
-    this.clampZoom = (options?: ClampZoomOptions) =>
-      this.viewport.clampZoom(options);
-    this.mouseEdges = (options?: MouseEdgesOptions) =>
-      this.viewport.mouseEdges(options);
-
-    this.viewport.drag({ ...dragOptions, wheel: false });
-
-    this.viewport.addChild(this.room);
-    this.addChild(this.viewport);
-
-    this.viewportEvents();
   }
 
-  viewportEvents(): void {
-    // @ts-ignore
-    this.viewport.on("drag-end", this.dragEnd);
-    this.viewport.on("snap-end", () => this.viewport.plugins.remove("snap"));
-  }
+  private _updatePosition() {
+    switch (this._state.type) {
+      case "DRAGGING":
+        const diffX = this._state.currentX - this._state.startX;
+        const diffY = this._state.currentY - this._state.startY;
 
-  dragEnd = (container: MovedEventData): void => {
-    if (
-      this.room.height - this.room.wallHeight - this.room.tileHeight <
-        container.viewport.top ||
-      container.viewport.worldWidth < container.viewport.left ||
-      container.viewport.bottom + this.room.wallHeight < 0 ||
-      container.viewport.right + this.room.wallDepth < 0
-    ) {
-      this.viewport.snap(
-        (this.room.application.screen.width + this.room.roomWidth) / 8,
-        (this.room.application.screen.height -
-          this.room.roomHeight -
-          this.room.tileHeight -
-          this.room.wallHeight) /
-          8
-      );
+        this._container.x = this._offsets.x + diffX;
+        this._container.y = this._offsets.y + diffY;
+        break;
+
+      case "ANIMATE_ZERO":
+        this._container.x = this._animatedOffsets.x;
+        this._container.y = this._animatedOffsets.y;
+        break;
+
+      default:
+        this._container.x = this._offsets.x;
+        this._container.y = this._offsets.y;
     }
-  };
+  }
+
+  private _isOutOfBounds(offsets: { x: number; y: number }) {
+    if (this._room.x + this._room.roomWidth + offsets.x <= 0) {
+      return true;
+    }
+
+    if (this._room.x + offsets.x >= this._parentBounds.width) {
+      return true;
+    }
+
+    if (this._room.y + this._room.roomHeight + offsets.y <= 0) {
+      return true;
+    }
+
+    if (this._room.y + offsets.y >= this._parentBounds.height) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private returnToZero(current: { x: number; y: number }) {
+    this._animatedOffsets = current;
+    this._offsets = { x: 0, y: 0 };
+
+    const newPos = { ...this._animatedOffsets };
+
+    const tween = new TWEEN.Tween(newPos)
+      .to({ x: 0, y: 0 }, 500)
+      .easing(TWEEN.Easing.Quadratic.Out) // Use an easing function to make the animation smooth.
+      .onUpdate((value: number) => {
+        this._animatedOffsets = newPos;
+
+        if (value >= 1) {
+          this._state = { type: "WAITING" };
+        }
+
+        this._updatePosition();
+      })
+      .start();
+
+    this._updatePosition();
+  }
+
+  private _handlePointerUp(event: PIXI.InteractionEvent) {
+    if (this._state.type === "WAITING" || this._state.type === "ANIMATE_ZERO")
+      return;
+
+    if (this._state.pointerId !== event.data.pointerId) return;
+
+    if (this._state.type === "DRAGGING") {
+      const diffX = this._state.currentX - this._state.startX;
+      const diffY = this._state.currentY - this._state.startY;
+
+      const currentOffsets = {
+        x: this._offsets.x + diffX,
+        y: this._offsets.y + diffY,
+      };
+
+      if (this._isOutOfBounds(currentOffsets)) {
+        this._state = {
+          ...this._state,
+          type: "ANIMATE_ZERO",
+        };
+
+        this.returnToZero(currentOffsets);
+        return;
+      } else {
+        this._offsets = currentOffsets;
+      }
+    }
+
+    this._state = { type: "WAITING" };
+    this._updatePosition();
+  }
+
+  private _handlePointerDown(event: PIXI.InteractionEvent) {
+    if (this._state.type !== "WAITING") return;
+
+    const position = event.data.getLocalPosition(this._parent);
+
+    this._state = {
+      type: "WAIT_FOR_DISTANCE",
+      pointerId: event.data.pointerId,
+      startX: position.x,
+      startY: position.y,
+    };
+  }
+
+  private _handlePointerMove(event: PIXI.InteractionEvent) {
+    switch (this._state.type) {
+      case "WAIT_FOR_DISTANCE": {
+        if (this._state.pointerId !== event.data.pointerId) return;
+
+        const position = event.data.getLocalPosition(this._parent);
+
+        this._state = {
+          currentX: position.x,
+          currentY: position.y,
+          startX: position.x,
+          startY: position.y,
+          pointerId: this._state.pointerId,
+          type: "DRAGGING",
+        };
+        break;
+      }
+
+      case "DRAGGING": {
+        if (this._state.pointerId !== event.data.pointerId) return;
+
+        const position = event.data.getLocalPosition(this._parent);
+
+        this._state = {
+          ...this._state,
+          currentX: position.x,
+          currentY: position.y,
+        };
+
+        break;
+      }
+    }
+  }
 }

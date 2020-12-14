@@ -20,7 +20,7 @@ const application = new PIXI.Application({
   antialias: false,
   resolution: window.devicePixelRatio,
   autoDensity: true,
-  width: 1600,
+  width: 1200,
   height: 900,
   backgroundColor: 0x000000,
 });
@@ -44,8 +44,8 @@ const avatar = new Avatar({
   roomZ: 0,
 });
 
-room.x = 100;
-room.y = 200;
+room.x = application.screen.width / 2 - room.roomWidth / 2;
+room.y = application.screen.height / 2 - room.roomHeight / 2;
 
 room.wallTexture = loadRoomTexture("./images/tile.png");
 room.floorTexture = loadRoomTexture("./images/tile.png");
@@ -54,6 +54,17 @@ room.floorColor = "#eeeeee";
 
 room.addRoomObject(avatar);
 
-application.stage.addChild(new RoomCamera(room));
+const testContainer = new PIXI.Graphics();
 
+testContainer.x = room.x;
+testContainer.y = room.y;
+testContainer.beginFill(0xffffff, 0.1);
+testContainer.drawRect(0, 0, room.roomWidth, room.roomHeight);
+testContainer.endFill();
+
+application.stage.addChild(
+  new RoomCamera(room, application.stage, application.screen, application)
+);
+
+application.stage.addChild(testContainer);
 // application.stage.addChild(room);
