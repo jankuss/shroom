@@ -46,9 +46,6 @@ export class Room
 
   private visualization: RoomVisualization;
 
-  public roomWidth: number;
-  public roomHeight: number;
-
   private tileColor: string = "#989865";
 
   private animationTicker: IAnimationTicker;
@@ -63,7 +60,7 @@ export class Room
   private _cursors: TileCursor[] = [];
   private _doorWall: Wall | undefined;
 
-  private _roomBounds: {
+  private _tileMapBounds: {
     minX: number;
     minY: number;
     maxX: number;
@@ -279,10 +276,7 @@ export class Room
 
     this._application = application;
 
-    this._roomBounds = getTileMapBounds(parsedTileMap, this._wallOffsets);
-
-    this.roomWidth = this._roomBounds.maxX - this._roomBounds.minX;
-    this.roomHeight = this._roomBounds.maxY - this._roomBounds.minY;
+    this._tileMapBounds = getTileMapBounds(parsedTileMap, this._wallOffsets);
 
     this.animationTicker = animationTicker;
     this.furnitureLoader = furnitureLoader;
@@ -298,6 +292,24 @@ export class Room
 
     this.updateTiles();
     this.addChild(this.visualization);
+  }
+
+  public get roomBounds() {
+    return {
+      ...this._tileMapBounds,
+      minX: this._tileMapBounds.minX - this.wallDepth,
+      maxX: this._tileMapBounds.maxX + this.wallDepth,
+      minY: this._tileMapBounds.minY - this.wallHeight - this.wallDepth,
+      maxY: this._tileMapBounds.maxY + this.tileHeight,
+    };
+  }
+
+  public get roomHeight() {
+    return this.roomBounds.maxY - this.roomBounds.minY;
+  }
+
+  public get roomWidth() {
+    return this.roomBounds.maxX - this.roomBounds.minX;
   }
 
   getParsedTileTypes(): ParsedTileType[][] {
@@ -373,8 +385,8 @@ export class Room
 
     const base = 32;
 
-    const xPos = -this._roomBounds.minX + x * base - y * base;
-    const yPos = -this._roomBounds.minY + x * (base / 2) + y * (base / 2);
+    const xPos = -this.roomBounds.minX + x * base - y * base;
+    const yPos = -this.roomBounds.minY + x * (base / 2) + y * (base / 2);
 
     return {
       x: xPos,

@@ -62,9 +62,5 @@ testContainer.beginFill(0xffffff, 0.1);
 testContainer.drawRect(0, 0, room.roomWidth, room.roomHeight);
 testContainer.endFill();
 
-application.stage.addChild(
-  new RoomCamera(room, application.stage, application.screen, application)
-);
-
-application.stage.addChild(testContainer);
+application.stage.addChild(RoomCamera.forScreen(room));
 // application.stage.addChild(room);

@@ -28,7 +28,6 @@
     "events": "^3.2.0",
     "ink": "^3.0.8",
     "node-fetch": "^2.6.1",
-    "pixi-viewport": "^4.18.1",
     "react": "^16.14.0",
     "rxjs": "^6.6.3",
     "stream": "0.0.2",
