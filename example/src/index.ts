@@ -44,8 +44,8 @@ const avatar = new Avatar({
   roomZ: 0,
 });
 
-room.x = application.screen.width / 2 - room.roomWidth / 2;
-room.y = application.screen.height / 2 - room.roomHeight / 2;
+room.x = 200;
+room.y = 200;
 
 room.wallTexture = loadRoomTexture("./images/tile.png");
 room.floorTexture = loadRoomTexture("./images/tile.png");
@@ -53,4 +53,14 @@ room.wallColor = "#dbbe6e";
 room.floorColor = "#eeeeee";
 
 room.addRoomObject(avatar);
+
+const graphics = new PIXI.Graphics();
+graphics.x = 0;
+graphics.y = 0;
+
+graphics.beginFill(0xffffff, 0.1);
+graphics.drawRect(0, 0, room.roomWidth, room.roomHeight);
+graphics.endFill();
+
+room.addChild(graphics);
 application.stage.addChild(RoomCamera.forScreen(room));

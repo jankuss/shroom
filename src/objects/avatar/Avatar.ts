@@ -296,6 +296,13 @@ export class Avatar extends RoomObject {
     return getZOrder(roomX, roomY, roomZ) + 1;
   }
 
+  getScreenPosition() {
+    return {
+      x: this.avatarSprites.x,
+      y: this.avatarSprites.y,
+    };
+  }
+
   private updatePosition() {
     if (!this.mounted) return;
 

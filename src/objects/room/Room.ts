@@ -148,6 +148,7 @@ export class Room
   }
 
   private _updateWallDepth() {
+    this._updatePosition();
     this.visualization.disableCache();
     this._walls.forEach((wall) => {
       wall.wallDepth = this.wallDepth;
@@ -156,6 +157,7 @@ export class Room
   }
 
   private _updateWallHeight() {
+    this._updatePosition();
     this.visualization.updateRoom(this);
     this.visualization.disableCache();
     this._walls.forEach((wall) => {
@@ -165,6 +167,7 @@ export class Room
   }
 
   private _updateTileHeight() {
+    this._updatePosition();
     this.visualization.disableCache();
     this._floor.forEach((floor) => {
       floor.tileHeight = this.tileHeight;
@@ -290,8 +293,15 @@ export class Room
       this._application.renderer
     );
 
+    this._updatePosition();
+
     this.updateTiles();
     this.addChild(this.visualization);
+  }
+
+  private _updatePosition() {
+    this.visualization.x = -this.roomBounds.minX;
+    this.visualization.y = -this.roomBounds.minY;
   }
 
   public get roomBounds() {
@@ -392,8 +402,8 @@ export class Room
     // Future Idea: Create a container, which applies the transforms dependent on roomBounds, and
     // update that container to get all elements in the room positioned correctly.
 
-    const xPos = -this._tileMapBounds.minX + x * base - y * base;
-    const yPos = -this._tileMapBounds.minY + x * (base / 2) + y * (base / 2);
+    const xPos = x * base - y * base;
+    const yPos = x * (base / 2) + y * (base / 2);
 
     return {
       x: xPos,
