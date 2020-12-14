@@ -385,8 +385,15 @@ export class Room
 
     const base = 32;
 
-    const xPos = -this.roomBounds.minX + x * base - y * base;
-    const yPos = -this.roomBounds.minY + x * (base / 2) + y * (base / 2);
+    // We must use `_tileMapBounds` here instead of roomBounds, since roomBounds depends on
+    // multiple, changeable parameters. Since there is no way to notify the room objects, that
+    // getPosition positioning changed, we just use the tileMapBounds here, since they are static.
+    //
+    // Future Idea: Create a container, which applies the transforms dependent on roomBounds, and
+    // update that container to get all elements in the room positioned correctly.
+
+    const xPos = -this._tileMapBounds.minX + x * base - y * base;
+    const yPos = -this._tileMapBounds.minY + x * (base / 2) + y * (base / 2);
 
     return {
       x: xPos,
