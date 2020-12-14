@@ -53,14 +53,4 @@ room.wallColor = "#dbbe6e";
 room.floorColor = "#eeeeee";
 
 room.addRoomObject(avatar);
-
-const testContainer = new PIXI.Graphics();
-
-testContainer.x = room.x;
-testContainer.y = room.y;
-testContainer.beginFill(0xffffff, 0.1);
-testContainer.drawRect(0, 0, room.roomWidth, room.roomHeight);
-testContainer.endFill();
-
 application.stage.addChild(RoomCamera.forScreen(room));
-// application.stage.addChild(room);
