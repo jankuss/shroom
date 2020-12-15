@@ -1,6 +1,4 @@
 import * as PIXI from "pixi.js";
-import TileAsset from "../../assets/tile2.png";
-import { createPlaneMatrix } from "./util/createPlaneMatrix";
 import { getTileColors } from "./util/getTileColors";
 import { getFloorMatrix, getLeftMatrix, getRightMatrix } from "./matrixes";
 import { RoomObject } from "../RoomObject";
