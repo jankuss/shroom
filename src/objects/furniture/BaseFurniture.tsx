@@ -13,7 +13,7 @@ import { HitTexture } from "../hitdetection/HitTexture";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 import { HighlightFilter } from "./filter/HighlightFilter";
 
-const highlightFilter = new HighlightFilter();
+const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
 type MaskIdGetter = (direction: number) => string | undefined;
 
@@ -277,12 +277,7 @@ export class BaseFurniture
       );
     }
 
-    const highlight =
-      this._highlight &&
-      layer?.ink == null &&
-      layer?.alpha == null &&
-      !shadow &&
-      !mask;
+    const highlight = this.highlight && layer?.ink == null && !shadow && !mask;
 
     if (highlight) {
       sprite.filters = [highlightFilter];
@@ -301,19 +296,27 @@ export class BaseFurniture
 
     if (layer != null) {
       if (layer.alpha != null) {
-        sprite.alpha = layer.alpha / 255;
+        if (this.highlight) {
+          sprite.alpha = 1;
+        } else {
+          sprite.alpha = layer.alpha / 255;
+        }
       }
 
       if (layer.ink != null) {
+        if (this.highlight) {
+          sprite.visible = false;
+        }
         sprite.blendMode =
           layer.ink === "ADD" ? PIXI.BLEND_MODES.ADD : PIXI.BLEND_MODES.NORMAL;
       }
     }
 
     if (shadow) {
-      if (this._highlight) {
-        sprite.alpha = 0;
+      if (this.highlight) {
+        sprite.visible = false;
       } else {
+        sprite.visible = true;
         sprite.alpha = 0.195;
       }
     }

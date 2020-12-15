@@ -1,14 +1,16 @@
 import * as PIXI from "pixi.js";
 
 export class HighlightFilter extends PIXI.Filter {
-  constructor() {
+  constructor(private _backgroundColor: number, private _borderColor: number) {
     super(vertex, fragment);
-    this.uniforms.originalColor = new Float32Array(4);
-    this.uniforms.newColor = new Float32Array(4);
-    this.uniforms.epsilon = 0.1;
+    this.uniforms.backgroundColor = new Float32Array(4);
+    this.uniforms.borderColor = new Float32Array(4);
 
-    this.uniforms.originalColor = [0.6, 0.6, 0.6, 1.0];
-    this.uniforms.newColor = [1.0, 1.0, 1.0, 1.0];
+    this.uniforms.backgroundColor = [
+      ...PIXI.utils.hex2rgb(this._backgroundColor),
+      1.0,
+    ];
+    this.uniforms.borderColor = [...PIXI.utils.hex2rgb(this._borderColor), 1.0];
   }
 }
 
@@ -30,17 +32,17 @@ void main(void)
 const fragment = `
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
-uniform vec4 originalColor;
-uniform vec4 newColor;
-uniform float epsilon;
+uniform vec4 backgroundColor;
+uniform vec4 borderColor;
+
 void main(void) {
     vec4 currentColor = texture2D(uSampler, vTextureCoord);
 
     if (currentColor.a > 0.001) {
         if (currentColor.r < 0.001 && currentColor.g < 0.001 && currentColor.b < 0.001) {
-            gl_FragColor = newColor;
+            gl_FragColor = borderColor;
         } else {
-            gl_FragColor = originalColor;
+            gl_FragColor = backgroundColor;
         }
     }
 }

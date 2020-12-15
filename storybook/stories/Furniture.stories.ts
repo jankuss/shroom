@@ -125,37 +125,27 @@ export function Highlighted() {
     room.x = application.screen.width / 2 - room.roomWidth / 2;
     room.y = application.screen.height / 2 - room.roomHeight / 2;
 
-    for (let i = 0; i < 4; i++) {
-      const furniture = new FloorFurniture({
-        roomX: i * 3,
-        roomY: 0,
-        roomZ: 0,
-        type: "club_sofa",
-        direction: i * 2,
-      });
+    const furniture1 = new FloorFurniture({
+      roomX: 0,
+      roomY: 0,
+      roomZ: 0,
+      type: "rare_dragonlamp*1",
+      direction: 2,
+    });
 
-      furniture.onClick = () => {
-        furniture.highlight = !furniture.highlight;
-      };
+    const furniture2 = new FloorFurniture({
+      roomX: 2,
+      roomY: 0,
+      roomZ: 0,
+      type: "club_sofa",
+      direction: 4,
+    });
 
-      room.addRoomObject(furniture);
-    }
+    furniture1.highlight = true;
+    furniture2.highlight = true;
 
-    for (let i = 0; i < 4; i++) {
-      const furniture = new FloorFurniture({
-        roomX: i * 3,
-        roomY: 3,
-        roomZ: 0,
-        type: "wf_act_move_rotate",
-        direction: 0,
-      });
-
-      furniture.onClick = () => {
-        furniture.highlight = !furniture.highlight;
-      };
-
-      room.addRoomObject(furniture);
-    }
+    room.addRoomObject(furniture1);
+    room.addRoomObject(furniture2);
 
     application.stage.addChild(room);
   });
