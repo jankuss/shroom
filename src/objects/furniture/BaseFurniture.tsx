@@ -394,7 +394,7 @@ export class BaseFurniture
     this.updateFurniture();
   }
 
-  destroy() {
+  destroyed() {
     this.destroySprites();
 
     if (this.cancelTicker != null) {

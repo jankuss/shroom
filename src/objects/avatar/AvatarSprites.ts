@@ -218,7 +218,7 @@ export class AvatarSprites extends RoomObject {
     this.fetchLook(this.lookOptions.look);
   }
 
-  destroy(): void {
+  destroyed(): void {
     this.container?.destroy();
   }
 }

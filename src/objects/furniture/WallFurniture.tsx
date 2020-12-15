@@ -125,7 +125,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
     throw new Error("Invalid direction for wall item");
   }
 
-  destroy(): void {
+  destroyed(): void {
     this._baseFurniture.destroy();
   }
 

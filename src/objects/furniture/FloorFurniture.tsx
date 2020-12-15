@@ -184,7 +184,7 @@ export class FloorFurniture
     }
   }
 
-  destroy(): void {
+  destroyed(): void {
     this._baseFurniture.destroy();
   }
 

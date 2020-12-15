@@ -186,7 +186,7 @@ export class Landscape extends RoomObject {
     this.visualization.addLandscape(container);
   }
 
-  destroy(): void {
+  destroyed(): void {
     this._unsubscribe();
     this._container?.destroy();
   }

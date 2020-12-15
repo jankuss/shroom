@@ -53,6 +53,14 @@ export class HitTexture {
 
   static async fromUrl(imageUrl: string) {
     const image = new Image();
+
+    // We set the crossOrigin here so the image element
+    // can fetch and display images hosted on another origin.
+    // Thanks to @danielsolartech for reporting.
+
+    // TODO: Add option to configure this somewhere?
+    image.crossOrigin = "anonymous";
+
     image.src = imageUrl;
 
     await new Promise<{

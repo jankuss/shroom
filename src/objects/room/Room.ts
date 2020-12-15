@@ -22,6 +22,7 @@ import { Wall } from "./Wall";
 import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
 import { ILandscapeContainer } from "./ILandscapeContainer";
+import { RoomObjectContainer } from "./RoomObjectContainer";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -38,7 +39,7 @@ type TileMap = TileType[][] | string;
 export class Room
   extends PIXI.Container
   implements IRoomGeometry, IRoomObjectContainer, ITileMap {
-  private roomObjects: IRoomObject[] = [];
+  private _roomObjectContainer: RoomObjectContainer;
 
   private _wallOffsets = { x: 1, y: 1 };
   private _positionOffsets = { x: 1, y: 1 };
@@ -101,6 +102,10 @@ export class Room
     },
   };
 
+  public get roomObjects() {
+    return this._roomObjectContainer.roomObjects;
+  }
+
   public get hideWalls() {
     return this._hideWalls;
   }
@@ -148,58 +153,6 @@ export class Room
   public set wallDepth(value) {
     this._wallDepth = value;
     this._updateWallDepth();
-  }
-
-  private _updateWallDepth() {
-    this.visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.wallDepth = this.wallDepth;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _updateWallHeight() {
-    this.visualization.updateRoom(this);
-    this.visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.wallHeight = this.wallHeightWithZ;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _updateTileHeight() {
-    this.visualization.disableCache();
-    this._floor.forEach((floor) => {
-      floor.tileHeight = this.tileHeight;
-    });
-    this._walls.forEach((wall) => {
-      wall.tileHeight = this.tileHeight;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _getObjectPositionWithOffset(roomX: number, roomY: number) {
-    return {
-      x: roomX + this._positionOffsets.x,
-      y: roomY + this._positionOffsets.y,
-    };
-  }
-
-  private _getTilePositionWithOffset(roomX: number, roomY: number) {
-    return {
-      x: roomX + this._wallOffsets.x,
-      y: roomY + this._wallOffsets.y,
-    };
-  }
-
-  getTileAtPosition(roomX: number, roomY: number) {
-    const { x, y } = this._getObjectPositionWithOffset(roomX, roomY);
-
-    const row = this.parsedTileMap[y];
-    if (row == null) return;
-    if (row[x] == null) return;
-
-    return row[x];
   }
 
   get onTileClick() {
@@ -295,8 +248,74 @@ export class Room
       this._application.renderer
     );
 
+    this._roomObjectContainer = new RoomObjectContainer();
+    this._roomObjectContainer.context = {
+      geometry: this,
+      visualization: this.visualization,
+      animationTicker: this.animationTicker,
+      furnitureLoader: this.furnitureLoader,
+      roomObjectContainer: this,
+      avatarLoader: this.avatarLoader,
+      hitDetection: this.hitDetection,
+      configuration: this.configuration,
+      tilemap: this,
+      landscapeContainer: this._landscapeContainer,
+    };
+
     this.updateTiles();
     this.addChild(this.visualization);
+  }
+
+  private _updateWallDepth() {
+    this.visualization.disableCache();
+    this._walls.forEach((wall) => {
+      wall.wallDepth = this.wallDepth;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _updateWallHeight() {
+    this.visualization.updateRoom(this);
+    this.visualization.disableCache();
+    this._walls.forEach((wall) => {
+      wall.wallHeight = this.wallHeightWithZ;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _updateTileHeight() {
+    this.visualization.disableCache();
+    this._floor.forEach((floor) => {
+      floor.tileHeight = this.tileHeight;
+    });
+    this._walls.forEach((wall) => {
+      wall.tileHeight = this.tileHeight;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _getObjectPositionWithOffset(roomX: number, roomY: number) {
+    return {
+      x: roomX + this._positionOffsets.x,
+      y: roomY + this._positionOffsets.y,
+    };
+  }
+
+  private _getTilePositionWithOffset(roomX: number, roomY: number) {
+    return {
+      x: roomX + this._wallOffsets.x,
+      y: roomY + this._wallOffsets.y,
+    };
+  }
+
+  getTileAtPosition(roomX: number, roomY: number) {
+    const { x, y } = this._getObjectPositionWithOffset(roomX, roomY);
+
+    const row = this.parsedTileMap[y];
+    if (row == null) return;
+    if (row[x] == null) return;
+
+    return row[x];
   }
 
   getParsedTileTypes(): ParsedTileType[][] {
@@ -335,20 +354,11 @@ export class Room
   }
 
   addRoomObject(object: IRoomObject) {
-    object.setParent({
-      geometry: this,
-      visualization: this.visualization,
-      animationTicker: this.animationTicker,
-      furnitureLoader: this.furnitureLoader,
-      roomObjectContainer: this,
-      avatarLoader: this.avatarLoader,
-      hitDetection: this.hitDetection,
-      configuration: this.configuration,
-      tilemap: this,
-      landscapeContainer: this._landscapeContainer,
-    });
+    this._roomObjectContainer.addRoomObject(object);
+  }
 
-    this.roomObjects.push(object);
+  removeRoomObject(object: IRoomObject) {
+    this._roomObjectContainer.removeRoomObject(object);
   }
 
   getPosition(

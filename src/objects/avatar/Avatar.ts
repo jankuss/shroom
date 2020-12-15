@@ -372,7 +372,7 @@ export class Avatar extends RoomObject implements IMoveable {
     this._updateAvatarSprites();
   }
 
-  destroy(): void {
+  destroyed(): void {
     this._avatarSprites?.destroy();
 
     if (this._cancelAnimation != null) {
