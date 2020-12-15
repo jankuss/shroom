@@ -317,8 +317,8 @@ export class Avatar extends RoomObject implements IMoveable {
 
   getScreenPosition() {
     return {
-      x: this.avatarSprites.x,
-      y: this.avatarSprites.y,
+      x: this._avatarSprites.x,
+      y: this._avatarSprites.y,
     };
   }
 
