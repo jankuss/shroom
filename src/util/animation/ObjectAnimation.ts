@@ -1,25 +1,25 @@
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { RoomPosition } from "../../types/RoomPosition";
 
-export class ObjectAnimation {
+export class ObjectAnimation<T> {
   private current: RoomPosition | undefined;
   private diff: RoomPosition | undefined;
-  private currentFrame: number = 0;
+  private start: number = 0;
   private enqueued: {
     currentPosition: RoomPosition;
     newPosition: RoomPosition;
-    direction: number;
+    data: T;
   }[] = [];
   private nextPosition: RoomPosition | undefined;
 
   constructor(
     private animationTicker: IAnimationTicker,
     private callbacks: {
-      onUpdatePosition: (position: RoomPosition, direction: number) => void;
-      onStart: (direction: number) => void;
-      onStop: () => void;
+      onUpdatePosition: (position: RoomPosition, data: T) => void;
+      onStart: (data: T) => void;
+      onStop: (data: T) => void;
     },
-    private frameDuration: number = 12
+    private duration: number = 500
   ) {}
 
   clear() {
@@ -30,18 +30,18 @@ export class ObjectAnimation {
   move(
     currentPos: { roomX: number; roomY: number; roomZ: number },
     newPos: { roomX: number; roomY: number; roomZ: number },
-    direction: number
+    data: T
   ) {
     if (this.diff != null) {
       this.enqueued.push({
         currentPosition: currentPos,
         newPosition: newPos,
-        direction: direction,
+        data: data,
       });
       return;
     }
 
-    this.callbacks.onStart(direction);
+    this.callbacks.onStart(data);
 
     this.current = currentPos;
     this.diff = {
@@ -51,7 +51,7 @@ export class ObjectAnimation {
     };
 
     this.nextPosition = newPos;
-    this.currentFrame = 0;
+    this.start = performance.now();
 
     const handleFinish = () => {
       this.diff = undefined;
@@ -59,9 +59,9 @@ export class ObjectAnimation {
 
       const next = this.enqueued.shift();
       if (next != null) {
-        this.move(next.currentPosition, next.newPosition, next.direction);
+        this.move(next.currentPosition, next.newPosition, next.data);
       } else {
-        this.callbacks.onStop();
+        this.callbacks.onStop(data);
       }
 
       cancel();
@@ -73,12 +73,13 @@ export class ObjectAnimation {
         roomY: this.current.roomY,
         roomZ: this.current.roomZ,
       },
-      direction
+      data
     );
 
-    const start = this.animationTicker.current();
     const cancel = this.animationTicker.subscribe((value, accurate) => {
-      let factor = this.currentFrame / (this.frameDuration - 1);
+      const timeDiff = performance.now() - this.start;
+
+      let factor = timeDiff / this.duration;
       const current = this.current;
       const diff = this.diff;
 
@@ -93,7 +94,7 @@ export class ObjectAnimation {
             roomY: current.roomY + diff.roomY * factor,
             roomZ: current.roomZ + diff.roomZ * factor,
           },
-          direction
+          data
         );
       }
 
@@ -101,8 +102,6 @@ export class ObjectAnimation {
         handleFinish();
         return;
       }
-
-      this.currentFrame = accurate - start;
     });
   }
 }

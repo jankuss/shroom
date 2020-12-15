@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { IAvatarLoader } from "../../interfaces/IAvatarLoader";
 import { IConfiguration } from "../../interfaces/IConfiguration";
@@ -48,9 +47,6 @@ export class Room
 
   private visualization: RoomVisualization;
 
-  public roomWidth: number;
-  public roomHeight: number;
-
   private tileColor: string = "#989865";
 
   private animationTicker: IAnimationTicker;
@@ -58,13 +54,14 @@ export class Room
   private furnitureLoader: IFurnitureLoader;
   private hitDetection: IHitDetection;
   private configuration: IConfiguration;
+  public readonly application: PIXI.Application;
 
   private _walls: Wall[] = [];
   private _floor: (Tile | Stair)[] = [];
   private _cursors: TileCursor[] = [];
   private _doorWall: Wall | undefined;
 
-  private _roomBounds: {
+  private _tileMapBounds: {
     minX: number;
     minY: number;
     maxX: number;
@@ -155,6 +152,61 @@ export class Room
     this._updateWallDepth();
   }
 
+  private _updateWallDepth() {
+    this._updatePosition();
+    this.visualization.disableCache();
+    this._walls.forEach((wall) => {
+      wall.wallDepth = this.wallDepth;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _updateWallHeight() {
+    this._updatePosition();
+    this.visualization.updateRoom(this);
+    this.visualization.disableCache();
+    this._walls.forEach((wall) => {
+      wall.wallHeight = this.wallHeightWithZ;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _updateTileHeight() {
+    this._updatePosition();
+    this.visualization.disableCache();
+    this._floor.forEach((floor) => {
+      floor.tileHeight = this.tileHeight;
+    });
+    this._walls.forEach((wall) => {
+      wall.tileHeight = this.tileHeight;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _getObjectPositionWithOffset(roomX: number, roomY: number) {
+    return {
+      x: roomX + this._positionOffsets.x,
+      y: roomY + this._positionOffsets.y,
+    };
+  }
+
+  private _getTilePositionWithOffset(roomX: number, roomY: number) {
+    return {
+      x: roomX + this._wallOffsets.x,
+      y: roomY + this._wallOffsets.y,
+    };
+  }
+
+  getTileAtPosition(roomX: number, roomY: number) {
+    const { x, y } = this._getObjectPositionWithOffset(roomX, roomY);
+
+    const row = this.parsedTileMap[y];
+    if (row == null) return;
+    if (row[x] == null) return;
+
+    return row[x];
+  }
+
   get onTileClick() {
     return this._onTileClick;
   }
@@ -232,22 +284,21 @@ export class Room
 
     this._application = application;
 
-    this._roomBounds = getTileMapBounds(parsedTileMap, this._wallOffsets);
-
-    this.roomWidth = this._roomBounds.maxX - this._roomBounds.minX;
-    this.roomHeight = this._roomBounds.maxY - this._roomBounds.minY;
+    this._tileMapBounds = getTileMapBounds(parsedTileMap, this._wallOffsets);
 
     this.animationTicker = animationTicker;
     this.furnitureLoader = furnitureLoader;
     this.avatarLoader = avatarLoader;
     this.hitDetection = hitDetection;
     this.configuration = configuration;
+    this.application = application;
 
     this.visualization = new RoomVisualization(
       this,
       this._application.renderer
     );
 
+    this._updatePosition();
     this._roomObjectContainer = new RoomObjectContainer();
     this._roomObjectContainer.context = {
       geometry: this,
@@ -266,56 +317,27 @@ export class Room
     this.addChild(this.visualization);
   }
 
-  private _updateWallDepth() {
-    this.visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.wallDepth = this.wallDepth;
-    });
-    this.visualization.enableCache();
+  private _updatePosition() {
+    this.visualization.x = -this.roomBounds.minX;
+    this.visualization.y = -this.roomBounds.minY;
   }
 
-  private _updateWallHeight() {
-    this.visualization.updateRoom(this);
-    this.visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.wallHeight = this.wallHeightWithZ;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _updateTileHeight() {
-    this.visualization.disableCache();
-    this._floor.forEach((floor) => {
-      floor.tileHeight = this.tileHeight;
-    });
-    this._walls.forEach((wall) => {
-      wall.tileHeight = this.tileHeight;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _getObjectPositionWithOffset(roomX: number, roomY: number) {
+  public get roomBounds() {
     return {
-      x: roomX + this._positionOffsets.x,
-      y: roomY + this._positionOffsets.y,
+      ...this._tileMapBounds,
+      minX: this._tileMapBounds.minX - this.wallDepth,
+      maxX: this._tileMapBounds.maxX + this.wallDepth,
+      minY: this._tileMapBounds.minY - this.wallHeight - this.wallDepth,
+      maxY: this._tileMapBounds.maxY + this.tileHeight,
     };
   }
 
-  private _getTilePositionWithOffset(roomX: number, roomY: number) {
-    return {
-      x: roomX + this._wallOffsets.x,
-      y: roomY + this._wallOffsets.y,
-    };
+  public get roomHeight() {
+    return this.roomBounds.maxY - this.roomBounds.minY;
   }
 
-  getTileAtPosition(roomX: number, roomY: number) {
-    const { x, y } = this._getObjectPositionWithOffset(roomX, roomY);
-
-    const row = this.parsedTileMap[y];
-    if (row == null) return;
-    if (row[x] == null) return;
-
-    return row[x];
+  public get roomWidth() {
+    return this.roomBounds.maxX - this.roomBounds.minX;
   }
 
   getParsedTileTypes(): ParsedTileType[][] {
@@ -382,8 +404,15 @@ export class Room
 
     const base = 32;
 
-    const xPos = -this._roomBounds.minX + x * base - y * base;
-    const yPos = -this._roomBounds.minY + x * (base / 2) + y * (base / 2);
+    // We must use `_tileMapBounds` here instead of roomBounds, since roomBounds depends on
+    // multiple, changeable parameters. Since there is no way to notify the room objects, that
+    // getPosition positioning changed, we just use the tileMapBounds here, since they are static.
+    //
+    // Future Idea: Create a container, which applies the transforms dependent on roomBounds, and
+    // update that container to get all elements in the room positioned correctly.
+
+    const xPos = x * base - y * base;
+    const yPos = x * (base / 2) + y * (base / 2);
 
     return {
       x: xPos,
