@@ -11,6 +11,9 @@ import { Asset } from "./util/parseAssets";
 import { Layer } from "./util/visualization/parseLayers";
 import { HitTexture } from "../hitdetection/HitTexture";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
+import { HighlightFilter } from "./filter/HighlightFilter";
+
+const highlightFilter = new HighlightFilter();
 
 type MaskIdGetter = (direction: number) => string | undefined;
 
@@ -30,10 +33,21 @@ export class BaseFurniture
   private _unknownTexture: PIXI.Texture | undefined;
   private _clickHandler = new ClickHandler();
 
+  private _highlight: boolean = false;
+
   private _doubleClickInfo?: {
     initialEvent: HitEvent;
     timeout: number;
   };
+
+  public get highlight() {
+    return this._highlight;
+  }
+
+  public set highlight(value) {
+    this._highlight = value;
+    this.updateFurniture();
+  }
 
   public get onClick() {
     return this._clickHandler.onClick;
@@ -263,6 +277,19 @@ export class BaseFurniture
       );
     }
 
+    const highlight =
+      this._highlight &&
+      layer?.ink == null &&
+      layer?.alpha == null &&
+      !shadow &&
+      !mask;
+
+    if (highlight) {
+      sprite.filters = [highlightFilter];
+    } else {
+      sprite.filters = [];
+    }
+
     const scaleX = asset.flipH ? -1 : 1;
     sprite.x = x + (32 - asset.x * scaleX);
     sprite.y = y - asset.y + 16;
@@ -284,7 +311,11 @@ export class BaseFurniture
     }
 
     if (shadow) {
-      sprite.alpha = 0.195;
+      if (this._highlight) {
+        sprite.alpha = 0;
+      } else {
+        sprite.alpha = 0.195;
+      }
     }
 
     if (mask) {

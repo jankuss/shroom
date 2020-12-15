@@ -110,3 +110,53 @@ export function Movement() {
     application.stage.addChild(room);
   });
 }
+
+export function Highlighted() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        0000000000
+        0000000000
+        0000000000
+        0000000000
+      `,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    for (let i = 0; i < 4; i++) {
+      const furniture = new FloorFurniture({
+        roomX: i * 3,
+        roomY: 0,
+        roomZ: 0,
+        type: "club_sofa",
+        direction: i * 2,
+      });
+
+      furniture.onClick = () => {
+        furniture.highlight = !furniture.highlight;
+      };
+
+      room.addRoomObject(furniture);
+    }
+
+    for (let i = 0; i < 4; i++) {
+      const furniture = new FloorFurniture({
+        roomX: i * 3,
+        roomY: 3,
+        roomZ: 0,
+        type: "wf_act_move_rotate",
+        direction: 0,
+      });
+
+      furniture.onClick = () => {
+        furniture.highlight = !furniture.highlight;
+      };
+
+      room.addRoomObject(furniture);
+    }
+
+    application.stage.addChild(room);
+  });
+}

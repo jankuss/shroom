@@ -15,6 +15,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
   private _roomZ: number;
   private _animation: string | undefined;
   private _direction: number;
+  private _highlight: boolean = false;
 
   constructor(options: {
     roomX: number;
@@ -43,6 +44,14 @@ export class WallFurniture extends RoomObject implements IFurniture {
     );
 
     options.behaviors?.forEach((behavior) => behavior.setParent(this));
+  }
+
+  public get highlight() {
+    return this._highlight;
+  }
+
+  public set highlight(value) {
+    this._highlight = this._highlight;
   }
 
   public get type() {
@@ -116,6 +125,10 @@ export class WallFurniture extends RoomObject implements IFurniture {
 
   private updateDirection() {
     this._baseFurniture.direction = this.direction;
+  }
+
+  private updateHighlight() {
+    this._baseFurniture.highlight = this.highlight;
   }
 
   private getOffsets(direction: number) {

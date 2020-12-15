@@ -25,9 +25,19 @@ export class FloorFurniture
   private _direction: number;
   private _animation?: string;
   private _type: string;
+  private _highlight: boolean = false;
 
   private _onClick: HitEventHandler | undefined;
   private _onDoubleClick: HitEventHandler | undefined;
+
+  public get highlight() {
+    return this._highlight;
+  }
+
+  public set highlight(value) {
+    this._highlight = value;
+    this._updateHighlight();
+  }
 
   public get type() {
     return this._type;
@@ -160,6 +170,10 @@ export class FloorFurniture
 
   private _updateAnimation() {
     this._baseFurniture.animation = this.animation;
+  }
+
+  private _updateHighlight() {
+    this._baseFurniture.highlight = this.highlight;
   }
 
   move(roomX: number, roomY: number, roomZ: number) {

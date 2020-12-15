@@ -7,6 +7,7 @@ export interface IFurniture extends IFurnitureEventHandlers {
   roomZ: number;
   direction: number;
   animation: string | undefined;
+  highlight: boolean | undefined;
 }
 
 export type IFurnitureBehavior<T extends IFurniture = IFurniture> = {

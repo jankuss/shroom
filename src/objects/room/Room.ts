@@ -83,7 +83,7 @@ export class Room
   private _onTileClick: ((position: RoomPosition) => void) | undefined;
 
   private _wallDepth: number = 8;
-  private _wallHeight: number = 115;
+  private _wallHeight: number = 116;
   private _tileHeight: number = 8;
   private _application: PIXI.Application;
   private _maskOffsets: { x: number; y: number } = { x: 0, y: 0 };
@@ -318,8 +318,8 @@ export class Room
   }
 
   private _updatePosition() {
-    this.visualization.x = -this.roomBounds.minX;
-    this.visualization.y = -this.roomBounds.minY;
+    this.visualization.x = Math.round(-this.roomBounds.minX / 2) * 2;
+    this.visualization.y = Math.round(-this.roomBounds.minY / 2) * 2;
   }
 
   public get roomBounds() {
