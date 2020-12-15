@@ -2,11 +2,11 @@ import { IRoomContext } from "../interfaces/IRoomContext";
 import { IRoomObject } from "../interfaces/IRoomObject";
 
 export abstract class RoomObject implements IRoomObject {
-  private context: IRoomContext | undefined;
-  private isDestroyed: boolean = false;
+  private _context: IRoomContext | undefined;
+  private _isDestroyed: boolean = false;
 
   protected get mounted() {
-    return this.context != null;
+    return this._context != null;
   }
 
   protected get configuration() {
@@ -50,30 +50,30 @@ export abstract class RoomObject implements IRoomObject {
   }
 
   private getRoomContext(): IRoomContext {
-    if (this.context == null) throw new Error("Invalid context");
+    if (this._context == null) throw new Error("Invalid context");
 
-    return this.context;
+    return this._context;
   }
 
   setParent(room: IRoomContext): void {
-    if (this.context != null)
+    if (this._context != null)
       throw new Error("RoomObject already provided with a context.");
 
-    this.isDestroyed = false;
-    this.context = room;
+    this._isDestroyed = false;
+    this._context = room;
 
     this.registered();
   }
 
   destroy() {
-    if (this.isDestroyed) return;
+    if (this._isDestroyed) return;
 
     // Important: set isDestroyed to true so this doesn't infinite loop.
-    this.isDestroyed = true;
+    this._isDestroyed = true;
 
     this.roomObjectContainer.removeRoomObject(this);
 
-    this.context = undefined;
+    this._context = undefined;
     this.destroyed();
   }
 
