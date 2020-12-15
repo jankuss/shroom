@@ -48,7 +48,7 @@ export interface State {
   figureAssets: StepState;
   furniAssets: StepState;
   lastFigureAsset?: string;
-  lastFurniAsset?: { id: string; revision: string };
+  lastFurniAsset?: { id: string; revision?: string };
   furniAssetsCount?: number;
   furniAssetsCompletedCount?: number;
   figureAssetsCount?: number;
