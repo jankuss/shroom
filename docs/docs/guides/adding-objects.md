@@ -4,6 +4,7 @@ title: Adding objects
 ---
 
 The room is so empty right now. Let's add a character and a sofa for him to sit on.
+We do this by using the `FloorFurniture` and `Avatar` classes.
 
 ```ts
 import * as PIXI from "pixi.js";
