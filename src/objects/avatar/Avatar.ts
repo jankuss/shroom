@@ -342,7 +342,7 @@ export class Avatar extends RoomObject {
     this.updateAvatarSprites();
   }
 
-  destroy(): void {
+  destroyed(): void {
     this.avatarSprites?.destroy();
 
     if (this.cancelAnimation != null) {

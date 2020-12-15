@@ -318,7 +318,7 @@ export class Wall extends RoomObject {
     this.updateSprites();
   }
 
-  destroy(): void {
+  destroyed(): void {
     this._border?.destroy();
     this._top?.destroy();
     this._primary?.destroy();

@@ -3,6 +3,7 @@ import { IRoomObject } from "../interfaces/IRoomObject";
 
 export abstract class RoomObject implements IRoomObject {
   private context: IRoomContext | undefined;
+  private isDestroyed: boolean = false;
 
   protected get mounted() {
     return this.context != null;
@@ -55,11 +56,27 @@ export abstract class RoomObject implements IRoomObject {
   }
 
   setParent(room: IRoomContext): void {
+    if (this.context != null)
+      throw new Error("RoomObject already provided with a context.");
+
+    this.isDestroyed = false;
     this.context = room;
 
     this.registered();
   }
 
-  abstract destroy(): void;
+  destroy() {
+    if (this.isDestroyed) return;
+
+    // Important: set isDestroyed to true so this doesn't infinite loop.
+    this.isDestroyed = true;
+
+    this.roomObjectContainer.removeRoomObject(this);
+
+    this.context = undefined;
+    this.destroyed();
+  }
+
+  abstract destroyed(): void;
   abstract registered(): void;
 }

@@ -137,7 +137,7 @@ export class FloorFurniture extends RoomObject implements IFurniture {
     this.baseFurniture.animation = this.animation;
   }
 
-  destroy(): void {
+  destroyed(): void {
     this.baseFurniture.destroy();
   }
 
