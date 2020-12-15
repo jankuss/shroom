@@ -143,7 +143,7 @@ export class Tile extends RoomObject implements ITexturable {
     }
   }
 
-  destroy(): void {
+  destroyed(): void {
     this.destroySprites();
   }
 

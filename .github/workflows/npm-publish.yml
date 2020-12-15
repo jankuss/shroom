@@ -31,12 +31,23 @@ jobs:
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-      - name: Discord notification
+  notify-discord:
+    if: "!github.event.release.prerelease"
+    needs: publish-npm
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ci/discord
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm install
+      - run: npm start
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args: "The version `{{ EVENT_PAYLOAD.release.tag_name }}` has been published on npm. To view the changelog, click the link following link: https://github.com/jankuss/shroom/tree/{{ EVENT_PAYLOAD.release.tag_name }}/CHANGELOG.md."
+          GIT_VERSION_TAG: ${{ github.event.release.tag_name }}
 
   publish-gpr:
     needs: build

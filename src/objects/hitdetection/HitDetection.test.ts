@@ -1,8 +1,13 @@
 import { HitDetection } from "./HitDetection";
 
+const view = {
+  getBoundingClientRect: () => ({ x: 0, y: 0 }),
+  addEventListener: () => {},
+};
+
 test("detects hits on multiple elements", () => {
   const hitDetection = new HitDetection({
-    view: { getBoundingClientRect: () => ({ x: 0, y: 0 }) },
+    view,
   } as any);
 
   let firstClicked = false;
@@ -32,7 +37,7 @@ test("detects hits on multiple elements", () => {
 
 test("doesn't detect if element out of bounds", () => {
   const hitDetection = new HitDetection({
-    view: { getBoundingClientRect: () => ({ x: 0, y: 0 }) },
+    view,
   } as any);
 
   let firstClicked = false;
@@ -62,7 +67,7 @@ test("doesn't detect if element out of bounds", () => {
 
 test("doesn't detect if element in bounds but doesn't hit", () => {
   const hitDetection = new HitDetection({
-    view: { getBoundingClientRect: () => ({ x: 0, y: 0 }) },
+    view,
   } as any);
 
   let firstClicked = false;
@@ -92,7 +97,7 @@ test("doesn't detect if element in bounds but doesn't hit", () => {
 
 test("intercepts event if element stops propagating", () => {
   const hitDetection = new HitDetection({
-    view: { getBoundingClientRect: () => ({ x: 0, y: 0 }) },
+    view,
   } as any);
 
   let firstClicked = false;

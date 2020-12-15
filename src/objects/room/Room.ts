@@ -21,6 +21,7 @@ import { Wall } from "./Wall";
 import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
 import { ILandscapeContainer } from "./ILandscapeContainer";
+import { RoomObjectContainer } from "./RoomObjectContainer";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -37,7 +38,7 @@ type TileMap = TileType[][] | string;
 export class Room
   extends PIXI.Container
   implements IRoomGeometry, IRoomObjectContainer, ITileMap {
-  private roomObjects: IRoomObject[] = [];
+  private _roomObjectContainer: RoomObjectContainer;
 
   private _wallOffsets = { x: 1, y: 1 };
   private _positionOffsets = { x: 1, y: 1 };
@@ -97,6 +98,10 @@ export class Room
       };
     },
   };
+
+  public get roomObjects() {
+    return this._roomObjectContainer.roomObjects;
+  }
 
   public get hideWalls() {
     return this._hideWalls;
@@ -294,6 +299,19 @@ export class Room
     );
 
     this._updatePosition();
+    this._roomObjectContainer = new RoomObjectContainer();
+    this._roomObjectContainer.context = {
+      geometry: this,
+      visualization: this.visualization,
+      animationTicker: this.animationTicker,
+      furnitureLoader: this.furnitureLoader,
+      roomObjectContainer: this,
+      avatarLoader: this.avatarLoader,
+      hitDetection: this.hitDetection,
+      configuration: this.configuration,
+      tilemap: this,
+      landscapeContainer: this._landscapeContainer,
+    };
 
     this.updateTiles();
     this.addChild(this.visualization);
@@ -358,20 +376,11 @@ export class Room
   }
 
   addRoomObject(object: IRoomObject) {
-    object.setParent({
-      geometry: this,
-      visualization: this.visualization,
-      animationTicker: this.animationTicker,
-      furnitureLoader: this.furnitureLoader,
-      roomObjectContainer: this,
-      avatarLoader: this.avatarLoader,
-      hitDetection: this.hitDetection,
-      configuration: this.configuration,
-      tilemap: this,
-      landscapeContainer: this._landscapeContainer,
-    });
+    this._roomObjectContainer.addRoomObject(object);
+  }
 
-    this.roomObjects.push(object);
+  removeRoomObject(object: IRoomObject) {
+    this._roomObjectContainer.removeRoomObject(object);
   }
 
   getPosition(

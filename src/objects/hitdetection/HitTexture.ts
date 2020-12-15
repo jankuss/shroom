@@ -27,8 +27,17 @@ export class HitTexture {
     return this._cachedHitmap;
   }
 
-  hits(x: number, y: number, transform: { x: number; y: number }) {
-    x = x - transform.x;
+  hits(
+    x: number,
+    y: number,
+    transform: { x: number; y: number },
+    options: { mirrorHorizonally?: boolean } = { mirrorHorizonally: false }
+  ) {
+    if (options.mirrorHorizonally) {
+      x = -(x - transform.x);
+    } else {
+      x = x - transform.x;
+    }
     y = y - transform.y;
 
     const baseTexture = this._texture.baseTexture;
@@ -44,6 +53,14 @@ export class HitTexture {
 
   static async fromUrl(imageUrl: string) {
     const image = new Image();
+
+    // We set the crossOrigin here so the image element
+    // can fetch and display images hosted on another origin.
+    // Thanks to @danielsolartech for reporting.
+
+    // TODO: Add option to configure this somewhere?
+    image.crossOrigin = "anonymous";
+
     image.src = imageUrl;
 
     await new Promise<{

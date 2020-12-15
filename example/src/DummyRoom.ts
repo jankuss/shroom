@@ -280,7 +280,7 @@ export class DummyRoom {
     this.room.floorTexture = loadRoomTexture("./tile.png");
 
     this.room.onTileClick = async (position) => {
-      this.ownAvatar.clearWalk();
+      this.ownAvatar.clearMovement();
 
       const path = await this.findPath(position);
       this.path = path;

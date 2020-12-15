@@ -50,7 +50,7 @@ export class TileCursor extends RoomObject {
     this._roomZ = position.roomZ;
   }
 
-  destroy(): void {
+  destroyed(): void {
     this.graphics?.destroy();
   }
 
