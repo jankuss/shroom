@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Room` improvements
   - `removeRoomObject` method to remove an object from a room
   - `roomObjects` to access all present room objects
+- Ability to dump and use furniture when revision is not set
 - Add `move` method for moving `FloorFurniture` and `Avatar` objects
 - Add `RoomCamera` class for handling drag, drop & snapback for a `Room` (thanks @mtwzim)
 

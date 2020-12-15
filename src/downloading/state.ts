@@ -30,11 +30,11 @@ export type Action =
   | { type: "FURNI_ASSETS_LOADING" }
   | {
       type: "FURNI_ASSETS_PROGRESS_SUCCESS";
-      payload: { id: string; revision: string };
+      payload: { id: string; revision?: string };
     }
   | {
       type: "FURNI_ASSETS_PROGRESS_ERROR";
-      payload: { id: string; revision: string };
+      payload: { id: string; revision?: string };
     }
   | { type: "FURNI_ASSETS_SUCCESS" }
   | { type: "FURNI_ASSETS_COUNT"; payload: number }
@@ -48,7 +48,7 @@ export interface State {
   figureAssets: StepState;
   furniAssets: StepState;
   lastFigureAsset?: string;
-  lastFurniAsset?: { id: string; revision: string };
+  lastFurniAsset?: { id: string; revision?: string };
   furniAssetsCount?: number;
   furniAssetsCompletedCount?: number;
   figureAssetsCount?: number;

@@ -8,29 +8,44 @@ export class FurnitureLoader implements IFurnitureLoader {
   constructor(
     private options: {
       furnitureData: IFurnitureData;
-      getAssets: (type: string, revision: number) => Promise<string>;
-      getVisualization: (type: string, revision: number) => Promise<string>;
+      getAssets: (type: string, revision?: number) => Promise<string>;
+      getVisualization: (type: string, revision?: number) => Promise<string>;
       getAsset: (
         type: string,
         name: string,
-        revision: number
+        revision?: number
       ) => Promise<string>;
     }
   ) {}
 
   static create(furnitureData: IFurnitureData, resourcePath: string = "") {
+    const normalizePath = (revision: number | undefined, type: string) => {
+      if (revision == null) return type;
+
+      return `${revision}/${type}`;
+    };
+
     return new FurnitureLoader({
       furnitureData,
       getAssets: (type, revision) =>
         fetch(
-          `${resourcePath}/hof_furni/${revision}/${type}/${type}_assets.bin`
+          `${resourcePath}/hof_furni/${normalizePath(
+            revision,
+            type
+          )}/${type}_assets.bin`
         ).then((response) => response.text()),
       getVisualization: (type, revision) =>
         fetch(
-          `${resourcePath}/hof_furni/${revision}/${type}/${type}_visualization.bin`
+          `${resourcePath}/hof_furni/${normalizePath(
+            revision,
+            type
+          )}/${type}_visualization.bin`
         ).then((response) => response.text()),
       getAsset: async (type, name, revision) =>
-        `${resourcePath}/hof_furni/${revision}/${type}/${name}.png`,
+        `${resourcePath}/hof_furni/${normalizePath(
+          revision,
+          type
+        )}/${name}.png`,
     });
   }
 
@@ -43,10 +58,6 @@ export class FurnitureLoader implements IFurnitureLoader {
     let furniture = this.furnitureCache.get(type);
     if (furniture != null) {
       return furniture;
-    }
-
-    if (revision == null) {
-      throw new Error("Couldn't find revision for type " + typeWithColor);
     }
 
     furniture = loadFurni(type, revision, {

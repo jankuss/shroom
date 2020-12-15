@@ -2,14 +2,19 @@ import { tryFetchBuffer } from "./fetching";
 
 export async function fetchFurni(
   dcrUrl: string,
-  revision: string,
+  revision: string | undefined,
   name: string
 ) {
-  const blob = await tryFetchBuffer(`${dcrUrl}/${revision}/${name}.swf`);
+  const url =
+    revision != null
+      ? `${dcrUrl}/${revision}/${name}.swf`
+      : `${dcrUrl}/${name}.swf`;
+
+  const blob = await tryFetchBuffer(url);
 
   return {
     revision,
     name,
-    blob
+    blob,
   };
 }
