@@ -73,3 +73,40 @@ export function Animated() {
     application.stage.addChild(room);
   });
 }
+
+export function Movement() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        0000000000
+        0000000000
+        0000000000
+        0000000000
+      `,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    const furniture = new FloorFurniture({
+      roomX: 0,
+      roomY: 0,
+      roomZ: 0,
+      type: `rare_dragonlamp*1`,
+      direction: 2,
+      animation: "1",
+    });
+
+    setTimeout(() => {
+      furniture.move(0, 1, 0);
+    }, 2000);
+
+    setTimeout(() => {
+      furniture.move(1, 1, 0);
+      furniture.move(2, 1, 0);
+    }, 4000);
+
+    room.addRoomObject(furniture);
+
+    application.stage.addChild(room);
+  });
+}

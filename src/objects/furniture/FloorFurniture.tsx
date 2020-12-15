@@ -168,6 +168,10 @@ export class FloorFurniture
       { roomX, roomY, roomZ },
       undefined
     );
+
+    this._roomX = roomX;
+    this._roomY = roomY;
+    this._roomZ = roomZ;
   }
 
   clearMovement() {
