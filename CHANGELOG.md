@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### [Unreleased]
 
+### Added
+
+- `Room` improvements
+  - `removeRoomObject` method to remove an object from a room
+  - `roomObjects` to access all present room objects
+
 ### Fixed
 
 - Cross Origin issue with `HitTexture`
