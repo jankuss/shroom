@@ -1,7 +1,5 @@
 import * as PIXI from "pixi.js";
 import { RoomObject } from "../RoomObject";
-
-import WallAsset from "../../assets/wall2.png";
 import { getWallColors } from "./util/getTileColors";
 import { getZOrder } from "../../util/getZOrder";
 import { IRoomGeometry } from "../../interfaces/IRoomGeometry";
