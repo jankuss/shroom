@@ -11,3 +11,7 @@ export { IFurnitureData } from "./interfaces/IFurnitureData";
 export { FurnitureData } from "./objects/FurnitureData";
 export { Shroom } from "./objects/Shroom";
 export { Landscape } from "./objects/room/Landscape";
+export { HitDetection } from "./objects/hitdetection/HitDetection";
+export { AnimationTicker } from "./objects/AnimationTicker";
+export { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
+export { AvatarLoader } from "./objects/avatar/AvatarLoader";
