@@ -44,6 +44,6 @@ export function getTileMapBounds(
     minX,
     minY: minY - 32,
     maxX,
-    maxY,
+    maxY: maxY - 32,
   };
 }

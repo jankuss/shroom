@@ -315,6 +315,13 @@ export class Avatar extends RoomObject implements IMoveable {
     return getZOrder(roomX, roomY, roomZ) + 1;
   }
 
+  getScreenPosition() {
+    return {
+      x: this._avatarSprites.x,
+      y: this._avatarSprites.y,
+    };
+  }
+
   private _updatePosition() {
     if (!this.mounted) return;
 

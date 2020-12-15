@@ -2,12 +2,12 @@ import * as PIXI from "pixi.js";
 
 import {
   Room,
-  FloorFurniture,
   Avatar,
+  FloorFurniture,
+  RoomCamera,
   Shroom,
   loadRoomTexture,
 } from "@jankuss/shroom";
-import { DummyRoom } from "./DummyRoom";
 
 const view = document.querySelector("#root") as HTMLCanvasElement | undefined;
 const container = document.querySelector("#container") as
@@ -20,7 +20,7 @@ const application = new PIXI.Application({
   antialias: false,
   resolution: window.devicePixelRatio,
   autoDensity: true,
-  width: 1600,
+  width: 1200,
   height: 900,
   backgroundColor: 0x000000,
 });
@@ -38,13 +38,13 @@ const room = Room.create(shroom, {
 
 const avatar = new Avatar({
   look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
-  direction: 2,
+  direction: 4,
   roomX: 0,
-  roomY: 1,
+  roomY: 0,
   roomZ: 0,
 });
 
-room.x = 100;
+room.x = 200;
 room.y = 200;
 
 room.wallTexture = loadRoomTexture("./images/tile.png");
@@ -52,16 +52,5 @@ room.floorTexture = loadRoomTexture("./images/tile.png");
 room.wallColor = "#dbbe6e";
 room.floorColor = "#eeeeee";
 
-const furniture = new FloorFurniture({
-  roomX: 2,
-  roomY: 0,
-  direction: 2,
-  roomZ: 0,
-  type: "exe_table",
-  animation: "1",
-});
-
 room.addRoomObject(avatar);
-room.addRoomObject(furniture);
-
-application.stage.addChild(room);
+application.stage.addChild(RoomCamera.forScreen(room));

@@ -3,6 +3,7 @@ export { Avatar } from "./objects/avatar/Avatar";
 export { FloorFurniture } from "./objects/furniture/FloorFurniture";
 export { WallFurniture } from "./objects/furniture/WallFurniture";
 export { Room } from "./objects/room/Room";
+export { RoomCamera } from "./objects/room/RoomCamera";
 export { loadRoomTexture } from "./util/loadRoomTexture";
 export { parseTileMapString } from "./util/parseTileMapString";
 export { IFurniture, IFurnitureBehavior } from "./objects/furniture/IFurniture";
