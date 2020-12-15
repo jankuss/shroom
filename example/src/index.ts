@@ -53,12 +53,12 @@ room.wallColor = "#dbbe6e";
 room.floorColor = "#eeeeee";
 
 const furniture = new FloorFurniture({
-  roomX: 0,
+  roomX: 2,
   roomY: 0,
   direction: 2,
   roomZ: 0,
-  type: "chess_queen",
-  animation: "0",
+  type: "exe_table",
+  animation: "1",
 });
 
 room.addRoomObject(avatar);
