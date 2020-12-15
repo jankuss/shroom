@@ -12,6 +12,7 @@ import { LookOptions } from "./util/createLookServer";
 import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
 import { ParsedTileType } from "../../util/parseTileMap";
+import { IMoveable } from "../IMoveable";
 
 interface Options {
   look: string;
@@ -21,14 +22,17 @@ interface Options {
   roomZ: number;
 }
 
-export class Avatar extends RoomObject {
-  private avatarSprites: AvatarSprites;
-  private walkAnimation: ObjectAnimation | undefined;
-  private walking: boolean = false;
+export class Avatar extends RoomObject implements IMoveable {
+  private _avatarSprites: AvatarSprites;
+  private _moveAnimation:
+    | ObjectAnimation<{ type: "walk"; direction: number } | { type: "move" }>
+    | undefined;
+  private _walking: boolean = false;
+  private _moving: boolean = false;
 
-  private frame: number = 0;
+  private _frame: number = 0;
 
-  private cancelAnimation: (() => void) | undefined;
+  private _cancelAnimation: (() => void) | undefined;
 
   private _primaryAction: PrimaryActionKind = "std";
   private _waving: boolean = false;
@@ -42,19 +46,19 @@ export class Avatar extends RoomObject {
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
 
   public get onClick() {
-    return this.avatarSprites.onClick;
+    return this._avatarSprites.onClick;
   }
 
   public set onClick(value) {
-    this.avatarSprites.onClick = value;
+    this._avatarSprites.onClick = value;
   }
 
   public get onDoubleClick() {
-    return this.avatarSprites.onDoubleClick;
+    return this._avatarSprites.onDoubleClick;
   }
 
   public set onDoubleClick(value) {
-    this.avatarSprites.onDoubleClick = value;
+    this._avatarSprites.onDoubleClick = value;
   }
 
   constructor({ look, roomX, roomY, roomZ, direction }: Options) {
@@ -66,9 +70,9 @@ export class Avatar extends RoomObject {
     this._roomY = roomY;
     this._roomZ = roomZ;
 
-    this.avatarSprites = new AvatarSprites({
-      look: this.getCurrentLookOptions(),
-      zIndex: this.calculateZIndex(),
+    this._avatarSprites = new AvatarSprites({
+      look: this._getCurrentLookOptions(),
+      zIndex: this._calculateZIndex(),
       position: { x: 0, y: 0 },
     });
   }
@@ -79,7 +83,7 @@ export class Avatar extends RoomObject {
 
   set roomX(value) {
     this._roomX = value;
-    this.updatePosition();
+    this._updatePosition();
   }
 
   get roomY() {
@@ -88,7 +92,7 @@ export class Avatar extends RoomObject {
 
   set roomY(value) {
     this._roomY = value;
-    this.updatePosition();
+    this._updatePosition();
   }
 
   get roomZ() {
@@ -97,7 +101,7 @@ export class Avatar extends RoomObject {
 
   set roomZ(value) {
     this._roomZ = value;
-    this.updatePosition();
+    this._updatePosition();
   }
 
   get item() {
@@ -106,7 +110,7 @@ export class Avatar extends RoomObject {
 
   set item(value) {
     this._item = value;
-    this.updateAvatarSprites();
+    this._updateAvatarSprites();
   }
 
   get drinking() {
@@ -115,7 +119,7 @@ export class Avatar extends RoomObject {
 
   set drinking(value) {
     this._drinking = value;
-    this.updateAvatarSprites();
+    this._updateAvatarSprites();
   }
 
   get direction() {
@@ -124,8 +128,8 @@ export class Avatar extends RoomObject {
 
   set direction(value) {
     this._direction = value;
-    this.updatePosition();
-    this.updateAvatarSprites();
+    this._updatePosition();
+    this._updateAvatarSprites();
   }
 
   get action() {
@@ -134,7 +138,7 @@ export class Avatar extends RoomObject {
 
   set action(value) {
     this._primaryAction = value;
-    this.updateAvatarSprites();
+    this._updateAvatarSprites();
   }
 
   get waving() {
@@ -143,11 +147,11 @@ export class Avatar extends RoomObject {
 
   set waving(value) {
     this._waving = value;
-    this.updateAvatarSprites();
+    this._updateAvatarSprites();
   }
 
-  clearWalk() {
-    const current = this.walkAnimation?.clear();
+  clearMovement() {
+    const current = this._moveAnimation?.clear();
 
     if (current != null) {
       this.roomX = current.roomX;
@@ -156,16 +160,16 @@ export class Avatar extends RoomObject {
     }
   }
 
-  private getWavingAction() {
+  private _getWavingAction() {
     if (this.waving) {
       return {
         frame:
-          avatarFramesObject.wav[this.frame % avatarFramesObject.wav.length],
+          avatarFramesObject.wav[this._frame % avatarFramesObject.wav.length],
       };
     }
   }
 
-  private getDrinkingAction() {
+  private _getDrinkingAction() {
     if (this.item != null) {
       return {
         kind: this.drinking ? ("drk" as const) : ("crr" as const),
@@ -174,11 +178,11 @@ export class Avatar extends RoomObject {
     }
   }
 
-  private getCurrentPrimaryAction(): PrimaryAction {
+  private _getCurrentPrimaryAction(): PrimaryAction {
     const walkFrame =
-      avatarFramesObject.wlk[this.frame % avatarFramesObject.wlk.length];
+      avatarFramesObject.wlk[this._frame % avatarFramesObject.wlk.length];
 
-    if (this.walking || this.action === "wlk") {
+    if (this._walking || this.action === "wlk") {
       return {
         kind: "wlk",
         frame: walkFrame,
@@ -190,69 +194,69 @@ export class Avatar extends RoomObject {
     };
   }
 
-  private getCurrentLookOptions(): LookOptions {
+  private _getCurrentLookOptions(): LookOptions {
     return {
-      action: this.getCurrentPrimaryAction(),
+      action: this._getCurrentPrimaryAction(),
       actions: {
-        wav: this.getWavingAction(),
-        item: this.getDrinkingAction(),
+        wav: this._getWavingAction(),
+        item: this._getDrinkingAction(),
       },
       direction: this.direction,
       look: this._look,
     };
   }
 
-  private updateAvatarSprites() {
+  private _updateAvatarSprites() {
     if (!this.mounted) return;
 
-    const look = this.getCurrentLookOptions();
-    const animating = this.isAnimating(look);
+    const look = this._getCurrentLookOptions();
+    const animating = this._isAnimating(look);
 
     if (animating) {
-      this.startAnimation();
+      this._startAnimation();
     } else {
-      this.stopAnimation();
+      this._stopAnimation();
     }
 
-    const avatarSprites = this.avatarSprites;
+    const avatarSprites = this._avatarSprites;
 
     if (avatarSprites != null) {
       avatarSprites.lookOptions = look;
     }
   }
 
-  private startAnimation() {
-    if (this.cancelAnimation != null) return;
+  private _startAnimation() {
+    if (this._cancelAnimation != null) return;
 
-    this.frame = 0;
+    this._frame = 0;
     const start = this.animationTicker.current();
 
-    this.cancelAnimation = this.animationTicker.subscribe((value) => {
-      this.frame = value - start;
-      this.updateAvatarSprites();
+    this._cancelAnimation = this.animationTicker.subscribe((value) => {
+      this._frame = value - start;
+      this._updateAvatarSprites();
     });
   }
 
-  private stopAnimation() {
-    this.frame = 0;
-    if (this.cancelAnimation != null) {
-      this.cancelAnimation();
-      this.cancelAnimation = undefined;
+  private _stopAnimation() {
+    this._frame = 0;
+    if (this._cancelAnimation != null) {
+      this._cancelAnimation();
+      this._cancelAnimation = undefined;
     }
   }
 
-  private startWalking(direction: number) {
-    this.walking = true;
+  private _startWalking(direction: number) {
+    this._walking = true;
     this.direction = direction;
-    this.updateAvatarSprites();
+    this._updateAvatarSprites();
   }
 
-  private stopWalking() {
-    this.walking = false;
-    this.updateAvatarSprites();
+  private _stopWalking() {
+    this._walking = false;
+    this._updateAvatarSprites();
   }
 
-  private isAnimating(look: LookOptions) {
+  private _isAnimating(look: LookOptions) {
     if (look.action.kind === "wlk") return true;
     if (look.actions.wav != null) return true;
 
@@ -265,10 +269,13 @@ export class Avatar extends RoomObject {
     roomZ: number,
     options?: { direction?: number }
   ) {
-    this.walkAnimation?.move(
+    this._moveAnimation?.move(
       { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
       { roomX, roomY, roomZ },
-      options?.direction ?? this.direction
+      {
+        direction: options?.direction ?? this.direction,
+        type: "walk",
+      }
     );
 
     this._roomX = roomX;
@@ -276,12 +283,24 @@ export class Avatar extends RoomObject {
     this._roomZ = roomZ;
   }
 
-  private calculateZIndex() {
+  move(roomX: number, roomY: number, roomZ: number) {
+    this._moveAnimation?.move(
+      { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
+      { roomX, roomY, roomZ },
+      { type: "move" }
+    );
+
+    this._roomX = roomX;
+    this._roomY = roomY;
+    this._roomZ = roomZ;
+  }
+
+  private _calculateZIndex() {
     return this._getZIndexAtPosition(this.roomX, this.roomY, this.roomZ);
   }
 
-  private getDisplayRoomPosition() {
-    if (this.walking) {
+  private _getDisplayRoomPosition() {
+    if (this._walking || this._moving) {
       return this._animatedPosition;
     }
 
@@ -296,10 +315,10 @@ export class Avatar extends RoomObject {
     return getZOrder(roomX, roomY, roomZ) + 1;
   }
 
-  private updatePosition() {
+  private _updatePosition() {
     if (!this.mounted) return;
 
-    const { roomX, roomY, roomZ } = this.getDisplayRoomPosition();
+    const { roomX, roomY, roomZ } = this._getDisplayRoomPosition();
 
     const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ, "object");
 
@@ -307,10 +326,10 @@ export class Avatar extends RoomObject {
     const roomYrounded = Math.round(roomY);
     const roomZrounded = Math.round(roomZ);
 
-    if (this.avatarSprites != null) {
-      this.avatarSprites.x = Math.round(x);
-      this.avatarSprites.y = Math.round(y);
-      this.avatarSprites.zIndex = this._getZIndexAtPosition(
+    if (this._avatarSprites != null) {
+      this._avatarSprites.x = Math.round(x);
+      this._avatarSprites.y = Math.round(y);
+      this._avatarSprites.zIndex = this._getZIndexAtPosition(
         roomXrounded,
         roomYrounded,
         roomZrounded
@@ -319,34 +338,45 @@ export class Avatar extends RoomObject {
 
     const item = this.tilemap.getTileAtPosition(roomXrounded, roomYrounded);
 
-    this.avatarSprites.layer = item?.type === "door" ? "door" : "tile";
+    this._avatarSprites.layer = item?.type === "door" ? "door" : "tile";
   }
 
   registered(): void {
-    this.updatePosition();
-    this.roomObjectContainer.addRoomObject(this.avatarSprites);
+    this._updatePosition();
+    this.roomObjectContainer.addRoomObject(this._avatarSprites);
 
-    this.walkAnimation = new ObjectAnimation(this.animationTicker, {
-      onUpdatePosition: (position, direction) => {
-        this._animatedPosition = position;
-        this.updatePosition();
+    this._moveAnimation = new ObjectAnimation(
+      this.animationTicker,
+      {
+        onUpdatePosition: (position, data) => {
+          this._animatedPosition = position;
+          this._updatePosition();
+        },
+        onStart: (data) => {
+          if (data.type === "walk") {
+            this._startWalking(data.direction);
+            this._moving = false;
+          } else if (data.type === "move") {
+            this._stopWalking();
+            this._moving = true;
+          }
+        },
+        onStop: () => {
+          this._stopWalking();
+          this._moving = false;
+        },
       },
-      onStart: (direction: number) => {
-        this.startWalking(direction);
-      },
-      onStop: () => {
-        this.stopWalking();
-      },
-    });
+      this.configuration.avatarMovementDuration
+    );
 
-    this.updateAvatarSprites();
+    this._updateAvatarSprites();
   }
 
   destroy(): void {
-    this.avatarSprites?.destroy();
+    this._avatarSprites?.destroy();
 
-    if (this.cancelAnimation != null) {
-      this.cancelAnimation();
+    if (this._cancelAnimation != null) {
+      this._cancelAnimation();
     }
   }
 }
