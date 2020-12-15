@@ -30,11 +30,11 @@ export type Action =
   | { type: "FURNI_ASSETS_LOADING" }
   | {
       type: "FURNI_ASSETS_PROGRESS_SUCCESS";
-      payload: { id: string; revision: string };
+      payload: { id: string; revision?: string };
     }
   | {
       type: "FURNI_ASSETS_PROGRESS_ERROR";
-      payload: { id: string; revision: string };
+      payload: { id: string; revision?: string };
     }
   | { type: "FURNI_ASSETS_SUCCESS" }
   | { type: "FURNI_ASSETS_COUNT"; payload: number }

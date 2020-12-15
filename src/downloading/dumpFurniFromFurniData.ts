@@ -27,18 +27,20 @@ export async function dumpFurniFromFurniData(
       if (usedIds.has(name)) return;
       usedIds.add(name);
 
-      const revision = value.revision[0];
+      const revision: number | undefined =
+        value.revision != null ? value.revision[0] : undefined;
+
       try {
-        await dumpFurni(dcrUrl, revision, name, folder);
+        await dumpFurni(dcrUrl, revision?.toString(), name, folder);
         dispatch({
           type: "FURNI_ASSETS_PROGRESS_SUCCESS",
-          payload: { id: name, revision: revision },
+          payload: { id: name, revision: revision?.toString() },
         });
       } catch (err) {
         //console.log(`Error dumping ${value.revision[0]}/${name}`);
         dispatch({
           type: "FURNI_ASSETS_PROGRESS_ERROR",
-          payload: { id: name, revision: revision },
+          payload: { id: name, revision: revision?.toString() },
         });
       }
     },

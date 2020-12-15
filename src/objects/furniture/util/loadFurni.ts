@@ -24,11 +24,15 @@ export type LoadFurniResult = {
 
 export async function loadFurni(
   typeWithColor: string,
-  revision: number,
+  revision: number | undefined,
   options: {
-    getAssets: (type: string, revision: number) => Promise<string>;
-    getVisualization: (type: string, revision: number) => Promise<string>;
-    getAsset: (type: string, name: string, revision: number) => Promise<string>;
+    getAssets: (type: string, revision?: number) => Promise<string>;
+    getVisualization: (type: string, revision?: number) => Promise<string>;
+    getAsset: (
+      type: string,
+      name: string,
+      revision?: number
+    ) => Promise<string>;
   }
 ): Promise<LoadFurniResult> {
   const type = typeWithColor.split("*")[0];
