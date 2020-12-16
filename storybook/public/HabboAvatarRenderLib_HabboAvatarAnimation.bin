@@ -1,0 +1,570 @@
+<animationSet>
+
+    <action id="Move">
+
+         <part set-type="bd">
+             <frame number="0" assetpartdefinition="wlk"/>
+             <frame number="1" assetpartdefinition="wlk"/>
+             <frame number="2" assetpartdefinition="wlk"/>
+             <frame number="3" assetpartdefinition="wlk"/>
+         </part>
+
+         <part set-type="bds">
+             <frame number="0" assetpartdefinition="wlk"/>
+             <frame number="1" assetpartdefinition="wlk"/>
+             <frame number="2" assetpartdefinition="wlk"/>
+             <frame number="3" assetpartdefinition="wlk"/>
+         </part>
+
+         <part set-type="ss">
+             <frame number="0" assetpartdefinition="wlk"/>
+             <frame number="1" assetpartdefinition="wlk"/>
+             <frame number="2" assetpartdefinition="wlk"/>
+             <frame number="3" assetpartdefinition="wlk"/>
+         </part>
+
+         <part set-type="lg">
+             <frame number="0" assetpartdefinition="wlk"/>
+             <frame number="1" assetpartdefinition="wlk"/>
+             <frame number="2" assetpartdefinition="wlk"/>
+             <frame number="3" assetpartdefinition="wlk"/>
+         </part>
+
+         <part set-type="sh">
+             <frame number="0" assetpartdefinition="wlk"/>
+             <frame number="1" assetpartdefinition="wlk"/>
+             <frame number="2" assetpartdefinition="wlk"/>
+             <frame number="3" assetpartdefinition="wlk"/>
+         </part>
+
+         <part set-type="lh">
+             <frame number="0" assetpartdefinition="wlk"/>
+             <frame number="1" assetpartdefinition="wlk"/>
+             <frame number="2" assetpartdefinition="wlk"/>
+             <frame number="3" assetpartdefinition="wlk"/>
+         </part>
+
+         <part set-type="lhs">
+             <frame number="0" assetpartdefinition="wlk"/>
+             <frame number="1" assetpartdefinition="wlk"/>
+             <frame number="2" assetpartdefinition="wlk"/>
+             <frame number="3" assetpartdefinition="wlk"/>
+         </part>
+
+         <part set-type="ls">
+             <frame number="0" assetpartdefinition="wlk"/>
+             <frame number="1" assetpartdefinition="wlk"/>
+             <frame number="2" assetpartdefinition="wlk"/>
+             <frame number="3" assetpartdefinition="wlk"/>
+         </part>
+
+		 <part set-type="lc">
+			 <frame number="0" assetpartdefinition="wlk"/>
+			 <frame number="1" assetpartdefinition="wlk"/>
+			 <frame number="2" assetpartdefinition="wlk"/>
+			 <frame number="3" assetpartdefinition="wlk"/>
+		 </part>
+
+         <part set-type="rh">
+             <frame number="0" assetpartdefinition="wlk"/>
+             <frame number="1" assetpartdefinition="wlk"/>
+             <frame number="2" assetpartdefinition="wlk"/>
+             <frame number="3" assetpartdefinition="wlk"/>
+         </part>
+
+         <part set-type="rhs">
+             <frame number="0" assetpartdefinition="wlk"/>
+             <frame number="1" assetpartdefinition="wlk"/>
+             <frame number="2" assetpartdefinition="wlk"/>
+             <frame number="3" assetpartdefinition="wlk"/>
+         </part>
+		
+		<part set-type="rs">
+			<frame number="0" assetpartdefinition="wlk"/>
+			<frame number="1" assetpartdefinition="wlk"/>
+			<frame number="2" assetpartdefinition="wlk"/>
+			<frame number="3" assetpartdefinition="wlk"/>
+		</part>
+
+		<part set-type="rc">
+			<frame number="0" assetpartdefinition="wlk"/>
+			<frame number="1" assetpartdefinition="wlk"/>
+			<frame number="2" assetpartdefinition="wlk"/>
+			<frame number="3" assetpartdefinition="wlk"/>
+		</part>
+
+        <part set-type="ch">
+            <frame number="0" assetpartdefinition="wlk"/>
+            <frame number="1" assetpartdefinition="wlk"/>
+            <frame number="2" assetpartdefinition="wlk"/>
+            <frame number="3" assetpartdefinition="wlk"/>
+        </part>
+
+    </action>
+
+    <action id="Wave">
+
+         <part set-type="lh">
+             <frame number="0" assetpartdefinition="wav"/>
+             <frame number="1" assetpartdefinition="wav"/>
+         </part>
+
+         <part set-type="lhs">
+             <frame number="0" assetpartdefinition="wav"/>
+             <frame number="1" assetpartdefinition="wav"/>
+         </part>
+
+        <part set-type="ls">
+             <frame number="0" assetpartdefinition="wav"/>
+             <frame number="1" assetpartdefinition="wav"/>
+         </part>
+
+		<part set-type="lc">
+			 <frame number="0" assetpartdefinition="wav"/>
+			 <frame number="1" assetpartdefinition="wav"/>
+		 </part>
+
+        <part set-type="ch">
+            <frame number="0" assetpartdefinition="wav"/>
+            <frame number="1" assetpartdefinition="wav"/>
+            <frame number="2" assetpartdefinition="wav"/>
+            <frame number="3" assetpartdefinition="wav"/>
+        </part>
+
+    </action>
+
+    <action id="Talk">
+
+         <part set-type="hd">
+             <frame number="0" assetpartdefinition="spk"/>
+             <frame number="1" assetpartdefinition="spk"/>
+         </part>
+
+         <part set-type="fc">
+             <frame number="0" assetpartdefinition="spk"/>
+             <frame number="1" assetpartdefinition="spk"/>
+         </part>
+
+         <part set-type="fa">
+             <frame number="0" assetpartdefinition="spk"/>
+             <frame number="1" assetpartdefinition="spk"/>
+         </part>
+
+    </action>
+
+
+    <action id="Swim">
+
+         <part set-type="bds">
+             <frame number="0" assetpartdefinition="swm"/>
+             <frame number="1" assetpartdefinition="swm"/>
+             <frame number="2" assetpartdefinition="swm"/>
+             <frame number="3" assetpartdefinition="swm"/>
+         </part>
+
+         <part set-type="ss">
+             <frame number="0" assetpartdefinition="swm"/>
+             <frame number="1" assetpartdefinition="swm"/>
+             <frame number="2" assetpartdefinition="swm"/>
+             <frame number="3" assetpartdefinition="swm"/>
+         </part>
+
+         <part set-type="lhs">
+             <frame number="0" assetpartdefinition="swm"/>
+             <frame number="1" assetpartdefinition="swm"/>
+             <frame number="2" assetpartdefinition="swm"/>
+             <frame number="3" assetpartdefinition="swm"/>
+         </part>
+
+         <part set-type="rhs">
+             <frame number="0" assetpartdefinition="swm"/>
+             <frame number="1" assetpartdefinition="swm"/>
+             <frame number="2" assetpartdefinition="swm"/>
+             <frame number="3" assetpartdefinition="swm"/>
+         </part>
+
+    </action>
+
+
+    <action id="Float">
+
+         <part set-type="bds">
+             <frame number="3" assetpartdefinition="sws"/>
+             <frame number="3" assetpartdefinition="sws"/>
+             <frame number="2" assetpartdefinition="sws"/>
+             <frame number="1" assetpartdefinition="sws"/>
+             <frame number="0" assetpartdefinition="sws"/>
+         </part>
+
+         <part set-type="ss">
+             <frame number="0" assetpartdefinition="sws"/>
+         </part>
+
+         <part set-type="lhs">
+             <frame number="0" assetpartdefinition="sws"/>
+             <frame number="0" assetpartdefinition="sws"/>
+             <frame number="1" assetpartdefinition="sws"/>
+             <frame number="1" assetpartdefinition="sws"/>
+             <frame number="2" assetpartdefinition="sws"/>
+             <frame number="3" assetpartdefinition="sws"/>
+             <frame number="3" assetpartdefinition="sws"/>
+             <frame number="2" assetpartdefinition="sws"/>
+             <frame number="1" assetpartdefinition="sws"/>
+             <frame number="1" assetpartdefinition="sws"/>
+         </part>
+
+         <part set-type="rhs">
+             <frame number="0" assetpartdefinition="sws"/>
+             <frame number="0" assetpartdefinition="sws"/>
+             <frame number="1" assetpartdefinition="sws"/>
+             <frame number="1" assetpartdefinition="sws"/>
+             <frame number="2" assetpartdefinition="sws"/>
+             <frame number="3" assetpartdefinition="sws"/>
+             <frame number="3" assetpartdefinition="sws"/>
+             <frame number="2" assetpartdefinition="sws"/>
+             <frame number="1" assetpartdefinition="sws"/>
+             <frame number="1" assetpartdefinition="sws"/>
+         </part>
+
+    </action>
+
+    <action id="Sign">
+        <part set-type="lh">
+            <frame number="0" assetpartdefinition="sig"/>
+        </part>
+        <part set-type="li">
+            <frame number="0" assetpartdefinition="sig"/>
+        </part>
+        <part set-type="ls">
+            <frame number="0" assetpartdefinition="wav"/>
+        </part>
+        <part set-type="lc">
+            <frame number="0" assetpartdefinition="wav"/>
+        </part>
+    </action>
+
+    <action id="Respect">
+        <part set-type="lh">
+            <frame number="0" assetpartdefinition="respect" repeats="15"/>
+            <frame number="1" assetpartdefinition="respect" repeats="15"/>
+        </part>
+        <part set-type="ls">
+            <frame number="0" assetpartdefinition="wav" repeats="15"/>
+            <frame number="1" assetpartdefinition="wav" repeats="15"/>
+        </part>
+        <part set-type="lc">
+            <frame number="0" assetpartdefinition="wav" repeats="15"/>
+            <frame number="1" assetpartdefinition="wav" repeats="15"/>
+        </part>
+    </action>
+
+	<action id="Blow">
+
+         <part set-type="rh">
+             <frame number="0" assetpartdefinition="blw" repeats="10"/>
+             <frame number="1" assetpartdefinition="blw" repeats="10"/>
+         </part>
+
+        <part set-type="rs">
+             <frame number="0" assetpartdefinition="drk"/>
+        </part>
+
+		<part set-type="rc">
+			 <frame number="0" assetpartdefinition="drk"/>
+		</part>
+
+		<part set-type="ri">
+			 <frame number="0" assetpartdefinition=""/>
+		</part>
+
+		<part set-type="ey">
+			<frame number="0" assetpartdefinition="std" repeats="10"/>
+			<frame number="0" assetpartdefinition="eyb" repeats="10"/>
+		</part>
+
+		<part set-type="fc">
+			<frame number="0" assetpartdefinition="std" repeats="10"/>
+			<frame number="0" assetpartdefinition="blw" repeats="10"/>
+		</part>
+    </action>
+
+    <action id="Laugh">
+
+         <part set-type="rh">
+             <frame number="0" assetpartdefinition="blw"/>
+         </part>
+
+        <part set-type="rs">
+             <frame number="0" assetpartdefinition="drk"/>
+        </part>
+
+        <part set-type="rc">
+             <frame number="0" assetpartdefinition="drk"/>
+        </part>
+
+        <part set-type="ri">
+             <frame number="0" assetpartdefinition=""/>
+        </part>
+
+        <part set-type="ey">
+            <frame number="0" assetpartdefinition="std" repeats="2"/>
+        </part>
+
+        <part set-type="fc">
+            <frame number="0" assetpartdefinition="sml"/>
+        </part>
+
+        <offsets>
+            <frame id="0">
+                <directions>
+                    <direction id="0"><bodypart id="head" dx="0" dy="1"/></direction>
+                    <direction id="1"><bodypart id="head" dx="0" dy="1"/></direction>
+                    <direction id="2"><bodypart id="head" dx="0" dy="1"/></direction>
+                    <direction id="3"><bodypart id="head" dx="0" dy="1"/></direction>
+                    <direction id="4"><bodypart id="head" dx="0" dy="1"/></direction>
+                    <direction id="5"><bodypart id="head" dx="0" dy="1"/></direction>
+                    <direction id="6"><bodypart id="head" dx="0" dy="1"/></direction>
+                    <direction id="7"><bodypart id="head" dx="0" dy="1"/></direction>
+                </directions>
+            </frame>
+
+            <frame id="1">
+                <directions>
+                    <direction id="0"><bodypart id="head" dx="0" dy="0"/></direction>
+                    <direction id="1"><bodypart id="head" dx="0" dy="0"/></direction>
+                    <direction id="2"><bodypart id="head" dx="0" dy="0"/></direction>
+                    <direction id="3"><bodypart id="head" dx="0" dy="0"/></direction>
+                    <direction id="4"><bodypart id="head" dx="0" dy="0"/></direction>
+                    <direction id="5"><bodypart id="head" dx="0" dy="0"/></direction>
+                    <direction id="6"><bodypart id="head" dx="0" dy="0"/></direction>
+                    <direction id="7"><bodypart id="head" dx="0" dy="0"/></direction>
+                </directions>
+            </frame>
+
+        </offsets>
+    </action>
+	
+	
+    <action id="SnowWarRun">
+
+         <part set-type="ch">
+             <frame number="3" assetpartdefinition="swrun"/>
+             <frame number="2" assetpartdefinition="swrun"/>
+             <frame number="1" assetpartdefinition="swrun"/>
+             <frame number="0" assetpartdefinition="swrun"/>
+         </part>
+
+    </action>
+
+    <action id="SnowWarDieFront">
+
+        <part set-type="ch">
+            <frame number="0" assetpartdefinition="swdie"/>
+            <frame number="0" assetpartdefinition="swdie"/>
+            <frame number="1" assetpartdefinition="swdie"/>
+            <frame number="1" assetpartdefinition="swdie" repeats="100"/>
+         </part>
+
+        <offsets>
+            <frame id="0">
+                <directions>
+                    <direction id="0">
+                        <bodypart id="head" dx="10" dy="4"/>
+                    </direction>
+                    <direction id="2">
+                        <bodypart id="head" dx="10" dy="5"/>
+                    </direction>
+                    <direction id="4">
+                        <bodypart id="head" dx="-10" dy="5"/>
+                    </direction>
+                    <direction id="6">
+                        <bodypart id="head" dx="-10" dy="4"/>
+                    </direction>
+                </directions>
+            </frame>
+            <frame id="1">
+                <directions>
+                    <direction id="0">
+                        <bodypart id="head" dx="10" dy="4"/>
+                    </direction>
+                    <direction id="2">
+                        <bodypart id="head" dx="10" dy="5"/>
+                    </direction>
+                    <direction id="4">
+                        <bodypart id="head" dx="-10" dy="5"/>
+                    </direction>
+                    <direction id="6">
+                        <bodypart id="head" dx="-10" dy="4"/>
+                    </direction>
+                </directions>
+            </frame>
+            <frame id="2">
+                <directions>
+                    <direction id="0">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="2">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="4">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="6">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                </directions>
+            </frame>
+            <frame id="3" repeats="100">
+                <directions>
+                    <direction id="0">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="2">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="4">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="6">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                </directions>
+            </frame>
+        </offsets>
+
+
+    </action>
+
+    <action id="SnowWarDieBack">
+
+        <part set-type="ch">
+            <frame number="2" assetpartdefinition="swdie"/>
+            <frame number="2" assetpartdefinition="swdie"/>
+            <frame number="3" assetpartdefinition="swdie"/>
+            <frame number="3" assetpartdefinition="swdie" repeats="100"/>
+         </part>
+
+        <offsets>
+            <frame id="0">
+                <directions>
+                    <direction id="0">
+                        <bodypart id="head" dx="-10" dy="4"/>
+                    </direction>
+                    <direction id="2">
+                        <bodypart id="head" dx="-10" dy="5"/>
+                    </direction>
+                    <direction id="4">
+                        <bodypart id="head" dx="10" dy="5"/>
+                    </direction>
+                    <direction id="6">
+                        <bodypart id="head" dx="10" dy="4"/>
+                    </direction>
+                </directions>
+            </frame>
+            <frame id="1">
+                <directions>
+                    <direction id="0">
+                        <bodypart id="head" dx="-10" dy="4"/>
+                    </direction>
+                    <direction id="2">
+                        <bodypart id="head" dx="-10" dy="5"/>
+                    </direction>
+                    <direction id="4">
+                        <bodypart id="head" dx="10" dy="5"/>
+                    </direction>
+                    <direction id="6">
+                        <bodypart id="head" dx="10" dy="4"/>
+                    </direction>
+                </directions>
+            </frame>
+            <frame id="2">
+                <directions>
+                    <direction id="0">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="2">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="4">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="6">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                </directions>
+            </frame>
+            <frame id="3" repeats="100">
+                <directions>
+                    <direction id="0">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="2">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="4">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                    <direction id="6">
+                        <bodypart id="head" dx="-100" dy="5"/>
+                    </direction>
+                </directions>
+            </frame>
+        </offsets>
+
+    </action>
+
+    <action id="SnowWarPick">
+
+         <part set-type="ch">
+             <frame number="0" assetpartdefinition="swpick"/>
+         </part>
+
+        <offsets>
+            <frame id="0">
+                <directions>
+                    <direction id="0">
+                        <bodypart id="head" dx="0" dy="3"/>
+                    </direction>
+                    <direction id="1">
+                        <bodypart id="head" dx="0" dy="3"/>
+                    </direction>
+                    <direction id="2">
+                        <bodypart id="head" dx="0" dy="3"/>
+                    </direction>
+                    <direction id="3">
+                        <bodypart id="head" dx="0" dy="3"/>
+                    </direction>
+                    <direction id="4">
+                        <bodypart id="head" dx="0" dy="3"/>
+                    </direction>
+                    <direction id="5">
+                        <bodypart id="head" dx="0" dy="3"/>
+                    </direction>
+                    <direction id="6">
+                        <bodypart id="head" dx="0" dy="3"/>
+                    </direction>
+                    <direction id="7">
+                        <bodypart id="head" dx="0" dy="3"/>
+                    </direction>
+                </directions>
+            </frame>
+        </offsets>
+
+    </action>
+
+    <action id="SnowWarThrow">
+
+         <part set-type="ch">
+             <frame number="0" assetpartdefinition="swthrow"/>
+             <frame number="0" assetpartdefinition="swthrow"/>
+             <frame number="1" assetpartdefinition="swthrow"/>
+             <frame number="1" assetpartdefinition="swthrow"/>
+             <frame number="1" assetpartdefinition="swthrow"/>
+             <frame number="1" assetpartdefinition="swthrow"/>
+             <frame number="1" assetpartdefinition="swthrow"/>
+             <frame number="1" assetpartdefinition="swthrow"/>
+             <frame number="0" assetpartdefinition="swthrow" repeats="100"/>
+         </part>
+
+    </action>
+</animationSet>

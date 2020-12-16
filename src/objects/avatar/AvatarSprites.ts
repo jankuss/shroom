@@ -21,6 +21,8 @@ export class AvatarSprites extends RoomObject {
   private avatarDrawDefinition: AvatarDrawDefinition | undefined;
 
   private _lookOptions: LookOptions;
+  private _lookOptionsAfterReload: LookOptions | undefined;
+
   private _x: number = 0;
   private _y: number = 0;
   private _zIndex: number = 0;
@@ -86,12 +88,15 @@ export class AvatarSprites extends RoomObject {
   }
 
   get lookOptions() {
+    if (this._lookOptionsAfterReload != null) {
+      return this._lookOptionsAfterReload;
+    }
+
     return this._lookOptions;
   }
 
   set lookOptions(lookOptions) {
-    this._lookOptions = lookOptions;
-    this._updateSprites();
+    this._updateLookOptions(this._lookOptions, lookOptions);
   }
 
   get currentFrame() {
@@ -110,6 +115,26 @@ export class AvatarSprites extends RoomObject {
     this._y = options.position.y;
     this._zIndex = options.zIndex;
     this._lookOptions = options.look;
+  }
+
+  private _updateLookOptions(
+    oldLookOptions: LookOptions,
+    newLookOptions: LookOptions
+  ) {
+    const didChangeItem =
+      oldLookOptions.actions.item?.item !== newLookOptions.actions.item?.item;
+
+    if (didChangeItem) {
+      console.log("REFETCH");
+      // refetch look
+      this._lookOptionsAfterReload = newLookOptions;
+
+      this.refreshLook();
+    } else {
+      console.log("ITEM DIDNT CHANGE");
+      this._lookOptions = newLookOptions;
+      this._updateSprites();
+    }
   }
 
   private _updateLayer(
@@ -152,8 +177,10 @@ export class AvatarSprites extends RoomObject {
 
     this.container = new PIXI.Container();
 
+    console.log("Rendering with look options", this._lookOptions);
+
     const definition = this.avatarLoaderResult.getDrawDefinition(
-      this.lookOptions
+      this._lookOptions
     );
 
     this.avatarDrawDefinition = definition;
@@ -205,17 +232,29 @@ export class AvatarSprites extends RoomObject {
     return sprite;
   }
 
-  private fetchLook(look: string) {
-    this.avatarLoader.getAvatarDrawDefinition(look).then((result) => {
-      this.avatarLoaderResult = result;
-      this._updateSprites();
-    });
+  private refreshLook() {
+    if (!this.mounted) return;
+
+    this.avatarLoader
+      .getAvatarDrawDefinition(this.lookOptions.look, {
+        item: this.lookOptions.actions.item?.item,
+      })
+      .then((result) => {
+        this.avatarLoaderResult = result;
+
+        if (this._lookOptionsAfterReload != null) {
+          this._lookOptions = this._lookOptionsAfterReload;
+          this._lookOptionsAfterReload = undefined;
+        }
+
+        this._updateSprites();
+      });
 
     this._updateSprites();
   }
 
   registered(): void {
-    this.fetchLook(this.lookOptions.look);
+    this.refreshLook();
   }
 
   destroyed(): void {

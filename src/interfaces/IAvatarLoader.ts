@@ -3,7 +3,10 @@ import { AvatarDrawDefinition } from "../objects/avatar/util/getAvatarDrawDefini
 import { HitTexture } from "../objects/hitdetection/HitTexture";
 
 export interface IAvatarLoader {
-  getAvatarDrawDefinition(look: string): Promise<AvatarLoaderResult>;
+  getAvatarDrawDefinition(
+    look: string,
+    additional?: { item?: number }
+  ): Promise<AvatarLoaderResult>;
 }
 
 export type AvatarLoaderResult = {

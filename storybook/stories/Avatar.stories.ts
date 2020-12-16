@@ -41,3 +41,53 @@ export function Walking() {
     application.stage.addChild(room);
   });
 }
+
+export function Drinking() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+            0000000
+            0000000
+            0000000
+            0000000
+          `,
+    });
+
+    const avatars: Avatar[] = [];
+
+    for (let i = 0; i < 4; i++) {
+      const avatar = new Avatar({
+        look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
+        direction: i * 2,
+        roomX: i * 2,
+        roomY: 0,
+        roomZ: 0,
+      });
+
+      avatar.item = 40;
+
+      room.addRoomObject(avatar);
+      avatars.push(avatar);
+    }
+
+    for (let i = 0; i < 4; i++) {
+      const avatar = new Avatar({
+        look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
+        direction: i * 2 + 1,
+        roomX: i * 2,
+        roomY: 3,
+        roomZ: 0,
+      });
+
+      avatar.item = 40;
+
+      room.addRoomObject(avatar);
+      avatars.push(avatar);
+    }
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    application.stage.addChild(room);
+  });
+}

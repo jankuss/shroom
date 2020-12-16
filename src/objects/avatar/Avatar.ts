@@ -350,6 +350,9 @@ export class Avatar extends RoomObject implements IMoveable {
 
   registered(): void {
     this._updatePosition();
+
+    this._updateAvatarSprites();
+
     this.roomObjectContainer.addRoomObject(this._avatarSprites);
 
     this._moveAnimation = new ObjectAnimation(
@@ -375,8 +378,6 @@ export class Avatar extends RoomObject implements IMoveable {
       },
       this.configuration.avatarMovementDuration
     );
-
-    this._updateAvatarSprites();
   }
 
   destroyed(): void {

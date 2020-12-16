@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<geometry direction="0" >
+
+	<camera>
+		<x>0</x>
+		<y>0</y>
+		<z>10</z>
+	</camera>
+	
+	<canvas scale="h">
+		<!-- dx and dy values are offsets for figure parts in canvas, used by AvatarImage, mainly for lay and swim -->
+		<geometry id="vertical" width="90" height="130" dy="0" dx="0"/>
+        <geometry id="sitting" width="90" height="130" dy="0" dx="0"/>
+		<geometry id="horizontal" width="128" height="80" dy="0" dx="30"/>
+		<geometry id="swhorizontal" width="192" height="120" dy="-40" dx="0"/>
+	</canvas>
+
+	<canvas scale="sh">
+		<geometry id="vertical" width="45" height="72" dy="0" dx="0"/>
+        <geometry id="sitting" width="45" height="72" dy="0" dx="0"/>
+		<geometry id="horizontal" width="64" height="50" dy="-10" dx="15"/>
+		<geometry id="swhorizontal" width="96" height="70" dy="-20" dx="0"/>
+		<geometry id="swim" width="64" height="70" dy="10" dx="25"/>
+	</canvas>
+
+	<avatarset id="full">
+		<avatarset id="body" main="1">
+			<bodypart id="top" />
+			<bodypart id="bottom" />
+			<bodypart id="behind" />
+			<bodypart id="torso" />
+			<bodypart id="leftitem" />
+            <bodypart id="rightitem" />
+			<bodypart id="leftarm" />
+			<bodypart id="rightarm" />
+		</avatarset>
+		<avatarset id="head">
+			<bodypart id="head" />
+		</avatarset>
+	</avatarset>
+	
+	<type id="vertical" >
+		<bodypart id="top" x="0" y="0" z="0.0" radius="2.0" />
+		<bodypart id="bottom" x="0" y="0" z="0.0" radius="0.001" />
+		<bodypart id="behind" x="0" y="0" z="0.2" radius="0.3" />
+		<bodypart id="torso" x="0" y="0" z="0" radius="0.4" >
+			<!-- <boundary type="circle/sphere/box/cylinder" radius="0.4" /> -->
+			<item id="bd"  x="0" y="0" z="0" radius="0.01"  nx="0" ny="0" nz="-1" double="1" />
+			<item id="bds" x="0" y="0" z="0" radius="0.01"  nx="0" ny="0" nz="-1" double="1" />
+			<item id="ch"  x="0" y="0" z="0" radius="0.04"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="sh"  x="0" y="0" z="0" radius="0.02"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="lg"  x="0" y="0" z="0" radius="0.03"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="ss"  x="0" y="0" z="0" radius="0.04"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="cp"  x="0" y="0" z="0" radius="0.045" nx="0" ny="0" nz="-1" double="0" />
+            <item id="wa"  x="0" y="0" z="0" radius="0.05"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="cc"  x="0" y="0" z="0" radius="0.06"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="ca"  x="0" y="0" z="0" radius="0.07"  nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="leftitem" x="0" y="0" z="-0.29" radius="0.3">
+			<item id="li" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+        <bodypart id="rightitem" x="0" y="0" z="-0.29" radius="0.3">
+			<item id="ri" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="leftarm" x="-1" y="0" z="-0.51" radius="0.5">
+			<item id="lh"  x="0" y="0" z="0"  radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="lhs" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ls"  x="0" y="0" z="0"  radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+			<item id="lc"  x="0" y="0" z="0"  radius="0.025" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="rightarm" x="1" y="0" z="-0.51" radius="0.5">
+			<item id="rh" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="rhs" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="rs" x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+			<item id="rc" x="0" y="0" z="0" radius="0.025" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="head" x="0" y="0" z="0" radius="0.5">
+			<item id="hd"  x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="1" />
+			<item id="fc"  x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ey"  x="0" y="0" z="0" radius="0.03" nx="0" ny="0" nz="-1" double="0" />
+			<item id="hr"  x="0" y="0" z="0" radius="0.04" nx="0" ny="0" nz="-1" double="1" />
+			<item id="hrb" x="0" y="0" z="0" radius="0.05" nx="0" ny="0" nz="-1" double="1" />
+			<item id="fa"  x="0" y="0" z="0" radius="0.06" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ea"  x="0" y="0" z="0" radius="0.07" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ha"  x="0" y="0" z="0" radius="0.08" nx="0" ny="0" nz="-1" double="0" />
+			<item id="he"  x="0" y="0" z="0" radius="0.09" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+	</type>
+
+    <type id="sitting" >
+        <bodypart id="top" x="0" y="0" z="0.0" radius="2.0" />
+        <bodypart id="bottom" x="0" y="0" z="0.0" radius="0.001" />
+        <bodypart id="behind" x="0" y="0" z="0.2" radius="0.3" />
+        <bodypart id="torso" x="0" y="0" z="0" radius="0.4" >
+            <!-- <boundary type="circle/sphere/box/cylinder" radius="0.4" /> -->
+            <item id="bd" x="0" y="0" z="0"  radius="0.01"  nx="0" ny="0" nz="-1" double="1" />
+            <item id="bds" x="0" y="0" z="0" radius="0.01"  nx="0" ny="0" nz="-1" double="1" />
+            <item id="ch" x="0" y="0" z="0"  radius="0.03"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="sh" x="0" y="0" z="0"  radius="0.04"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="lg" x="0" y="0" z="0"  radius="0.02"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="ss" x="0" y="0" z="0"  radius="0.04"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="cp" x="0" y="0" z="0"  radius="0.045" nx="0" ny="0" nz="-1" double="0" />
+            <item id="wa" x="0" y="0" z="0"  radius="0.05"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="cc" x="0" y="0" z="0"  radius="0.06"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="ca" x="0" y="0" z="0"  radius="0.07"  nx="0" ny="0" nz="-1" double="0" />
+        </bodypart>
+        <bodypart id="leftitem" x="0" y="0" z="-0.29" radius="0.3">
+            <item id="li" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+        </bodypart>
+        <bodypart id="rightitem" x="0" y="0" z="-0.29" radius="0.3">
+            <item id="ri" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+        </bodypart>
+        <bodypart id="leftarm" x="-1" y="0" z="-0.51" radius="0.5">
+            <item id="lh"  x="0" y="0" z="0"  radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+            <item id="lhs" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+            <item id="ls"  x="0" y="0" z="0"  radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+            <item id="lc"  x="0" y="0" z="0"  radius="0.025" nx="0" ny="0" nz="-1" double="0" />
+        </bodypart>
+        <bodypart id="rightarm" x="1" y="0" z="-0.51" radius="0.5">
+            <item id="rh" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+            <item id="rhs" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+            <item id="rs" x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+            <item id="rc" x="0" y="0" z="0" radius="0.025" nx="0" ny="0" nz="-1" double="0" />
+        </bodypart>
+        <bodypart id="head" x="0" y="0" z="0" radius="0.5">
+            <item id="hd"  x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="1" />
+            <item id="fc"  x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+            <item id="ey"  x="0" y="0" z="0" radius="0.03" nx="0" ny="0" nz="-1" double="0" />
+            <item id="hr"  x="0" y="0" z="0" radius="0.04" nx="0" ny="0" nz="-1" double="1" />
+            <item id="hrb" x="0" y="0" z="0" radius="0.05" nx="0" ny="0" nz="-1" double="1" />
+            <item id="fa"  x="0" y="0" z="0" radius="0.06" nx="0" ny="0" nz="-1" double="0" />
+            <item id="ea"  x="0" y="0" z="0" radius="0.07" nx="0" ny="0" nz="-1" double="0" />
+            <item id="ha"  x="0" y="0" z="0" radius="0.08" nx="0" ny="0" nz="-1" double="0" />
+            <item id="he"  x="0" y="0" z="0" radius="0.09" nx="0" ny="0" nz="-1" double="0" />
+        </bodypart>
+    </type>
+
+
+	<type id="horizontal" >
+		<bodypart id="torso" x="0" y="0" z="0" radius="0.4" >
+			<!-- <boundary type="circle/sphere/box/cylinder" radius="0.4" /> -->
+			<item id="bd"  x="0" y="0" z="0" radius="0.01"  nx="0" ny="0" nz="-1" double="1" />
+			<item id="bds" x="0" y="0" z="0" radius="0.01"  nx="0" ny="0" nz="-1" double="1" />
+			<item id="ch"  x="0" y="0" z="0" radius="0.02"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="cp"  x="0" y="0" z="0" radius="0.025" nx="0" ny="0" nz="-1" double="0" />
+			<item id="sh"  x="0" y="0" z="0" radius="0.04"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="lg"  x="0" y="0" z="0" radius="0.03"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="ss"  x="0" y="0" z="0" radius="0.03"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="wa"  x="0" y="0" z="0" radius="0.05"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="cc"  x="0" y="0" z="0" radius="0.06"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="ca"  x="0" y="0" z="0" radius="0.07"  nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="leftitem" x="0" y="0" z="-0.29" radius="0.3">
+			<item id="li" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+        <bodypart id="rightitem" x="0" y="0" z="-0.29" radius="0.3">
+			<item id="ri" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="leftarm" x="-1" y="0" z="0" radius="0.6">
+			<item id="lh" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="lhs" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ls" x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+			<item id="lc" x="0" y="0" z="0" radius="0.025" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="rightarm" x="1" y="0" z="0" radius="0.6">
+			<item id="rh" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="rhs" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="rs" x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+			<item id="rc" x="0" y="0" z="0" radius="0.025" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="head" x="0" y="0" z="0" radius="0.5">
+			<item id="hd"  x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="1" />
+			<item id="fc"  x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ey"  x="0" y="0" z="0" radius="0.03" nx="0" ny="0" nz="-1" double="0" />
+			<item id="hr"  x="0" y="0" z="0" radius="0.04" nx="0" ny="0" nz="-1" double="1" />
+			<item id="hrb" x="0" y="0" z="0" radius="0.05" nx="0" ny="0" nz="-1" double="1" />
+			<item id="fa"  x="0" y="0" z="0" radius="0.06" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ea"  x="0" y="0" z="0" radius="0.07" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ha"  x="0" y="0" z="0" radius="0.08" nx="0" ny="0" nz="-1" double="0" />
+			<item id="he"  x="0" y="0" z="0" radius="0.09" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+	</type>
+		
+	<type id="swhorizontal" >
+		<bodypart id="torso" x="0" y="0" z="0" radius="0.4" >
+			<!-- <boundary type="circle/sphere/box/cylinder" radius="0.4" /> -->
+			<item id="bd"  x="0" y="0" z="0" radius="0.01"  nx="0" ny="0" nz="-1" double="1" />
+			<item id="bds" x="0" y="0" z="0" radius="0.01"  nx="0" ny="0" nz="-1" double="1" />
+			<item id="ch"  x="0" y="0" z="0" radius="0.02"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="cp"  x="0" y="0" z="0" radius="0.025" nx="0" ny="0" nz="-1" double="0" />
+			<item id="sh"  x="0" y="0" z="0" radius="0.04"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="lg"  x="0" y="0" z="0" radius="0.03"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="ss"  x="0" y="0" z="0" radius="0.03"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="wa"  x="0" y="0" z="0" radius="0.05"  nx="0" ny="0" nz="-1" double="0" />
+			<item id="cc"  x="0" y="0" z="0" radius="0.06"  nx="0" ny="0" nz="-1" double="0" />
+            <item id="ca"  x="0" y="0" z="0" radius="0.07"  nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="leftitem" x="0" y="0" z="-0.29" radius="0.3">
+			<item id="li" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+        <bodypart id="rightitem" x="0" y="0" z="-0.29" radius="0.3">
+			<item id="ri" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="leftarm" x="-1" y="0" z="0" radius="0.6">
+			<item id="lh" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="lhs" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ls" x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+			<item id="lc" x="0" y="0" z="0" radius="0.025" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="rightarm" x="1" y="0" z="0" radius="0.6">
+			<item id="rh" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="rhs" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+			<item id="rs" x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+			<item id="rc" x="0" y="0" z="0" radius="0.025" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="head" x="0" y="0" z="0" radius="0.5">
+			<item id="hd"  x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="1" />
+			<item id="fc"  x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ey"  x="0" y="0" z="0" radius="0.03" nx="0" ny="0" nz="-1" double="0" />
+			<item id="hr"  x="0" y="0" z="0" radius="0.04" nx="0" ny="0" nz="-1" double="1" />
+			<item id="hrb" x="0" y="0" z="0" radius="0.05" nx="0" ny="0" nz="-1" double="1" />
+			<item id="fa"  x="0" y="0" z="0" radius="0.06" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ea"  x="0" y="0" z="0" radius="0.07" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ha"  x="0" y="0" z="0" radius="0.08" nx="0" ny="0" nz="-1" double="0" />
+			<item id="he"  x="0" y="0" z="0" radius="0.09" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+	</type>
+
+	<type id="swim" >
+		<bodypart id="torso" x="0" y="0" z="0" radius="0.4" >
+			<item id="bds" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="1" />
+			<item id="ss" x="0" y="0" z="0" radius="0.03" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="leftarm" x="-1" y="0" z="0" radius="0.6">
+			<item id="lhs" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="rightarm" x="1" y="0" z="0" radius="0.6">
+			<item id="rhs" x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+		<bodypart id="head" x="0" y="0" z="0" radius="0.5">
+			<item id="hd"  x="0" y="0" z="0" radius="0.01" nx="0" ny="0" nz="-1" double="1" />
+			<item id="fc"  x="0" y="0" z="0" radius="0.02" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ey"  x="0" y="0" z="0" radius="0.03" nx="0" ny="0" nz="-1" double="0" />
+			<item id="hr"  x="0" y="0" z="0" radius="0.04" nx="0" ny="0" nz="-1" double="1" />
+			<item id="hrb" x="0" y="0" z="0" radius="0.05" nx="0" ny="0" nz="-1" double="1" />
+			<item id="fa"  x="0" y="0" z="0" radius="0.06" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ea"  x="0" y="0" z="0" radius="0.07" nx="0" ny="0" nz="-1" double="0" />
+			<item id="ha"  x="0" y="0" z="0" radius="0.08" nx="0" ny="0" nz="-1" double="0" />
+			<item id="he"  x="0" y="0" z="0" radius="0.09" nx="0" ny="0" nz="-1" double="0" />
+		</bodypart>
+	</type>
+
+</geometry>
+

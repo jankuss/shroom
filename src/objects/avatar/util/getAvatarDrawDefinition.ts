@@ -8,6 +8,12 @@ import { GetOffset } from "./loadOffsetMap";
 import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import { getActionForPart } from "./getActionForPart";
 import { getDrawOrder } from "./drawOrder";
+import { avatarAnimations } from "./avatarAnimations";
+import { IAvatarAnimationData } from "./data/IAvatarAnimationData";
+import { IAvatarPartSetsData } from "./data/IAvatarPartSetsData";
+import { IAvatarOffsetsData } from "./data/IAvatarOffsetsData";
+import { IFigureMapData } from "./data/IFigureMapData";
+import { IFigureData } from "./data/IFigureData";
 
 export type AvatarDrawPart = {
   fileId: string;
@@ -26,9 +32,11 @@ export interface AvatarDrawDefinition {
 }
 
 export interface Dependencies {
-  getSetType: GetSetType;
-  getOffset: GetOffset;
-  getLibraryOfPart: (id: string, type: string) => string | undefined;
+  figureData: IFigureData;
+  figureMap: IFigureMapData;
+  offsetsData: IAvatarOffsetsData;
+  animationData: IAvatarAnimationData;
+  partSetsData: IAvatarPartSetsData;
 }
 
 export type PrimaryAction =
@@ -60,22 +68,23 @@ interface Options {
  */
 export function getAvatarDrawDefinition(
   { parsedLook, action, actions, direction }: Options,
-  { getOffset, getSetType, getLibraryOfPart }: Dependencies
+  {
+    offsetsData,
+    animationData,
+    partSetsData,
+    figureData,
+    figureMap,
+  }: Dependencies
 ): AvatarDrawDefinition | undefined {
   const parts = Array.from(parsedLook.entries()).flatMap(
     ([type, { setId, colorId }]) => {
-      const setType = getSetType(type);
-      if (setType) {
-        const colorValue = setType.getColor(colorId.toString());
-        const parts = setType.getParts(setId.toString());
+      const parts = figureData.getParts(type, setId.toString());
+      const colorValue = figureData.getColor(type, colorId.toString());
 
-        return (parts || []).map((part) => ({
-          ...part,
-          color: colorValue,
-        }));
-      }
-
-      return [];
+      return (parts || []).map((part) => ({
+        ...part,
+        color: colorValue,
+      }));
     }
   );
 
@@ -168,12 +177,36 @@ export function getAvatarDrawDefinition(
             waveFrame: actions.wav != null ? actions.wav.frame : 0,
           });
 
-          const id = `h_${part.action}_${p.type}_${p.id}_${normalizedDirection.direction}_${part.frame}`;
+          const animation = avatarAnimations.getAnimation({
+            actionId: "Blow",
+            frameId: part.frame.toString(),
+            setType: p.type,
+            direction: direction.toString(),
+          });
 
-          const offset = getOffset(id);
-          if (offset == null) return;
+          let actionId = part.action;
 
-          const library = getLibraryOfPart(p.id, p.type);
+          if (animation != null) {
+            actionId = animation.part.assetpartdefinition;
+          }
+
+          const getId = (actionId: string) =>
+            `h_${actionId}_${p.type}_${p.id}_${normalizedDirection.direction}_${part.frame}`;
+
+          let id = getId(actionId);
+          let offset = offsetsData.getOffsets(id);
+
+          if (offset == null) {
+            const fallbackId = getId("std");
+            offset = offsetsData.getOffsets(fallbackId);
+            id = fallbackId;
+          }
+
+          if (offset == null) {
+            return;
+          }
+
+          const library = figureMap.getLibraryOfPart(p.id, p.type);
           if (library == null) {
             throw new Error(`Invalid library ${id} ${p.type}`);
           }

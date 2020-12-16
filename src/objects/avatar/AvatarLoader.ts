@@ -47,7 +47,10 @@ export class AvatarLoader implements IAvatarLoader {
     });
   }
 
-  async getAvatarDrawDefinition(look: string): Promise<AvatarLoaderResult> {
+  async getAvatarDrawDefinition(
+    look: string,
+    additional?: { item?: number }
+  ): Promise<AvatarLoaderResult> {
     const loadedFiles = new Map<string, Promise<HitTexture>>();
 
     const getDrawDefinition = await this.lookServer;
@@ -75,23 +78,25 @@ export class AvatarLoader implements IAvatarLoader {
         actions: {},
       });
 
-      loadResources({
-        action: { kind: "std" },
-        direction,
-        look,
-        actions: {
-          item: { kind: "crr", item: 1 },
-        },
-      });
+      if (additional != null && additional.item != null) {
+        loadResources({
+          action: { kind: "std" },
+          direction,
+          look,
+          actions: {
+            item: { kind: "crr", item: additional.item },
+          },
+        });
 
-      loadResources({
-        action: { kind: "std" },
-        direction,
-        look,
-        actions: {
-          item: { kind: "drk", item: 1 },
-        },
-      });
+        loadResources({
+          action: { kind: "std" },
+          direction,
+          look,
+          actions: {
+            item: { kind: "drk", item: additional.item },
+          },
+        });
+      }
 
       avatarFramesObject.wlk.forEach((frame) => {
         loadResources({
