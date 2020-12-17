@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2020-12-17
 
+### Added
+
+- Highlight State for Furniture
+
 ### Changed
 
 - **BREAKING:** Tile Map Parsing behavior
