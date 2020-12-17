@@ -192,10 +192,16 @@ class RowWall {
 function assertTileMapHasPadding(tilemap: TileType[][]) {
   if (tilemap.length < 1) throw new Error("Tilemap has no rows");
 
+  let doorCount = 0;
+
   for (let y = 0; y < tilemap.length; y++) {
     const row = tilemap[y];
 
     if (row.length < 1) throw new Error("Tilemap row was empty.");
+    if (doorCount > 0 && row[0] !== "x")
+      throw new Error(paddingErrorMessage(`row ${y}`));
+
+    doorCount++;
   }
 
   for (let x = 0; x < tilemap[0].length; x++) {
@@ -206,7 +212,7 @@ function assertTileMapHasPadding(tilemap: TileType[][]) {
 }
 
 const paddingErrorMessage = (text: string) => `No padding for ${text}
-- There should be one 'x' at the beginning of each row.
+- There should be one 'x' at the beginning of each row
 - There should be a full row of 'x' as the first row
 
 Please ensure that the tilemap is padded like the following example:
