@@ -30,27 +30,8 @@ export function parseTileMap(
   positionOffsets: { x: number; y: number };
   maskOffsets: { x: number; y: number };
 } {
-  const startIndexColumn = findFirstNonEmptyColumnIndex(tilemap);
-  const startIndexRow = findFirstNonEmptyRowIndex(tilemap);
-
-  if (startIndexColumn === -1) throw new Error("No column start found");
-  if (startIndexRow === -1) throw new Error("No row start found");
-
-  const endIndexColumn = findLastColumnIndex(tilemap);
-  const endIndexRow = findLastRowIndex(tilemap);
-
-  const cutoutTilemap = cutoutArray(
-    tilemap,
-    startIndexColumn,
-    startIndexRow,
-    endIndexColumn + 1,
-    endIndexRow + 1
-  );
-
-  const result = initialize2DArray<ParsedTileType>(
-    endIndexColumn - startIndexColumn + 1 + 1,
-    endIndexRow - startIndexRow + 1 + 1,
-    { type: "hidden" }
+  const result: ParsedTileType[][] = tilemap.map((row) =>
+    row.map(() => ({ type: "hidden" as const }))
   );
 
   const rowWallMinimum = new RowWall();
@@ -72,22 +53,22 @@ export function parseTileMap(
     }
   }
 
-  for (let y = 0; y < cutoutTilemap.length; y++) {
+  for (let y = 0; y < tilemap.length; y++) {
     let rowWallStartX = -1;
 
-    for (let x = 0; x < cutoutTilemap[y].length; x++) {
-      const resultX = x + 1;
-      const resultY = y + 1;
+    for (let x = 0; x < tilemap[y].length; x++) {
+      const resultX = x;
+      const resultY = y;
 
       const wallPositionX = resultX - 1;
       const wallPositionY = resultY - 1;
 
-      const tileInfo = getTileInfo(cutoutTilemap, x, y);
+      const tileInfo = getTileInfo(tilemap, x, y);
 
       if (!tileInfo.rowDoor || hasDoor) {
         const rowWallAllowed = rowWallMinimum.isWallAllowed(wallPositionX);
         if (tileInfo.rowEdge && tileInfo.height != null && rowWallAllowed) {
-          const belowTileInfo = getTileInfo(cutoutTilemap, x - 1, y + 1);
+          const belowTileInfo = getTileInfo(tilemap, x - 1, y + 1);
 
           result[resultY][wallPositionX] = {
             type: "wall",
@@ -179,7 +160,6 @@ export function parseTileMap(
     x: 1,
     y: 1,
   };
-  const doorOffset = hasDoor ? 1 : 0;
 
   return {
     tilemap: result,
@@ -188,14 +168,8 @@ export function parseTileMap(
     // When the tilemap has a door, we offset the objects in the room by one in the x direction.
     // This makes it so objects appear at the same position, for a room without a door
     // and for a room with a door.
-    positionOffsets: {
-      x: wallOffsets.x + doorOffset,
-      y: wallOffsets.y,
-    },
-    maskOffsets: {
-      x: doorOffset,
-      y: 0,
-    },
+    positionOffsets: { x: 0, y: 0 },
+    maskOffsets: { x: -1, y: -wallOffsets.y },
   };
 }
 

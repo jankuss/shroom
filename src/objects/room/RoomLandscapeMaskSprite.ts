@@ -27,6 +27,7 @@ export class RoomLandscapeMaskSprite extends PIXI.Sprite {
   private _roomHeight: number;
   private _wallHeight: number;
   private _renderer: PIXI.Renderer;
+  private _graphics: PIXI.Graphics | undefined;
 
   constructor({
     width,
@@ -73,6 +74,13 @@ export class RoomLandscapeMaskSprite extends PIXI.Sprite {
     this._renderer.render(container, texture);
 
     this.texture = texture;
+    this._graphics?.destroy();
+    this._graphics = new PIXI.Graphics();
+    this._graphics.beginFill(0xffffff);
+    this._graphics.drawRect(0, 0, this._roomWidth, this._roomHeight);
+    this._graphics.endFill();
+
+    this.addChild(this._graphics);
   }
 
   addSprite(element: PIXI.Sprite) {
