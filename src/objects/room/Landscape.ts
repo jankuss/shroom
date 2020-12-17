@@ -121,8 +121,7 @@ export class Landscape extends RoomObject {
         const position = this.geometry.getPosition(
           meta.level + 1,
           meta.start,
-          0,
-          "none"
+          0
         );
 
         wall.transform.setFromMatrix(new PIXI.Matrix(1, -0.5, 0, 1));
@@ -153,8 +152,7 @@ export class Landscape extends RoomObject {
         const position = this.geometry.getPosition(
           meta.start + 1,
           meta.level + 1,
-          0,
-          "none"
+          0
         );
 
         wall.transform.setFromMatrix(new PIXI.Matrix(1, 0.5, 0, 1));

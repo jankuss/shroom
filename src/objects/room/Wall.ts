@@ -342,7 +342,7 @@ export class Wall extends RoomObject {
       color,
     } = this.props;
 
-    const { x, y } = geometry.getPosition(roomX, roomY, roomZ, "plane");
+    const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
     const wallColor = this._color ?? color;
 
     const { leftTint, rightTint, topTint } = getWallColors(wallColor);
