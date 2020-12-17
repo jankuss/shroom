@@ -318,7 +318,7 @@ export class Room
   }
 
   private _updatePosition() {
-    this.visualization.x = -this.roomBounds.minX;
+    this.visualization.x = -this.roomBounds.minX + this._tileMapBounds.minX;
     this.visualization.y = -this.roomBounds.minY;
   }
 
@@ -404,14 +404,10 @@ export class Room
 
     const base = 32;
 
-    // We must use `_tileMapBounds` here instead of roomBounds, since roomBounds depends on
-    // multiple, changeable parameters. Since there is no way to notify the room objects, that
-    // getPosition positioning changed, we just use the tileMapBounds here, since they are static.
-    //
-    // Future Idea: Create a container, which applies the transforms dependent on roomBounds, and
-    // update that container to get all elements in the room positioned correctly.
-
-    const xPos = x * base - y * base;
+    // TODO: Right now we are subtracting the tileMapBounds here.
+    // This is so the landscapes work correctly. This has something with the mask position being negative for some walls.
+    // This fixes it for now.
+    const xPos = -this._tileMapBounds.minX + x * base - y * base;
     const yPos = x * (base / 2) + y * (base / 2);
 
     return {
