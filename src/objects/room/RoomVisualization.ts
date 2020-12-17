@@ -60,6 +60,7 @@ export class RoomVisualization
 
     this.addChild(this._behindWallPlane);
     this.addChild(this._plane);
+    this.addChild(this._masksContainer);
     this.addChild(this._landscapeContainer);
     this.addChild(this._tileCursorPlane);
     this.addChild(this._container);
@@ -87,9 +88,7 @@ export class RoomVisualization
       });
 
     current.addSprite(element);
-    //this._container.addChild(current);
-
-    this._container.addChild(element);
+    this._masksContainer.addChild(current);
 
     if (existing == null) {
       this.masks.set(id, current);

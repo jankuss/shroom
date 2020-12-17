@@ -88,11 +88,6 @@ export class Landscape extends RoomObject {
     this._container?.destroy();
     const container = new PIXI.Container();
 
-    console.log("==============");
-    console.log("MASKS");
-    console.log(this._masks);
-    console.log(meta);
-
     let offsetRow = 0;
     let offsetCol = 0;
 
@@ -119,12 +114,9 @@ export class Landscape extends RoomObject {
 
       if (meta.type === "rowWall") {
         const maskLevel = this.landscapeContainer.getMaskLevel(meta.level, 0);
-
-        console.log("MASK LEVEL", maskLevel, meta.level);
         const mask = this._getMask(2, maskLevel.roomX, 0);
 
         wall.mask = mask;
-        //wall.addChild(mask);
 
         const position = this.geometry.getPosition(
           meta.level + 1,
@@ -314,8 +306,6 @@ function getWallCollectionMeta(parsedTileMap: ParsedTileType[][]) {
       done = true;
     }
   }
-
-  console.log("ARR", arr);
 
   return arr;
 }
