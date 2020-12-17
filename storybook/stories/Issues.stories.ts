@@ -1,4 +1,5 @@
 import { Avatar, Room } from "@jankuss/shroom";
+import { action } from "@storybook/addon-actions";
 import { createShroom } from "./common/createShroom";
 
 export default {
@@ -36,7 +37,7 @@ export function Issue28() {
       roomZ: 0,
     });
 
-    room.onTileClick = (position) => console.log(position);
+    room.onTileClick = action("Position");
 
     room.addRoomObject(avatar);
 

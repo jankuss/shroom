@@ -30,6 +30,8 @@ export function parseTileMap(
   positionOffsets: { x: number; y: number };
   maskOffsets: { x: number; y: number };
 } {
+  assertTileMapHasPadding(tilemap);
+
   const result: ParsedTileType[][] = tilemap.map((row) =>
     row.map(() => ({ type: "hidden" as const }))
   );
@@ -169,7 +171,7 @@ export function parseTileMap(
     // This makes it so objects appear at the same position, for a room without a door
     // and for a room with a door.
     positionOffsets: { x: 0, y: 0 },
-    maskOffsets: { x: -1, y: -wallOffsets.y },
+    maskOffsets: { x: -wallOffsets.x, y: -wallOffsets.y },
   };
 }
 
@@ -187,93 +189,28 @@ class RowWall {
   }
 }
 
-function cutoutArray(
-  tilemap: TileType[][],
-  startX: number,
-  startY: number,
-  endX: number,
-  endY: number
-) {
-  const width = endX - startX;
-  const height = endY - startY;
+function assertTileMapHasPadding(tilemap: TileType[][]) {
+  if (tilemap.length < 1) throw new Error("Tilemap has no rows");
 
-  const result = initialize2DArray<TileType>(width, height, "0");
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      result[y][x] = tilemap[y + startY][x + startX];
-    }
-  }
-
-  return result;
-}
-
-function initialize2DArray<T, TD = T>(
-  maxX: number,
-  maxY: number,
-  defaultValue: TD | T
-) {
-  const res: (T | TD)[][] = [];
-
-  for (let y = 0; y < maxY; y++) {
-    const row: (T | TD)[] = [];
-    for (let x = 0; x < maxX; x++) {
-      row.push(defaultValue);
-    }
-    res.push(row);
-  }
-
-  return res;
-}
-
-function findFirstNonEmptyColumnIndex(tilemap: TileType[][]) {
-  for (let x = 0; x < tilemap[0].length; x++) {
-    for (let y = 0; y < tilemap.length; y++) {
-      if (tilemap[y][x] !== "x") return x;
-    }
-  }
-
-  return -1;
-}
-
-function findFirstNonEmptyRowIndex(tilemap: TileType[][]) {
   for (let y = 0; y < tilemap.length; y++) {
-    for (let x = 0; x < tilemap[y].length; x++) {
-      if (tilemap[y][x] !== "x") return y;
-    }
+    const row = tilemap[y];
+
+    if (row.length < 1) throw new Error("Tilemap row was empty.");
   }
 
-  return -1;
-}
-
-function findLastColumnIndex(tilemap: TileType[][]) {
-  let lastColumn = 0;
   for (let x = 0; x < tilemap[0].length; x++) {
-    let hasTile = false;
-    for (let y = 0; y < tilemap.length; y++) {
-      hasTile = hasTile || isTile(getNumberOfTileType(tilemap[y][x]));
-    }
+    const cell = tilemap[0][x];
 
-    if (hasTile) {
-      lastColumn = x;
-    }
+    if (cell !== "x") throw new Error(paddingErrorMessage(`column ${x}`));
   }
-
-  return lastColumn;
 }
 
-function findLastRowIndex(tilemap: TileType[][]) {
-  let lastRow = 0;
-  for (let y = 0; y < tilemap.length; y++) {
-    let hasTile = false;
-    for (let x = 0; x < tilemap.length; x++) {
-      hasTile = hasTile || isTile(getNumberOfTileType(tilemap[y][x]));
-    }
+const paddingErrorMessage = (text: string) => `No padding for ${text}
+- There should be one 'x' at the beginning of each row.
+- There should be a full row of 'x' as the first row
 
-    if (hasTile) {
-      lastRow = y;
-    }
-  }
-
-  return lastRow;
-}
+Please ensure that the tilemap is padded like the following example:
+xxx
+xoo
+xoo
+`;

@@ -237,11 +237,11 @@ export function Door() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        xxxxxx
-        xx0000
-        x00000
-        xx0000
-        xx0000
+        xxxxx
+        x0000
+        00000
+        x0000
+        x0000
       `,
     });
 
