@@ -38,8 +38,8 @@ uniform vec4 borderColor;
 void main(void) {
     vec4 currentColor = texture2D(uSampler, vTextureCoord);
 
-    if (currentColor.a > 0.001) {
-        if (currentColor.r < 0.001 && currentColor.g < 0.001 && currentColor.b < 0.001) {
+    if (currentColor.a > 0.0) {
+        if (currentColor.r == 0.0 && currentColor.g == 0.0 && currentColor.b == 0.0) {
             gl_FragColor = borderColor;
         } else {
             gl_FragColor = backgroundColor;
