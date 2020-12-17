@@ -12,8 +12,9 @@ export function DefaultRoom() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        00
-        00
+        xxx
+        x00
+        x00
       `,
     });
 
@@ -28,10 +29,11 @@ export function Stairs() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        1100
-        1100
-        0000
-        0000
+        xxxxx
+        x1100
+        x1100
+        x0000
+        x0000
       `,
     });
 
@@ -46,11 +48,12 @@ export function MultipleSubsequentStairs() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        22100
-        22100
-        11000
-        00000
-        00000
+        xxxxxx
+        x22100
+        x22100
+        x11000
+        x00000
+        x00000
       `,
     });
 
@@ -65,11 +68,12 @@ export function Holes() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        00000
-        0x0x0
-        00x00
-        0x0x0
-        00000
+        xxxxxx
+        x00000
+        x0x0x0
+        x00x00
+        x0x0x0
+        x00000
       `,
     });
 
@@ -84,12 +88,13 @@ export function AngledRoom() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        xxx000
-        xxx000
-        xxx000
-        000000
-        000000
-        000000
+        xxxxxxx
+        xxxx000
+        xxxx000
+        xxxx000
+        x000000
+        x000000
+        x000000
       `,
     });
 
@@ -104,12 +109,13 @@ export function HiddenWalls() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        xxx000
-        xxx000
-        xxx000
-        000000
-        000000
-        000000
+        xxxxxxx
+        xxxx000
+        xxxx000
+        xxxx000
+        x000000
+        x000000
+        x000000
       `,
     });
 
@@ -125,12 +131,13 @@ export function TileTexture() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        xxx000
-        xxx000
-        xxx000
-        000000
-        000000
-        000000
+        xxxxxxx
+        xxxx000
+        xxxx000
+        xxxx000
+        x000000
+        x000000
+        x000000
       `,
     });
 
@@ -147,12 +154,13 @@ export function WallTexture() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        xxx000
-        xxx000
-        xxx000
-        000000
-        000000
-        000000
+        xxxxxxx
+        xxxx000
+        xxxx000
+        xxxx000
+        x000000
+        x000000
+        x000000
       `,
     });
 
@@ -169,12 +177,13 @@ export function CustomLook() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        xxx11100
-        xxx11100
-        xxx00000
-        00000000
-        00000000
-        00000000
+        xxxxxxxxx
+        xxxx11100
+        xxxx11100
+        xxxx00000
+        x00000000
+        x00000000
+        x00000000
       `,
     });
 
@@ -197,12 +206,13 @@ export function CustomColor() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        xxx11100
-        xxx11100
-        xxx00000
-        00000000
-        00000000
-        00000000
+        xxxxxxxxx
+        xxxx11100
+        xxxx11100
+        xxxx00000
+        x00000000
+        x00000000
+        x00000000
       `,
     });
 
@@ -227,10 +237,11 @@ export function Door() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        x0000
-        00000
-        x0000
-        x0000
+        xxxxxx
+        xx0000
+        x00000
+        xx0000
+        xx0000
       `,
     });
 
@@ -249,12 +260,13 @@ export function LandscapeColor() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        xxxx0
-        xx000
-        x0000
-        00000
-        x0000
-        x0000
+        xxxxxx
+        xxxxx0
+        xxx000
+        xx0000
+        x00000
+        xx0000
+        xx0000
       `,
     });
 
@@ -269,72 +281,72 @@ export function LandscapeColor() {
     landscape.color = "#ffcccc";
 
     const window1 = new WallFurniture({
-      roomX: 0,
-      roomY: 2,
+      roomX: 2,
+      roomY: 3,
       direction: 2,
       roomZ: 0,
       type: "window_skyscraper",
     });
 
     const window2 = new WallFurniture({
-      roomX: 0,
-      roomY: 4,
-      direction: 2,
-      roomZ: 0,
-      type: "window_skyscraper",
-    });
-
-    const window3 = new WallFurniture({
-      roomX: 0,
+      roomX: 2,
       roomY: 5,
       direction: 2,
       roomZ: 0,
       type: "window_skyscraper",
     });
 
+    const window3 = new WallFurniture({
+      roomX: 2,
+      roomY: 6,
+      direction: 2,
+      roomZ: 0,
+      type: "window_skyscraper",
+    });
+
     const window4 = new WallFurniture({
-      roomX: 0,
-      roomY: 2,
+      roomX: 2,
+      roomY: 3,
       direction: 4,
       roomZ: 0,
       type: "window_skyscraper",
     });
 
     const window5 = new WallFurniture({
-      roomX: 1,
-      roomY: 1,
+      roomX: 3,
+      roomY: 2,
       direction: 2,
       roomZ: 0,
       type: "window_skyscraper",
     });
 
     const window6 = new WallFurniture({
-      roomX: 1,
-      roomY: 1,
+      roomX: 3,
+      roomY: 2,
       direction: 4,
       roomZ: 0,
       type: "window_skyscraper",
     });
 
     const window7 = new WallFurniture({
-      roomX: 2,
-      roomY: 1,
+      roomX: 4,
+      roomY: 2,
       direction: 4,
       roomZ: 0,
       type: "window_skyscraper",
     });
 
     const window8 = new WallFurniture({
-      roomX: 3,
-      roomY: 0,
+      roomX: 5,
+      roomY: 1,
       direction: 2,
       roomZ: 0,
       type: "window_skyscraper",
     });
 
     const window9 = new WallFurniture({
-      roomX: 3,
-      roomY: 0,
+      roomX: 5,
+      roomY: 1,
       direction: 4,
       roomZ: 0,
       type: "window_skyscraper",
