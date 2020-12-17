@@ -82,8 +82,7 @@ export class TileCursor extends RoomObject {
     const { x, y } = this.geometry.getPosition(
       this._roomX,
       this._roomY,
-      this._roomZ,
-      "plane"
+      this._roomZ
     );
 
     graphics.zIndex = this.door

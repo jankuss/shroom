@@ -73,7 +73,7 @@ export class Stair extends RoomObject implements ITexturable {
     const { roomX, roomY, roomZ, color, direction } = this.props;
     this.container.zIndex = getZOrder(roomX, roomY, roomZ);
 
-    const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ, "plane");
+    const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
 
     for (let i = 0; i < 4; i++) {
       const props = {
