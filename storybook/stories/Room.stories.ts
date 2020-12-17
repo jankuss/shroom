@@ -266,7 +266,7 @@ export function LandscapeColor() {
     room.y = application.screen.height / 2 - room.roomHeight / 2;
 
     const landscape = new Landscape();
-    landscape.color = "#cccccc";
+    landscape.color = "#ffcccc";
 
     const window1 = new WallFurniture({
       roomX: 0,
