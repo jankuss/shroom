@@ -224,6 +224,8 @@ export class AvatarSprites extends RoomObject {
 
     if (part.color != null && part.mode === "colored") {
       sprite.tint = parseInt(part.color.slice(1), 16);
+    } else {
+      sprite.tint = 0xffffff;
     }
 
     return sprite;

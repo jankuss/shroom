@@ -19,7 +19,7 @@ export function Default() {
     for (let i = 0; i < 8; i++) {
       const avatar = new Avatar({
         look:
-          "hd-180-1.hr-828-61.ha-1012-110.ch-255-66.cc-3075-62.ca-1814-62.lg-280-110.sh-305-62",
+          "hd-610-1373.hr-3255-1394.he-3181-1323.ea-3083-1315.ch-669-66.cc-3159-72.cp-3312-93.ca-1807-62.lg-3058-102.sh-3016-1333.wa-2008-62",
         direction: i,
         roomX: i * 2,
         roomY: 0,

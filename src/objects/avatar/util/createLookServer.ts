@@ -13,7 +13,7 @@ import { AvatarAction } from "./AvatarAction";
 
 export interface LookOptions {
   look: string;
-  action: AvatarAction;
+  actions: Set<AvatarAction>;
   direction: number;
 }
 
@@ -24,11 +24,11 @@ export interface LookServer {
 export async function createLookServer(
   dependencies: AvatarDependencies
 ): Promise<LookServer> {
-  return ({ look, action, direction }: LookOptions) =>
+  return ({ look, actions, direction }: LookOptions) =>
     getAvatarDrawDefinition(
       {
         parsedLook: parseLookString(look),
-        action: action,
+        actions,
         direction,
         frame: 0,
       },

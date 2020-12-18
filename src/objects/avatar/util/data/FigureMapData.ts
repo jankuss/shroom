@@ -8,7 +8,10 @@ export class FigureMapData extends AvatarData implements IFigureMapData {
   }
 
   getLibraryOfPart(id: string, type: string): string | undefined {
-    const element = this.querySelector(`lib part[id="${id}"][type="${type}"]`);
+    const typeProcessed = type === "hrb" ? "hr" : type;
+    const element = this.querySelector(
+      `lib part[id="${id}"][type="${typeProcessed}"]`
+    );
 
     return element?.parentElement?.getAttribute("id") ?? undefined;
   }
