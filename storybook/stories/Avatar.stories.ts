@@ -5,6 +5,34 @@ export default {
   title: "Avatar",
 };
 
+export function Default() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+            000000000000000
+            000000000000000
+            000000000000000
+            000000000000000
+          `,
+    });
+
+    for (let i = 0; i < 8; i++) {
+      const avatar = new Avatar({
+        look:
+          "hd-180-1.hr-828-61.ha-1012-110.ch-255-66.cc-3075-62.ca-1814-62.lg-280-110.sh-305-62",
+        direction: i,
+        roomX: i * 2,
+        roomY: 0,
+        roomZ: 0,
+      });
+
+      room.addRoomObject(avatar);
+    }
+
+    application.stage.addChild(room);
+  });
+}
+
 export function Walking() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {

@@ -67,8 +67,6 @@ class _AvatarAnimations {
         });
       });
     });
-
-    console.log(this._parts);
   }
 }
 

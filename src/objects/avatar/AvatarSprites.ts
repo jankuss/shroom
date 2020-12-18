@@ -121,17 +121,14 @@ export class AvatarSprites extends RoomObject {
     oldLookOptions: LookOptions,
     newLookOptions: LookOptions
   ) {
-    const didChangeItem =
-      oldLookOptions.actions.item?.item !== newLookOptions.actions.item?.item;
+    const didChangeItem = false;
 
     if (didChangeItem) {
-      console.log("REFETCH");
       // refetch look
       this._lookOptionsAfterReload = newLookOptions;
 
       this.refreshLook();
     } else {
-      console.log("ITEM DIDNT CHANGE");
       this._lookOptions = newLookOptions;
       this._updateSprites();
     }
@@ -176,8 +173,6 @@ export class AvatarSprites extends RoomObject {
     this.container?.destroy();
 
     this.container = new PIXI.Container();
-
-    console.log("Rendering with look options", this._lookOptions);
 
     const definition = this.avatarLoaderResult.getDrawDefinition(
       this._lookOptions
@@ -225,6 +220,8 @@ export class AvatarSprites extends RoomObject {
       this._clickHandler.handleClick(event);
     });
 
+    sprite.scale.x = part.mirror ? -1 : 1;
+
     if (part.color != null && part.mode === "colored") {
       sprite.tint = parseInt(part.color.slice(1), 16);
     }
@@ -236,9 +233,7 @@ export class AvatarSprites extends RoomObject {
     if (!this.mounted) return;
 
     this.avatarLoader
-      .getAvatarDrawDefinition(this.lookOptions.look, {
-        item: this.lookOptions.actions.item?.item,
-      })
+      .getAvatarDrawDefinition(this.lookOptions.look)
       .then((result) => {
         this.avatarLoaderResult = result;
 

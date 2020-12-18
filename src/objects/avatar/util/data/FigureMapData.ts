@@ -18,4 +18,11 @@ export class FigureMapData extends AvatarData implements IFigureMapData {
       .map((element) => element.getAttribute("id"))
       .filter(notNullOrUndefined);
   }
+
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new FigureMapData(text);
+  }
 }

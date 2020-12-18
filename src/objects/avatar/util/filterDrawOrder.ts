@@ -12,12 +12,7 @@ const remove = (items: string[], item: string) => {
   return items.filter((value) => value !== item);
 };
 
-export function filterDrawOrder(
-  drawOrder: Set<string>,
-  action: string,
-  waving: boolean,
-  direction: number
-): DrawOrderItem[] {
+export function filterDrawOrder(drawOrder: Set<string>): string[] {
   const drawOrderArray = [...drawOrder];
 
   const drawOrderArrayWithCenterItems: string[] = [];
@@ -40,25 +35,6 @@ export function filterDrawOrder(
         break;
     }
   });
-
-  if (action !== "wlk" && (direction === 1 || direction === 5)) {
-    if (!waving) {
-      const indexOfLeftSide = drawOrderArrayWithCenterItems.indexOf("ls");
-      replace(drawOrderArrayWithCenterItems, "rs", "ls");
-
-      if (indexOfLeftSide !== -1) {
-        drawOrderArrayWithCenterItems.splice(indexOfLeftSide, 1);
-      }
-    } else {
-      replace(drawOrderArrayWithCenterItems, "rs", "ls");
-    }
-  }
-
-  if (direction === 0 || direction === 7) {
-    // Avatar is facing away, no need to draw facial parts.
-    remove(drawOrderArrayWithCenterItems, "fc");
-    remove(drawOrderArrayWithCenterItems, "ey");
-  }
 
   return drawOrderArrayWithCenterItems;
 }

@@ -6,15 +6,14 @@ import { GetOffset } from "./loadOffsetMap";
 import {
   getAvatarDrawDefinition,
   AvatarDrawDefinition,
-  PrimaryAction,
-  SecondaryActions,
+  AvatarDependencies,
 } from "./getAvatarDrawDefinition";
 import { parseLookString } from "./parseLookString";
+import { AvatarAction } from "./AvatarAction";
 
 export interface LookOptions {
   look: string;
-  action: PrimaryAction;
-  actions: SecondaryActions;
+  action: AvatarAction;
   direction: number;
 }
 
@@ -22,31 +21,17 @@ export interface LookServer {
   (options: LookOptions): AvatarDrawDefinition | undefined;
 }
 
-export async function createLookServer({
-  figureDataString,
-  figureMapString,
-  loadOffsetMap,
-}: {
-  figureMapString: string;
-  figureDataString: string;
-  loadOffsetMap: (figureMap: string[]) => Promise<GetOffset>;
-}): Promise<LookServer> {
-  const figureDataXml = await parseStringAsync(figureDataString);
-  const figureMapXml = await parseStringAsync(figureMapString);
-
-  const { getSetType } = parseFigureData(figureDataXml);
-  const figureMap = parseFigureMap(figureMapXml);
-
-  const getOffset = await loadOffsetMap(figureMap.libraries);
-
-  return ({ look, action, actions, direction }: LookOptions) =>
+export async function createLookServer(
+  dependencies: AvatarDependencies
+): Promise<LookServer> {
+  return ({ look, action, direction }: LookOptions) =>
     getAvatarDrawDefinition(
       {
         parsedLook: parseLookString(look),
         action: action,
-        actions: actions,
         direction,
+        frame: 0,
       },
-      { getOffset, getSetType, getLibraryOfPart: figureMap.getLibraryOfPart }
+      dependencies
     );
 }

@@ -10,7 +10,7 @@ export class AvatarAnimationData
 
   getAnimationFrames(id: string, type: string) {
     const frames = this.querySelectorAll(
-      `action[id="${id}"] part[set-type="${type}"]`
+      `action[id="${id}"] part[set-type="${type}"] frame`
     );
 
     return frames.map((element) => {
@@ -71,5 +71,12 @@ export class AvatarAnimationData
       x: dx,
       y: dy,
     };
+  }
+
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new AvatarAnimationData(text);
   }
 }

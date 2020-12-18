@@ -1,10 +1,6 @@
 import * as PIXI from "pixi.js";
 
 import { RoomObject } from "../RoomObject";
-import {
-  PrimaryAction,
-  PrimaryActionKind,
-} from "./util/getAvatarDrawDefinition";
 import { getZOrder } from "../../util/getZOrder";
 import { AvatarSprites } from "./AvatarSprites";
 import { avatarFramesObject } from "./util/avatarFrames";
@@ -13,6 +9,7 @@ import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
 import { ParsedTileType } from "../../util/parseTileMap";
 import { IMoveable } from "../IMoveable";
+import { AvatarAction } from "./util/AvatarAction";
 
 interface Options {
   look: string;
@@ -34,7 +31,7 @@ export class Avatar extends RoomObject implements IMoveable {
 
   private _cancelAnimation: (() => void) | undefined;
 
-  private _primaryAction: PrimaryActionKind = "std";
+  private _primaryAction: AvatarAction = AvatarAction.Default;
   private _waving: boolean = false;
   private _direction: number = 0;
   private _item: number | undefined;
@@ -178,29 +175,13 @@ export class Avatar extends RoomObject implements IMoveable {
     }
   }
 
-  private _getCurrentPrimaryAction(): PrimaryAction {
-    const walkFrame =
-      avatarFramesObject.wlk[this._frame % avatarFramesObject.wlk.length];
-
-    if (this._walking || this.action === "wlk") {
-      return {
-        kind: "wlk",
-        frame: walkFrame,
-      };
-    }
-
-    return {
-      kind: this.action,
-    };
+  private _getCurrentPrimaryAction(): AvatarAction {
+    return AvatarAction.Respect;
   }
 
   private _getCurrentLookOptions(): LookOptions {
     return {
       action: this._getCurrentPrimaryAction(),
-      actions: {
-        wav: this._getWavingAction(),
-        item: this._getDrinkingAction(),
-      },
       direction: this.direction,
       look: this._look,
     };
@@ -257,9 +238,6 @@ export class Avatar extends RoomObject implements IMoveable {
   }
 
   private _isAnimating(look: LookOptions) {
-    if (look.action.kind === "wlk") return true;
-    if (look.actions.wav != null) return true;
-
     return false;
   }
 

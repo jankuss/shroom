@@ -1,4 +1,7 @@
-export function getDrawOrder(value: keyof typeof drawOrder, direction: number) {
+export function getDrawOrder(
+  value: keyof typeof drawOrder,
+  direction: number
+): string[] {
   const directions: any = drawOrder[value];
   return directions[direction.toString()];
 }

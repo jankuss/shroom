@@ -6,6 +6,15 @@ import {
   IAvatarLoader,
 } from "../../interfaces/IAvatarLoader";
 import { HitTexture } from "../hitdetection/HitTexture";
+import Bluebird from "bluebird";
+import { AvatarAnimationData } from "./util/data/AvatarAnimationData";
+import { FigureMapData } from "./util/data/FigureMapData";
+import { AvatarOffsetsData } from "./util/data/AvatarOffsetsData";
+import { AvatarPartSetsData } from "./util/data/AvatarPartSetsData";
+import { FigureData } from "./util/data/FigureData";
+import { AvatarActionsData } from "./util/data/AvatarActionsData";
+import { AvatarGeometryData } from "./util/data/AvatarGeometryData";
+import { AvatarAction } from "./util/AvatarAction";
 
 interface Options {
   resolveImage: (id: string, library: string) => Promise<HitTexture>;
@@ -25,18 +34,40 @@ export class AvatarLoader implements IAvatarLoader {
   static create(resourcePath: string = "") {
     return new AvatarLoader({
       createLookServer: async () => {
-        const fetchString = (url: string) =>
-          fetch(url).then((response) => response.text());
-        const fetchJson = (url: string) =>
-          fetch(url).then((response) => response.json());
+        const {
+          animationData,
+          offsetsData,
+          figureMap,
+          figureData,
+          partSetsData,
+          actionsData,
+          geometry,
+        } = await Bluebird.props({
+          animationData: AvatarAnimationData.fromUrl(
+            `${resourcePath}/HabboAvatarRenderLib_HabboAvatarAnimation.bin`
+          ),
+          figureData: FigureData.fromUrl(`${resourcePath}/figuredata.xml`),
+          figureMap: FigureMapData.fromUrl(`${resourcePath}/figuremap.xml`),
+          offsetsData: AvatarOffsetsData.fromUrl(
+            `${resourcePath}/offsets.json`
+          ),
+          partSetsData: AvatarPartSetsData.fromUrl(
+            `${resourcePath}/HabboAvatarRenderLib_HabboAvatarPartSets.bin`
+          ),
+          actionsData: AvatarActionsData.fromUrl(`${resourcePath}/actions.xml`),
+          geometry: AvatarGeometryData.fromUrl(
+            `${resourcePath}/HabboAvatarRenderLib_HabboAvatarGeometry.bin`
+          ),
+        });
 
         return createLookServer({
-          figureDataString: await fetchString(resourcePath + "/figuredata.xml"),
-          figureMapString: await fetchString(resourcePath + "/figuremap.xml"),
-          loadOffsetMap: async () =>
-            loadOffsetMapFromJson(
-              await fetchJson(resourcePath + "/offsets.json")
-            ).getOffset,
+          animationData,
+          figureData,
+          offsetsData,
+          figureMap,
+          partSetsData,
+          actionsData,
+          geometry,
         });
       },
       resolveImage: async (id, library) => {
@@ -70,69 +101,10 @@ export class AvatarLoader implements IAvatarLoader {
       });
 
     directions.forEach((direction) => {
-      // Load standing assets
       loadResources({
-        action: { kind: "std" },
+        action: AvatarAction.Respect,
         direction,
         look,
-        actions: {},
-      });
-
-      if (additional != null && additional.item != null) {
-        loadResources({
-          action: { kind: "std" },
-          direction,
-          look,
-          actions: {
-            item: { kind: "crr", item: additional.item },
-          },
-        });
-
-        loadResources({
-          action: { kind: "std" },
-          direction,
-          look,
-          actions: {
-            item: { kind: "drk", item: additional.item },
-          },
-        });
-      }
-
-      avatarFramesObject.wlk.forEach((frame) => {
-        loadResources({
-          action: { kind: "wlk", frame },
-          direction,
-          look,
-          actions: {},
-        });
-      });
-
-      // Load sitting assets
-      if (direction % 2 === 0) {
-        loadResources({
-          action: { kind: "sit" },
-          direction,
-          look,
-          actions: {},
-        });
-
-        loadResources({
-          action: { kind: "lay" },
-          direction,
-          look,
-          actions: {},
-        });
-      }
-
-      avatarFramesObject.wav.forEach((frame) => {
-        loadResources({
-          action: { kind: "std" },
-          direction,
-          look,
-          actions: {
-            wav: { frame },
-          },
-        });
       });
     });
 

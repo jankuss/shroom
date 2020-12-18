@@ -1,5 +1,5 @@
 export interface IAvatarOffsetsData {
-  getOffsets: (
+  getOffsets(
     fileName: string
-  ) => { offsetX: number; offsetY: number } | undefined;
+  ): { offsetX: number; offsetY: number } | undefined;
 }
