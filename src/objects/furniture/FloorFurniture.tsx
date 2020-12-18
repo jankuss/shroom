@@ -157,14 +157,13 @@ export class FloorFurniture
 
     const roomXrounded = Math.round(roomX);
     const roomYrounded = Math.round(roomY);
-    const roomZrounded = Math.round(roomZ);
 
     this._baseFurniture.x = x;
     this._baseFurniture.y = y;
     this._baseFurniture.zIndex = getZOrder(
       roomXrounded,
       roomYrounded,
-      roomZrounded
+      this.roomZ
     );
   }
 

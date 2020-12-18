@@ -339,7 +339,7 @@ export class Avatar extends RoomObject implements IMoveable {
       this._avatarSprites.zIndex = this._getZIndexAtPosition(
         roomXrounded,
         roomYrounded,
-        roomZrounded
+        this.roomZ
       );
     }
 
