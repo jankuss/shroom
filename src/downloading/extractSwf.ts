@@ -1,9 +1,9 @@
-import { exec } from "child_process";
+import { exec, ExecException } from "child_process";
 import * as path from "path";
 
 function execute(command: string) {
   return new Promise((resolve, reject) =>
-    exec(command, (error, stdout, stderr) =>
+    exec(command, {maxBuffer: 1024 * 1024}, (error: ExecException | null, stdout: string, stderr: string) =>
       error ? reject(error) : resolve(stdout)
     )
   );
