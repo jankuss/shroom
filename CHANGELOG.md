@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.7] - 2020-12-19
 
+### Fixed
+
 - Fixed cache issue when loading colored furniture
 
 ## [0.1.6] - 2020-12-19
@@ -14,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Furniture fetching by id differentiates between wall and floor items
+- Tile Map Parser: Allow doors in first column of tilemap
 
 ## [0.1.5] - 2020-12-19
 
