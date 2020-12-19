@@ -22,7 +22,7 @@ type SpriteWithStaticOffset = {
   x: number;
   y: number;
   sprite: PIXI.Sprite;
-  zIndex: number;
+  zIndex?: number;
 };
 
 export class BaseFurniture
@@ -180,7 +180,11 @@ export class BaseFurniture
 
   private _updateZIndex() {
     this._updateSprites((element: SpriteWithStaticOffset) => {
-      element.sprite.zIndex = this.zIndex + element.zIndex;
+      if (element.zIndex == null) {
+        element.sprite.zIndex = 0;
+      } else {
+        element.sprite.zIndex = this.zIndex + element.zIndex;
+      }
     });
   }
 
@@ -332,11 +336,14 @@ export class BaseFurniture
     const offsetX = +(32 - asset.x * scaleX);
     const offsetY = -asset.y + 16;
 
-    const zIndexOffset = shadow ? 0 : zIndex;
-
     sprite.x = x + offsetX;
     sprite.y = y + offsetY;
-    sprite.zIndex = this.zIndex + zIndexOffset;
+
+    if (shadow) {
+      sprite.zIndex = 0;
+    } else {
+      sprite.zIndex = this.zIndex + zIndex;
+    }
 
     if (tint != null) {
       sprite.tint = parseInt(tint, 16);
@@ -373,7 +380,12 @@ export class BaseFurniture
       sprite.tint = 0xffffff;
     }
 
-    return { sprite, x: offsetX, y: offsetY, zIndex: zIndexOffset };
+    return {
+      sprite,
+      x: offsetX,
+      y: offsetY,
+      zIndex: shadow ? undefined : zIndex,
+    };
   }
 
   private createAssetFromPart(
