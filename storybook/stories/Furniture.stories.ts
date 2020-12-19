@@ -1,4 +1,4 @@
-import { FloorFurniture, Room } from "@jankuss/shroom";
+import { FloorFurniture, Room, WallFurniture } from "@jankuss/shroom";
 import { createShroom } from "./common/createShroom";
 import { action } from "@storybook/addon-actions";
 
@@ -212,6 +212,47 @@ export function MultipleFurnitures() {
     setTimeout(() => {
       furnis.forEach((furni) => furni.move(furni.roomX, furni.roomY + 1, 0));
     }, 2500);
+
+    application.stage.addChild(room);
+  });
+}
+
+export function DifferentFetchTypes() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+       xxxxxxxxxxx
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+      `,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    const wallFurniture = new WallFurniture({
+      id: 4054,
+      direction: 2,
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+    });
+    const floorFurniture = new FloorFurniture({
+      id: 4054,
+      direction: 2,
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+    });
+
+    room.addRoomObject(wallFurniture);
+    room.addRoomObject(floorFurniture);
 
     application.stage.addChild(room);
   });

@@ -32,6 +32,8 @@ export class FloorFurniture
   private _animation?: string;
   private _highlight: boolean = false;
 
+  public readonly placementType = "wall";
+
   private _onClick: HitEventHandler | undefined;
   private _onDoubleClick: HitEventHandler | undefined;
 
@@ -96,7 +98,7 @@ export class FloorFurniture
     }
 
     this._baseFurniture = new BaseFurniture(
-      getFurnitureFetch(options),
+      getFurnitureFetch(options, "floor"),
       options.direction,
       options.animation
     );

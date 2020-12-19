@@ -21,6 +21,8 @@ export class WallFurniture extends RoomObject implements IFurniture {
   private _direction: number;
   private _highlight: boolean = false;
 
+  public readonly placementType = "wall";
+
   constructor(
     options: {
       roomX: number;
@@ -43,7 +45,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
     this._direction = options.direction;
 
     this._baseFurniture = new BaseFurniture(
-      getFurnitureFetch(options),
+      getFurnitureFetch(options, "wall"),
       options.direction,
       options.animation,
       (direction) => getMaskId(direction, this.roomX, this.roomY)

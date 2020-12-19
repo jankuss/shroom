@@ -4,7 +4,10 @@ import { furnitureDataTransformers } from "../util/furnitureDataTransformers";
 export interface IFurnitureData {
   getRevisionForType(type: string): Promise<number | undefined>;
   getInfo(type: string): Promise<FurnitureInfo | undefined>;
-  getTypeById(id: FurnitureId): Promise<string | undefined>;
+  getTypeById(
+    id: FurnitureId,
+    type: "wall" | "floor"
+  ): Promise<string | undefined>;
   getInfoForFurniture(
     furniture: IFurniture
   ): Promise<FurnitureInfo | undefined>;

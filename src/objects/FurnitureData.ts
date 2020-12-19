@@ -16,7 +16,11 @@ type IdToTypeMap = {
 };
 
 export class FurnitureData implements IFurnitureData {
-  private data: Promise<{ typeToInfo: FurnitureMap; idToType: IdToTypeMap }>;
+  private data: Promise<{
+    typeToInfo: FurnitureMap;
+    floorIdToType: IdToTypeMap;
+    wallIdToType: IdToTypeMap;
+  }>;
 
   constructor(private getFurniData: () => Promise<string>) {
     this.data = this.prepareData();
@@ -27,22 +31,34 @@ export class FurnitureData implements IFurnitureData {
     const parsed = await parseStringPromise(furniDataString);
 
     const typeToInfo: FurnitureMap = {};
-    const idToType: IdToTypeMap = {};
+    const floorIdToType: IdToTypeMap = {};
+    const wallIdToType: IdToTypeMap = {};
 
-    const register = (data: any[]) => {
+    const register = (data: any[], furnitureType: "floor" | "wall") => {
       data.forEach((element) => {
         const type = element.$.classname;
         const id = element.$.id;
 
         typeToInfo[type] = formatFurnitureData(element);
-        idToType[id] = type;
+
+        if (furnitureType === "floor") {
+          if (floorIdToType[id] != null)
+            throw new Error(`Floor furniture with id ${id} already exists`);
+
+          floorIdToType[id] = type;
+        } else if (furnitureType === "wall") {
+          if (wallIdToType[id] != null)
+            throw new Error(`Wall furniture with id ${id} already exists`);
+
+          wallIdToType[id] = type;
+        }
       });
     };
 
-    register(parsed.furnidata.roomitemtypes[0].furnitype);
-    register(parsed.furnidata.wallitemtypes[0].furnitype);
+    register(parsed.furnidata.roomitemtypes[0].furnitype, "wall");
+    register(parsed.furnidata.wallitemtypes[0].furnitype, "floor");
 
-    return { typeToInfo, idToType };
+    return { typeToInfo, floorIdToType, wallIdToType };
   }
 
   static create(resourcePath: string = "") {
@@ -62,9 +78,13 @@ export class FurnitureData implements IFurnitureData {
     return data.typeToInfo[type];
   }
 
-  async getTypeById(id: FurnitureId): Promise<string | undefined> {
+  async getTypeById(
+    id: FurnitureId,
+    placementType: "wall" | "floor"
+  ): Promise<string | undefined> {
     const data = await this.data;
-    const type = data.idToType[id];
+    const type =
+      placementType != "floor" ? data.floorIdToType[id] : data.wallIdToType[id];
 
     if (type == null) return;
 
@@ -73,7 +93,10 @@ export class FurnitureData implements IFurnitureData {
 
   async getInfoForFurniture(furniture: IFurniture) {
     if (furniture.id != null) {
-      const type = await this.getTypeById(furniture.id);
+      const type = await this.getTypeById(
+        furniture.id,
+        furniture.placementType
+      );
 
       if (type != null) {
         return this.getInfo(type);

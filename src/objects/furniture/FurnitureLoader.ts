@@ -56,7 +56,10 @@ export class FurnitureLoader implements IFurnitureLoader {
     let typeWithColor: string;
 
     if (fetch.kind === "id") {
-      const type = await this.options.furnitureData.getTypeById(fetch.id);
+      const type = await this.options.furnitureData.getTypeById(
+        fetch.id,
+        fetch.placementType
+      );
       if (type == null)
         throw new Error("Couldn't determine type for furniture.");
 
