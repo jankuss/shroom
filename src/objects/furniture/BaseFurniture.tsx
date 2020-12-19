@@ -11,13 +11,19 @@ import { Asset } from "./util/parseAssets";
 import { Layer } from "./util/visualization/parseLayers";
 import { HitTexture } from "../hitdetection/HitTexture";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
+import { HighlightFilter } from "./filter/HighlightFilter";
+import { FurnitureFetch } from "../../interfaces/IFurnitureLoader";
+
+const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
 type MaskIdGetter = (direction: number) => string | undefined;
+
+type SpriteWithStaticOffset = { x: number; y: number; sprite: PIXI.Sprite };
 
 export class BaseFurniture
   extends RoomObject
   implements IFurnitureEventHandlers {
-  private sprites: PIXI.DisplayObject[] = [];
+  private elements: SpriteWithStaticOffset[] = [];
   private loadFurniResult: LoadFurniResult | undefined;
   private unknownSprite: PIXI.Sprite | undefined;
 
@@ -26,14 +32,23 @@ export class BaseFurniture
   private _zIndex: number = 0;
   private _direction: number = 0;
   private _animation: string | undefined;
-  private _type: string;
+  private _type: FurnitureFetch;
   private _unknownTexture: PIXI.Texture | undefined;
   private _clickHandler = new ClickHandler();
 
-  private _doubleClickInfo?: {
-    initialEvent: HitEvent;
-    timeout: number;
-  };
+  private _refreshPosition: boolean = false;
+  private _refreshFurniture: boolean = false;
+
+  private _highlight: boolean = false;
+
+  public get highlight() {
+    return this._highlight;
+  }
+
+  public set highlight(value) {
+    this._highlight = value;
+    this._refreshFurniture = true;
+  }
 
   public get onClick() {
     return this._clickHandler.onClick;
@@ -57,7 +72,7 @@ export class BaseFurniture
 
   public set x(value) {
     this._x = value;
-    this.updateFurniture();
+    this._refreshPosition = true;
   }
 
   public get y() {
@@ -66,7 +81,7 @@ export class BaseFurniture
 
   public set y(value) {
     this._y = value;
-    this.updateFurniture();
+    this._refreshPosition = true;
   }
 
   public get zIndex() {
@@ -75,7 +90,7 @@ export class BaseFurniture
 
   public set zIndex(value) {
     this._zIndex = value;
-    this.updateFurniture();
+    this._refreshPosition = true;
   }
 
   public get direction() {
@@ -84,7 +99,7 @@ export class BaseFurniture
 
   public set direction(value) {
     this._direction = value;
-    this.updateFurniture();
+    this._refreshFurniture = true;
   }
 
   public get animation() {
@@ -93,11 +108,11 @@ export class BaseFurniture
 
   public set animation(value) {
     this._animation = value;
-    this.updateFurniture();
+    this._refreshFurniture = true;
   }
 
   private animatedSprites: {
-    sprites: Map<string, PIXI.Sprite>;
+    sprites: Map<string, SpriteWithStaticOffset>;
     frames: string[];
   }[] = [];
 
@@ -116,7 +131,7 @@ export class BaseFurniture
   }
 
   constructor(
-    type: string,
+    type: FurnitureFetch,
     direction: number,
     animation: string = "0",
     getMaskId: MaskIdGetter = () => undefined
@@ -126,18 +141,37 @@ export class BaseFurniture
     this._animation = animation;
     this._type = type;
     this._getMaskId = getMaskId;
+
+    PIXI.Ticker.shared.add(() => {
+      if (this._refreshFurniture) {
+        this._refreshFurniture = false;
+        this._updateFurniture();
+      }
+
+      if (this._refreshPosition) {
+        this._refreshPosition = false;
+        this._updatePosition();
+      }
+    });
   }
 
-  updateFurniture() {
+  _updatePosition() {
+    const updateElement = (element: SpriteWithStaticOffset) => {
+      element.sprite.x = this.x + element.x;
+      element.sprite.y = this.y + element.y;
+    };
+
+    this.elements.forEach(updateElement);
+    this.animatedSprites.forEach(({ sprites }) =>
+      sprites.forEach(updateElement)
+    );
+  }
+
+  _updateFurniture() {
     if (!this.mounted) return;
 
     if (this.loadFurniResult != null) {
-      this.updateSprites(
-        this.loadFurniResult,
-        this._type,
-        this.direction,
-        this.animation
-      );
+      this.updateSprites(this.loadFurniResult, this.direction, this.animation);
     } else {
       this.updateUnknown();
     }
@@ -147,27 +181,25 @@ export class BaseFurniture
     this.destroySprites();
 
     this.unknownSprite = new PIXI.Sprite(this._unknownTexture);
-    this.unknownSprite.x = this.x;
-    this.unknownSprite.y = this.y - 32;
+    const x = this.x;
+    const y = this.y - 32;
+
+    this.unknownSprite.x = x;
+    this.unknownSprite.y = y;
     this.unknownSprite.zIndex = this.zIndex;
 
     this.visualization.addContainerChild(this.unknownSprite);
-    this.sprites.push(this.unknownSprite);
+    this.elements.push({ sprite: this.unknownSprite, x, y });
   }
 
   updateSprites(
     loadFurniResult: LoadFurniResult,
-    type: string,
     direction: number,
     animation?: string
   ) {
     this.destroySprites();
 
-    const { parts } = loadFurniResult.getDrawDefinition(
-      type,
-      direction,
-      animation
-    );
+    const { parts } = loadFurniResult.getDrawDefinition(direction, animation);
 
     if (animation != null) {
       this.cancelTicker = this.animationTicker.subscribe((frame) =>
@@ -176,31 +208,31 @@ export class BaseFurniture
     }
 
     parts.forEach((part, index) => {
-      const sprite = this.createAssetFromPart(
+      const asset = this.createAssetFromPart(
         part,
         { x: this.x, y: this.y },
         loadFurniResult,
         index
       );
 
-      if (sprite.kind === "simple" || sprite.kind === "mask") {
-        this.sprites.push(sprite.sprite);
+      if (asset.kind === "simple" || asset.kind === "mask") {
+        this.elements.push(asset.sprite);
 
-        if (sprite.kind === "mask") {
+        if (asset.kind === "mask") {
           const maskId = this.maskId(this.direction);
 
           if (maskId != null) {
-            this.visualization.addMask(maskId, sprite.sprite);
+            this.visualization.addMask(maskId, asset.sprite.sprite);
           }
         } else {
-          this.visualization.addContainerChild(sprite.sprite);
+          this.visualization.addContainerChild(asset.sprite.sprite);
         }
-      } else if (sprite.kind === "animated") {
-        this.animatedSprites.push(sprite);
-        const sprites = [...sprite.sprites.values()];
+      } else if (asset.kind === "animated") {
+        this.animatedSprites.push(asset);
+        const sprites = [...asset.sprites.values()];
 
         sprites.forEach((sprite) => {
-          this.visualization.addContainerChild(sprite);
+          this.visualization.addContainerChild(sprite.sprite);
         });
       }
     });
@@ -220,11 +252,11 @@ export class BaseFurniture
       const current = animatedSprite.sprites.get(frameIdCurrent);
 
       if (previous) {
-        previous.visible = false;
+        previous.sprite.visible = false;
       }
 
       if (current) {
-        current.visible = true;
+        current.sprite.visible = true;
       }
     });
   }
@@ -248,7 +280,7 @@ export class BaseFurniture
       shadow?: boolean;
       mask?: boolean;
     }
-  ): PIXI.Sprite {
+  ): SpriteWithStaticOffset {
     const sprite = new HitSprite({
       hitDetection: this.hitDetection,
       mirrored: asset.flipH,
@@ -263,10 +295,22 @@ export class BaseFurniture
       );
     }
 
+    const highlight = this.highlight && layer?.ink == null && !shadow && !mask;
+
+    if (highlight) {
+      sprite.filters = [highlightFilter];
+    } else {
+      sprite.filters = [];
+    }
+
     const scaleX = asset.flipH ? -1 : 1;
-    sprite.x = x + (32 - asset.x * scaleX);
-    sprite.y = y - asset.y + 16;
-    sprite.zIndex = zIndex;
+
+    const offsetX = +(32 - asset.x * scaleX);
+    const offsetY = -asset.y + 16;
+
+    sprite.x = x + offsetX;
+    sprite.y = y + offsetY;
+    sprite.zIndex = shadow ? 0 : zIndex;
 
     if (tint != null) {
       sprite.tint = parseInt(tint, 16);
@@ -274,24 +318,36 @@ export class BaseFurniture
 
     if (layer != null) {
       if (layer.alpha != null) {
-        sprite.alpha = layer.alpha / 255;
+        if (this.highlight) {
+          sprite.alpha = 1;
+        } else {
+          sprite.alpha = layer.alpha / 255;
+        }
       }
 
       if (layer.ink != null) {
+        if (this.highlight) {
+          sprite.visible = false;
+        }
         sprite.blendMode =
           layer.ink === "ADD" ? PIXI.BLEND_MODES.ADD : PIXI.BLEND_MODES.NORMAL;
       }
     }
 
     if (shadow) {
-      sprite.alpha = 0.195;
+      if (this.highlight) {
+        sprite.visible = false;
+      } else {
+        sprite.visible = true;
+        sprite.alpha = 0.195;
+      }
     }
 
     if (mask) {
       sprite.tint = 0xffffff;
     }
 
-    return sprite;
+    return { sprite, x: offsetX, y: offsetY };
   }
 
   private createAssetFromPart(
@@ -300,10 +356,10 @@ export class BaseFurniture
     loadFurniResult: LoadFurniResult,
     index: number
   ):
-    | { kind: "simple" | "mask"; sprite: PIXI.Sprite }
+    | { kind: "simple" | "mask"; sprite: SpriteWithStaticOffset }
     | {
         kind: "animated";
-        sprites: Map<string, PIXI.Sprite>;
+        sprites: Map<string, SpriteWithStaticOffset>;
         frames: string[];
       } {
     const getAssetTextureName = (asset: Asset) => asset.source ?? asset.name;
@@ -336,16 +392,19 @@ export class BaseFurniture
           }
         );
         if (mask != null && mask) {
-          return { kind: "mask", sprite };
+          return { kind: "mask", sprite: sprite };
         } else {
-          return { kind: "simple", sprite };
+          return { kind: "simple", sprite: sprite };
         }
       }
 
-      return { kind: "simple", sprite: new PIXI.Sprite() };
+      return {
+        kind: "simple",
+        sprite: { x: 0, y: 0, sprite: new PIXI.Sprite() },
+      };
     }
 
-    const sprites = new Map<string, PIXI.Sprite>();
+    const sprites = new Map<string, SpriteWithStaticOffset>();
 
     assets.forEach((spriteFrame) => {
       const texture = getTexture(spriteFrame);
@@ -360,7 +419,7 @@ export class BaseFurniture
         shadow,
       });
 
-      sprite.visible = false;
+      sprite.sprite.visible = false;
 
       sprites.set(name, sprite);
     });
@@ -373,13 +432,13 @@ export class BaseFurniture
   }
 
   destroySprites() {
-    this.sprites.forEach((sprite) => sprite.destroy());
+    this.elements.forEach((sprite) => sprite.sprite.destroy());
     this.animatedSprites.forEach((sprite) =>
-      sprite.sprites.forEach((sprite) => sprite.destroy())
+      sprite.sprites.forEach((sprite) => sprite.sprite.destroy())
     );
     this._maskNodes.forEach((node) => node.remove());
 
-    this.sprites = [];
+    this.elements = [];
     this.animatedSprites = [];
   }
 
@@ -388,10 +447,10 @@ export class BaseFurniture
 
     this.furnitureLoader.loadFurni(this._type).then((result) => {
       this.loadFurniResult = result;
-      this.updateFurniture();
+      this._updateFurniture();
     });
 
-    this.updateFurniture();
+    this._updateFurniture();
   }
 
   destroyed() {

@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2020-12-19
+
+### Changed
+
+- Improve furniture movement animations performance
+
+### Fixed
+
+- Z-Ordering of furniture on the same tile
+
+## [0.1.4] - 2020-12-17
+
+### Added
+
+- Highlight State for Furniture
+
+### Changed
+
+- **BREAKING:** Tile Map Parsing behavior
+
+  Tile map parsing is now equal to how the original tilemaps work. That means each row and column should be padded with an empty (`x`) tile. So for example:
+
+  ```
+  00
+  00
+  ```
+
+  becomes
+
+  ```
+  xxx
+  x00
+  x00
+  ```
+
+### Fixed
+
+- Regression where landscapes for some walls don't work
+
 ## [0.1.3] - 2020-12-15
 
 ### Added

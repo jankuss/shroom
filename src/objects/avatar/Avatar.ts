@@ -308,7 +308,7 @@ export class Avatar extends RoomObject implements IMoveable {
 
     const { roomX, roomY, roomZ } = this._getDisplayRoomPosition();
 
-    const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ, "object");
+    const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
 
     const roomXrounded = Math.round(roomX);
     const roomYrounded = Math.round(roomY);
@@ -320,7 +320,7 @@ export class Avatar extends RoomObject implements IMoveable {
       this._avatarSprites.zIndex = this._getZIndexAtPosition(
         roomXrounded,
         roomYrounded,
-        roomZrounded
+        this.roomZ
       );
     }
 

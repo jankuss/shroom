@@ -83,7 +83,7 @@ export class Room
   private _onTileClick: ((position: RoomPosition) => void) | undefined;
 
   private _wallDepth: number = 8;
-  private _wallHeight: number = 115;
+  private _wallHeight: number = 116;
   private _tileHeight: number = 8;
   private _application: PIXI.Application;
   private _maskOffsets: { x: number; y: number } = { x: 0, y: 0 };
@@ -318,8 +318,9 @@ export class Room
   }
 
   private _updatePosition() {
-    this.visualization.x = -this.roomBounds.minX;
-    this.visualization.y = -this.roomBounds.minY;
+    this.visualization.x =
+      Math.round(-this.roomBounds.minX / 2) * 2 + this._tileMapBounds.minX;
+    this.visualization.y = Math.round(-this.roomBounds.minY / 2) * 2;
   }
 
   public get roomBounds() {
@@ -386,17 +387,9 @@ export class Room
   getPosition(
     roomX: number,
     roomY: number,
-    roomZ: number,
-    type: "plane" | "object" | "none"
+    roomZ: number
   ): { x: number; y: number } {
     const getBasePosition = () => {
-      switch (type) {
-        case "plane":
-          return this._getTilePositionWithOffset(roomX, roomY);
-        case "object":
-          return this._getObjectPositionWithOffset(roomX, roomY);
-      }
-
       return { x: roomX, y: roomY };
     };
 
@@ -404,14 +397,10 @@ export class Room
 
     const base = 32;
 
-    // We must use `_tileMapBounds` here instead of roomBounds, since roomBounds depends on
-    // multiple, changeable parameters. Since there is no way to notify the room objects, that
-    // getPosition positioning changed, we just use the tileMapBounds here, since they are static.
-    //
-    // Future Idea: Create a container, which applies the transforms dependent on roomBounds, and
-    // update that container to get all elements in the room positioned correctly.
-
-    const xPos = x * base - y * base;
+    // TODO: Right now we are subtracting the tileMapBounds here.
+    // This is so the landscapes work correctly. This has something with the mask position being negative for some walls.
+    // This fixes it for now.
+    const xPos = -this._tileMapBounds.minX + x * base - y * base;
     const yPos = x * (base / 2) + y * (base / 2);
 
     return {
@@ -468,8 +457,8 @@ export class Room
           this.registerTile(
             new Tile({
               geometry: this,
-              roomX: x - this._wallOffsets.x,
-              roomY: y - this._wallOffsets.y,
+              roomX: x,
+              roomY: y,
               roomZ: tile.z,
               edge: true,
               tileHeight: this.tileHeight,
@@ -480,8 +469,8 @@ export class Room
 
           const wall = new Wall({
             geometry: this,
-            roomX: x - this._wallOffsets.x,
-            roomY: y - this._wallOffsets.y,
+            roomX: x,
+            roomY: y,
             direction: "left",
             tileHeight: this.tileHeight,
             wallHeight: this.wallHeightWithZ,
@@ -499,8 +488,8 @@ export class Room
 
           this.registerTileCursor(
             {
-              roomX: x - this._wallOffsets.x,
-              roomY: y - this._wallOffsets.y,
+              roomX: x,
+              roomY: y,
               roomZ: tile.z,
             },
             true
@@ -511,8 +500,8 @@ export class Room
           this.registerTile(
             new Tile({
               geometry: this,
-              roomX: x - this._wallOffsets.x,
-              roomY: y - this._wallOffsets.y,
+              roomX: x,
+              roomY: y,
               roomZ: tile.z,
               edge: true,
               tileHeight: this.tileHeight,
@@ -521,8 +510,8 @@ export class Room
           );
 
           this.registerTileCursor({
-            roomX: x - this._wallOffsets.x,
-            roomY: y - this._wallOffsets.y,
+            roomX: x,
+            roomY: y,
             roomZ: tile.z,
           });
         }
@@ -533,8 +522,8 @@ export class Room
           this.registerWall(
             new Wall({
               geometry: this,
-              roomX: x - this._wallOffsets.x,
-              roomY: y - this._wallOffsets.y,
+              roomX: x,
+              roomY: y,
               direction: direction,
               tileHeight: this.tileHeight,
               wallHeight: this.wallHeightWithZ,
@@ -551,8 +540,8 @@ export class Room
           this.registerWall(
             new Wall({
               geometry: this,
-              roomX: x - this._wallOffsets.x,
-              roomY: y - this._wallOffsets.y,
+              roomX: x,
+              roomY: y,
               direction: "right",
               tileHeight: this.tileHeight,
               wallHeight: this.wallHeightWithZ,
@@ -566,8 +555,8 @@ export class Room
           this.registerWall(
             new Wall({
               geometry: this,
-              roomX: x - this._wallOffsets.x,
-              roomY: y - this._wallOffsets.y,
+              roomX: x,
+              roomY: y,
               direction: "left",
               tileHeight: this.tileHeight,
               wallHeight: this.wallHeightWithZ,
@@ -583,8 +572,8 @@ export class Room
           this.registerTile(
             new Stair({
               geometry: this,
-              roomX: x - this._wallOffsets.x,
-              roomY: y - this._wallOffsets.y,
+              roomX: x,
+              roomY: y,
               roomZ: tile.z,
               tileHeight: this.tileHeight,
               color: this.tileColor,
@@ -593,14 +582,14 @@ export class Room
           );
 
           this.registerTileCursor({
-            roomX: x - this._wallOffsets.x,
-            roomY: y - this._wallOffsets.y,
+            roomX: x,
+            roomY: y,
             roomZ: tile.z,
           });
 
           this.registerTileCursor({
-            roomX: x - this._wallOffsets.x,
-            roomY: y - this._wallOffsets.y,
+            roomX: x,
+            roomY: y,
             roomZ: tile.z + 1,
           });
         }
