@@ -73,15 +73,21 @@ export function getAvatarDrawDefinition(
     geometry,
   }: AvatarDependencies
 ): AvatarDrawDefinition | undefined {
+  const a = new Set(["Default", "Respect"]);
+
+  console.log(a, actions);
+
   const activeActions = actionsData
     .getActions()
-    .filter((info) => actions.has(info.id))
+    .filter((info) => a.has(info.id))
     .sort((a, b) => {
       if (a.precedence < b.precedence) return 1;
       if (a.precedence > b.precedence) return -1;
 
       return 0;
     });
+
+  console.log("ABC", activeActions);
 
   const partByType = new Map<
     string,

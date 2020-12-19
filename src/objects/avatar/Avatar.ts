@@ -181,7 +181,10 @@ export class Avatar extends RoomObject implements IMoveable {
 
   private _getCurrentLookOptions(): LookOptions {
     return {
-      actions: new Set<AvatarAction>([AvatarAction.Default]),
+      actions: new Set<AvatarAction>([
+        AvatarAction.Default,
+        AvatarAction.Respect,
+      ]),
       direction: this.direction,
       look: this._look,
     };
