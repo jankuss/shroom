@@ -102,7 +102,7 @@ export class AvatarLoader implements IAvatarLoader {
 
     directions.forEach((direction) => {
       loadResources({
-        actions: new Set([AvatarAction.Default]),
+        actions: new Set([AvatarAction.Default, AvatarAction.Respect]),
         direction,
         look,
       });

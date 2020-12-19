@@ -56,13 +56,15 @@ interface Options {
   frame: number;
 }
 
+const a = new Set(["Default", "Respect"]);
+
 /**
  * Returns a definition of how the avatar should be drawn.
  * @param options Look options
  * @param dependencies External figure data, draw order and offsets
  */
 export function getAvatarDrawDefinition(
-  { parsedLook, actions, direction }: Options,
+  { parsedLook, actions: initialActions, direction }: Options,
   {
     offsetsData,
     animationData,
@@ -73,13 +75,11 @@ export function getAvatarDrawDefinition(
     geometry,
   }: AvatarDependencies
 ): AvatarDrawDefinition | undefined {
-  const a = new Set(["Default", "Respect"]);
-
-  console.log(a, actions);
+  const actions = new Set(initialActions).add(AvatarAction.Default);
 
   const activeActions = actionsData
     .getActions()
-    .filter((info) => a.has(info.id))
+    .filter((info) => actions.has(info.id))
     .sort((a, b) => {
       if (a.precedence < b.precedence) return 1;
       if (a.precedence > b.precedence) return -1;

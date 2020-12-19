@@ -9,10 +9,11 @@ export function Default() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-            000000000000000
-            000000000000000
-            000000000000000
-            000000000000000
+            xxxxxxxxxxxxxxxx
+            x000000000000000
+            x000000000000000
+            x000000000000000
+            x000000000000000
           `,
     });
 
@@ -20,8 +21,8 @@ export function Default() {
       const avatar = new Avatar({
         look: "hd-205-1.hr-155-61.ea-1406-107.ch-262-107.lg-280-110.sh-305-62",
         direction: i,
-        roomX: i * 2,
-        roomY: 0,
+        roomX: 1 + i * 2,
+        roomY: 1,
         roomZ: 0,
       });
 
