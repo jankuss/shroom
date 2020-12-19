@@ -6,10 +6,14 @@ import { BaseFurniture } from "./BaseFurniture";
 import { IFurniture, IFurnitureBehavior } from "./IFurniture";
 import { HitEvent } from "../../interfaces/IHitDetection";
 import { getMaskId } from "../room/util/getMaskId";
+import { FurnitureFetchInfo } from "./FurnitureFetchInfo";
+import { getFurnitureFetch } from "./util/getFurnitureFetch";
+import { FurnitureId } from "../../interfaces/IFurnitureData";
 
 export class WallFurniture extends RoomObject implements IFurniture {
   private _baseFurniture: BaseFurniture;
-  private _type: string;
+  private readonly _type: string | undefined;
+  private readonly _id: FurnitureId | undefined;
   private _roomX: number;
   private _roomY: number;
   private _roomZ: number;
@@ -17,18 +21,20 @@ export class WallFurniture extends RoomObject implements IFurniture {
   private _direction: number;
   private _highlight: boolean = false;
 
-  constructor(options: {
-    roomX: number;
-    roomZ: number;
-    roomY: number;
-    type: string;
-    direction: number;
-    animation?: string;
-    behaviors?: IFurnitureBehavior<WallFurniture>[];
-  }) {
+  constructor(
+    options: {
+      roomX: number;
+      roomZ: number;
+      roomY: number;
+      direction: number;
+      animation?: string;
+      behaviors?: IFurnitureBehavior<WallFurniture>[];
+    } & FurnitureFetchInfo
+  ) {
     super();
 
     this._type = options.type;
+    this._id = options.id;
 
     this._roomX = options.roomX;
     this._roomY = options.roomY;
@@ -37,13 +43,17 @@ export class WallFurniture extends RoomObject implements IFurniture {
     this._direction = options.direction;
 
     this._baseFurniture = new BaseFurniture(
-      options.type,
+      getFurnitureFetch(options),
       options.direction,
       options.animation,
       (direction) => getMaskId(direction, this.roomX, this.roomY)
     );
 
     options.behaviors?.forEach((behavior) => behavior.setParent(this));
+  }
+
+  public get id() {
+    return this._id;
   }
 
   public get highlight() {

@@ -6,7 +6,6 @@ import { parseStringAsync } from "./parseStringAsync";
 import { parseVisualization } from "./visualization/parseVisualization";
 
 export type GetFurniDrawDefinition = (
-  type: string,
   direction: number,
   animation?: string
 ) => DrawDefinition;
@@ -68,9 +67,9 @@ export async function loadFurni(
   const textures = await loadTextures();
 
   return {
-    getDrawDefinition: (type: string, direction: number, animation?: string) =>
+    getDrawDefinition: (direction: number, animation?: string) =>
       getFurniDrawDefinition({
-        type,
+        type: typeWithColor,
         direction,
         visualization,
         assetMap,

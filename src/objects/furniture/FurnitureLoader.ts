@@ -1,5 +1,8 @@
 import { IFurnitureData } from "../../interfaces/IFurnitureData";
-import { IFurnitureLoader } from "../../interfaces/IFurnitureLoader";
+import {
+  FurnitureFetch,
+  IFurnitureLoader,
+} from "../../interfaces/IFurnitureLoader";
 import { loadFurni, LoadFurniResult } from "./util/loadFurni";
 
 export class FurnitureLoader implements IFurnitureLoader {
@@ -49,7 +52,19 @@ export class FurnitureLoader implements IFurnitureLoader {
     });
   }
 
-  async loadFurni(typeWithColor: string): Promise<LoadFurniResult> {
+  async loadFurni(fetch: FurnitureFetch): Promise<LoadFurniResult> {
+    let typeWithColor: string;
+
+    if (fetch.kind === "id") {
+      const type = await this.options.furnitureData.getTypeById(fetch.id);
+      if (type == null)
+        throw new Error("Couldn't determine type for furniture.");
+
+      typeWithColor = type;
+    } else {
+      typeWithColor = fetch.type;
+    }
+
     const type = typeWithColor.split("*")[0];
     const revision = await this.options.furnitureData.getRevisionForType(
       typeWithColor

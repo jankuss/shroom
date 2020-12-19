@@ -99,7 +99,7 @@ export function Issue31() {
     });
 
     const furniture4 = new FloorFurniture({
-      type: "plant_pineapple",
+      id: 160,
       direction: 0,
       roomX: 5,
       roomY: 1,
@@ -113,7 +113,7 @@ export function Issue31() {
       roomZ: 0.5,
     });
     const furniture6 = new FloorFurniture({
-      type: "plant_pineapple",
+      id: 160,
       direction: 0,
       roomX: 5,
       roomY: 1,

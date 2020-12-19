@@ -12,6 +12,7 @@ import { Layer } from "./util/visualization/parseLayers";
 import { HitTexture } from "../hitdetection/HitTexture";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 import { HighlightFilter } from "./filter/HighlightFilter";
+import { FurnitureFetch } from "../../interfaces/IFurnitureLoader";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -29,7 +30,7 @@ export class BaseFurniture
   private _zIndex: number = 0;
   private _direction: number = 0;
   private _animation: string | undefined;
-  private _type: string;
+  private _type: FurnitureFetch;
   private _unknownTexture: PIXI.Texture | undefined;
   private _clickHandler = new ClickHandler();
 
@@ -130,7 +131,7 @@ export class BaseFurniture
   }
 
   constructor(
-    type: string,
+    type: FurnitureFetch,
     direction: number,
     animation: string = "0",
     getMaskId: MaskIdGetter = () => undefined
@@ -171,17 +172,13 @@ export class BaseFurniture
 
   updateSprites(
     loadFurniResult: LoadFurniResult,
-    type: string,
+    type: FurnitureFetch,
     direction: number,
     animation?: string
   ) {
     this.destroySprites();
 
-    const { parts } = loadFurniResult.getDrawDefinition(
-      type,
-      direction,
-      animation
-    );
+    const { parts } = loadFurniResult.getDrawDefinition(direction, animation);
 
     if (animation != null) {
       this.cancelTicker = this.animationTicker.subscribe((frame) =>

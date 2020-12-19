@@ -8,6 +8,9 @@ import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 import { HitEventHandler } from "../hitdetection/HitSprite";
 import { RoomPosition } from "../../types/RoomPosition";
 import { IMoveable } from "../IMoveable";
+import { FurnitureFetchInfo } from "./FurnitureFetchInfo";
+import { getFurnitureFetch } from "./util/getFurnitureFetch";
+import { FurnitureId } from "../../interfaces/IFurnitureData";
 
 export class FloorFurniture
   extends RoomObject
@@ -19,12 +22,14 @@ export class FloorFurniture
 
   private _moving: boolean = false;
 
+  private readonly _id: FurnitureId | undefined;
+  private readonly _type: string | undefined;
+
   private _roomX: number;
   private _roomY: number;
   private _roomZ: number;
   private _direction: number;
   private _animation?: string;
-  private _type: string;
   private _highlight: boolean = false;
 
   private _onClick: HitEventHandler | undefined;
@@ -61,27 +66,37 @@ export class FloorFurniture
     this._baseFurniture.onDoubleClick = this.onDoubleClick;
   }
 
-  constructor(options: {
-    roomX: number;
-    roomY: number;
-    roomZ: number;
-    direction: number;
+  public get id() {
+    return this._id;
+  }
 
-    type: string;
-    animation?: string;
-    behaviors?: IFurnitureBehavior<FloorFurniture>[];
-  }) {
+  constructor(
+    options: {
+      roomX: number;
+      roomY: number;
+      roomZ: number;
+      direction: number;
+      animation?: string;
+      behaviors?: IFurnitureBehavior<FloorFurniture>[];
+    } & FurnitureFetchInfo
+  ) {
     super();
 
     this._type = options.type;
+    this._id = options.id;
+
     this._roomX = options.roomX;
     this._roomY = options.roomY;
     this._roomZ = options.roomZ;
     this._direction = options.direction;
     this._animation = options.animation;
 
+    if ("type" in options) {
+      this._type = options.type;
+    }
+
     this._baseFurniture = new BaseFurniture(
-      options.type,
+      getFurnitureFetch(options),
       options.direction,
       options.animation
     );
