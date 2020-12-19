@@ -168,7 +168,6 @@ export class BaseFurniture
       if (this._refreshZIndex) {
         this._refreshZIndex = false;
         this._updateZIndex();
-        console.log(this.zIndex);
       }
     });
   }
