@@ -269,7 +269,6 @@ export class AvatarSprites extends RoomObject {
         this.avatarLoaderResult = result;
 
         if (this._nextLookOptions != null) {
-          console.log("SET NEW LOOK", this._nextLookOptions);
           this._lookOptions = this._nextLookOptions;
           this._nextLookOptions = undefined;
         }
