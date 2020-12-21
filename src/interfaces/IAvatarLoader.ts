@@ -1,12 +1,10 @@
+import { AvatarAction } from "../objects/avatar/util/AvatarAction";
 import { LookOptions } from "../objects/avatar/util/createLookServer";
 import { AvatarDrawDefinition } from "../objects/avatar/util/getAvatarDrawDefinition";
 import { HitTexture } from "../objects/hitdetection/HitTexture";
 
 export interface IAvatarLoader {
-  getAvatarDrawDefinition(
-    look: string,
-    additional?: { item?: number }
-  ): Promise<AvatarLoaderResult>;
+  getAvatarDrawDefinition(options: LookOptions): Promise<AvatarLoaderResult>;
 }
 
 export type AvatarLoaderResult = {

@@ -3,6 +3,7 @@ import { AvatarAction } from "../AvatarAction";
 export interface IAvatarActionsData {
   getAction(id: AvatarAction): AvatarActionInfo | undefined;
   getActions(): AvatarActionInfo[];
+  getHandItemId(actionId: string, id: string): number | undefined;
 }
 
 export interface AvatarActionInfo {

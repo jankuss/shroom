@@ -19,7 +19,7 @@ export class AvatarAnimationData
 
       const repeatsString = element.getAttribute("repeats");
 
-      let repeats = 1;
+      let repeats = 2;
 
       if (repeatsString != null) {
         repeats = Number(repeatsString);

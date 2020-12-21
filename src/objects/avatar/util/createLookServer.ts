@@ -1,8 +1,3 @@
-import { parseStringAsync } from "./parseStringAsync";
-import { parseDrawOrder } from "./parseDrawOrder";
-import { parseFigureData } from "./parseFigureData";
-import { parseFigureMap } from "./parseFigureMap";
-import { GetOffset } from "./loadOffsetMap";
 import {
   getAvatarDrawDefinition,
   AvatarDrawDefinition,
@@ -15,6 +10,7 @@ export interface LookOptions {
   look: string;
   actions: Set<AvatarAction>;
   direction: number;
+  item?: string | number;
 }
 
 export interface LookServer {
@@ -24,13 +20,14 @@ export interface LookServer {
 export async function createLookServer(
   dependencies: AvatarDependencies
 ): Promise<LookServer> {
-  return ({ look, actions, direction }: LookOptions) =>
+  return ({ look, actions, direction, item }: LookOptions) =>
     getAvatarDrawDefinition(
       {
         parsedLook: parseLookString(look),
         actions,
         direction,
         frame: 0,
+        item: item,
       },
       dependencies
     );

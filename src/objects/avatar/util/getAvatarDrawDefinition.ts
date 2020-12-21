@@ -20,15 +20,18 @@ import {
   AvatarActionInfo,
   IAvatarActionsData,
 } from "./data/IAvatarActionsData";
-import { debug } from "console";
 
-export type AvatarDrawPart = {
+export type AvatarAsset = {
   fileId: string;
-  library: string;
   x: number;
   y: number;
-  color: string | undefined;
+  library: string;
   mirror: boolean;
+};
+
+export type AvatarDrawPart = {
+  assets: AvatarAsset[];
+  color: string | undefined;
   mode: "colored" | "just-image";
 };
 
@@ -54,9 +57,8 @@ interface Options {
   actions: Set<string>;
   direction: number;
   frame: number;
+  item?: string | number;
 }
-
-const a = new Set(["Default", "Respect"]);
 
 /**
  * Returns a definition of how the avatar should be drawn.
@@ -64,7 +66,7 @@ const a = new Set(["Default", "Respect"]);
  * @param dependencies External figure data, draw order and offsets
  */
 export function getAvatarDrawDefinition(
-  { parsedLook, actions: initialActions, direction }: Options,
+  { parsedLook, actions: initialActions, direction, item: itemId }: Options,
   {
     offsetsData,
     animationData,
@@ -86,8 +88,6 @@ export function getAvatarDrawDefinition(
 
       return 0;
     });
-
-  console.log("ABC", activeActions);
 
   const partByType = new Map<
     string,
@@ -130,7 +130,7 @@ export function getAvatarDrawDefinition(
 
   activeActions.forEach((info) => {
     const drawParts = getActionParts(
-      { partByType, direction, actionData: info },
+      { partByType, direction, actionData: info, itemId },
       {
         offsetsData,
         animationData,
@@ -150,6 +150,10 @@ export function getAvatarDrawDefinition(
       activePartSets.add(drawParts.activePartSet);
     }
   });
+
+  if (itemId != null) {
+    activePartSets.add("itemRight");
+  }
 
   function getDrawOrderType() {
     if (activePartSets.has("handLeft")) {
@@ -187,6 +191,7 @@ function getActionParts(
     actionData,
     direction,
     partByType,
+    itemId,
   }: {
     partByType: Map<
       string,
@@ -200,6 +205,7 @@ function getActionParts(
     >;
     actionData: AvatarActionInfo;
     direction: number;
+    itemId?: string | number;
   },
   {
     offsetsData,
@@ -255,15 +261,67 @@ function getActionParts(
         partType
       );
 
+      const getPartFrame = (frame: number) => {
+        return frame % (partFrames !== null ? partFrames.length : 1);
+      };
+
+      const frameCount = animationData.getAnimationFramesCount(actionData.id);
+
       const parts = partByType.get(partType) ?? [];
 
-      for (const part of parts) {
-        const partFrame = frame % (partFrames !== null ? partFrames.length : 1);
-        let assetPartDef =
-          partFrames && partFrames[partFrame]
-            ? partFrames[partFrame].assetpartdefinition
-            : actionData.assetpartdefinition;
+      const partFrame = getPartFrame(0);
 
+      let partTypeFlipped: string | undefined;
+
+      const partInfo = partSetsData.getPartInfo(partType);
+
+      if (checkFlipped) {
+        if (partInfo?.flippedSetType != null) {
+          partTypeFlipped = partInfo.flippedSetType;
+        }
+      }
+
+      if (partInfo?.removeSetType != null) {
+        const removeSetType = partInfo.removeSetType;
+      }
+
+      const assetPartDef =
+        partFrames && partFrames[partFrame]
+          ? partFrames[partFrame].assetpartdefinition
+          : actionData.assetpartdefinition;
+      const _getPartMeta = (partId: string, frameNumber: number) => {
+        return getPartMeta({
+          assetPartDef,
+          direction: direction,
+          normalizedDirection: normalizedDirection.direction,
+          exists: (id: string) => offsetsData.getOffsets(id) != null,
+          partFrame: frameNumber,
+          partId: partId,
+          partTypeFlipped: partTypeFlipped,
+          partType: partType,
+          mirrorHorizonal: normalizedDirection.mirrorHorizontal,
+        });
+      };
+
+      if (item.id === "ri" && itemId != null) {
+        const partMeta = _getPartMeta(itemId.toString(), 0);
+        const libraryId = figureMap.getLibraryOfPart(
+          itemId.toString(),
+          item.id
+        );
+
+        if (libraryId != null && partMeta != null) {
+          const asset = getAssetFromPartMeta(libraryId, partMeta, offsetsData);
+
+          if (asset != null) {
+            map.set(item.id, [
+              { color: undefined, mode: "just-image", assets: [asset] },
+            ]);
+          }
+        }
+      }
+
+      for (const part of parts) {
         part.hiddenLayers.forEach((layer) => hiddenLayers.add(layer));
 
         if (!actionValidParts.has(part.type)) {
@@ -276,67 +334,55 @@ function getActionParts(
           continue;
         }
 
-        let partTypeFlipped: string | undefined;
+        let normalizedPartFrames = partFrames;
+        if (normalizedPartFrames.length === 0) {
+          normalizedPartFrames = [
+            { repeats: 1, assetpartdefinition: assetPartDef, number: 0 },
+          ];
+        }
 
-        const partInfo = partSetsData.getPartInfo(partType);
+        const frameElements: number[] = [];
+        for (
+          let frameIndex = 0;
+          frameIndex < normalizedPartFrames.length;
+          frameIndex++
+        ) {
+          const frame = normalizedPartFrames[frameIndex];
 
-        if (checkFlipped) {
-          if (partInfo?.flippedSetType != null) {
-            partTypeFlipped = partInfo.flippedSetType;
+          for (
+            let repeatIndex = 0;
+            repeatIndex < frame.repeats;
+            repeatIndex++
+          ) {
+            frameElements.push(frame.number);
           }
         }
 
-        if (partInfo?.removeSetType != null) {
-          const removeSetType = partInfo.removeSetType;
-        }
-
-        const assetInfo = getPartMeta({
-          assetPartDef,
-          direction: direction,
-          normalizedDirection: normalizedDirection.direction,
-          exists: (id) => offsetsData.getOffsets(id) != null,
-          partFrame: 0,
-          partId: part.id,
-          partType: part.type,
-          partTypeFlipped: partTypeFlipped,
-          mirrorHorizonal: normalizedDirection.mirrorHorizontal,
+        const frameAssetInfos = frameElements.map((frameNumber) => {
+          return _getPartMeta(part.id, frameNumber);
         });
 
-        if (assetInfo == null) continue;
-
-        const offsets = offsetsData.getOffsets(assetInfo.asset);
-        if (offsets == null) continue;
-
-        let offsetsX = 0;
-        let offsetsY = 0;
-        let mirror = false;
-
-        if (assetInfo.swapped) {
-          offsetsX -= offsets.offsetX;
-          offsetsY -= offsets.offsetY;
-        } else {
-          offsetsX -= offsets.offsetX;
-          offsetsY -= offsets.offsetY;
-        }
-
-        if (assetInfo.flipped) {
-          offsetsX = 64 + offsets.offsetX;
-        }
-
         const currentPartsOnType = map.get(part.type) ?? [];
-        map.set(part.type, [
-          ...currentPartsOnType,
-          {
-            fileId: assetInfo.asset,
-            library: libraryId,
-            color: part.colorable ? `#${part.color}` : undefined,
-            mirror: assetInfo.flipped,
-            mode:
-              part.type !== "ey" && part.colorable ? "colored" : "just-image",
-            x: offsetsX,
-            y: offsetsY + 16,
-          },
-        ]);
+
+        const avatarAssets = frameAssetInfos
+          .map((assetInfoFrame): AvatarAsset | undefined => {
+            if (assetInfoFrame == null) return;
+
+            return getAssetFromPartMeta(libraryId, assetInfoFrame, offsetsData);
+          })
+          .filter(notNullOrUndefined);
+
+        if (avatarAssets.length > 0) {
+          map.set(part.type, [
+            ...currentPartsOnType,
+            {
+              assets: avatarAssets,
+              color: part.colorable ? `#${part.color}` : undefined,
+              mode:
+                part.type !== "ey" && part.colorable ? "colored" : "just-image",
+            },
+          ]);
+        }
       }
     }
   }
@@ -346,6 +392,34 @@ function getActionParts(
     activePartSet: actionData?.activepartset,
     mirrorHorizontal: false,
     hiddenLayers,
+  };
+}
+
+function getAssetFromPartMeta(
+  libraryId: string,
+  assetInfoFrame: { flipped: boolean; swapped: boolean; asset: string },
+  offsetsData: IAvatarOffsetsData
+) {
+  const offsets = offsetsData.getOffsets(assetInfoFrame.asset);
+
+  if (offsets == null) return;
+
+  let offsetsX = 0;
+  let offsetsY = 0;
+
+  offsetsX -= offsets.offsetX;
+  offsetsY -= offsets.offsetY;
+
+  if (assetInfoFrame.flipped) {
+    offsetsX = 64 + offsets.offsetX;
+  }
+
+  return {
+    fileId: assetInfoFrame.asset,
+    library: libraryId,
+    mirror: assetInfoFrame.flipped,
+    x: offsetsX,
+    y: offsetsY + 16,
   };
 }
 

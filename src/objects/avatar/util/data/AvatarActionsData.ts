@@ -5,6 +5,18 @@ import { IAvatarActionsData, AvatarActionInfo } from "./IAvatarActionsData";
 export class AvatarActionsData
   extends AvatarData
   implements IAvatarActionsData {
+  getHandItemId(actionId: string, id: string): number | undefined {
+    const actionParam = this.querySelector(
+      `action[id="${actionId}"] param[id="${id}"]`
+    );
+
+    const value = Number(actionParam?.getAttribute("value"));
+
+    if (isNaN(value)) return;
+
+    return value;
+  }
+
   getActions(): AvatarActionInfo[] {
     return this.querySelectorAll("action").map((element) =>
       getAvatarActionInfoFromElement(element)

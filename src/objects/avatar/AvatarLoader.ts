@@ -78,33 +78,43 @@ export class AvatarLoader implements IAvatarLoader {
     });
   }
 
-  async getAvatarDrawDefinition(
-    look: string,
-    additional?: { item?: number }
-  ): Promise<AvatarLoaderResult> {
+  async getAvatarDrawDefinition({
+    actions,
+    look,
+    item,
+  }: LookOptions): Promise<AvatarLoaderResult> {
     const loadedFiles = new Map<string, Promise<HitTexture>>();
 
     const getDrawDefinition = await this.lookServer;
 
     const loadResources = (options: LookOptions) =>
-      getDrawDefinition(options)?.parts.forEach((item) => {
-        if (loadedFiles.has(item.fileId)) return;
-        const globalFile = this.globalCache.get(item.fileId);
+      getDrawDefinition(options)?.parts.forEach((parts) => {
+        parts.assets.forEach((item) => {
+          if (loadedFiles.has(item.fileId)) return;
+          const globalFile = this.globalCache.get(item.fileId);
 
-        if (globalFile != null) {
-          loadedFiles.set(item.fileId, globalFile);
-        } else {
-          const file = this.options.resolveImage(item.fileId, item.library);
-          this.globalCache.set(item.fileId, file);
-          loadedFiles.set(item.fileId, file);
-        }
+          if (globalFile != null) {
+            loadedFiles.set(item.fileId, globalFile);
+          } else {
+            const file = this.options.resolveImage(item.fileId, item.library);
+            this.globalCache.set(item.fileId, file);
+            loadedFiles.set(item.fileId, file);
+          }
+        });
       });
 
     directions.forEach((direction) => {
       loadResources({
-        actions: new Set([AvatarAction.Default, AvatarAction.Respect]),
+        actions: new Set([AvatarAction.Default]),
         direction,
         look,
+      });
+
+      loadResources({
+        actions: new Set(actions),
+        direction,
+        look,
+        item,
       });
     });
 
