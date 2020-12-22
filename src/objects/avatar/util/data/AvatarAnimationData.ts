@@ -1,43 +1,65 @@
 import { AvatarData } from "./AvatarData";
-import { IAvatarAnimationData } from "./IAvatarAnimationData";
+import {
+  AvatarAnimationFrame,
+  IAvatarAnimationData,
+} from "./IAvatarAnimationData";
 
 export class AvatarAnimationData
   extends AvatarData
   implements IAvatarAnimationData {
+  private _animationFrames = new Map<string, AvatarAnimationFrame[]>();
+  private _aniamtionFramesCount = new Map<string, number>();
+
   constructor(xml: string) {
     super(xml);
   }
 
   getAnimationFrames(id: string, type: string) {
+    const key = `${id}_${type};`;
+    const current = this._animationFrames.get(key);
+
+    if (current != null) {
+      return current;
+    }
+
     const frames = this.querySelectorAll(
       `action[id="${id}"] part[set-type="${type}"] frame`
     );
 
-    return frames.map((element) => {
-      const number = Number(element.getAttribute("number"));
-      if (isNaN(number)) throw new Error("number was NaN");
+    const result = frames.map(
+      (element): AvatarAnimationFrame => {
+        const number = Number(element.getAttribute("number"));
+        if (isNaN(number)) throw new Error("number was NaN");
 
-      const repeatsString = element.getAttribute("repeats");
+        const repeatsString = element.getAttribute("repeats");
 
-      let repeats = 2;
+        let repeats = 2;
 
-      if (repeatsString != null) {
-        repeats = Number(repeatsString);
+        if (repeatsString != null) {
+          repeats = Number(repeatsString);
+        }
+
+        const assetpartdefinition = element.getAttribute("assetpartdefinition");
+        if (assetpartdefinition == null)
+          throw new Error("assetpartdefinition was null");
+
+        return {
+          number,
+          assetpartdefinition,
+          repeats,
+        };
       }
+    );
 
-      const assetpartdefinition = element.getAttribute("assetpartdefinition");
-      if (assetpartdefinition == null)
-        throw new Error("assetpartdefinition was null");
-
-      return {
-        number,
-        assetpartdefinition,
-        repeats,
-      };
-    });
+    this._animationFrames.set(key, result);
+    return result;
   }
 
   getAnimationFramesCount(id: string) {
+    const current = this._aniamtionFramesCount.get(id);
+
+    if (current != null) return current;
+
     const partFrameCount = this.querySelectorAll(
       `action[id="${id}"] part:first-child frame`
     ).length;
@@ -45,7 +67,11 @@ export class AvatarAnimationData
       `action[id="${id}"] offsets frame`
     ).length;
 
-    return Math.max(partFrameCount, offsetsFrameCount);
+    const result = Math.max(partFrameCount, offsetsFrameCount);
+
+    this._aniamtionFramesCount.set(id, result);
+
+    return result;
   }
 
   getAnimationOffset(

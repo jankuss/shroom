@@ -15,11 +15,14 @@ import { IAvatarOffsetsData } from "./data/IAvatarOffsetsData";
 import { IFigureMapData } from "./data/IFigureMapData";
 import { IFigureData } from "./data/IFigureData";
 import { IAvatarGeometryData } from "./data/IAvatarGeometryData";
-import { AvatarAction } from "./AvatarAction";
+import { AvatarAction } from "../enum/AvatarAction";
 import {
   AvatarActionInfo,
   IAvatarActionsData,
 } from "./data/IAvatarActionsData";
+import { AvatarEffectData } from "./data/AvatarEffectData";
+import { IAvatarEffectData } from "./data/IAvatarEffectData";
+import { dir } from "console";
 
 export type AvatarAsset = {
   fileId: string;
@@ -58,7 +61,16 @@ interface Options {
   direction: number;
   frame: number;
   item?: string | number;
+  effect?: IAvatarEffectData;
 }
+
+export type PartData = {
+  color: string | undefined;
+  id: string;
+  type: string;
+  colorable: boolean;
+  hiddenLayers: string[];
+};
 
 /**
  * Returns a definition of how the avatar should be drawn.
@@ -66,7 +78,13 @@ interface Options {
  * @param dependencies External figure data, draw order and offsets
  */
 export function getAvatarDrawDefinition(
-  { parsedLook, actions: initialActions, direction, item: itemId }: Options,
+  {
+    parsedLook,
+    actions: initialActions,
+    direction,
+    item: itemId,
+    effect,
+  }: Options,
   {
     offsetsData,
     animationData,
@@ -89,16 +107,7 @@ export function getAvatarDrawDefinition(
       return 0;
     });
 
-  const partByType = new Map<
-    string,
-    {
-      color: string | undefined;
-      id: string;
-      type: string;
-      colorable: boolean;
-      hiddenLayers: string[];
-    }[]
-  >();
+  const partByType = new Map<string, PartData[]>();
 
   Array.from(parsedLook.entries()).forEach(([type, { setId, colorId }]) => {
     const parts = figureData.getParts(type, setId.toString());
@@ -125,7 +134,7 @@ export function getAvatarDrawDefinition(
   // Every other direction can be displayed by mirroring one of the above.
   const normalizedDirection = getNormalizedAvatarDirection(direction);
 
-  const drawPartMap = new Map<string, AvatarDrawPart[]>();
+  let drawPartMap = new Map<string, AvatarDrawPart[]>();
   const activePartSets = new Set<string>();
 
   activeActions.forEach((info) => {
@@ -176,6 +185,26 @@ export function getAvatarDrawDefinition(
 
   const drawOrderAdditional = filterDrawOrder(new Set(drawOrderRaw));
 
+  if (effect != null) {
+    drawPartMap = enhancePartsWithEffects(
+      {
+        effect,
+        drawPartMap,
+        partByType,
+        direction,
+      },
+      {
+        actionsData,
+        animationData,
+        figureData,
+        figureMap,
+        geometry,
+        offsetsData,
+        partSetsData,
+      }
+    );
+  }
+
   return {
     parts: drawOrderAdditional
       .flatMap((partType) => drawPartMap.get(partType))
@@ -192,6 +221,8 @@ function getActionParts(
     direction,
     partByType,
     itemId,
+    validBodyParts,
+    frame,
   }: {
     partByType: Map<
       string,
@@ -206,6 +237,8 @@ function getActionParts(
     actionData: AvatarActionInfo;
     direction: number;
     itemId?: string | number;
+    validBodyParts?: Set<string>;
+    frame?: number;
   },
   {
     offsetsData,
@@ -225,8 +258,6 @@ function getActionParts(
   const map = new Map<string, AvatarDrawPart[]>();
   const hiddenLayers = new Set<string>();
 
-  const frame = 0;
-
   const normalizedDirection = getNormalizedAvatarDirection(direction);
 
   if (actionData == null) throw new Error("Invalid action data");
@@ -241,6 +272,10 @@ function getActionParts(
     const bodyPart = bodyParts[i];
     const bodyPartId = bodyPart.id;
 
+    if (validBodyParts != null) {
+      if (!validBodyParts.has(bodyPartId)) continue;
+    }
+
     const items = bodyPart.items.sort((b, a) => b.z - a.z);
 
     for (let j = 0; j < items.length; j++) {
@@ -253,9 +288,6 @@ function getActionParts(
 
       const checkFlipped = normalizedDirection.mirrorHorizontal;
 
-      const actionValidParts = partSetsData.getActivePartSet(
-        actionData.activepartset ?? "figure"
-      );
       const partFrames = animationData.getAnimationFrames(
         actionData.id,
         partType
@@ -266,10 +298,15 @@ function getActionParts(
       };
 
       const frameCount = animationData.getAnimationFramesCount(actionData.id);
-
       const parts = partByType.get(partType) ?? [];
+      const getAssetPartDef = (frame: number) => {
+        const assetPartDef =
+          partFrames && partFrames[getPartFrame(frame)]
+            ? partFrames[getPartFrame(frame)].assetpartdefinition
+            : actionData.assetpartdefinition;
 
-      const partFrame = getPartFrame(0);
+        return assetPartDef;
+      };
 
       let partTypeFlipped: string | undefined;
 
@@ -285,11 +322,11 @@ function getActionParts(
         const removeSetType = partInfo.removeSetType;
       }
 
-      const assetPartDef =
-        partFrames && partFrames[partFrame]
-          ? partFrames[partFrame].assetpartdefinition
-          : actionData.assetpartdefinition;
-      const _getPartMeta = (partId: string, frameNumber: number) => {
+      const _getPartMeta = (
+        assetPartDef: string,
+        partId: string,
+        frameNumber: number
+      ) => {
         return getPartMeta({
           assetPartDef,
           direction: direction,
@@ -304,7 +341,7 @@ function getActionParts(
       };
 
       if (item.id === "ri" && itemId != null) {
-        const partMeta = _getPartMeta(itemId.toString(), 0);
+        const partMeta = _getPartMeta(getAssetPartDef(0), itemId.toString(), 0);
         const libraryId = figureMap.getLibraryOfPart(
           itemId.toString(),
           item.id
@@ -324,10 +361,6 @@ function getActionParts(
       for (const part of parts) {
         part.hiddenLayers.forEach((layer) => hiddenLayers.add(layer));
 
-        if (!actionValidParts.has(part.type)) {
-          continue;
-        }
-
         const libraryId = figureMap.getLibraryOfPart(part.id, part.type);
 
         if (libraryId == null) {
@@ -337,7 +370,17 @@ function getActionParts(
         let normalizedPartFrames = partFrames;
         if (normalizedPartFrames.length === 0) {
           normalizedPartFrames = [
-            { repeats: 1, assetpartdefinition: assetPartDef, number: 0 },
+            { repeats: 2, assetpartdefinition: getAssetPartDef(0), number: 0 },
+          ];
+        }
+
+        if (frame != null) {
+          normalizedPartFrames = [
+            {
+              repeats: 2,
+              assetpartdefinition: getAssetPartDef(frame),
+              number: getPartFrame(frame),
+            },
           ];
         }
 
@@ -359,7 +402,11 @@ function getActionParts(
         }
 
         const frameAssetInfos = frameElements.map((frameNumber) => {
-          return _getPartMeta(part.id, frameNumber);
+          return _getPartMeta(
+            getAssetPartDef(frameNumber),
+            part.id,
+            frameNumber
+          );
         });
 
         const currentPartsOnType = map.get(part.type) ?? [];
@@ -409,7 +456,6 @@ function getAssetFromPartMeta(
 
   offsetsX -= offsets.offsetX;
   offsetsY -= offsets.offsetY;
-
   if (assetInfoFrame.flipped) {
     offsetsX = 64 + offsets.offsetX;
   }
@@ -463,9 +509,9 @@ function getPartMeta({
 }) {
   const map = new Map<string, { flipped: boolean; swapped: boolean }>();
   const none = { flipped: false, swapped: false };
-  const flipped = { flipped: mirrorHorizonal, swapped: false };
+  const flipped = { flipped: true, swapped: false };
   const swapped = { flipped: false, swapped: true };
-  const both = { flipped: mirrorHorizonal, swapped: true };
+  const both = { flipped: true, swapped: true };
   const fallback = generateAssetName(
     "std",
     partType,
@@ -541,4 +587,132 @@ function getPartMeta({
 
     if (assetExists) return { asset: key, ...info };
   }
+}
+
+function enhancePartsWithEffects(
+  {
+    effect,
+    direction,
+    drawPartMap: dpm,
+    partByType,
+  }: {
+    effect: IAvatarEffectData;
+    direction: number;
+    partByType: Map<string, PartData[]>;
+    drawPartMap: Map<string, AvatarDrawPart[]>;
+  },
+  deps: AvatarDependencies
+) {
+  const drawPartMap = new Map(dpm);
+  const effectFrameCount = effect.getFrameCount();
+  const effectMap = new Map<string, AvatarDrawPart[]>();
+
+  const {
+    offsetsData,
+    actionsData,
+    animationData,
+    figureMap,
+    geometry,
+    figureData,
+    partSetsData,
+  } = deps;
+
+  const map: Map<string, Map<number, Map<number, AvatarAsset[]>>> = new Map();
+
+  for (
+    let effectFrameIndex = 0;
+    effectFrameIndex < effectFrameCount;
+    effectFrameIndex++
+  ) {
+    const frameParts = effect.getFrameParts(effectFrameIndex);
+
+    frameParts.forEach((framePart, framePartIndex) => {
+      const actionData = actionsData.getAction(
+        framePart.action as AvatarAction
+      );
+      const defaultActionData = actionsData.getAction(AvatarAction.Default);
+      if (actionData == null) return;
+      if (defaultActionData == null) return;
+
+      const parts = new Map<string, AvatarDrawPart[]>();
+
+      getActionParts(
+        {
+          actionData: defaultActionData,
+          partByType,
+          direction,
+          frame: framePart.frame,
+          validBodyParts: new Set([framePart.id]),
+        },
+        deps
+      ).parts.forEach((part, key) => {
+        parts.set(key, part);
+      });
+
+      getActionParts(
+        {
+          actionData,
+          direction,
+          partByType,
+          validBodyParts: new Set([framePart.id]),
+          frame: framePart.frame,
+        },
+        deps
+      ).parts.forEach((part, key) => {
+        parts.set(key, part);
+      });
+
+      parts.forEach((parts, partKey) => {
+        const existing =
+          map.get(partKey) ?? new Map<number, Map<number, AvatarAsset[]>>();
+
+        parts.forEach((part, partIndex) => {
+          const existingAssets =
+            existing.get(partIndex) ?? new Map<number, AvatarAsset[]>();
+
+          existingAssets.set(
+            effectFrameIndex,
+            part.assets.map(
+              (asset): AvatarAsset => ({
+                ...asset,
+                x: asset.x + framePart.dx,
+                y: asset.y + framePart.dy,
+              })
+            )
+          );
+          existing.set(partIndex, existingAssets);
+        });
+
+        map.set(partKey, existing);
+      });
+    });
+
+    map.forEach((parts, partKey) => {
+      const fallbackParts = drawPartMap.get(partKey) ?? [];
+
+      drawPartMap.set(
+        partKey,
+        fallbackParts.map((fallbackPart, partIndex) => {
+          const assetByFrame = parts.get(partIndex);
+
+          const assets = new Array(effectFrameCount)
+            .fill(0)
+            .flatMap((_, index) => {
+              const insertIndex = index;
+              const effectAsset = assetByFrame?.get(index);
+
+              if (effectAsset == null || effectAsset.length < 2) {
+                return [];
+              }
+
+              return effectAsset;
+            });
+
+          return { ...fallbackPart, assets };
+        })
+      );
+    });
+  }
+
+  return drawPartMap;
 }

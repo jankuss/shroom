@@ -7,6 +7,7 @@ export class AvatarPartSetsData
   constructor(xml: string) {
     super(xml);
   }
+
   getPartInfo(
     id: string
   ):

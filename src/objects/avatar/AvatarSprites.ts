@@ -136,7 +136,8 @@ export class AvatarSprites extends RoomObject {
     if (
       !isSetEqual(oldLookOptions.actions, newLookOptions.actions) ||
       oldLookOptions.look != newLookOptions.look ||
-      oldLookOptions.item != newLookOptions.item
+      oldLookOptions.item != newLookOptions.item ||
+      oldLookOptions.effect != newLookOptions.effect
     ) {
       this._nextLookOptions = newLookOptions;
       this._refreshLook = true;
@@ -196,6 +197,10 @@ export class AvatarSprites extends RoomObject {
     drawDefinition: AvatarDrawDefinition,
     currentFrame: number
   ) {
+    if (this.currentFrame === 10) {
+      console.log(drawDefinition);
+    }
+
     this._assets.forEach((value) => (value.visible = false));
     this.container?.destroy();
 
@@ -217,6 +222,8 @@ export class AvatarSprites extends RoomObject {
 
       if (sprite == null) return;
 
+      sprite.x = asset.x;
+      sprite.y = asset.y;
       sprite.visible = true;
 
       this._sprites.set(asset.fileId, sprite);

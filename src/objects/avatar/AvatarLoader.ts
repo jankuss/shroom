@@ -14,7 +14,9 @@ import { AvatarPartSetsData } from "./util/data/AvatarPartSetsData";
 import { FigureData } from "./util/data/FigureData";
 import { AvatarActionsData } from "./util/data/AvatarActionsData";
 import { AvatarGeometryData } from "./util/data/AvatarGeometryData";
-import { AvatarAction } from "./util/AvatarAction";
+import { AvatarAction } from "./enum/AvatarAction";
+import { AvatarEffectData } from "./util/data/AvatarEffectData";
+import { IAvatarEffectData } from "./util/data/IAvatarEffectData";
 
 interface Options {
   resolveImage: (id: string, library: string) => Promise<HitTexture>;
@@ -26,9 +28,24 @@ const directions = [0, 1, 2, 3, 4, 5, 6, 7];
 export class AvatarLoader implements IAvatarLoader {
   private globalCache: Map<string, Promise<HitTexture>> = new Map();
   private lookServer: Promise<LookServer>;
+  private effectCache: Map<string, Promise<IAvatarEffectData>> = new Map();
 
   constructor(private options: Options) {
     this.lookServer = this.options.createLookServer();
+  }
+
+  private _loadEffect(type: string, id: string) {
+    const key = `${type}_${id}`;
+    let current = this.effectCache.get(key);
+
+    if (current == null) {
+      current = AvatarEffectData.fromUrl(
+        `./resources/figure/hh_human_fx/hh_human_fx_${type}${id}.bin`
+      );
+      this.effectCache.set(key, current);
+    }
+
+    return current;
   }
 
   static create(resourcePath: string = "") {
@@ -82,13 +99,19 @@ export class AvatarLoader implements IAvatarLoader {
     actions,
     look,
     item,
+    effect,
   }: LookOptions): Promise<AvatarLoaderResult> {
     const loadedFiles = new Map<string, Promise<HitTexture>>();
 
     const getDrawDefinition = await this.lookServer;
 
+    let effectData: IAvatarEffectData | undefined;
+    if (effect != null) {
+      effectData = await this._loadEffect(effect.type, effect.id);
+    }
+
     const loadResources = (options: LookOptions) =>
-      getDrawDefinition(options)?.parts.forEach((parts) => {
+      getDrawDefinition(options, effectData)?.parts.forEach((parts) => {
         parts.assets.forEach((item) => {
           if (loadedFiles.has(item.fileId)) return;
           const globalFile = this.globalCache.get(item.fileId);
@@ -128,7 +151,7 @@ export class AvatarLoader implements IAvatarLoader {
 
     const obj: AvatarLoaderResult = {
       getDrawDefinition: (options) => {
-        const result = getDrawDefinition(options);
+        const result = getDrawDefinition(options, effectData);
         if (result == null) throw new Error("Invalid look");
 
         return result;

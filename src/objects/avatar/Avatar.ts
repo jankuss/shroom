@@ -9,7 +9,7 @@ import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
 import { ParsedTileType } from "../../util/parseTileMap";
 import { IMoveable } from "../IMoveable";
-import { AvatarAction } from "./util/AvatarAction";
+import { AvatarAction } from "./enum/AvatarAction";
 
 interface Options {
   look: string;
@@ -41,6 +41,7 @@ export class Avatar extends RoomObject implements IMoveable {
   private _roomZ: number = 0;
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
   private _actions: Set<AvatarAction> = new Set();
+  private _fx: { type: "dance"; id: string } | undefined;
 
   public get onClick() {
     return this._avatarSprites.onClick;
@@ -56,6 +57,24 @@ export class Avatar extends RoomObject implements IMoveable {
 
   public set onDoubleClick(value) {
     this._avatarSprites.onDoubleClick = value;
+  }
+
+  public get dance() {
+    if (this._fx?.type === "dance") {
+      return this._fx.id;
+    }
+  }
+
+  public set dance(value) {
+    if (this._fx == undefined || this._fx.type === "dance") {
+      if (value == null) {
+        this._fx = undefined;
+      } else {
+        this._fx = { type: "dance", id: value };
+      }
+
+      this._updateAvatarSprites();
+    }
   }
 
   constructor({ look, roomX, roomY, roomZ, direction }: Options) {
@@ -163,6 +182,7 @@ export class Avatar extends RoomObject implements IMoveable {
       direction: this.direction,
       look: this._look,
       item: this.item,
+      effect: this._fx,
     };
   }
 
@@ -186,7 +206,7 @@ export class Avatar extends RoomObject implements IMoveable {
   }
 
   private _updateFrame() {
-    this._avatarSprites.currentFrame = this._frame;
+    this._avatarSprites.currentFrame = 9;
   }
 
   private _startAnimation() {

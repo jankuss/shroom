@@ -1,4 +1,4 @@
-import { AvatarAction } from "../AvatarAction";
+import { AvatarAction } from "../../enum/AvatarAction";
 import { AvatarData } from "./AvatarData";
 import { IAvatarActionsData, AvatarActionInfo } from "./IAvatarActionsData";
 
