@@ -1,6 +1,6 @@
 import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
 
-const DIRECTION_IS_FLIPPED = [
+export const DIRECTION_IS_FLIPPED = [
   false,
   false,
   false,
@@ -25,7 +25,7 @@ export function getFlippedMetaData({
   const directionFlipped = DIRECTION_IS_FLIPPED[direction];
 
   if (!directionFlipped) {
-    return { direction, flip: false, partType };
+    return { direction, flip: false, partType, swapped: false };
   }
 
   if (
@@ -34,7 +34,7 @@ export function getFlippedMetaData({
       partType == AvatarFigurePartType.LeftSleeve ||
       partType == AvatarFigurePartType.LeftCoatSleeve)
   ) {
-    return { direction, flip: true, partType };
+    return { direction, flip: true, partType, swapped: false };
   }
 
   if (
@@ -43,40 +43,40 @@ export function getFlippedMetaData({
       partType == AvatarFigurePartType.RightSleeve ||
       partType == AvatarFigurePartType.RightCoatSleeve)
   ) {
-    return { direction, flip: true, partType };
+    return { direction, flip: true, partType, swapped: false };
   }
 
   if (
     assetPartDefinition == "blw" &&
     partType == AvatarFigurePartType.RightHand
   ) {
-    return { direction, flip: true, partType };
+    return { direction, flip: true, partType, swapped: false };
   }
 
   if (
     assetPartDefinition == "sig" &&
     partType == AvatarFigurePartType.LeftHand
   ) {
-    return { direction, flip: true, partType };
+    return { direction, flip: true, partType, swapped: false };
   }
 
   if (
     assetPartDefinition == "respect" &&
     partType == AvatarFigurePartType.LeftHand
   ) {
-    return { direction, flip: true, partType };
+    return { direction, flip: true, partType, swapped: false };
   }
 
   if (partType == AvatarFigurePartType.RightHandItem) {
-    return { direction, flip: true, partType };
+    return { direction, flip: true, partType, swapped: false };
   }
 
   if (partType == AvatarFigurePartType.LeftHandItem) {
-    return { direction, flip: true, partType };
+    return { direction, flip: true, partType, swapped: false };
   }
 
   if (partType == AvatarFigurePartType.ChestPrint) {
-    return { direction, flip: true, partType };
+    return { direction, flip: true, partType, swapped: false };
   }
 
   let overrideDirection = direction;
@@ -94,15 +94,17 @@ export function getFlippedMetaData({
 
   if (direction === 6) {
     overrideDirection = 0;
+    flip = true;
   }
 
-  if (flippedPartType != partType && flippedPartType != null) {
+  if (flippedPartType != partType) {
     return {
       direction: overrideDirection,
       flip: false,
-      partType: flippedPartType,
+      partType: flippedPartType ?? partType,
+      swapped: true,
     };
   }
 
-  return { direction: overrideDirection, flip: directionFlipped, partType };
+  return { direction: overrideDirection, flip: false, partType };
 }

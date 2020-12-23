@@ -14,16 +14,14 @@ import { IAvatarPartSetsData } from "./data/IAvatarPartSetsData";
 import { IAvatarOffsetsData } from "./data/IAvatarOffsetsData";
 import { IFigureMapData } from "./data/IFigureMapData";
 import { IFigureData } from "./data/IFigureData";
-import { IAvatarGeometryData } from "./data/IAvatarGeometryData";
+import { Bodypart, IAvatarGeometryData } from "./data/IAvatarGeometryData";
 import { AvatarAction } from "../enum/AvatarAction";
 import {
   AvatarActionInfo,
   IAvatarActionsData,
 } from "./data/IAvatarActionsData";
-import { AvatarEffectData } from "./data/AvatarEffectData";
 import { IAvatarEffectData } from "./data/IAvatarEffectData";
-import { dir } from "console";
-import { getFlippedMetaData } from "./getFlippedMetaData";
+import { DIRECTION_IS_FLIPPED, getFlippedMetaData } from "./getFlippedMetaData";
 import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
 
 export type AvatarAsset = {
@@ -35,6 +33,7 @@ export type AvatarAsset = {
 };
 
 export type AvatarDrawPart = {
+  type: string;
   assets: AvatarAsset[];
   color: string | undefined;
   mode: "colored" | "just-image";
@@ -66,13 +65,17 @@ interface Options {
   effect?: IAvatarEffectData;
 }
 
-export type PartData = {
+export interface PartData {
   color: string | undefined;
   id: string;
   type: string;
   colorable: boolean;
   hiddenLayers: string[];
-};
+}
+
+export interface PartDataWithBodyPart extends PartData {
+  bodypart: Bodypart;
+}
 
 /**
  * Returns a definition of how the avatar should be drawn.
@@ -87,7 +90,11 @@ export function getAvatarDrawDefinition(
     item: itemId,
     effect,
   }: Options,
-  {
+  deps: AvatarDependencies
+): AvatarDrawDefinition | undefined {
+  const actions = new Set(initialActions).add(AvatarAction.Default);
+
+  const {
     offsetsData,
     animationData,
     partSetsData,
@@ -95,9 +102,7 @@ export function getAvatarDrawDefinition(
     figureData,
     figureMap,
     geometry,
-  }: AvatarDependencies
-): AvatarDrawDefinition | undefined {
-  const actions = new Set(initialActions).add(AvatarAction.Default);
+  } = deps;
 
   const activeActions = actionsData
     .getActions()
@@ -140,25 +145,8 @@ export function getAvatarDrawDefinition(
   const activePartSets = new Set<string>();
 
   activeActions.forEach((info) => {
-    const drawParts = getActionParts(
-      { partByType, direction, actionData: info, itemId },
-      {
-        offsetsData,
-        animationData,
-        partSetsData,
-        actionsData,
-        figureData,
-        figureMap,
-        geometry,
-      }
-    );
-
-    drawParts.parts.forEach((part, key) => {
-      drawPartMap.set(key, part);
-    });
-
-    if (drawParts.activePartSet != null) {
-      activePartSets.add(drawParts.activePartSet);
+    if (info.activepartset != null) {
+      activePartSets.add(info.activepartset);
     }
   });
 
@@ -187,61 +175,76 @@ export function getAvatarDrawDefinition(
 
   const drawOrderAdditional = filterDrawOrder(new Set(drawOrderRaw));
 
-  if (effect != null) {
-    /*
-    drawPartMap = enhancePartsWithEffects(
-      {
-        effect,
-        drawPartMap,
-        partByType,
-        direction,
-      },
-      {
-        actionsData,
-        animationData,
-        figureData,
-        figureMap,
-        geometry,
-        offsetsData,
-        partSetsData,
-      }
-    );*/
+  const bodyParts = geometry
+    .getBodyParts("full")
+    .map((id) => geometry.getBodyPart("vertical", id))
+    .filter(notNullOrUndefined)
+    .sort((a, b) => b.z - a.z);
+
+  bodyParts.forEach((bodyPart) => {
+    const parts = bodyPart.items
+      .flatMap((item) => {
+        const partsForType = partByType.get(item.id);
+        if (partsForType == null) return [];
+
+        return partsForType;
+      })
+      .map((part) => ({ ...part, bodypart: bodyPart }));
+
+    activeActions.forEach((action) => {
+      const localDrawPartMap = new Map<string, AvatarDrawPart[]>();
+
+      const drawParts = getBodyPart(
+        {
+          actionData: action,
+          frame: 0,
+          direction,
+          parts,
+          bodyPartId: bodyPart.id,
+        },
+        deps
+      );
+
+      drawParts.forEach((part) => {
+        const existing = localDrawPartMap.get(part.type) ?? [];
+        localDrawPartMap.set(part.type, [...existing, part]);
+      });
+
+      localDrawPartMap.forEach((parts, key) => drawPartMap.set(key, parts));
+    });
+  });
+
+  const drawParts = drawOrderAdditional
+    .flatMap((partType) => drawPartMap.get(partType))
+    .filter(notNullOrUndefined);
+
+  if (direction === 4) {
+    console.log("DRAW PARTS", drawParts);
   }
 
   return {
-    parts: drawOrderAdditional
-      .flatMap((partType) => drawPartMap.get(partType))
-      .filter(notNullOrUndefined),
+    parts: drawParts,
     mirrorHorizontal: false,
     offsetX: 0,
     offsetY: 0,
   };
 }
 
-function getActionParts(
+function getBodyPart(
   {
     actionData,
     direction,
-    partByType,
-    itemId,
-    validBodyParts,
     frame,
+    parts,
+    bodyPartId,
   }: {
-    partByType: Map<
-      string,
-      {
-        color: string | undefined;
-        id: string;
-        type: string;
-        colorable: boolean;
-        hiddenLayers: string[];
-      }[]
-    >;
+    parts: PartDataWithBodyPart[];
+    bodyPartId: string;
     actionData: AvatarActionInfo;
     direction: number;
     itemId?: string | number;
     validBodyParts?: Set<string>;
-    frame?: number;
+    frame: number;
   },
   {
     offsetsData,
@@ -252,182 +255,108 @@ function getActionParts(
     figureMap,
     geometry,
   }: AvatarDependencies
-): {
-  parts: Map<string, AvatarDrawPart[]>;
-  activePartSet: string | null;
-  mirrorHorizontal: boolean;
-  hiddenLayers: Set<string>;
-} {
-  const map = new Map<string, AvatarDrawPart[]>();
-  const hiddenLayers = new Set<string>();
-
-  const normalizedDirection = getNormalizedAvatarDirection(direction);
-
+): AvatarDrawPart[] {
   if (actionData == null) throw new Error("Invalid action data");
 
-  const bodyParts = geometry
-    .getBodyParts("full")
-    .map((id) => geometry.getBodyPart("vertical", id))
-    .filter(notNullOrUndefined)
-    .sort((a, b) => b.z - a.z);
+  let remainingPartCount = parts.length - 1;
+  let assetPartDefinition = actionData.assetpartdefinition;
 
-  for (let i = 0; i < bodyParts.length; i++) {
-    const bodyPart = bodyParts[i];
-    const bodyPartId = bodyPart.id;
+  const avatarFlipped = DIRECTION_IS_FLIPPED[direction];
+  const resolvedParts: AvatarDrawPart[] = [];
 
-    if (validBodyParts != null) {
-      if (!validBodyParts.has(bodyPartId)) continue;
+  while (remainingPartCount >= 0) {
+    const part = parts[remainingPartCount];
+    const frames = animationData.getAnimationFrames(actionData.id, part.type);
+    const animationFrame = frames[frame % frames.length];
+
+    let frameNumber = -1;
+
+    if (animationFrame != null) {
+      frameNumber = animationFrame.number;
+      if (
+        animationFrame.assetpartdefinition &&
+        !(animationFrame.assetpartdefinition == "")
+      ) {
+        assetPartDefinition = animationFrame.assetpartdefinition;
+      }
     }
 
-    const items = bodyPart.items.sort((b, a) => b.z - a.z);
+    const partInfo = partSetsData.getPartInfo(part.type);
 
-    for (let j = 0; j < items.length; j++) {
-      const partDirection =
-        bodyPartId === "head"
-          ? normalizedDirection.direction
-          : normalizedDirection.direction;
-      const item = items[j];
-      const partType = item.id;
+    const partTypeFlipped = partInfo?.flippedSetType as
+      | AvatarFigurePartType
+      | undefined;
+    const flippedMeta = getFlippedMetaData({
+      assetPartDefinition,
+      flippedPartType: partTypeFlipped,
+      direction,
+      partType: part.type as AvatarFigurePartType,
+    });
 
-      const checkFlipped = normalizedDirection.mirrorHorizontal;
+    let assetId = generateAssetName(
+      assetPartDefinition,
+      flippedMeta.partType,
+      part.id,
+      direction,
+      frameNumber
+    );
+    let offset = offsetsData.getOffsets(assetId);
 
-      const partFrames = animationData.getAnimationFrames(
-        actionData.id,
-        partType
+    if (offset == null) {
+      assetId = generateAssetName(
+        "std",
+        flippedMeta.partType,
+        part.id,
+        flippedMeta.direction,
+        0
+      );
+      offset = offsetsData.getOffsets(assetId);
+    }
+
+    if (offset != null) {
+      let flipH = flippedMeta.flip;
+      const swapped = flippedMeta.flip;
+
+      if (avatarFlipped) {
+        flipH = !flipH;
+      }
+
+      const libraryId = figureMap.getLibraryOfPart(
+        part.id,
+        flippedMeta.partType
       );
 
-      const getPartFrame = (frame: number) => {
-        return frame % (partFrames !== null ? partFrames.length : 1);
-      };
+      if (libraryId != null) {
+        const asset = getAssetFromPartMeta(
+          libraryId,
+          { flipped: flipH, swapped: false, asset: assetId },
+          offsetsData
+        );
 
-      const frameCount = animationData.getAnimationFramesCount(actionData.id);
-      const parts = partByType.get(partType) ?? [];
-      const getAssetPartDef = (frame: number) => {
-        const assetPartDef =
-          partFrames && partFrames[getPartFrame(frame)]
-            ? partFrames[getPartFrame(frame)].assetpartdefinition
-            : actionData.assetpartdefinition;
-
-        return assetPartDef;
-      };
-
-      const partInfo = partSetsData.getPartInfo(partType);
-
-      let partTypeFlipped: string | undefined;
-      if (partInfo?.flippedSetType != null) {
-        partTypeFlipped = partInfo.flippedSetType;
-      }
-
-      for (const part of parts) {
-        part.hiddenLayers.forEach((layer) => hiddenLayers.add(layer));
-
-        const libraryId = figureMap.getLibraryOfPart(part.id, part.type);
-
-        if (libraryId == null) {
-          continue;
-        }
-
-        let normalizedPartFrames = partFrames;
-        if (normalizedPartFrames.length === 0) {
-          normalizedPartFrames = [
-            { repeats: 2, assetpartdefinition: getAssetPartDef(0), number: 0 },
-          ];
-        }
-
-        if (frame != null) {
-          normalizedPartFrames = [
-            {
-              repeats: 2,
-              assetpartdefinition: getAssetPartDef(frame),
-              number: getPartFrame(frame),
-            },
-          ];
-        }
-
-        const frameElements: number[] = [];
-        for (
-          let frameIndex = 0;
-          frameIndex < normalizedPartFrames.length;
-          frameIndex++
-        ) {
-          const frame = normalizedPartFrames[frameIndex];
-
-          for (
-            let repeatIndex = 0;
-            repeatIndex < frame.repeats;
-            repeatIndex++
-          ) {
-            frameElements.push(frame.number);
-          }
-        }
-
-        const frameAssetInfos = frameElements.map((frameNumber) => {
-          const assetPartDef = getAssetPartDef(frameNumber);
-          const flippedMeta = getFlippedMetaData({
-            assetPartDefinition: assetPartDef,
-            direction: partDirection,
-            partType: part.type as AvatarFigurePartType,
-            flippedPartType: partTypeFlipped as AvatarFigurePartType,
+        if (asset != null) {
+          resolvedParts.push({
+            assets: [asset],
+            color: part.colorable ? `#${part.color}` : undefined,
+            mode:
+              part.type !== "ey" && part.colorable ? "colored" : "just-image",
+            type: part.type,
           });
-
-          let id = generateAssetName(
-            assetPartDef,
-            flippedMeta.partType,
-            part.id,
-            flippedMeta.direction,
-            frameNumber
-          );
-          let offsets = offsetsData.getOffsets(id);
-
-          if (offsets == null) {
-            id = generateAssetName(
-              assetPartDef,
-              flippedMeta.partType,
-              part.id,
-              flippedMeta.direction,
-              0
-            );
-            offsets = offsetsData.getOffsets(id);
-          }
-
-          return { asset: id, flipped: flippedMeta.flip, swapped: false };
-        });
-
-        const currentPartsOnType = map.get(part.type) ?? [];
-
-        const avatarAssets = frameAssetInfos
-          .map((assetInfoFrame): AvatarAsset | undefined => {
-            if (assetInfoFrame == null) return;
-
-            return getAssetFromPartMeta(libraryId, assetInfoFrame, offsetsData);
-          })
-          .filter(notNullOrUndefined);
-
-        if (avatarAssets.length > 0) {
-          map.set(part.type, [
-            ...currentPartsOnType,
-            {
-              assets: avatarAssets,
-              color: part.colorable ? `#${part.color}` : undefined,
-              mode:
-                part.type !== "ey" && part.colorable ? "colored" : "just-image",
-            },
-          ]);
         }
       }
     }
+
+    if (
+      actionData.id === "Respect" &&
+      direction === 4 &&
+      bodyPartId === "handRight"
+    ) {
+      console.log("ABC", actionData, resolvedParts);
+    }
+
+    remainingPartCount--;
   }
 
-  if (direction === 4) {
-    console.log(actionData.id, map);
-  }
-
-  return {
-    parts: map,
-    activePartSet: actionData?.activepartset,
-    mirrorHorizontal: false,
-    hiddenLayers,
-  };
+  return resolvedParts;
 }
 
 function getAssetFromPartMeta(
@@ -450,6 +379,10 @@ function getAssetFromPartMeta(
     offsetsX = -offsets.offsetX;
   }
 
+  if (assetInfoFrame.swapped) {
+    offsetsX += 100;
+  }
+
   return {
     fileId: assetInfoFrame.asset,
     library: libraryId,
@@ -468,7 +401,7 @@ function generateAssetName(
 ) {
   return `h_${assetPartDef}_${partType}_${partId}_${direction}_${frame}`;
 }
-
+/*
 function enhancePartsWithEffects(
   {
     effect,
@@ -596,3 +529,4 @@ function enhancePartsWithEffects(
 
   return drawPartMap;
 }
+*/
