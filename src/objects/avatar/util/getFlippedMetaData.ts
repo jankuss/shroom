@@ -1,5 +1,16 @@
 import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
 
+const DIRECTION_IS_FLIPPED = [
+  false,
+  false,
+  false,
+  false,
+  true,
+  true,
+  true,
+  false,
+];
+
 export function getFlippedMetaData({
   assetPartDefinition,
   direction,
@@ -11,13 +22,19 @@ export function getFlippedMetaData({
   flippedPartType?: AvatarFigurePartType;
   direction: number;
 }) {
+  const directionFlipped = DIRECTION_IS_FLIPPED[direction];
+
+  if (!directionFlipped) {
+    return { direction, flip: false, partType };
+  }
+
   if (
     assetPartDefinition === "wav" &&
     (partType == AvatarFigurePartType.LeftHand ||
       partType == AvatarFigurePartType.LeftSleeve ||
       partType == AvatarFigurePartType.LeftCoatSleeve)
   ) {
-    return { direction, flip: true, partType: partType };
+    return { direction, flip: true, partType };
   }
 
   if (
@@ -63,17 +80,20 @@ export function getFlippedMetaData({
   }
 
   let overrideDirection = direction;
+  let flip = false;
 
   if (direction === 4) {
-    overrideDirection = direction;
+    overrideDirection = 2;
+    flip = true;
   }
 
   if (direction === 5) {
-    overrideDirection = direction;
+    overrideDirection = 1;
+    flip = true;
   }
 
   if (direction === 6) {
-    overrideDirection = direction;
+    overrideDirection = 0;
   }
 
   if (flippedPartType != partType && flippedPartType != null) {
@@ -84,5 +104,5 @@ export function getFlippedMetaData({
     };
   }
 
-  return { direction: overrideDirection, flip: false, partType };
+  return { direction: overrideDirection, flip: directionFlipped, partType };
 }

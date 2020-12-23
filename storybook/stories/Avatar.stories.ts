@@ -1,4 +1,5 @@
 import { Room, Avatar } from "@jankuss/shroom";
+import { AvatarAction } from "../../dist/objects/avatar/enum/AvatarAction";
 import { createShroom } from "./common/createShroom";
 
 export default {
@@ -27,21 +28,34 @@ export function Default() {
       "ch-255-91.lg-280-64.sh-290-1408.hd-180-2.hr-831-61",
     ];
 
+    /*
     for (let y = 1; y < 6; y++) {
       for (let x = 0; x < 8; x++) {
         const avatar = new Avatar({
           look: "ch-255-91.lg-280-64.sh-290-1408.hd-180-2.hr-831-61",
-          direction: 4,
-          roomX: 1,
-          roomY: 1,
+          direction: x % 8,
+          roomX: 1 + x * 2,
+          roomY: y * 2,
           roomZ: 0,
         });
 
-        avatar.dance = "1";
+        avatar.addAction(AvatarAction.Respect);
 
         room.addRoomObject(avatar);
       }
-    }
+    }*/
+
+    const avatar = new Avatar({
+      look: "ch-255-91.lg-280-64.sh-290-1408.hd-180-2.hr-831-61",
+      direction: 4,
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+    });
+
+    avatar.addAction(AvatarAction.Respect);
+
+    room.addRoomObject(avatar);
 
     application.stage.addChild(room);
   });

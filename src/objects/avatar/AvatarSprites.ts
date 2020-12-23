@@ -197,10 +197,6 @@ export class AvatarSprites extends RoomObject {
     drawDefinition: AvatarDrawDefinition,
     currentFrame: number
   ) {
-    if (this.currentFrame === 10) {
-      console.log(drawDefinition);
-    }
-
     this._assets.forEach((value) => (value.visible = false));
     this.container?.destroy();
 

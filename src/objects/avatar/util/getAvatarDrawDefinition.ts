@@ -23,6 +23,8 @@ import {
 import { AvatarEffectData } from "./data/AvatarEffectData";
 import { IAvatarEffectData } from "./data/IAvatarEffectData";
 import { dir } from "console";
+import { getFlippedMetaData } from "./getFlippedMetaData";
+import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
 
 export type AvatarAsset = {
   fileId: string;
@@ -186,6 +188,7 @@ export function getAvatarDrawDefinition(
   const drawOrderAdditional = filterDrawOrder(new Set(drawOrderRaw));
 
   if (effect != null) {
+    /*
     drawPartMap = enhancePartsWithEffects(
       {
         effect,
@@ -202,7 +205,7 @@ export function getAvatarDrawDefinition(
         offsetsData,
         partSetsData,
       }
-    );
+    );*/
   }
 
   return {
@@ -308,54 +311,11 @@ function getActionParts(
         return assetPartDef;
       };
 
-      let partTypeFlipped: string | undefined;
-
       const partInfo = partSetsData.getPartInfo(partType);
 
-      if (checkFlipped) {
-        if (partInfo?.flippedSetType != null) {
-          partTypeFlipped = partInfo.flippedSetType;
-        }
-      }
-
-      if (partInfo?.removeSetType != null) {
-        const removeSetType = partInfo.removeSetType;
-      }
-
-      const _getPartMeta = (
-        assetPartDef: string,
-        partId: string,
-        frameNumber: number
-      ) => {
-        return getPartMeta({
-          assetPartDef,
-          direction: direction,
-          normalizedDirection: normalizedDirection.direction,
-          exists: (id: string) => offsetsData.getOffsets(id) != null,
-          partFrame: frameNumber,
-          partId: partId,
-          partTypeFlipped: partTypeFlipped,
-          partType: partType,
-          mirrorHorizonal: normalizedDirection.mirrorHorizontal,
-        });
-      };
-
-      if (item.id === "ri" && itemId != null) {
-        const partMeta = _getPartMeta(getAssetPartDef(0), itemId.toString(), 0);
-        const libraryId = figureMap.getLibraryOfPart(
-          itemId.toString(),
-          item.id
-        );
-
-        if (libraryId != null && partMeta != null) {
-          const asset = getAssetFromPartMeta(libraryId, partMeta, offsetsData);
-
-          if (asset != null) {
-            map.set(item.id, [
-              { color: undefined, mode: "just-image", assets: [asset] },
-            ]);
-          }
-        }
+      let partTypeFlipped: string | undefined;
+      if (partInfo?.flippedSetType != null) {
+        partTypeFlipped = partInfo.flippedSetType;
       }
 
       for (const part of parts) {
@@ -402,11 +362,35 @@ function getActionParts(
         }
 
         const frameAssetInfos = frameElements.map((frameNumber) => {
-          return _getPartMeta(
-            getAssetPartDef(frameNumber),
+          const assetPartDef = getAssetPartDef(frameNumber);
+          const flippedMeta = getFlippedMetaData({
+            assetPartDefinition: assetPartDef,
+            direction: partDirection,
+            partType: part.type as AvatarFigurePartType,
+            flippedPartType: partTypeFlipped as AvatarFigurePartType,
+          });
+
+          let id = generateAssetName(
+            assetPartDef,
+            flippedMeta.partType,
             part.id,
+            flippedMeta.direction,
             frameNumber
           );
+          let offsets = offsetsData.getOffsets(id);
+
+          if (offsets == null) {
+            id = generateAssetName(
+              assetPartDef,
+              flippedMeta.partType,
+              part.id,
+              flippedMeta.direction,
+              0
+            );
+            offsets = offsetsData.getOffsets(id);
+          }
+
+          return { asset: id, flipped: flippedMeta.flip, swapped: false };
         });
 
         const currentPartsOnType = map.get(part.type) ?? [];
@@ -434,6 +418,10 @@ function getActionParts(
     }
   }
 
+  if (direction === 4) {
+    console.log(actionData.id, map);
+  }
+
   return {
     parts: map,
     activePartSet: actionData?.activepartset,
@@ -454,10 +442,12 @@ function getAssetFromPartMeta(
   let offsetsX = 0;
   let offsetsY = 0;
 
-  offsetsX -= offsets.offsetX;
-  offsetsY -= offsets.offsetY;
+  offsetsY = -offsets.offsetY;
+
   if (assetInfoFrame.flipped) {
     offsetsX = 64 + offsets.offsetX;
+  } else {
+    offsetsX = -offsets.offsetX;
   }
 
   return {
@@ -477,116 +467,6 @@ function generateAssetName(
   frame: number
 ) {
   return `h_${assetPartDef}_${partType}_${partId}_${direction}_${frame}`;
-}
-
-function getOffsets(mirror: boolean) {
-  return {
-    offsetX: mirror ? 64 : 0,
-    offsetY: 16,
-  };
-}
-
-function getPartMeta({
-  assetPartDef,
-  partType,
-  partTypeFlipped,
-  partId,
-  direction,
-  partFrame,
-  normalizedDirection,
-  mirrorHorizonal,
-  exists,
-}: {
-  assetPartDef: string;
-  partType: string;
-  partTypeFlipped?: string;
-  partId: string;
-  direction: number;
-  partFrame: number;
-  normalizedDirection: number;
-  mirrorHorizonal: boolean;
-  exists: (id: string) => boolean;
-}) {
-  const map = new Map<string, { flipped: boolean; swapped: boolean }>();
-  const none = { flipped: false, swapped: false };
-  const flipped = { flipped: true, swapped: false };
-  const swapped = { flipped: false, swapped: true };
-  const both = { flipped: true, swapped: true };
-  const fallback = generateAssetName(
-    "std",
-    partType,
-    partId,
-    normalizedDirection,
-    partFrame
-  );
-
-  if (partTypeFlipped != null) {
-    map.set(
-      generateAssetName(
-        assetPartDef,
-        partTypeFlipped,
-        partId,
-        direction,
-        partFrame
-      ),
-      swapped
-    );
-    map.set(
-      generateAssetName(assetPartDef, partTypeFlipped, partId, direction, 0),
-      swapped
-    );
-    map.set(
-      generateAssetName(
-        assetPartDef,
-        partTypeFlipped,
-        partId,
-        normalizedDirection,
-        partFrame
-      ),
-      both
-    );
-    map.set(
-      generateAssetName(
-        assetPartDef,
-        partTypeFlipped,
-        partId,
-        normalizedDirection,
-        0
-      ),
-      both
-    );
-  }
-
-  map.set(
-    generateAssetName(assetPartDef, partType, partId, direction, partFrame),
-    none
-  );
-  map.set(
-    generateAssetName(assetPartDef, partType, partId, direction, 0),
-    none
-  );
-  map.set(
-    generateAssetName(
-      assetPartDef,
-      partType,
-      partId,
-      normalizedDirection,
-      partFrame
-    ),
-    flipped
-  );
-  map.set(
-    generateAssetName(assetPartDef, partType, partId, normalizedDirection, 0),
-    flipped
-  );
-
-  const arr = Array.from(map);
-
-  for (const [key, info] of arr) {
-    const assetExists = exists(key);
-
-    if (assetExists) return { asset: key, ...info };
-  }
 }
 
 function enhancePartsWithEffects(
