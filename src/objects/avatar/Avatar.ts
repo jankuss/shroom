@@ -177,8 +177,14 @@ export class Avatar extends RoomObject implements IMoveable {
   }
 
   private _getCurrentLookOptions(): LookOptions {
+    const combinedActions = new Set(this.actions);
+
+    if (this._walking) {
+      combinedActions.add(AvatarAction.Move);
+    }
+
     return {
-      actions: this.actions,
+      actions: combinedActions,
       direction: this.direction,
       look: this._look,
       item: this.item,
@@ -206,7 +212,7 @@ export class Avatar extends RoomObject implements IMoveable {
   }
 
   private _updateFrame() {
-    this._avatarSprites.currentFrame = 9;
+    this._avatarSprites.currentFrame = this._frame;
   }
 
   private _startAnimation() {

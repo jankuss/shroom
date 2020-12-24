@@ -47,7 +47,7 @@ export function Default() {
 
     const avatar = new Avatar({
       look: "ch-255-91.lg-280-64.sh-290-1408.hd-180-2.hr-831-61",
-      direction: 6,
+      direction: 4,
       roomX: 1,
       roomY: 1,
       roomZ: 0,
