@@ -181,18 +181,24 @@ export function getAvatarDrawDefinition(
     .filter(notNullOrUndefined)
     .sort((a, b) => b.z - a.z);
 
-  bodyParts.forEach((bodyPart) => {
-    const parts = bodyPart.items
-      .flatMap((item) => {
-        const partsForType = partByType.get(item.id);
-        if (partsForType == null) return [];
+  const actionItems = new Map<string, any>();
 
-        return partsForType;
-      })
-      .map((part) => ({ ...part, bodypart: bodyPart }));
+  activeActions.forEach((action) => {
+    const localDrawPartMap = new Map<string, AvatarDrawPart[]>();
+    if (action.activepartset == null) return;
 
-    activeActions.forEach((action) => {
-      const localDrawPartMap = new Map<string, AvatarDrawPart[]>();
+    const activePartSet = partSetsData.getActivePartSet(action.activepartset);
+
+    bodyParts.forEach((bodyPart) => {
+      const parts = bodyPart.items
+        .flatMap((item) => {
+          const partsForType = partByType.get(item.id);
+          if (partsForType == null) return [];
+
+          return partsForType;
+        })
+        .map((part) => ({ ...part, bodypart: bodyPart }))
+        .filter((item) => activePartSet.has(item.type));
 
       const drawParts = getBodyPart(
         {
@@ -209,18 +215,15 @@ export function getAvatarDrawDefinition(
         const existing = localDrawPartMap.get(part.type) ?? [];
         localDrawPartMap.set(part.type, [...existing, part]);
       });
-
-      localDrawPartMap.forEach((parts, key) => drawPartMap.set(key, parts));
     });
+
+    localDrawPartMap.forEach((parts, key) => drawPartMap.set(key, parts));
+    actionItems.set(action.id, localDrawPartMap);
   });
 
   const drawParts = drawOrderAdditional
     .flatMap((partType) => drawPartMap.get(partType))
     .filter(notNullOrUndefined);
-
-  if (direction === 4) {
-    console.log("DRAW PARTS", drawParts);
-  }
 
   return {
     parts: drawParts,
@@ -275,10 +278,12 @@ function getBodyPart(
       frameNumber = animationFrame.number;
       if (
         animationFrame.assetpartdefinition &&
-        !(animationFrame.assetpartdefinition == "")
+        animationFrame.assetpartdefinition !== ""
       ) {
         assetPartDefinition = animationFrame.assetpartdefinition;
       }
+    } else {
+      frameNumber = frame;
     }
 
     const partInfo = partSetsData.getPartInfo(part.type);
@@ -286,6 +291,7 @@ function getBodyPart(
     const partTypeFlipped = partInfo?.flippedSetType as
       | AvatarFigurePartType
       | undefined;
+
     const flippedMeta = getFlippedMetaData({
       assetPartDefinition,
       flippedPartType: partTypeFlipped,
@@ -297,7 +303,7 @@ function getBodyPart(
       assetPartDefinition,
       flippedMeta.partType,
       part.id,
-      direction,
+      flippedMeta.direction,
       frameNumber
     );
     let offset = offsetsData.getOffsets(assetId);
@@ -343,14 +349,6 @@ function getBodyPart(
           });
         }
       }
-    }
-
-    if (
-      actionData.id === "Respect" &&
-      direction === 4 &&
-      bodyPartId === "handRight"
-    ) {
-      console.log("ABC", actionData, resolvedParts);
     }
 
     remainingPartCount--;
