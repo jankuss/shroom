@@ -9,7 +9,10 @@ import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import { getActionForPart } from "./getActionForPart";
 import { getDrawOrder } from "./drawOrder";
 import { avatarAnimations } from "./avatarAnimations";
-import { IAvatarAnimationData } from "./data/IAvatarAnimationData";
+import {
+  AvatarAnimationFrame,
+  IAvatarAnimationData,
+} from "./data/IAvatarAnimationData";
 import { IAvatarPartSetsData } from "./data/IAvatarPartSetsData";
 import { IAvatarOffsetsData } from "./data/IAvatarOffsetsData";
 import { IFigureMapData } from "./data/IFigureMapData";
@@ -141,7 +144,7 @@ export function getAvatarDrawDefinition(
   // Every other direction can be displayed by mirroring one of the above.
   const normalizedDirection = getNormalizedAvatarDirection(direction);
 
-  let drawPartMap = new Map<string, AvatarDrawPart[]>();
+  //let drawPartMap = new Map<string, AvatarDrawPart[]>();
   const activePartSets = new Set<string>();
 
   activeActions.forEach((info) => {
@@ -183,6 +186,8 @@ export function getAvatarDrawDefinition(
 
   const actionItems = new Map<string, any>();
 
+  const avatarFramesArray: AvatarBodypartFrames[] = [];
+
   activeActions.forEach((action) => {
     const localDrawPartMap = new Map<string, AvatarDrawPart[]>();
     if (action.activepartset == null) return;
@@ -200,6 +205,8 @@ export function getAvatarDrawDefinition(
         .map((part) => ({ ...part, bodypart: bodyPart }))
         .filter((item) => activePartSet.has(item.type));
 
+      const frameCount = animationData.getAnimationFramesCount(action.id);
+
       const drawParts = getBodyPart(
         {
           actionData: action,
@@ -215,11 +222,14 @@ export function getAvatarDrawDefinition(
         const existing = localDrawPartMap.get(part.type) ?? [];
         localDrawPartMap.set(part.type, [...existing, part]);
       });
-    });
 
-    localDrawPartMap.forEach((parts, key) => drawPartMap.set(key, parts));
-    actionItems.set(action.id, localDrawPartMap);
+      avatarFramesArray.push(
+        new AvatarBodypartFrames({ action, parts, direction, bodyPart }, deps)
+      );
+    });
   });
+
+  const drawPartMap = new AvatarFramesCollection(avatarFramesArray).collapse(3);
 
   const drawParts = drawOrderAdditional
     .flatMap((partType) => drawPartMap.get(partType))
@@ -231,6 +241,59 @@ export function getAvatarDrawDefinition(
     offsetX: 0,
     offsetY: 0,
   };
+}
+
+class AvatarFramesCollection {
+  private _cache = new Map<number, Map<string, AvatarDrawPart[]>>();
+
+  constructor(private _avatarBodypartFramesArray: AvatarBodypartFrames[]) {}
+
+  collapse(frame: number): Map<string, AvatarDrawPart[]> {
+    const cacheEntry = this._cache.get(frame);
+    if (cacheEntry != null) {
+      return cacheEntry;
+    }
+
+    const drawPartMap = new Map<string, AvatarDrawPart[]>();
+
+    this._avatarBodypartFramesArray.forEach((avatarFrames) => {
+      const localDrawPartMap = new Map<string, AvatarDrawPart[]>();
+
+      avatarFrames.getFrame(frame)?.forEach((part) => {
+        const current = localDrawPartMap.get(part.type) ?? [];
+        localDrawPartMap.set(part.type, [...current, part]);
+      });
+
+      localDrawPartMap.forEach((parts, type) => drawPartMap.set(type, parts));
+    });
+
+    return drawPartMap;
+  }
+}
+
+class AvatarBodypartFrames {
+  constructor(
+    private _options: {
+      action: AvatarActionInfo;
+      parts: PartDataWithBodyPart[];
+      direction: number;
+      bodyPart: Bodypart;
+    },
+    private deps: AvatarDependencies
+  ) {}
+
+  getFrame(frame: number) {
+    return getBodyPart(
+      {
+        actionData: this._options.action,
+        frame: frame,
+        direction: this._options.direction,
+        parts: this._options.parts,
+        bodyPartId: this._options.bodyPart.id,
+      },
+      this.deps
+    );
+  }
 }
 
 function getBodyPart(
@@ -270,9 +333,14 @@ function getBodyPart(
   while (remainingPartCount >= 0) {
     const part = parts[remainingPartCount];
     const frames = animationData.getAnimationFrames(actionData.id, part.type);
-    const animationFrame = frames[frame % frames.length];
 
-    let frameNumber = -1;
+    const framesIndexed: AvatarAnimationFrame[] = frames.flatMap((frame) =>
+      new Array(frame.repeats).fill(frame)
+    );
+
+    const animationFrame = framesIndexed[frame % framesIndexed.length];
+
+    let frameNumber = 0;
 
     if (animationFrame != null) {
       frameNumber = animationFrame.number;
@@ -283,7 +351,6 @@ function getBodyPart(
         assetPartDefinition = animationFrame.assetpartdefinition;
       }
     } else {
-      frameNumber = frame;
     }
 
     const partInfo = partSetsData.getPartInfo(part.type);
