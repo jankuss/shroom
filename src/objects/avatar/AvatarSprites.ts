@@ -202,7 +202,7 @@ export class AvatarSprites extends RoomObject {
 
     this.container = new PIXI.Container();
 
-    drawDefinition.parts.forEach((part, index) => {
+    drawDefinition.parts.forEach((part) => {
       const frame = currentFrame % part.assets.length;
       const asset = part.assets[frame];
 
@@ -213,7 +213,6 @@ export class AvatarSprites extends RoomObject {
       sprite.x = asset.x;
       sprite.y = asset.y;
       sprite.visible = true;
-      sprite.zIndex = index;
 
       this._sprites.set(asset.fileId, sprite);
       this.container?.addChild(sprite);
