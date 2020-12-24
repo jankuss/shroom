@@ -257,7 +257,7 @@ export class AvatarSprites extends RoomObject {
     const requestId = ++this._updateId;
 
     this.avatarLoader
-      .getAvatarDrawDefinition(this.lookOptions)
+      .getAvatarDrawDefinition({ ...this.lookOptions, initial: true })
       .then((result) => {
         if (requestId !== this._updateId) return;
 

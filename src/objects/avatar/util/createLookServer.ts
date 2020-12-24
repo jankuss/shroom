@@ -14,6 +14,7 @@ export interface LookOptions {
   direction: number;
   item?: string | number;
   effect?: { type: "dance" | "fx"; id: string };
+  initial?: boolean;
 }
 
 export interface LookServer {

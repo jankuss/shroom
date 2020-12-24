@@ -25,6 +25,12 @@ interface Options {
 
 const directions = [0, 1, 2, 3, 4, 5, 6, 7];
 
+const preloadActions = new Set([
+  AvatarAction.Default,
+  AvatarAction.Move,
+  AvatarAction.Sit,
+]);
+
 export class AvatarLoader implements IAvatarLoader {
   private globalCache: Map<string, Promise<HitTexture>> = new Map();
   private lookServer: Promise<LookServer>;
@@ -100,6 +106,7 @@ export class AvatarLoader implements IAvatarLoader {
     look,
     item,
     effect,
+    initial,
   }: LookOptions): Promise<AvatarLoaderResult> {
     const loadedFiles = new Map<string, Promise<HitTexture>>();
 
@@ -128,17 +135,21 @@ export class AvatarLoader implements IAvatarLoader {
 
     directions.forEach((direction) => {
       loadResources({
-        actions: new Set([AvatarAction.Default]),
-        direction,
-        look,
-      });
-
-      loadResources({
         actions: new Set(actions),
         direction,
         look,
         item,
       });
+
+      if (initial != null) {
+        preloadActions.forEach((action) => {
+          loadResources({
+            actions: new Set([action]),
+            direction,
+            look,
+          });
+        });
+      }
     });
 
     const awaitedEntries = await Promise.all(

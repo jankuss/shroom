@@ -4,7 +4,9 @@ import { AvatarDrawDefinition } from "../objects/avatar/util/getAvatarDrawDefini
 import { HitTexture } from "../objects/hitdetection/HitTexture";
 
 export interface IAvatarLoader {
-  getAvatarDrawDefinition(options: LookOptions): Promise<AvatarLoaderResult>;
+  getAvatarDrawDefinition(
+    options: LookOptions & { initial?: boolean }
+  ): Promise<AvatarLoaderResult>;
 }
 
 export type AvatarLoaderResult = {

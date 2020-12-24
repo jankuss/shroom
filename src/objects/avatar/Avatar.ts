@@ -183,6 +183,10 @@ export class Avatar extends RoomObject implements IMoveable {
       combinedActions.add(AvatarAction.Move);
     }
 
+    if (this.waving) {
+      combinedActions.add(AvatarAction.Wave);
+    }
+
     return {
       actions: combinedActions,
       direction: this.direction,
