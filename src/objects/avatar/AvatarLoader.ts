@@ -1,4 +1,4 @@
-import { createLookServer, LookServer } from "./util";
+import { AvatarDrawDefinition, createLookServer, LookServer } from "./util";
 import { LookOptions } from "./util/createLookServer";
 import {
   AvatarLoaderResult,
@@ -30,10 +30,34 @@ const preloadActions = new Set([
   AvatarAction.Sit,
 ]);
 
+function _getLookOptionsString(lookOptions: LookOptions) {
+  const parts: string[] = [];
+
+  if (lookOptions.actions.size > 0) {
+    const actionString = Array.from(lookOptions.actions)
+      .map((action) => action)
+      .join(",");
+    parts.push(`actions(${actionString})`);
+  }
+
+  parts.push(`direction(${lookOptions.direction})`);
+
+  if (lookOptions.item != null) {
+    parts.push(`item(${lookOptions.item})`);
+  }
+
+  if (lookOptions.look != null) {
+    parts.push(`look(${lookOptions.look})`);
+  }
+
+  return parts.join(",");
+}
+
 export class AvatarLoader implements IAvatarLoader {
   private globalCache: Map<string, Promise<HitTexture>> = new Map();
   private lookServer: Promise<LookServer>;
   private effectCache: Map<string, Promise<IAvatarEffectData>> = new Map();
+  private lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
 
   constructor(private options: Options) {
     this.lookServer = this.options.createLookServer();
@@ -94,6 +118,27 @@ export class AvatarLoader implements IAvatarLoader {
     });
   }
 
+  private _getDrawDefinitionCached(
+    getAvatarDrawDefinition: LookServer,
+    lookOptions: LookOptions,
+    effect: IAvatarEffectData | undefined
+  ) {
+    const key = _getLookOptionsString(lookOptions);
+
+    const existing = this.lookOptionsCache.get(key);
+
+    if (existing != null) {
+      return existing;
+    }
+
+    const drawDefinition = getAvatarDrawDefinition(lookOptions, effect);
+    if (drawDefinition == null) return;
+
+    this.lookOptionsCache.set(key, drawDefinition);
+
+    return drawDefinition;
+  }
+
   async getAvatarDrawDefinition(
     options: LookOptions
   ): Promise<AvatarLoaderResult> {
@@ -109,7 +154,11 @@ export class AvatarLoader implements IAvatarLoader {
     }
 
     const loadResources = (options: LookOptions) =>
-      getDrawDefinition(options, effectData)?.parts.forEach((parts) => {
+      this._getDrawDefinitionCached(
+        getDrawDefinition,
+        options,
+        effectData
+      )?.parts.forEach((parts) => {
         parts.assets.forEach((item) => {
           if (loadedFiles.has(item.fileId)) return;
           const globalFile = this.globalCache.get(item.fileId);
@@ -153,7 +202,11 @@ export class AvatarLoader implements IAvatarLoader {
 
     const obj: AvatarLoaderResult = {
       getDrawDefinition: (options) => {
-        const result = getDrawDefinition(options, effectData);
+        const result = this._getDrawDefinitionCached(
+          getDrawDefinition,
+          options,
+          effectData
+        );
         if (result == null) throw new Error("Invalid look");
 
         return result;

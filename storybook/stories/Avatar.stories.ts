@@ -49,19 +49,21 @@ export function Default() {
 
     const avatars: Avatar[] = [];
 
-    for (let i = 0; i < 8; i++) {
-      const avatar = new Avatar({
-        look: looks[i % looks.length],
-        direction: i,
-        roomX: 1 + i * 2,
-        roomY: 1,
-        roomZ: 0,
-      });
-      avatar.addAction(AvatarAction.CarryItem);
-      avatar.item = 2;
+    for (let y = 0; y < 5; y++) {
+      for (let x = 0; x < 8; x++) {
+        const avatar = new Avatar({
+          look: looks[y % looks.length],
+          direction: y % 8,
+          roomX: 1 + x * 2,
+          roomY: 1 + y * 2,
+          roomZ: 0,
+        });
+        avatar.addAction(AvatarAction.CarryItem);
+        avatar.item = 2;
 
-      room.addRoomObject(avatar);
-      avatars.push(avatar);
+        room.addRoomObject(avatar);
+        avatars.push(avatar);
+      }
     }
 
     setInterval(() => {

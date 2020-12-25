@@ -35,7 +35,7 @@ export class AvatarSprites extends RoomObject {
   private _refreshFrame = false;
   private _refreshLook = false;
 
-  private _sprites: Map<string, PIXI.Sprite> = new Map();
+  private _sprites: Map<string, HitSprite> = new Map();
 
   private _layer: "door" | "tile" = "tile";
   private _updateId = 0;
@@ -225,6 +225,7 @@ export class AvatarSprites extends RoomObject {
       sprite.x = asset.x;
       sprite.y = asset.y;
       sprite.visible = true;
+      sprite.mirrored = asset.mirror;
 
       this._sprites.set(asset.fileId, sprite);
       this.container?.addChild(sprite);
