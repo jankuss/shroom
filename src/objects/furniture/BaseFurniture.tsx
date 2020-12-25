@@ -46,6 +46,7 @@ export class BaseFurniture
   private _refreshZIndex: boolean = false;
 
   private _highlight: boolean = false;
+  private _alpha: number = 1;
 
   public get highlight() {
     return this._highlight;
@@ -54,6 +55,15 @@ export class BaseFurniture
   public set highlight(value) {
     this._highlight = value;
     this._refreshFurniture = true;
+  }
+
+  public get alpha() {
+    return this._alpha;
+  }
+
+  public set alpha(value) {
+    this._alpha = value;
+    this._updateFurniture();
   }
 
   public get onClick() {
@@ -371,8 +381,10 @@ export class BaseFurniture
         sprite.visible = false;
       } else {
         sprite.visible = true;
-        sprite.alpha = 0.195;
+        sprite.alpha = this.alpha / 5;
       }
+    } else {
+      sprite.alpha = this.alpha;
     }
 
     if (mask) {

@@ -66,6 +66,14 @@ export class WallFurniture extends RoomObject implements IFurniture {
     this._highlight = this._highlight;
   }
 
+  public get alpha() {
+    return this._baseFurniture.alpha;
+  }
+
+  public set alpha(value: number) {
+    this._baseFurniture.alpha = value;
+  }
+
   public get type() {
     return this._type;
   }
