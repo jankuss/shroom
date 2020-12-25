@@ -210,7 +210,15 @@ export class AvatarSprites extends RoomObject {
       const frame = currentFrame % part.assets.length;
       const asset = part.assets[frame];
 
-      const sprite = this.createAsset(part, asset);
+      let sprite = this._sprites.get(asset.fileId);
+
+      if (sprite == null) {
+        sprite = this.createAsset(part, asset);
+
+        if (sprite != null) {
+          this._assets.push(sprite);
+        }
+      }
 
       if (sprite == null) return;
 
