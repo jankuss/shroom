@@ -1,4 +1,4 @@
-import { IAvatarOffsetsData } from "./IAvatarOffsetsData";
+import { IAvatarOffsetsData } from "./interfaces/IAvatarOffsetsData";
 
 export class AvatarOffsetsData implements IAvatarOffsetsData {
   constructor(private json: any) {}

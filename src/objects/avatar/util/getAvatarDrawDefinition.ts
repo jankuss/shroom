@@ -1,84 +1,29 @@
 import { ParsedLook } from "./parseLookString";
-import { GetSetType } from "./parseFigureData";
-import { getNormalizedAvatarDirection } from "./getNormalizedAvatarDirection";
-import { GetDrawOrder } from "./parseDrawOrder";
-import { filterDrawOrder } from "./filterDrawOrder";
-import { getNormalizedPart } from "./getNormalizedPart";
-import { GetOffset } from "./loadOffsetMap";
+import { addMissingDrawOrderItems } from "./addMissingDrawOrderItems";
 import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
-import { getActionForPart } from "./getActionForPart";
 import { getDrawOrder } from "./drawOrder";
-import { avatarAnimations } from "./avatarAnimations";
 import {
   AvatarAnimationFrame,
   IAvatarAnimationData,
-} from "./data/IAvatarAnimationData";
-import { IAvatarPartSetsData } from "./data/IAvatarPartSetsData";
-import { IAvatarOffsetsData } from "./data/IAvatarOffsetsData";
-import { IFigureMapData } from "./data/IFigureMapData";
-import { IFigureData } from "./data/IFigureData";
-import { Bodypart, IAvatarGeometryData } from "./data/IAvatarGeometryData";
+} from "./data/interfaces/IAvatarAnimationData";
+import { IAvatarPartSetsData } from "./data/interfaces/IAvatarPartSetsData";
+import { IAvatarOffsetsData } from "./data/interfaces/IAvatarOffsetsData";
+import { IFigureMapData } from "./data/interfaces/IFigureMapData";
+import { IFigureData } from "./data/interfaces/IFigureData";
+import {
+  Bodypart,
+  IAvatarGeometryData,
+} from "./data/interfaces/IAvatarGeometryData";
 import { AvatarAction } from "../enum/AvatarAction";
 import {
   AvatarActionInfo,
   IAvatarActionsData,
-} from "./data/IAvatarActionsData";
-import { IAvatarEffectData } from "./data/IAvatarEffectData";
+} from "./data/interfaces/IAvatarActionsData";
+import { IAvatarEffectData } from "./data/interfaces/IAvatarEffectData";
 import { DIRECTION_IS_FLIPPED, getFlippedMetaData } from "./getFlippedMetaData";
 import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
-
-export type AvatarAsset = {
-  fileId: string;
-  x: number;
-  y: number;
-  library: string;
-  mirror: boolean;
-};
-
-export type AvatarDrawPart = {
-  type: string;
-  assets: AvatarAsset[];
-  color: string | undefined;
-  mode: "colored" | "just-image";
-};
-
-export interface AvatarDrawDefinition {
-  mirrorHorizontal: boolean;
-  parts: AvatarDrawPart[];
-  offsetX: number;
-  offsetY: number;
-}
-
-export interface AvatarDependencies {
-  figureData: IFigureData;
-  figureMap: IFigureMapData;
-  offsetsData: IAvatarOffsetsData;
-  animationData: IAvatarAnimationData;
-  partSetsData: IAvatarPartSetsData;
-  geometry: IAvatarGeometryData;
-  actionsData: IAvatarActionsData;
-}
-
-interface Options {
-  parsedLook: ParsedLook;
-  actions: Set<string>;
-  direction: number;
-  frame: number;
-  item?: string | number;
-  effect?: IAvatarEffectData;
-}
-
-export interface PartData {
-  color: string | undefined;
-  id: string;
-  type: string;
-  colorable: boolean;
-  hiddenLayers: string[];
-}
-
-export interface PartDataWithBodyPart extends PartData {
-  bodypart: Bodypart;
-}
+import { getPartDataForParsedLook, PartData } from "./getPartDataForParsedLook";
+import { getDrawOrderForActions } from "./getDrawOrderForActions";
 
 /**
  * Returns a definition of how the avatar should be drawn.
@@ -97,15 +42,12 @@ export function getAvatarDrawDefinition(
 ): AvatarDrawDefinition | undefined {
   const actions = new Set(initialActions).add(AvatarAction.Default);
 
-  const {
-    offsetsData,
-    animationData,
-    partSetsData,
-    actionsData,
-    figureData,
-    figureMap,
-    geometry,
-  } = deps;
+  const { partSetsData, actionsData, figureData, geometry } = deps;
+
+  // Sort actions by precedence. This basically determines in which order actions are applied.
+  // For example, if a avatar is sitting and respecting, the sorting by precedence will return
+  // the following order:
+  // Default < Sit < Respect
 
   const activeActions = actionsData
     .getActions()
@@ -117,66 +59,18 @@ export function getAvatarDrawDefinition(
       return 0;
     });
 
-  const partByType = new Map<string, PartData[]>();
+  const partByType = getPartDataForParsedLook(parsedLook, figureData);
 
-  Array.from(parsedLook.entries()).forEach(([type, { setId, colorId }]) => {
-    const parts = figureData.getParts(type, setId.toString());
-    const colorValue = figureData.getColor(type, colorId.toString());
-    const hiddenLayers: string[] = [];
-
-    parts?.forEach((part) => {
-      const current = partByType.get(part.type) ?? [];
-
-      partByType.set(part.type, [
-        ...current,
-        { ...part, color: colorValue, hiddenLayers },
-      ]);
-    });
-
-    return (parts || []).map((part) => ({
-      ...part,
-      color: colorValue,
-      hiddenLayers,
-    }));
+  // Here we determine the draworder based on the active actions.
+  const drawOrderId = getDrawOrderForActions(activeActions, {
+    hasItem: itemId != null,
   });
 
-  // Normalize the direction, since the only available directions are 0, 1, 2, 3 and 7.
-  // Every other direction can be displayed by mirroring one of the above.
-  const normalizedDirection = getNormalizedAvatarDirection(direction);
+  const drawOrderRaw =
+    getDrawOrder(drawOrderId, direction) ?? getDrawOrder("std", direction);
 
-  //let drawPartMap = new Map<string, AvatarDrawPart[]>();
-  const activePartSets = new Set<string>();
-
-  activeActions.forEach((info) => {
-    if (info.activepartset != null) {
-      activePartSets.add(info.activepartset);
-    }
-  });
-
-  if (itemId != null) {
-    activePartSets.add("itemRight");
-  }
-
-  function getDrawOrderType() {
-    if (activePartSets.has("handLeft")) {
-      return "lh-up";
-    }
-
-    if (
-      activePartSets.has("handRightAndHead") ||
-      activePartSets.has("handRight")
-    ) {
-      return "rh-up";
-    }
-
-    return "std";
-  }
-
-  let drawOrderRaw =
-    getDrawOrder(getDrawOrderType(), direction) ||
-    getDrawOrder("std", direction);
-
-  const drawOrderAdditional = filterDrawOrder(new Set(drawOrderRaw));
+  // Since the draworder file has missing parts, we add them here.
+  const drawOrderAdditional = addMissingDrawOrderItems(new Set(drawOrderRaw));
 
   const bodyParts = geometry
     .getBodyParts("full")
@@ -187,12 +81,13 @@ export function getAvatarDrawDefinition(
   const drawPartMap = new Map<string, AvatarDrawPart[]>();
 
   activeActions.forEach((action) => {
-    const localDrawPartMap = new Map<string, AvatarDrawPart[]>();
     if (action.activepartset == null) return;
 
     const activePartSet = partSetsData.getActivePartSet(action.activepartset);
 
     bodyParts.forEach((bodyPart) => {
+      // Select all parts of that bodypart who are in the activePartSet of that action.
+      // This is there so an action only applies to the parts specified in the activePartSet.
       const parts = bodyPart.items
         .flatMap((item) => {
           const partsForType = partByType.get(item.id);
@@ -203,32 +98,36 @@ export function getAvatarDrawDefinition(
         .map((part) => ({ ...part, bodypart: bodyPart }))
         .filter((item) => activePartSet.has(item.type));
 
+      // Get drawing parts for this body part
       const drawParts = getBodyPart(
         {
           actionData: action,
           direction,
           parts,
-          bodyPartId: bodyPart.id,
         },
         deps
       );
 
+      const localDrawPartMap = new Map<string, AvatarDrawPart[]>();
+
+      // Group body part draw parts by part type
       drawParts.forEach((part) => {
         const existing = localDrawPartMap.get(part.type) ?? [];
         localDrawPartMap.set(part.type, [...existing, part]);
       });
 
+      // Override the result draw parts with the draw parts for this body part
       localDrawPartMap.forEach((parts, type) => drawPartMap.set(type, parts));
     });
   });
 
+  // Get draw parts in the order specified by the draworder.
   const drawParts = drawOrderAdditional
     .flatMap((partType) => drawPartMap.get(partType))
     .filter(notNullOrUndefined);
 
   return {
     parts: drawParts,
-    mirrorHorizontal: false,
     offsetX: 0,
     offsetY: 0,
   };
@@ -239,14 +138,11 @@ function getBodyPart(
     actionData,
     direction,
     parts,
-    bodyPartId,
   }: {
     parts: PartDataWithBodyPart[];
-    bodyPartId: string;
     actionData: AvatarActionInfo;
     direction: number;
     itemId?: string | number;
-    validBodyParts?: Set<string>;
   },
   {
     offsetsData,
@@ -385,6 +281,7 @@ function getAssetForFrame({
 
     if (libraryId != null) {
       const asset = getAssetFromPartMeta(
+        assetPartDefinition,
         libraryId,
         { flipped: flipH, swapped: false, asset: assetId },
         offsetsData
@@ -401,6 +298,7 @@ function getAssetForFrame({
 }
 
 function getAssetFromPartMeta(
+  assetPartDefinition: string,
   libraryId: string,
   assetInfoFrame: { flipped: boolean; swapped: boolean; asset: string },
   offsetsData: IAvatarOffsetsData
@@ -420,6 +318,14 @@ function getAssetFromPartMeta(
     offsetsX = -offsets.offsetX;
   }
 
+  if (assetPartDefinition === "lay") {
+    if (assetInfoFrame.flipped) {
+      offsetsX -= 52;
+    } else {
+      offsetsX += 52;
+    }
+  }
+
   return {
     fileId: assetInfoFrame.asset,
     library: libraryId,
@@ -437,4 +343,48 @@ function generateAssetName(
   frame: number
 ) {
   return `h_${assetPartDef}_${partType}_${partId}_${direction}_${frame}`;
+}
+
+export type AvatarAsset = {
+  fileId: string;
+  x: number;
+  y: number;
+  library: string;
+  mirror: boolean;
+};
+
+export type AvatarDrawPart = {
+  type: string;
+  assets: AvatarAsset[];
+  color: string | undefined;
+  mode: "colored" | "just-image";
+};
+
+export interface AvatarDrawDefinition {
+  parts: AvatarDrawPart[];
+  offsetX: number;
+  offsetY: number;
+}
+
+export interface AvatarDependencies {
+  figureData: IFigureData;
+  figureMap: IFigureMapData;
+  offsetsData: IAvatarOffsetsData;
+  animationData: IAvatarAnimationData;
+  partSetsData: IAvatarPartSetsData;
+  geometry: IAvatarGeometryData;
+  actionsData: IAvatarActionsData;
+}
+
+interface Options {
+  parsedLook: ParsedLook;
+  actions: Set<string>;
+  direction: number;
+  frame: number;
+  item?: string | number;
+  effect?: IAvatarEffectData;
+}
+
+export interface PartDataWithBodyPart extends PartData {
+  bodypart: Bodypart;
 }

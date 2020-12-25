@@ -1,6 +1,6 @@
 import { notNullOrUndefined } from "../../../../util/notNullOrUndefined";
 import { AvatarData } from "./AvatarData";
-import { FigureDataPart, IFigureData } from "./IFigureData";
+import { FigureDataPart, IFigureData } from "./interfaces/IFigureData";
 
 export class FigureData extends AvatarData implements IFigureData {
   getColor(setType: string, colorId: string): string | undefined {

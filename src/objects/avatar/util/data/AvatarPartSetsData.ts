@@ -1,5 +1,5 @@
 import { AvatarData } from "./AvatarData";
-import { IAvatarPartSetsData } from "./IAvatarPartSetsData";
+import { IAvatarPartSetsData } from "./interfaces/IAvatarPartSetsData";
 
 export class AvatarPartSetsData
   extends AvatarData

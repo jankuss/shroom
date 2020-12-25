@@ -3,11 +3,9 @@ import * as PIXI from "pixi.js";
 import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { AvatarSprites } from "./AvatarSprites";
-import { avatarFramesObject } from "./util/avatarFrames";
 import { LookOptions } from "./util/createLookServer";
 import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
-import { ParsedTileType } from "../../util/parseTileMap";
 import { IMoveable } from "../IMoveable";
 import { AvatarAction } from "./enum/AvatarAction";
 

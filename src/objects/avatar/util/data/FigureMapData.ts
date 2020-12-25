@@ -1,6 +1,6 @@
 import { notNullOrUndefined } from "../../../../util/notNullOrUndefined";
 import { AvatarData } from "./AvatarData";
-import { IFigureMapData } from "./IFigureMapData";
+import { IFigureMapData } from "./interfaces/IFigureMapData";
 
 export class FigureMapData extends AvatarData implements IFigureMapData {
   constructor(xml: string) {

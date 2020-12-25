@@ -1,0 +1,40 @@
+import { IFigureData } from "./data/interfaces/IFigureData";
+import { ParsedLook } from "./parseLookString";
+
+export function getPartDataForParsedLook(
+  parsedLook: ParsedLook,
+  figureData: IFigureData
+) {
+  const partByType = new Map<string, PartData[]>();
+
+  Array.from(parsedLook.entries()).forEach(([type, { setId, colorId }]) => {
+    const parts = figureData.getParts(type, setId.toString());
+    const colorValue = figureData.getColor(type, colorId.toString());
+    const hiddenLayers: string[] = [];
+
+    parts?.forEach((part) => {
+      const current = partByType.get(part.type) ?? [];
+
+      partByType.set(part.type, [
+        ...current,
+        { ...part, color: colorValue, hiddenLayers },
+      ]);
+    });
+
+    return (parts || []).map((part) => ({
+      ...part,
+      color: colorValue,
+      hiddenLayers,
+    }));
+  });
+
+  return partByType;
+}
+
+export interface PartData {
+  color: string | undefined;
+  id: string;
+  type: string;
+  colorable: boolean;
+  hiddenLayers: string[];
+}

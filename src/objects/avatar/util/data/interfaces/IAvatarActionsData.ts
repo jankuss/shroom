@@ -1,4 +1,4 @@
-import { AvatarAction } from "../../enum/AvatarAction";
+import { AvatarAction } from "../../../enum/AvatarAction";
 
 export interface IAvatarActionsData {
   getAction(id: AvatarAction): AvatarActionInfo | undefined;

@@ -1,6 +1,9 @@
 import { AvatarAction } from "../../enum/AvatarAction";
 import { AvatarData } from "./AvatarData";
-import { IAvatarActionsData, AvatarActionInfo } from "./IAvatarActionsData";
+import {
+  IAvatarActionsData,
+  AvatarActionInfo,
+} from "./interfaces/IAvatarActionsData";
 
 export class AvatarActionsData
   extends AvatarData

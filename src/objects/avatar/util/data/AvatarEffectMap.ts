@@ -1,5 +1,5 @@
 import { AvatarData } from "./AvatarData";
-import { IAvatarEffectMap } from "./IAvatarEffectMap";
+import { IAvatarEffectMap } from "./interfaces/IAvatarEffectMap";
 
 export class AvatarEffectMap extends AvatarData implements IAvatarEffectMap {
   getEffectInfo(

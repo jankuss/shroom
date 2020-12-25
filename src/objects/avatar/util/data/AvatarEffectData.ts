@@ -1,5 +1,8 @@
 import { AvatarData } from "./AvatarData";
-import { AvatarEffectFrame, IAvatarEffectData } from "./IAvatarEffectData";
+import {
+  AvatarEffectFrame,
+  IAvatarEffectData,
+} from "./interfaces/IAvatarEffectData";
 
 export class AvatarEffectData extends AvatarData implements IAvatarEffectData {
   private _frameParts: Map<number, AvatarEffectFrame[]> = new Map();

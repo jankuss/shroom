@@ -4,7 +4,7 @@ import {
   AvatarGeometry,
   Bodypart,
   IAvatarGeometryData,
-} from "./IAvatarGeometryData";
+} from "./interfaces/IAvatarGeometryData";
 
 export class AvatarGeometryData
   extends AvatarData

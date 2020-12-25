@@ -1,5 +1,4 @@
-import { createLookServer, loadOffsetMapFromJson, LookServer } from "./util";
-import { avatarFramesObject } from "./util/avatarFrames";
+import { createLookServer, LookServer } from "./util";
 import { LookOptions } from "./util/createLookServer";
 import {
   AvatarLoaderResult,
@@ -16,7 +15,7 @@ import { AvatarActionsData } from "./util/data/AvatarActionsData";
 import { AvatarGeometryData } from "./util/data/AvatarGeometryData";
 import { AvatarAction } from "./enum/AvatarAction";
 import { AvatarEffectData } from "./util/data/AvatarEffectData";
-import { IAvatarEffectData } from "./util/data/IAvatarEffectData";
+import { IAvatarEffectData } from "./util/data/interfaces/IAvatarEffectData";
 
 interface Options {
   resolveImage: (id: string, library: string) => Promise<HitTexture>;

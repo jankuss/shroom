@@ -80,21 +80,17 @@ export function getFlippedMetaData({
   }
 
   let overrideDirection = direction;
-  let flip = false;
 
   if (direction === 4) {
     overrideDirection = 2;
-    flip = true;
   }
 
   if (direction === 5) {
     overrideDirection = 1;
-    flip = true;
   }
 
   if (direction === 6) {
     overrideDirection = 0;
-    flip = true;
   }
 
   if (flippedPartType != partType) {

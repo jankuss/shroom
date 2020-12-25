@@ -1,18 +1,6 @@
 type DrawOrderItem = string | { original: string; override: string };
 
-const replace = (items: DrawOrderItem[], item: string, newItem: string) => {
-  const index = items.indexOf(item);
-
-  if (index !== -1) {
-    items[index] = { original: item, override: newItem };
-  }
-};
-
-const remove = (items: string[], item: string) => {
-  return items.filter((value) => value !== item);
-};
-
-export function filterDrawOrder(drawOrder: Set<string>): string[] {
+export function addMissingDrawOrderItems(drawOrder: Set<string>): string[] {
   const drawOrderArray = [...drawOrder];
 
   const drawOrderArrayWithCenterItems: string[] = [];

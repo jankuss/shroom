@@ -2,7 +2,7 @@ import { AvatarData } from "./AvatarData";
 import {
   AvatarAnimationFrame,
   IAvatarAnimationData,
-} from "./IAvatarAnimationData";
+} from "./interfaces/IAvatarAnimationData";
 
 export class AvatarAnimationData
   extends AvatarData
