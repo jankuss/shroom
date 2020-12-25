@@ -258,22 +258,24 @@ export class AvatarSprites extends RoomObject {
   private _reloadLook() {
     if (!this.mounted) return;
 
-    const requestId = ++this._updateId;
+    const lookOptions = this._nextLookOptions;
 
-    this.avatarLoader
-      .getAvatarDrawDefinition({ ...this.lookOptions, initial: true })
-      .then((result) => {
-        if (requestId !== this._updateId) return;
+    if (lookOptions != null) {
+      const requestId = ++this._updateId;
 
-        this.avatarLoaderResult = result;
+      this.avatarLoader
+        .getAvatarDrawDefinition({ ...lookOptions, initial: true })
+        .then((result) => {
+          if (requestId !== this._updateId) return;
 
-        if (this._nextLookOptions != null) {
-          this._lookOptions = this._nextLookOptions;
+          this.avatarLoaderResult = result;
+
+          this._lookOptions = lookOptions;
           this._nextLookOptions = undefined;
-        }
 
-        this._updateSprites();
-      });
+          this._updateSprites();
+        });
+    }
   }
 
   private _updateFrame() {
