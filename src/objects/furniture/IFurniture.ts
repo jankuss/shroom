@@ -10,6 +10,7 @@ export interface IFurniture extends IFurnitureEventHandlers {
   direction: number;
   animation: string | undefined;
   highlight: boolean | undefined;
+  placementType: "wall" | "floor";
 }
 
 export type IFurnitureBehavior<T extends IFurniture = IFurniture> = {

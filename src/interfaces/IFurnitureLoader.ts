@@ -6,5 +6,5 @@ export interface IFurnitureLoader {
 }
 
 export type FurnitureFetch =
-  | { kind: "id"; id: FurnitureId }
+  | { kind: "id"; id: FurnitureId; placementType: "wall" | "floor" }
   | { kind: "type"; type: string };

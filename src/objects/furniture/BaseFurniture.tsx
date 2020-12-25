@@ -18,7 +18,12 @@ const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
 type MaskIdGetter = (direction: number) => string | undefined;
 
-type SpriteWithStaticOffset = { x: number; y: number; sprite: PIXI.Sprite };
+type SpriteWithStaticOffset = {
+  x: number;
+  y: number;
+  sprite: PIXI.Sprite;
+  zIndex?: number;
+};
 
 export class BaseFurniture
   extends RoomObject
@@ -38,6 +43,7 @@ export class BaseFurniture
 
   private _refreshPosition: boolean = false;
   private _refreshFurniture: boolean = false;
+  private _refreshZIndex: boolean = false;
 
   private _highlight: boolean = false;
 
@@ -71,8 +77,10 @@ export class BaseFurniture
   }
 
   public set x(value) {
-    this._x = value;
-    this._refreshPosition = true;
+    if (value !== this.x) {
+      this._x = value;
+      this._refreshPosition = true;
+    }
   }
 
   public get y() {
@@ -80,8 +88,10 @@ export class BaseFurniture
   }
 
   public set y(value) {
-    this._y = value;
-    this._refreshPosition = true;
+    if (value !== this.y) {
+      this._y = value;
+      this._refreshPosition = true;
+    }
   }
 
   public get zIndex() {
@@ -89,8 +99,10 @@ export class BaseFurniture
   }
 
   public set zIndex(value) {
-    this._zIndex = value;
-    this._refreshPosition = true;
+    if (value !== this.zIndex) {
+      this._zIndex = value;
+      this._refreshZIndex = true;
+    }
   }
 
   public get direction() {
@@ -152,19 +164,34 @@ export class BaseFurniture
         this._refreshPosition = false;
         this._updatePosition();
       }
+
+      if (this._refreshZIndex) {
+        this._refreshZIndex = false;
+        this._updateZIndex();
+      }
     });
   }
 
-  _updatePosition() {
-    const updateElement = (element: SpriteWithStaticOffset) => {
+  private _updateSprites(cb: (element: SpriteWithStaticOffset) => void) {
+    this.elements.forEach(cb);
+    this.animatedSprites.forEach(({ sprites }) => sprites.forEach(cb));
+  }
+
+  private _updateZIndex() {
+    this._updateSprites((element: SpriteWithStaticOffset) => {
+      if (element.zIndex == null) {
+        element.sprite.zIndex = 0;
+      } else {
+        element.sprite.zIndex = this.zIndex + element.zIndex;
+      }
+    });
+  }
+
+  private _updatePosition() {
+    this._updateSprites((element: SpriteWithStaticOffset) => {
       element.sprite.x = this.x + element.x;
       element.sprite.y = this.y + element.y;
-    };
-
-    this.elements.forEach(updateElement);
-    this.animatedSprites.forEach(({ sprites }) =>
-      sprites.forEach(updateElement)
-    );
+    });
   }
 
   _updateFurniture() {
@@ -189,7 +216,7 @@ export class BaseFurniture
     this.unknownSprite.zIndex = this.zIndex;
 
     this.visualization.addContainerChild(this.unknownSprite);
-    this.elements.push({ sprite: this.unknownSprite, x, y });
+    this.elements.push({ sprite: this.unknownSprite, x, y, zIndex: 0 });
   }
 
   updateSprites(
@@ -310,7 +337,12 @@ export class BaseFurniture
 
     sprite.x = x + offsetX;
     sprite.y = y + offsetY;
-    sprite.zIndex = shadow ? 0 : zIndex;
+
+    if (shadow) {
+      sprite.zIndex = 0;
+    } else {
+      sprite.zIndex = this.zIndex + zIndex;
+    }
 
     if (tint != null) {
       sprite.tint = parseInt(tint, 16);
@@ -347,7 +379,12 @@ export class BaseFurniture
       sprite.tint = 0xffffff;
     }
 
-    return { sprite, x: offsetX, y: offsetY };
+    return {
+      sprite,
+      x: offsetX,
+      y: offsetY,
+      zIndex: shadow ? undefined : zIndex,
+    };
   }
 
   private createAssetFromPart(
@@ -367,7 +404,7 @@ export class BaseFurniture
     const getTexture = (asset: Asset) =>
       loadFurniResult.getTexture(getAssetTextureName(asset));
 
-    const zIndex = this.zIndex + (z ?? 0) + index * 0.01;
+    const zIndex = (z ?? 0) + index * 0.01;
 
     if (isNaN(zIndex)) {
       throw new Error("invalid zindex");
@@ -400,7 +437,7 @@ export class BaseFurniture
 
       return {
         kind: "simple",
-        sprite: { x: 0, y: 0, sprite: new PIXI.Sprite() },
+        sprite: { x: 0, y: 0, sprite: new PIXI.Sprite(), zIndex: 0 },
       };
     }
 

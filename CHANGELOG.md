@@ -5,7 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2020-12-19
+## [0.1.8] - 2020-12-24
+
+### Fixed
+
+- Cause of random crashes during asset extraction
+
+## [0.1.7] - 2020-12-19
+
+### Fixed
+
+- Fixed cache issue when loading colored furniture
+- Tile Map Parser: Allow doors in first column of tilemap
+
+## [0.1.6] - 2020-12-19
+
+### Fixed
+
+- Furniture fetching by id differentiates between wall and floor items
+
+## [0.1.5] - 2020-12-19
+
+### Added
+
+- Ability to fetch furniture by id
 
 ### Changed
 

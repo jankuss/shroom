@@ -198,10 +198,11 @@ function assertTileMapHasPadding(tilemap: TileType[][]) {
     const row = tilemap[y];
 
     if (row.length < 1) throw new Error("Tilemap row was empty.");
-    if (doorCount > 0 && row[0] !== "x")
-      throw new Error(paddingErrorMessage(`row ${y}`));
 
-    doorCount++;
+    if (row[0] !== "x") {
+      if (doorCount > 0) throw new Error(paddingErrorMessage(`row ${y}`));
+      doorCount++;
+    }
   }
 
   for (let x = 0; x < tilemap[0].length; x++) {
