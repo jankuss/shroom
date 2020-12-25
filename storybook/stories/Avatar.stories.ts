@@ -122,10 +122,11 @@ export function Drinking() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-            0000000
-            0000000
-            0000000
-            0000000
+            xxxxxxxx
+            x0000000
+            x0000000
+            x0000000
+            x0000000
           `,
     });
 
@@ -135,12 +136,13 @@ export function Drinking() {
       const avatar = new Avatar({
         look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
         direction: i * 2,
-        roomX: i * 2,
-        roomY: 0,
+        roomX: 1 + i * 2,
+        roomY: 1,
         roomZ: 0,
       });
 
-      avatar.item = 40;
+      avatar.item = 1;
+      avatar.addAction(AvatarAction.CarryItem);
 
       room.addRoomObject(avatar);
       avatars.push(avatar);
@@ -150,12 +152,13 @@ export function Drinking() {
       const avatar = new Avatar({
         look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
         direction: i * 2 + 1,
-        roomX: i * 2,
-        roomY: 3,
+        roomX: 1 + i * 2,
+        roomY: 1 + 3,
         roomZ: 0,
       });
 
-      avatar.item = 40;
+      avatar.item = 2;
+      avatar.addAction(AvatarAction.UseItem);
 
       room.addRoomObject(avatar);
       avatars.push(avatar);
