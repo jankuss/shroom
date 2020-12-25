@@ -376,6 +376,10 @@ export class Avatar extends RoomObject implements IMoveable {
     this.actions = newSet;
   }
 
+  hasAction(action: AvatarAction) {
+    return this.actions.has(action);
+  }
+
   destroyed(): void {
     this._avatarSprites?.destroy();
 

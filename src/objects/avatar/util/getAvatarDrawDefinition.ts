@@ -89,7 +89,20 @@ export function getAvatarDrawDefinition(
       // Select all parts of that bodypart who are in the activePartSet of that action.
       // This is there so an action only applies to the parts specified in the activePartSet.
       const parts = bodyPart.items
-        .flatMap((item) => {
+        .flatMap((item): PartData[] | PartData => {
+          if (
+            item.id === AvatarFigurePartType.RightHandItem &&
+            itemId != null
+          ) {
+            return {
+              type: AvatarFigurePartType.RightHandItem,
+              color: undefined,
+              colorable: false,
+              hiddenLayers: [],
+              id: itemId.toString(),
+            };
+          }
+
           const partsForType = partByType.get(item.id);
           if (partsForType == null) return [];
 
@@ -104,6 +117,7 @@ export function getAvatarDrawDefinition(
           actionData: action,
           direction,
           parts,
+          itemId,
         },
         deps
       );
@@ -163,6 +177,7 @@ function getBodyPart(
 
   while (remainingPartCount >= 0) {
     const part = parts[remainingPartCount];
+
     const frames = animationData.getAnimationFrames(actionData.id, part.type);
 
     let framesIndexed: (

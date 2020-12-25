@@ -22,7 +22,7 @@ export class AvatarSprites extends RoomObject {
   private avatarLoaderResult: AvatarLoaderResult | undefined;
   private avatarDrawDefinition: AvatarDrawDefinition | undefined;
 
-  private _lookOptions: LookOptions;
+  private _lookOptions: LookOptions | undefined;
   private _nextLookOptions: LookOptions | undefined;
 
   private _x: number = 0;
@@ -100,6 +100,8 @@ export class AvatarSprites extends RoomObject {
       return this._nextLookOptions;
     }
 
+    if (this._lookOptions == null) throw new Error("Invalid look options");
+
     return this._lookOptions;
   }
 
@@ -126,14 +128,15 @@ export class AvatarSprites extends RoomObject {
     this._x = options.position.x;
     this._y = options.position.y;
     this._zIndex = options.zIndex;
-    this._lookOptions = options.look;
+    this._nextLookOptions = options.look;
   }
 
   private _updateLookOptions(
-    oldLookOptions: LookOptions,
+    oldLookOptions: LookOptions | undefined,
     newLookOptions: LookOptions
   ) {
     if (
+      oldLookOptions == null ||
       !isSetEqual(oldLookOptions.actions, newLookOptions.actions) ||
       oldLookOptions.look != newLookOptions.look ||
       oldLookOptions.item != newLookOptions.item ||
@@ -180,6 +183,7 @@ export class AvatarSprites extends RoomObject {
 
   private _updateSprites() {
     if (this.avatarLoaderResult == null) return;
+    if (this._lookOptions == null) return;
 
     const definition = this.avatarLoaderResult.getDrawDefinition(
       this._lookOptions
@@ -270,8 +274,6 @@ export class AvatarSprites extends RoomObject {
 
         this._updateSprites();
       });
-
-    this._updateSprites();
   }
 
   private _updateFrame() {

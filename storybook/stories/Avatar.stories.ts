@@ -47,6 +47,8 @@ export function Default() {
       }
     }*/
 
+    const avatars: Avatar[] = [];
+
     for (let i = 0; i < 8; i++) {
       const avatar = new Avatar({
         look: looks[i % looks.length],
@@ -55,10 +57,22 @@ export function Default() {
         roomY: 1,
         roomZ: 0,
       });
-      avatar.addAction(AvatarAction.Respect);
+      avatar.addAction(AvatarAction.CarryItem);
+      avatar.item = 2;
 
       room.addRoomObject(avatar);
+      avatars.push(avatar);
     }
+
+    setInterval(() => {
+      avatars.forEach((avatar) => {
+        if (!avatar.hasAction(AvatarAction.UseItem)) {
+          avatar.addAction(AvatarAction.UseItem);
+        } else {
+          avatar.removeAction(AvatarAction.UseItem);
+        }
+      });
+    }, 1000);
 
     application.stage.addChild(room);
   });

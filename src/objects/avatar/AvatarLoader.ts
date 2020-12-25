@@ -94,13 +94,11 @@ export class AvatarLoader implements IAvatarLoader {
     });
   }
 
-  async getAvatarDrawDefinition({
-    actions,
-    look,
-    item,
-    effect,
-    initial,
-  }: LookOptions): Promise<AvatarLoaderResult> {
+  async getAvatarDrawDefinition(
+    options: LookOptions
+  ): Promise<AvatarLoaderResult> {
+    const { actions, look, item, effect, initial } = options;
+
     const loadedFiles = new Map<string, Promise<HitTexture>>();
 
     const getDrawDefinition = await this.lookServer;
