@@ -1,5 +1,4 @@
-import { Room, Avatar } from "@jankuss/shroom";
-import { AvatarAction } from "../../dist/objects/avatar/enum/AvatarAction";
+import { Room, Avatar, AvatarAction } from "@jankuss/shroom";
 import { createShroom } from "./common/createShroom";
 
 export default {

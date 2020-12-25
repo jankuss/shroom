@@ -16,3 +16,4 @@ export { HitDetection } from "./objects/hitdetection/HitDetection";
 export { AnimationTicker } from "./objects/AnimationTicker";
 export { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
 export { AvatarLoader } from "./objects/avatar/AvatarLoader";
+export { AvatarAction } from "./objects/avatar/enum/AvatarAction";
