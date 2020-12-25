@@ -65,21 +65,15 @@ export class AvatarLoader implements IAvatarLoader {
           actionsData,
           geometry,
         } = await Bluebird.props({
-          animationData: AvatarAnimationData.fromUrl(
-            `${resourcePath}/HabboAvatarRenderLib_HabboAvatarAnimation.bin`
-          ),
+          animationData: AvatarAnimationData.default(),
           figureData: FigureData.fromUrl(`${resourcePath}/figuredata.xml`),
           figureMap: FigureMapData.fromUrl(`${resourcePath}/figuremap.xml`),
           offsetsData: AvatarOffsetsData.fromUrl(
             `${resourcePath}/offsets.json`
           ),
-          partSetsData: AvatarPartSetsData.fromUrl(
-            `${resourcePath}/HabboAvatarRenderLib_HabboAvatarPartSets.bin`
-          ),
-          actionsData: AvatarActionsData.fromUrl(`${resourcePath}/actions.xml`),
-          geometry: AvatarGeometryData.fromUrl(
-            `${resourcePath}/HabboAvatarRenderLib_HabboAvatarGeometry.bin`
-          ),
+          partSetsData: AvatarPartSetsData.default(),
+          actionsData: AvatarActionsData.default(),
+          geometry: AvatarGeometryData.default(),
         });
 
         return createLookServer({

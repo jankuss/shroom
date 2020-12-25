@@ -1,5 +1,6 @@
 import { AvatarData } from "./AvatarData";
 import { IAvatarPartSetsData } from "./interfaces/IAvatarPartSetsData";
+import { partsetsXml } from "./static/partsets.xml";
 
 export class AvatarPartSetsData
   extends AvatarData
@@ -46,5 +47,9 @@ export class AvatarPartSetsData
     const text = await response.text();
 
     return new AvatarPartSetsData(text);
+  }
+
+  static default() {
+    return new AvatarPartSetsData(atob(partsetsXml));
   }
 }

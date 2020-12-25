@@ -4,6 +4,7 @@ import {
   IAvatarActionsData,
   AvatarActionInfo,
 } from "./interfaces/IAvatarActionsData";
+import { actionsXml } from "./static/actions.xml";
 
 export class AvatarActionsData
   extends AvatarData
@@ -39,6 +40,10 @@ export class AvatarActionsData
     const text = await response.text();
 
     return new AvatarActionsData(text);
+  }
+
+  static default() {
+    return new AvatarActionsData(atob(actionsXml));
   }
 }
 

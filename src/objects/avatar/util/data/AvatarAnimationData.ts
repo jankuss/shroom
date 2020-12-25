@@ -3,6 +3,7 @@ import {
   AvatarAnimationFrame,
   IAvatarAnimationData,
 } from "./interfaces/IAvatarAnimationData";
+import { animationXml } from "./static/animation.xml";
 
 export class AvatarAnimationData
   extends AvatarData
@@ -104,5 +105,9 @@ export class AvatarAnimationData
     const text = await response.text();
 
     return new AvatarAnimationData(text);
+  }
+
+  static default() {
+    return new AvatarAnimationData(atob(animationXml));
   }
 }

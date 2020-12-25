@@ -5,6 +5,7 @@ import {
   Bodypart,
   IAvatarGeometryData,
 } from "./interfaces/IAvatarGeometryData";
+import { geometryXml } from "./static/geometry.xml";
 
 export class AvatarGeometryData
   extends AvatarData
@@ -76,5 +77,9 @@ export class AvatarGeometryData
     const text = await response.text();
 
     return new AvatarGeometryData(text);
+  }
+
+  static default() {
+    return new AvatarGeometryData(atob(geometryXml));
   }
 }

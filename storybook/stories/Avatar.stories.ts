@@ -26,6 +26,8 @@ export function Default() {
 
     const looks: string[] = [
       "ch-255-91.lg-280-64.sh-290-1408.hd-180-2.hr-831-61",
+      "hd-180-1.ch-255-66.lg-280-110.sh-305-62.ha-1012-110.hr-828-61",
+      "hd-190-1.hr-3163-1356.he-3081-62.fa-1203-62.cc-3153-1336.lg-3058-110",
     ];
 
     /*
@@ -45,18 +47,18 @@ export function Default() {
       }
     }*/
 
-    const avatar = new Avatar({
-      look: "ch-255-91.lg-280-64.sh-290-1408.hd-180-2.hr-831-61",
-      direction: 2,
-      roomX: 1,
-      roomY: 1,
-      roomZ: 0,
-    });
+    for (let i = 0; i < 8; i++) {
+      const avatar = new Avatar({
+        look: looks[i % looks.length],
+        direction: i,
+        roomX: 1 + i * 2,
+        roomY: 1,
+        roomZ: 0,
+      });
+      avatar.addAction(AvatarAction.Respect);
 
-    avatar.addAction(AvatarAction.Respect);
-    avatar.addAction(AvatarAction.Lay);
-
-    room.addRoomObject(avatar);
+      room.addRoomObject(avatar);
+    }
 
     application.stage.addChild(room);
   });
