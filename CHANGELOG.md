@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Loading and display of avatar items
 
 - Expose `MouseEvent` in hit detection through the `mouseEvent` property
+- Expose data in `index.bin` through `extradata` on furniture
+- Expose valid directions through `validDirections` on furniture
 
 ### Fixed
 

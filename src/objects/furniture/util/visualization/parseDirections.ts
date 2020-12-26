@@ -6,12 +6,15 @@ export function parseDirections(
   set: (direction: number, layerMap: Map<string, Layer>) => void
 ) {
   const directions = visualization.directions[0].direction;
+  const validDirections: number[] = [];
 
   for (let i = 0; i < directions.length; i++) {
     const layerMap = new Map<string, Layer>();
 
     const directionNumber = Number(directions[i]["$"].id);
     const directionLayers = directions[i].layer || [];
+
+    validDirections.push(directionNumber);
 
     for (let j = 0; j < directionLayers.length; j++) {
       const layer = directionLayers[j]["$"];
@@ -27,4 +30,8 @@ export function parseDirections(
 
     set(directionNumber, layerMap);
   }
+
+  return {
+    validDirections,
+  };
 }

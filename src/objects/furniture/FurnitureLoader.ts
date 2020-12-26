@@ -3,6 +3,7 @@ import {
   FurnitureFetch,
   IFurnitureLoader,
 } from "../../interfaces/IFurnitureLoader";
+import { FurnitureIndexData } from "./data/FurnitureIndexData";
 import { loadFurni, LoadFurniResult } from "./util/loadFurni";
 
 export class FurnitureLoader implements IFurnitureLoader {
@@ -18,6 +19,10 @@ export class FurnitureLoader implements IFurnitureLoader {
         name: string,
         revision?: number
       ) => Promise<string>;
+      getIndex: (
+        type: string,
+        revision?: number
+      ) => Promise<{ logic?: string; visualization?: string }>;
     }
   ) {}
 
@@ -49,6 +54,13 @@ export class FurnitureLoader implements IFurnitureLoader {
           revision,
           type
         )}/${name}.png`,
+      getIndex: async (type, revision) => {
+        const result = await FurnitureIndexData.fromUrl(
+          `${resourcePath}/hof_furni/${normalizePath(revision, type)}/index.bin`
+        );
+
+        return result?.toObject();
+      },
     });
   }
 
@@ -82,6 +94,7 @@ export class FurnitureLoader implements IFurnitureLoader {
       getAssets: this.options.getAssets,
       getVisualization: this.options.getVisualization,
       getAsset: this.options.getAsset,
+      getIndex: this.options.getIndex,
     });
     this.furnitureCache.set(type, furniture);
 
