@@ -11,6 +11,7 @@ export interface IFurniture extends IFurnitureEventHandlers {
   animation: string | undefined;
   highlight: boolean | undefined;
   placementType: "wall" | "floor";
+  alpha: number;
 }
 
 export type IFurnitureBehavior<T extends IFurniture = IFurniture> = {

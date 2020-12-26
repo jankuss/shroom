@@ -170,6 +170,47 @@ export function Highlighted() {
   });
 }
 
+export function AlphaFurniture() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+       xxxxxxxxxxx
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+      `,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    const furniture1 = new FloorFurniture({
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      type: "rare_dragonlamp*1",
+      direction: 2,
+    });
+
+    const furniture2 = new FloorFurniture({
+      roomX: 3,
+      roomY: 1,
+      roomZ: 0,
+      type: "club_sofa",
+      direction: 4,
+    });
+
+    furniture1.alpha = 0.5;
+    furniture2.alpha = 0.25;
+
+    room.addRoomObject(furniture1);
+    room.addRoomObject(furniture2);
+
+    application.stage.addChild(room);
+  });
+}
+
 export function MultipleFurnitures() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
