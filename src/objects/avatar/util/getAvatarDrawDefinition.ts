@@ -1,57 +1,29 @@
 import { ParsedLook } from "./parseLookString";
-import { GetSetType } from "./parseFigureData";
-import { getNormalizedAvatarDirection } from "./getNormalizedAvatarDirection";
-import { GetDrawOrder } from "./parseDrawOrder";
-import { filterDrawOrder } from "./filterDrawOrder";
-import { getNormalizedPart } from "./getNormalizedPart";
-import { GetOffset } from "./loadOffsetMap";
+import { addMissingDrawOrderItems } from "./addMissingDrawOrderItems";
 import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
-import { getActionForPart } from "./getActionForPart";
 import { getDrawOrder } from "./drawOrder";
-
-export type AvatarDrawPart = {
-  fileId: string;
-  library: string;
-  x: number;
-  y: number;
-  color: string | undefined;
-  mode: "colored" | "just-image";
-};
-
-export interface AvatarDrawDefinition {
-  mirrorHorizontal: boolean;
-  parts: AvatarDrawPart[];
-  offsetX: number;
-  offsetY: number;
-}
-
-export interface Dependencies {
-  getSetType: GetSetType;
-  getOffset: GetOffset;
-  getLibraryOfPart: (id: string, type: string) => string | undefined;
-}
-
-export type PrimaryAction =
-  | { kind: "std" }
-  | { kind: "sit" }
-  | { kind: "lay" }
-  | { kind: "wlk"; frame: number };
-
-export type PrimaryActionKind = PrimaryAction["kind"];
-
-export type SecondaryActions = {
-  wav?: { frame: number };
-  item?: { item: number; kind: "drk" | "crr" };
-};
-
-export type SecondaryActionKind = keyof SecondaryActions;
-
-interface Options {
-  parsedLook: ParsedLook;
-  action: PrimaryAction;
-  actions: SecondaryActions;
-  direction: number;
-}
+import {
+  AvatarAnimationFrame,
+  IAvatarAnimationData,
+} from "./data/interfaces/IAvatarAnimationData";
+import { IAvatarPartSetsData } from "./data/interfaces/IAvatarPartSetsData";
+import { IAvatarOffsetsData } from "./data/interfaces/IAvatarOffsetsData";
+import { IFigureMapData } from "./data/interfaces/IFigureMapData";
+import { IFigureData } from "./data/interfaces/IFigureData";
+import {
+  Bodypart,
+  IAvatarGeometryData,
+} from "./data/interfaces/IAvatarGeometryData";
+import { AvatarAction } from "../enum/AvatarAction";
+import {
+  AvatarActionInfo,
+  IAvatarActionsData,
+} from "./data/interfaces/IAvatarActionsData";
+import { IAvatarEffectData } from "./data/interfaces/IAvatarEffectData";
+import { DIRECTION_IS_FLIPPED, getFlippedMetaData } from "./getFlippedMetaData";
+import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
+import { getPartDataForParsedLook, PartData } from "./getPartDataForParsedLook";
+import { getDrawOrderForActions } from "./getDrawOrderForActions";
 
 /**
  * Returns a definition of how the avatar should be drawn.
@@ -59,160 +31,375 @@ interface Options {
  * @param dependencies External figure data, draw order and offsets
  */
 export function getAvatarDrawDefinition(
-  { parsedLook, action, actions, direction }: Options,
-  { getOffset, getSetType, getLibraryOfPart }: Dependencies
+  {
+    parsedLook,
+    actions: initialActions,
+    direction,
+    item: itemId,
+    effect,
+  }: Options,
+  deps: AvatarDependencies
 ): AvatarDrawDefinition | undefined {
-  const parts = Array.from(parsedLook.entries()).flatMap(
-    ([type, { setId, colorId }]) => {
-      const setType = getSetType(type);
-      if (setType) {
-        const colorValue = setType.getColor(colorId.toString());
-        const parts = setType.getParts(setId.toString());
+  const actions = new Set(initialActions).add(AvatarAction.Default);
 
-        return (parts || []).map((part) => ({
-          ...part,
-          color: colorValue,
-        }));
-      }
+  const { partSetsData, actionsData, figureData, geometry } = deps;
 
-      return [];
-    }
-  );
+  // Sort actions by precedence. This basically determines in which order actions are applied.
+  // For example, if a avatar is sitting and respecting, the sorting by precedence will return
+  // the following order:
+  // Default < Sit < Respect
 
-  // Normalize the direction, since the only available directions are 0, 1, 2, 3 and 7.
-  // Every other direction can be displayed by mirroring one of the above.
-  const normalizedDirection = getNormalizedAvatarDirection(direction);
+  const activeActions = actionsData
+    .getActions()
+    .filter((info) => actions.has(info.id))
+    .sort((a, b) => {
+      if (a.precedence < b.precedence) return 1;
+      if (a.precedence > b.precedence) return -1;
 
-  const map = new Map<
-    string,
-    {
-      color: string | undefined;
-      id: string;
-      type: string;
-      colorable: boolean;
-    }[]
-  >();
+      return 0;
+    });
 
-  parts.forEach((part) => {
-    const current = map.get(part.type) ?? [];
-    map.set(part.type, [...current, part]);
+  const partByType = getPartDataForParsedLook(parsedLook, figureData);
+
+  // Here we determine the draworder based on the active actions.
+  const drawOrderId = getDrawOrderForActions(activeActions, {
+    hasItem: itemId != null,
   });
 
-  if (actions.item != null) {
-    map.set("ri", [
-      {
-        type: "ri",
-        id: actions.item.item.toString(),
-        color: undefined,
-        colorable: false,
-      },
-    ]);
-  }
-
-  function getDrawOrderType() {
-    switch (action.kind) {
-      case "sit":
-        return "sit";
-      case "lay":
-        return "lay";
-      case "wlk":
-        return "std";
-    }
-
-    return "std";
-  }
-
   const drawOrderRaw =
-    getDrawOrder(getDrawOrderType(), normalizedDirection.direction) ||
-    getDrawOrder("std", normalizedDirection.direction);
+    getDrawOrder(drawOrderId, direction) ?? getDrawOrder("std", direction);
 
-  if (drawOrderRaw) {
-    // Filter the draw order, since in some directions not every part needs to be drawn.
-    const drawOrder = Array.from(
-      filterDrawOrder(
-        new Set(drawOrderRaw),
-        action.kind,
-        actions.wav != null,
-        normalizedDirection.direction
-      )
-    );
+  // Since the draworder file has missing parts, we add them here.
+  const drawOrderAdditional = addMissingDrawOrderItems(new Set(drawOrderRaw));
 
-    const allActions = new Set<string>();
-    allActions.add(action.kind);
+  const bodyParts = geometry
+    .getBodyParts("full")
+    .map((id) => geometry.getBodyPart("vertical", id))
+    .filter(notNullOrUndefined)
+    .sort((a, b) => b.z - a.z);
 
-    if (actions.item != null) {
-      allActions.add(actions.item.kind);
-    }
+  const drawPartMap = new Map<string, AvatarDrawPart[]>();
 
-    if (actions.wav != null) {
-      allActions.add("wav");
-    }
+  activeActions.forEach((action) => {
+    if (action.activepartset == null) return;
 
-    const drawParts = drawOrder
-      .flatMap((drawOrderItem) => {
-        const parts =
-          map.get(
-            typeof drawOrderItem === "string"
-              ? drawOrderItem
-              : drawOrderItem.override
-          ) ?? [];
+    const activePartSet = partSetsData.getActivePartSet(action.activepartset);
 
-        const original =
-          typeof drawOrderItem === "string"
-            ? drawOrderItem
-            : drawOrderItem.original;
-
-        return parts.flatMap((p) => {
-          const part = getActionForPart(allActions, 0, original, {
-            walkFrame: action.kind === "wlk" ? action.frame : 0,
-            waveFrame: actions.wav != null ? actions.wav.frame : 0,
-          });
-
-          const id = `h_${part.action}_${p.type}_${p.id}_${normalizedDirection.direction}_${part.frame}`;
-
-          const offset = getOffset(id);
-          if (offset == null) return;
-
-          const library = getLibraryOfPart(p.id, p.type);
-          if (library == null) {
-            throw new Error(`Invalid library ${id} ${p.type}`);
+    bodyParts.forEach((bodyPart) => {
+      // Select all parts of that bodypart who are in the activePartSet of that action.
+      // This is there so an action only applies to the parts specified in the activePartSet.
+      const parts = bodyPart.items
+        .flatMap((item): PartData[] | PartData => {
+          if (
+            item.id === AvatarFigurePartType.RightHandItem &&
+            itemId != null
+          ) {
+            return {
+              type: AvatarFigurePartType.RightHandItem,
+              color: undefined,
+              colorable: false,
+              hiddenLayers: [],
+              id: itemId.toString(),
+            };
           }
 
-          return {
-            fileId: id,
-            library: library,
-            x: -offset.offsetX,
-            y: -offset.offsetY,
-            color: `#${p.color}`,
-            mode:
-              p.type !== "ey" && p.colorable
-                ? ("colored" as const)
-                : ("just-image" as const),
-          };
-        });
-      })
-      .filter(notNullOrUndefined);
+          const partsForType = partByType.get(item.id);
+          if (partsForType == null) return [];
 
-    return {
-      mirrorHorizontal: normalizedDirection.mirrorHorizontal,
-      parts: drawParts,
-      ...getOffsets(action.kind, normalizedDirection.mirrorHorizontal),
-    };
-  }
+          return partsForType;
+        })
+        .map((part) => ({ ...part, bodypart: bodyPart }))
+        .filter((item) => activePartSet.has(item.type));
 
-  return;
+      // Get drawing parts for this body part
+      const drawParts = getBodyPart(
+        {
+          actionData: action,
+          direction,
+          parts,
+          itemId,
+        },
+        deps
+      );
+
+      const localDrawPartMap = new Map<string, AvatarDrawPart[]>();
+
+      // Group body part draw parts by part type
+      drawParts.forEach((part) => {
+        const existing = localDrawPartMap.get(part.type) ?? [];
+        localDrawPartMap.set(part.type, [...existing, part]);
+      });
+
+      // Override the result draw parts with the draw parts for this body part
+      localDrawPartMap.forEach((parts, type) => drawPartMap.set(type, parts));
+    });
+  });
+
+  // Get draw parts in the order specified by the draworder.
+  const drawParts = drawOrderAdditional
+    .flatMap((partType) => drawPartMap.get(partType))
+    .filter(notNullOrUndefined);
+
+  return {
+    parts: drawParts,
+    offsetX: 0,
+    offsetY: 0,
+  };
 }
 
-function getOffsets(action: PrimaryActionKind, mirror: boolean) {
-  if (action === "lay") {
-    return {
-      offsetX: mirror ? 32 : 48,
-      offsetY: 16,
-    };
+function getBodyPart(
+  {
+    actionData,
+    direction,
+    parts,
+  }: {
+    parts: PartDataWithBodyPart[];
+    actionData: AvatarActionInfo;
+    direction: number;
+    itemId?: string | number;
+  },
+  {
+    offsetsData,
+    animationData,
+    partSetsData,
+    actionsData,
+    figureData,
+    figureMap,
+    geometry,
+  }: AvatarDependencies
+): AvatarDrawPart[] {
+  if (actionData == null) throw new Error("Invalid action data");
+
+  let remainingPartCount = parts.length - 1;
+  let assetPartDefinition = actionData.assetpartdefinition;
+
+  const resolvedParts: AvatarDrawPart[] = [];
+
+  while (remainingPartCount >= 0) {
+    const part = parts[remainingPartCount];
+
+    const frames = animationData.getAnimationFrames(actionData.id, part.type);
+
+    let framesIndexed: (
+      | AvatarAnimationFrame
+      | undefined
+    )[] = frames.flatMap((frame) => new Array(frame.repeats).fill(frame));
+
+    if (framesIndexed.length === 0) {
+      framesIndexed = [undefined];
+    }
+
+    const partInfo = partSetsData.getPartInfo(part.type);
+
+    const assets = framesIndexed.map((animationFrame) =>
+      getAssetForFrame({
+        offsetsData,
+        direction,
+        partTypeFlipped: partInfo?.flippedSetType as
+          | AvatarFigurePartType
+          | undefined,
+        actionData: actionData,
+        animationFrame,
+        figureMap,
+        partId: part.id,
+        partType: part.type as AvatarFigurePartType,
+      })
+    );
+
+    const assetsFiltered = assets.filter(notNullOrUndefined);
+
+    if (assetsFiltered.length > 0) {
+      resolvedParts.push({
+        assets: assetsFiltered,
+        color: part.colorable ? `#${part.color}` : undefined,
+        mode: part.type !== "ey" && part.colorable ? "colored" : "just-image",
+        type: part.type,
+      });
+    }
+
+    remainingPartCount--;
+  }
+
+  return resolvedParts;
+}
+
+function getAssetForFrame({
+  animationFrame,
+  actionData,
+  partTypeFlipped,
+  direction,
+  partType,
+  partId,
+  offsetsData,
+  figureMap,
+}: {
+  animationFrame?: AvatarAnimationFrame;
+  actionData: AvatarActionInfo;
+  partTypeFlipped?: AvatarFigurePartType;
+  partType: AvatarFigurePartType;
+  direction: number;
+  partId: string;
+  offsetsData: IAvatarOffsetsData;
+  figureMap: IFigureMapData;
+}) {
+  const avatarFlipped = DIRECTION_IS_FLIPPED[direction];
+
+  let assetPartDefinition = actionData.assetpartdefinition;
+  let frameNumber = 0;
+
+  if (animationFrame != null) {
+    frameNumber = animationFrame.number;
+    if (
+      animationFrame.assetpartdefinition &&
+      animationFrame.assetpartdefinition !== ""
+    ) {
+      assetPartDefinition = animationFrame.assetpartdefinition;
+    }
+  }
+
+  const flippedMeta = getFlippedMetaData({
+    assetPartDefinition,
+    flippedPartType: partTypeFlipped,
+    direction,
+    partType: partType,
+  });
+
+  let assetId = generateAssetName(
+    assetPartDefinition,
+    flippedMeta.partType,
+    partId,
+    flippedMeta.direction,
+    frameNumber
+  );
+
+  let offset = offsetsData.getOffsets(assetId);
+
+  if (offset == null) {
+    assetId = generateAssetName(
+      "std",
+      flippedMeta.partType,
+      partId,
+      flippedMeta.direction,
+      0
+    );
+    offset = offsetsData.getOffsets(assetId);
+  }
+
+  if (offset != null) {
+    let flipH = flippedMeta.flip;
+
+    if (avatarFlipped) {
+      flipH = !flipH;
+    }
+
+    const libraryId = figureMap.getLibraryOfPart(partId, flippedMeta.partType);
+
+    if (libraryId != null) {
+      const asset = getAssetFromPartMeta(
+        assetPartDefinition,
+        libraryId,
+        { flipped: flipH, swapped: false, asset: assetId },
+        offsetsData
+      );
+
+      if (asset != null) {
+        return asset;
+      } else {
+      }
+    } else {
+    }
+  } else {
+  }
+}
+
+function getAssetFromPartMeta(
+  assetPartDefinition: string,
+  libraryId: string,
+  assetInfoFrame: { flipped: boolean; swapped: boolean; asset: string },
+  offsetsData: IAvatarOffsetsData
+) {
+  const offsets = offsetsData.getOffsets(assetInfoFrame.asset);
+
+  if (offsets == null) return;
+
+  let offsetsX = 0;
+  let offsetsY = 0;
+
+  offsetsY = -offsets.offsetY;
+
+  if (assetInfoFrame.flipped) {
+    offsetsX = 64 + offsets.offsetX;
+  } else {
+    offsetsX = -offsets.offsetX;
+  }
+
+  if (assetPartDefinition === "lay") {
+    if (assetInfoFrame.flipped) {
+      offsetsX -= 52;
+    } else {
+      offsetsX += 52;
+    }
   }
 
   return {
-    offsetX: mirror ? 64 : 0,
-    offsetY: 16,
+    fileId: assetInfoFrame.asset,
+    library: libraryId,
+    mirror: assetInfoFrame.flipped,
+    x: offsetsX,
+    y: offsetsY + 16,
   };
+}
+
+function generateAssetName(
+  assetPartDef: string,
+  partType: string,
+  partId: string,
+  direction: number,
+  frame: number
+) {
+  return `h_${assetPartDef}_${partType}_${partId}_${direction}_${frame}`;
+}
+
+export type AvatarAsset = {
+  fileId: string;
+  x: number;
+  y: number;
+  library: string;
+  mirror: boolean;
+};
+
+export type AvatarDrawPart = {
+  type: string;
+  assets: AvatarAsset[];
+  color: string | undefined;
+  mode: "colored" | "just-image";
+};
+
+export interface AvatarDrawDefinition {
+  parts: AvatarDrawPart[];
+  offsetX: number;
+  offsetY: number;
+}
+
+export interface AvatarDependencies {
+  figureData: IFigureData;
+  figureMap: IFigureMapData;
+  offsetsData: IAvatarOffsetsData;
+  animationData: IAvatarAnimationData;
+  partSetsData: IAvatarPartSetsData;
+  geometry: IAvatarGeometryData;
+  actionsData: IAvatarActionsData;
+}
+
+interface Options {
+  parsedLook: ParsedLook;
+  actions: Set<string>;
+  direction: number;
+  frame: number;
+  item?: string | number;
+  effect?: IAvatarEffectData;
+}
+
+export interface PartDataWithBodyPart extends PartData {
+  bodypart: Bodypart;
 }

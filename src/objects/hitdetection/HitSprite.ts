@@ -20,6 +20,15 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
   private _mirrored: boolean;
   private _mirrorNotVisually: boolean;
 
+  public get mirrored() {
+    return this._mirrored;
+  }
+
+  public set mirrored(value) {
+    this._mirrored = value;
+    this.scale.x = this._mirrored ? -1 : 1;
+  }
+
   private _getHitmap:
     | (() => (
         x: number,
@@ -65,12 +74,8 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
     this._mirrorNotVisually = mirroredNotVisually;
     this._getHitmap = getHitmap;
     this._tag = tag;
-
-    if (this._mirrored && !this._mirrorNotVisually) {
-      this.scale = new PIXI.Point(this._mirrored ? -1 : 1, 1);
-    }
-
     this._hitDetectionNode = hitDetection.register(this);
+    this.mirrored = this._mirrored;
   }
 
   trigger(type: HitEventType, event: HitEvent): void {

@@ -1,52 +1,45 @@
-import { parseStringAsync } from "./parseStringAsync";
-import { parseDrawOrder } from "./parseDrawOrder";
-import { parseFigureData } from "./parseFigureData";
-import { parseFigureMap } from "./parseFigureMap";
-import { GetOffset } from "./loadOffsetMap";
 import {
   getAvatarDrawDefinition,
   AvatarDrawDefinition,
-  PrimaryAction,
-  SecondaryActions,
+  AvatarDependencies,
 } from "./getAvatarDrawDefinition";
 import { parseLookString } from "./parseLookString";
+import { AvatarAction } from "../enum/AvatarAction";
+import { AvatarEffectData } from "./data/AvatarEffectData";
+import { IAvatarEffectData } from "./data/interfaces/IAvatarEffectData";
 
 export interface LookOptions {
   look: string;
-  action: PrimaryAction;
-  actions: SecondaryActions;
+  actions: Set<AvatarAction>;
   direction: number;
+  item?: string | number;
+  effect?: { type: "dance" | "fx"; id: string };
+  initial?: boolean;
 }
 
 export interface LookServer {
-  (options: LookOptions): AvatarDrawDefinition | undefined;
+  (options: LookOptions, effect?: IAvatarEffectData):
+    | AvatarDrawDefinition
+    | undefined;
 }
 
-export async function createLookServer({
-  figureDataString,
-  figureMapString,
-  loadOffsetMap,
-}: {
-  figureMapString: string;
-  figureDataString: string;
-  loadOffsetMap: (figureMap: string[]) => Promise<GetOffset>;
-}): Promise<LookServer> {
-  const figureDataXml = await parseStringAsync(figureDataString);
-  const figureMapXml = await parseStringAsync(figureMapString);
-
-  const { getSetType } = parseFigureData(figureDataXml);
-  const figureMap = parseFigureMap(figureMapXml);
-
-  const getOffset = await loadOffsetMap(figureMap.libraries);
-
-  return ({ look, action, actions, direction }: LookOptions) =>
-    getAvatarDrawDefinition(
+export async function createLookServer(
+  dependencies: AvatarDependencies
+): Promise<LookServer> {
+  return (
+    { look, actions, direction, item }: LookOptions,
+    effect?: IAvatarEffectData
+  ) => {
+    return getAvatarDrawDefinition(
       {
         parsedLook: parseLookString(look),
-        action: action,
-        actions: actions,
+        actions,
         direction,
+        frame: 0,
+        item: item,
+        effect: effect,
       },
-      { getOffset, getSetType, getLibraryOfPart: figureMap.getLibraryOfPart }
+      dependencies
     );
+  };
 }

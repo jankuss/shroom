@@ -1,18 +1,13 @@
 import * as PIXI from "pixi.js";
 
 import { RoomObject } from "../RoomObject";
-import {
-  PrimaryAction,
-  PrimaryActionKind,
-} from "./util/getAvatarDrawDefinition";
 import { getZOrder } from "../../util/getZOrder";
 import { AvatarSprites } from "./AvatarSprites";
-import { avatarFramesObject } from "./util/avatarFrames";
 import { LookOptions } from "./util/createLookServer";
 import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
-import { ParsedTileType } from "../../util/parseTileMap";
 import { IMoveable } from "../IMoveable";
+import { AvatarAction } from "./enum/AvatarAction";
 
 interface Options {
   look: string;
@@ -34,16 +29,17 @@ export class Avatar extends RoomObject implements IMoveable {
 
   private _cancelAnimation: (() => void) | undefined;
 
-  private _primaryAction: PrimaryActionKind = "std";
   private _waving: boolean = false;
   private _direction: number = 0;
-  private _item: number | undefined;
+  private _item: string | number | undefined;
   private _drinking: boolean = false;
   private _look: string;
   private _roomX: number = 0;
   private _roomY: number = 0;
   private _roomZ: number = 0;
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
+  private _actions: Set<AvatarAction> = new Set();
+  private _fx: { type: "dance"; id: string } | undefined;
 
   public get onClick() {
     return this._avatarSprites.onClick;
@@ -59,6 +55,24 @@ export class Avatar extends RoomObject implements IMoveable {
 
   public set onDoubleClick(value) {
     this._avatarSprites.onDoubleClick = value;
+  }
+
+  public get dance() {
+    if (this._fx?.type === "dance") {
+      return this._fx.id;
+    }
+  }
+
+  public set dance(value) {
+    if (this._fx == undefined || this._fx.type === "dance") {
+      if (value == null) {
+        this._fx = undefined;
+      } else {
+        this._fx = { type: "dance", id: value };
+      }
+
+      this._updateAvatarSprites();
+    }
   }
 
   constructor({ look, roomX, roomY, roomZ, direction }: Options) {
@@ -132,21 +146,21 @@ export class Avatar extends RoomObject implements IMoveable {
     this._updateAvatarSprites();
   }
 
-  get action() {
-    return this._primaryAction;
-  }
-
-  set action(value) {
-    this._primaryAction = value;
-    this._updateAvatarSprites();
-  }
-
   get waving() {
     return this._waving;
   }
 
   set waving(value) {
     this._waving = value;
+    this._updateAvatarSprites();
+  }
+
+  get actions() {
+    return this._actions;
+  }
+
+  set actions(value) {
+    this._actions = value;
     this._updateAvatarSprites();
   }
 
@@ -160,49 +174,23 @@ export class Avatar extends RoomObject implements IMoveable {
     }
   }
 
-  private _getWavingAction() {
-    if (this.waving) {
-      return {
-        frame:
-          avatarFramesObject.wav[this._frame % avatarFramesObject.wav.length],
-      };
-    }
-  }
-
-  private _getDrinkingAction() {
-    if (this.item != null) {
-      return {
-        kind: this.drinking ? ("drk" as const) : ("crr" as const),
-        item: this.item,
-      };
-    }
-  }
-
-  private _getCurrentPrimaryAction(): PrimaryAction {
-    const walkFrame =
-      avatarFramesObject.wlk[this._frame % avatarFramesObject.wlk.length];
-
-    if (this._walking || this.action === "wlk") {
-      return {
-        kind: "wlk",
-        frame: walkFrame,
-      };
-    }
-
-    return {
-      kind: this.action,
-    };
-  }
-
   private _getCurrentLookOptions(): LookOptions {
+    const combinedActions = new Set(this.actions);
+
+    if (this._walking) {
+      combinedActions.add(AvatarAction.Move);
+    }
+
+    if (this.waving) {
+      combinedActions.add(AvatarAction.Wave);
+    }
+
     return {
-      action: this._getCurrentPrimaryAction(),
-      actions: {
-        wav: this._getWavingAction(),
-        item: this._getDrinkingAction(),
-      },
+      actions: combinedActions,
       direction: this.direction,
       look: this._look,
+      item: this.item,
+      effect: this._fx,
     };
   }
 
@@ -210,7 +198,7 @@ export class Avatar extends RoomObject implements IMoveable {
     if (!this.mounted) return;
 
     const look = this._getCurrentLookOptions();
-    const animating = this._isAnimating(look);
+    const animating = true;
 
     if (animating) {
       this._startAnimation();
@@ -225,6 +213,10 @@ export class Avatar extends RoomObject implements IMoveable {
     }
   }
 
+  private _updateFrame() {
+    this._avatarSprites.currentFrame = this._frame;
+  }
+
   private _startAnimation() {
     if (this._cancelAnimation != null) return;
 
@@ -233,7 +225,7 @@ export class Avatar extends RoomObject implements IMoveable {
 
     this._cancelAnimation = this.animationTicker.subscribe((value) => {
       this._frame = value - start;
-      this._updateAvatarSprites();
+      this._updateFrame();
     });
   }
 
@@ -254,13 +246,6 @@ export class Avatar extends RoomObject implements IMoveable {
   private _stopWalking() {
     this._walking = false;
     this._updateAvatarSprites();
-  }
-
-  private _isAnimating(look: LookOptions) {
-    if (look.action.kind === "wlk") return true;
-    if (look.actions.wav != null) return true;
-
-    return false;
   }
 
   walk(
@@ -350,6 +335,9 @@ export class Avatar extends RoomObject implements IMoveable {
 
   registered(): void {
     this._updatePosition();
+
+    this._updateAvatarSprites();
+
     this.roomObjectContainer.addRoomObject(this._avatarSprites);
 
     this._moveAnimation = new ObjectAnimation(
@@ -375,8 +363,21 @@ export class Avatar extends RoomObject implements IMoveable {
       },
       this.configuration.avatarMovementDuration
     );
+  }
 
-    this._updateAvatarSprites();
+  addAction(action: AvatarAction) {
+    this.actions = new Set(this._actions).add(action);
+  }
+
+  removeAction(action: AvatarAction) {
+    const newSet = new Set(this._actions);
+    newSet.delete(action);
+
+    this.actions = newSet;
+  }
+
+  hasAction(action: AvatarAction) {
+    return this.actions.has(action);
   }
 
   destroyed(): void {

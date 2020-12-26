@@ -30,7 +30,7 @@ export class AnimationTicker implements IAnimationTicker {
   }
 
   private increment() {
-    this.frame++;
+    this.frame += 1;
     const data = this.getNormalizedFrame(this.frame);
 
     this.subscriptions.forEach((cb) => cb(data.rounded, data.pure));

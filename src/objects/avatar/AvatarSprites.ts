@@ -1,6 +1,7 @@
 import { RoomObject } from "../RoomObject";
 import * as PIXI from "pixi.js";
 import {
+  AvatarAsset,
   AvatarDrawDefinition,
   AvatarDrawPart,
 } from "./util/getAvatarDrawDefinition";
@@ -8,6 +9,7 @@ import { LookOptions } from "./util/createLookServer";
 import { AvatarLoaderResult } from "../../interfaces/IAvatarLoader";
 import { ClickHandler } from "../ClickHandler";
 import { HitSprite } from "../hitdetection/HitSprite";
+import { isSetEqual } from "../../util/isSetEqual";
 
 interface Options {
   look: LookOptions;
@@ -20,7 +22,9 @@ export class AvatarSprites extends RoomObject {
   private avatarLoaderResult: AvatarLoaderResult | undefined;
   private avatarDrawDefinition: AvatarDrawDefinition | undefined;
 
-  private _lookOptions: LookOptions;
+  private _lookOptions: LookOptions | undefined;
+  private _nextLookOptions: LookOptions | undefined;
+
   private _x: number = 0;
   private _y: number = 0;
   private _zIndex: number = 0;
@@ -28,7 +32,13 @@ export class AvatarSprites extends RoomObject {
   private _clickHandler: ClickHandler = new ClickHandler();
   private _assets: PIXI.Sprite[] = [];
 
+  private _refreshFrame = false;
+  private _refreshLook = false;
+
+  private _sprites: Map<string, HitSprite> = new Map();
+
   private _layer: "door" | "tile" = "tile";
+  private _updateId = 0;
 
   public get layer() {
     return this._layer;
@@ -86,12 +96,17 @@ export class AvatarSprites extends RoomObject {
   }
 
   get lookOptions() {
+    if (this._nextLookOptions != null) {
+      return this._nextLookOptions;
+    }
+
+    if (this._lookOptions == null) throw new Error("Invalid look options");
+
     return this._lookOptions;
   }
 
   set lookOptions(lookOptions) {
-    this._lookOptions = lookOptions;
-    this._updateSprites();
+    this._updateLookOptions(this._lookOptions, lookOptions);
   }
 
   get currentFrame() {
@@ -99,8 +114,12 @@ export class AvatarSprites extends RoomObject {
   }
 
   set currentFrame(value) {
+    if (value === this._currentFrame) {
+      return;
+    }
+
     this._currentFrame = value;
-    this._updateSprites();
+    this._refreshFrame = true;
   }
 
   constructor(options: Options) {
@@ -109,16 +128,35 @@ export class AvatarSprites extends RoomObject {
     this._x = options.position.x;
     this._y = options.position.y;
     this._zIndex = options.zIndex;
-    this._lookOptions = options.look;
+    this._nextLookOptions = options.look;
+  }
+
+  private _updateLookOptions(
+    oldLookOptions: LookOptions | undefined,
+    newLookOptions: LookOptions
+  ) {
+    if (
+      oldLookOptions == null ||
+      !isSetEqual(oldLookOptions.actions, newLookOptions.actions) ||
+      oldLookOptions.look != newLookOptions.look ||
+      oldLookOptions.item != newLookOptions.item ||
+      oldLookOptions.effect != newLookOptions.effect
+    ) {
+      this._nextLookOptions = newLookOptions;
+      this._refreshLook = true;
+    }
   }
 
   private _updateLayer(
     oldLayer: "door" | "tile" | undefined,
     newLayer: "door" | "tile"
   ) {
-    if (this.container == null) return;
     if (oldLayer === newLayer) return;
+    this._updateLayerOfCurrentContainer(newLayer);
+  }
 
+  private _updateLayerOfCurrentContainer(newLayer: "door" | "tile") {
+    if (this.container == null) return;
     this.visualization.removeBehindWallChild(this.container);
     this.visualization.removeContainerChild(this.container);
 
@@ -145,77 +183,135 @@ export class AvatarSprites extends RoomObject {
 
   private _updateSprites() {
     if (this.avatarLoaderResult == null) return;
-
-    this._assets.forEach((value) => value.destroy());
-    this._assets = [];
-    this.container?.destroy();
-
-    this.container = new PIXI.Container();
+    if (this._lookOptions == null) return;
 
     const definition = this.avatarLoaderResult.getDrawDefinition(
-      this.lookOptions
+      this._lookOptions
     );
 
     this.avatarDrawDefinition = definition;
+
+    this._updateSpritesWithAvatarDrawDefinition(definition, this.currentFrame);
     this._updatePosition(definition);
-
-    this.container.scale = new PIXI.Point(
-      definition.mirrorHorizontal ? -1 : 1,
-      1
-    );
-
-    definition.parts.forEach((part) => {
-      const asset = this.createAsset(part, definition.mirrorHorizontal);
-      if (asset == null) return;
-
-      this.container?.addChild(asset);
-      this._assets.push(asset);
-    });
 
     this._updateLayer(undefined, this.layer);
   }
 
-  private createAsset(part: AvatarDrawPart, mirrored: boolean) {
+  private _updateSpritesWithAvatarDrawDefinition(
+    drawDefinition: AvatarDrawDefinition,
+    currentFrame: number
+  ) {
+    this._assets.forEach((value) => (value.visible = false));
+    this.container?.destroy();
+
+    this.container = new PIXI.Container();
+
+    drawDefinition.parts.forEach((part) => {
+      const frame = currentFrame % part.assets.length;
+      const asset = part.assets[frame];
+
+      let sprite = this._sprites.get(asset.fileId);
+
+      if (sprite == null) {
+        sprite = this.createAsset(part, asset);
+
+        if (sprite != null) {
+          this._assets.push(sprite);
+        }
+      }
+
+      if (sprite == null) return;
+
+      sprite.x = asset.x;
+      sprite.y = asset.y;
+      sprite.visible = true;
+      sprite.mirrored = asset.mirror;
+
+      this._sprites.set(asset.fileId, sprite);
+      this.container?.addChild(sprite);
+    });
+  }
+
+  private createAsset(part: AvatarDrawPart, asset: AvatarAsset) {
     if (this.avatarLoaderResult == null)
       throw new Error(
         "Cant create asset when avatar loader result not present"
       );
-    const texture = this.avatarLoaderResult.getTexture(part.fileId);
+    const texture = this.avatarLoaderResult.getTexture(asset.fileId);
 
     if (texture == null) return;
 
     const sprite = new HitSprite({
       hitDetection: this.hitDetection,
-      mirroredNotVisually: mirrored,
+      mirrored: asset.mirror,
     });
 
     sprite.zIndex = this.zIndex;
     sprite.hitTexture = texture;
 
-    sprite.x = part.x;
-    sprite.y = part.y;
+    sprite.x = asset.x;
+    sprite.y = asset.y;
     sprite.addEventListener("click", (event) => {
       this._clickHandler.handleClick(event);
     });
 
     if (part.color != null && part.mode === "colored") {
       sprite.tint = parseInt(part.color.slice(1), 16);
+    } else {
+      sprite.tint = 0xffffff;
     }
 
     return sprite;
   }
 
-  private fetchLook(look: string) {
-    this.avatarLoader.getAvatarDrawDefinition(look).then((result) => {
-      this.avatarLoaderResult = result;
-      this._updateSprites();
-    });
+  private _reloadLook() {
+    if (!this.mounted) return;
 
-    this._updateSprites();
+    const lookOptions = this._nextLookOptions;
+
+    if (lookOptions != null) {
+      const requestId = ++this._updateId;
+
+      this.avatarLoader
+        .getAvatarDrawDefinition({ ...lookOptions, initial: true })
+        .then((result) => {
+          if (requestId !== this._updateId) return;
+
+          this.avatarLoaderResult = result;
+
+          this._lookOptions = lookOptions;
+          this._nextLookOptions = undefined;
+
+          this._updateSprites();
+        });
+    }
+  }
+
+  private _updateFrame() {
+    if (this.avatarDrawDefinition == null) return;
+
+    this._updateSpritesWithAvatarDrawDefinition(
+      this.avatarDrawDefinition,
+      this.currentFrame
+    );
+    this._updatePosition(this.avatarDrawDefinition);
+    this._updateLayerOfCurrentContainer(this.layer);
   }
 
   registered(): void {
-    this.fetchLook(this.lookOptions.look);
+    this._reloadLook();
+
+    this.animationTicker.subscribe(() => {
+      if (this._refreshLook) {
+        this._refreshLook = false;
+        this._reloadLook();
+      }
+
+      if (this._refreshFrame) {
+        this._refreshFrame = false;
+        this._updateFrame();
+      }
+    });
   }
 
   destroyed(): void {
