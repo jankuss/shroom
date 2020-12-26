@@ -63,7 +63,7 @@ export class BaseFurniture
 
   public set alpha(value) {
     this._alpha = value;
-    this._updateFurniture();
+    this._refreshFurniture = true;
   }
 
   public get onClick() {
