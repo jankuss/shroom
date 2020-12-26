@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Furniture property for alpha (thanks @sindreslungaard)
+- **Avatar Refactor**
+
+  Large parts of the avatar rendering has been refactored to match the vanilla flash rendering of avatars.
+  This means:
+
+  - Easy handling of **all** actions through `addAction`, `removeAction` and `hasAction`
+  - Loading and display of avatar items
+
+### Fixed
+
+- Parsing of walls
 
 ## [0.1.8] - 2020-12-24
 
