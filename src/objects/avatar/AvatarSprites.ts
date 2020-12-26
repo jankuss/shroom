@@ -140,7 +140,8 @@ export class AvatarSprites extends RoomObject {
       !isSetEqual(oldLookOptions.actions, newLookOptions.actions) ||
       oldLookOptions.look != newLookOptions.look ||
       oldLookOptions.item != newLookOptions.item ||
-      oldLookOptions.effect != newLookOptions.effect
+      oldLookOptions.effect != newLookOptions.effect ||
+      oldLookOptions.direction != newLookOptions.direction
     ) {
       this._nextLookOptions = newLookOptions;
       this._refreshLook = true;
