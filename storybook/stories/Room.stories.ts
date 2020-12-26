@@ -3,6 +3,7 @@ import {
   Room,
   Landscape,
   WallFurniture,
+  RoomCamera,
 } from "@jankuss/shroom";
 
 import { createShroom } from "./common/createShroom";
@@ -364,6 +365,60 @@ export function LandscapeColor() {
     room.addRoomObject(window9);
 
     application.stage.addChild(room);
+  });
+}
+
+export function FunkyRoomShape() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
+      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
+      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
+      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
+      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
+      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
+      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
+      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
+      xxxxxxxxxxxxxxxxxxxxxxxx00000000xx
+      xxxxxxxxxxxxxxxxxxxxxxxxx0000000xx
+      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
+      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
+      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
+      xxxxxxxxxxxxxxxxxxxx000000000xxxxx
+      xxxxxxxxxxxxxxxxxxxx000000000xxxxx
+      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
+      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
+      xxxxxxxxxxxxxxxxxxxxx000000000000x
+      xxxxxxxxxxxxxxxxxxxxx000000000000x
+      xxxxxxxxxxxxxxxxxxxxx000000000000x
+      x00000000xxxxxxxxxxxx000000000000x
+      x00000000xxxxxxxxxxxx0000000000000
+      x00000000xxxxxxxxxxxx0000000000000
+      x00000000xxxxxxxxxxxx000000000000x
+      x00000000xxxxxxxxxxxx000000000000x
+      x00000000xxxxxxxxxxxx000000000000x
+      x00000000xxxxxxxxxxxx000000000000x
+      x00000000xxxxxxxxxxxx00000000xxxxx
+      xxxx00xxxxxxxxxxxxxxx00000000xxxxx
+      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
+      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
+      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
+      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
+      xxxx0xxxxxxxxxxxxxxxxx00xxxxxxxxxx
+      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      `,
+    });
+
+    application.stage.addChild(RoomCamera.forScreen(room));
   });
 }
 
