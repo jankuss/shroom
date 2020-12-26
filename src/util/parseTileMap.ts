@@ -1,3 +1,4 @@
+import { Wall } from "../objects/room/Wall";
 import { TileType, TileTypeNumber } from "../types/TileType";
 import { getNumberOfTileType, getTileInfo } from "./getTileInfo";
 import { isTile } from "./isTile";
@@ -173,6 +174,53 @@ export function parseTileMap(
     positionOffsets: { x: 0, y: 0 },
     maskOffsets: { x: -wallOffsets.x, y: -wallOffsets.y },
   };
+}
+
+type WallBuilderInfo = { type: "row"; invalid: boolean };
+
+function getWalls(tilemap: TileType[][]) {
+  const start = findWallStartingTile(tilemap);
+
+  if (start == null) return;
+
+  let currentWall: WallBuilderInfo = { type: "row", invalid: false };
+  let currentPosition = start;
+
+  while (true) {
+    if (currentWall.type === "row") {
+      const current = tilemap[currentPosition.y][currentPosition.x] ?? "x";
+      const adjacent = tilemap[currentPosition.y][currentPosition.x - 1] ?? "x";
+
+      if (current !== "x" && adjacent === "x") {
+      } else {
+        // Mark the wall as invalid. This means the wall won't be shown,
+        // but we still continue following the edge tiles.
+
+        currentWall.invalid = true;
+      }
+    }
+  }
+}
+
+function findWallStartingTile(tilemap: TileType[][]) {
+  let y = tilemap.length - 1;
+  let x = 0;
+
+  while (true) {
+    const currentTile = tilemap[y][x];
+    if (currentTile == null) break;
+
+    if (currentTile != "x") {
+      return { x, y };
+    }
+
+    y--;
+
+    if (y < 0) {
+      y = tilemap.length - 1;
+      x++;
+    }
+  }
 }
 
 class RowWall {
