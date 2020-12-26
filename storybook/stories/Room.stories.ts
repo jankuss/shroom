@@ -422,6 +422,24 @@ export function FunkyRoomShape() {
   });
 }
 
+export function OtherRoomShape() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxxxxxx
+        x0xxx00
+        xxxxx00
+        xxxxx00
+        xxxxx00
+        x000000
+        x000000
+      `,
+    });
+
+    application.stage.addChild(RoomCamera.forScreen(room));
+  });
+}
+
 export default {
   title: "Room",
 };
