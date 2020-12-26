@@ -50,8 +50,6 @@ export function parseVisualization(xml: VisualizationXml): Visualization {
       );
       parseLayers(visualization, (id, layer) => layerMap.set(id, layer));
 
-      console.log("VALID DIR", parsedValidDirections);
-
       return {
         layerCount: Number(visualization["$"]["layerCount"]),
         getColor: (colorId, layer) => colorMap?.get(colorId)?.get(layer),
