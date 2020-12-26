@@ -164,23 +164,25 @@ export class BaseFurniture
     this._type = type;
     this._getMaskId = getMaskId;
 
-    PIXI.Ticker.shared.add(() => {
-      if (this._refreshFurniture) {
-        this._refreshFurniture = false;
-        this._updateFurniture();
-      }
-
-      if (this._refreshPosition) {
-        this._refreshPosition = false;
-        this._updatePosition();
-      }
-
-      if (this._refreshZIndex) {
-        this._refreshZIndex = false;
-        this._updateZIndex();
-      }
-    });
+    PIXI.Ticker.shared.add(this._onTicker);
   }
+
+  private _onTicker = () => {
+    if (this._refreshFurniture) {
+      this._refreshFurniture = false;
+      this._updateFurniture();
+    }
+
+    if (this._refreshPosition) {
+      this._refreshPosition = false;
+      this._updatePosition();
+    }
+
+    if (this._refreshZIndex) {
+      this._refreshZIndex = false;
+      this._updateZIndex();
+    }
+  };
 
   private _updateSprites(cb: (element: SpriteWithStaticOffset) => void) {
     this.elements.forEach(cb);
@@ -508,5 +510,7 @@ export class BaseFurniture
     if (this.cancelTicker != null) {
       this.cancelTicker();
     }
+
+    PIXI.Ticker.shared.remove(this._onTicker);
   }
 }
