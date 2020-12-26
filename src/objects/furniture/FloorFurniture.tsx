@@ -46,6 +46,14 @@ export class FloorFurniture
     this._updateHighlight();
   }
 
+  public get alpha() {
+    return this._baseFurniture.alpha;
+  }
+
+  public set alpha(value: number) {
+    this._baseFurniture.alpha = value;
+  }
+
   public get type() {
     return this._type;
   }
