@@ -18,11 +18,14 @@ export type Visualization = {
     layerId: string
   ) => Layer | undefined;
   getAnimationDatas(): { id: string; data: AnimationData }[];
+  directions: number[];
 };
 
 export function parseVisualization(xml: VisualizationXml): Visualization {
   const visualizations =
     xml["visualizationData"]["graphics"][0]["visualization"];
+
+  let parsedValidDirections: number[] = [];
 
   for (let i = 0; i < visualizations.length; i++) {
     const visualization = visualizations[i];
@@ -33,15 +36,21 @@ export function parseVisualization(xml: VisualizationXml): Visualization {
 
       const directionMap = new Map<number, Map<string, Layer>>();
 
-      parseDirections(visualization, (direction, layerMap) =>
-        directionMap.set(direction, layerMap)
+      const { validDirections } = parseDirections(
+        visualization,
+        (direction, layerMap) => directionMap.set(direction, layerMap)
       );
+
+      parsedValidDirections = validDirections;
+
       parseAnimations(visualization, (id, data) => animationMap.set(id, data));
 
       parseColors(visualization, (id, colorLayersMap) =>
         colorMap.set(id, colorLayersMap)
       );
       parseLayers(visualization, (id, layer) => layerMap.set(id, layer));
+
+      console.log("VALID DIR", parsedValidDirections);
 
       return {
         layerCount: Number(visualization["$"]["layerCount"]),
@@ -63,6 +72,7 @@ export function parseVisualization(xml: VisualizationXml): Visualization {
             id: animationId,
             data,
           })),
+        directions: parsedValidDirections,
       };
     }
   }

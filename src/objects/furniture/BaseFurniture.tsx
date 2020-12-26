@@ -13,6 +13,8 @@ import { HitTexture } from "../hitdetection/HitTexture";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 import { HighlightFilter } from "./filter/HighlightFilter";
 import { FurnitureFetch } from "../../interfaces/IFurnitureLoader";
+import { FurnitureIndexData } from "./data/FurnitureIndexData";
+import { FurnitureExtraData } from "./FurnitureExtraData";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -40,6 +42,8 @@ export class BaseFurniture
   private _type: FurnitureFetch;
   private _unknownTexture: PIXI.Texture | undefined;
   private _clickHandler = new ClickHandler();
+  private _loadFurniResultPromise: Promise<LoadFurniResult>;
+  private _resolveLoadFurniResult: (result: LoadFurniResult) => void = () => {};
 
   private _refreshPosition: boolean = false;
   private _refreshFurniture: boolean = false;
@@ -47,6 +51,18 @@ export class BaseFurniture
 
   private _highlight: boolean = false;
   private _alpha: number = 1;
+
+  public get extradata() {
+    return this._loadFurniResultPromise.then((result) => {
+      return result.getExtraData();
+    });
+  }
+
+  public get validDirections() {
+    return this._loadFurniResultPromise.then((result) => {
+      return result.directions;
+    });
+  }
 
   public get highlight() {
     return this._highlight;
@@ -165,6 +181,10 @@ export class BaseFurniture
     this._getMaskId = getMaskId;
 
     PIXI.Ticker.shared.add(this._onTicker);
+
+    this._loadFurniResultPromise = new Promise<LoadFurniResult>((resolve) => {
+      this._resolveLoadFurniResult = resolve;
+    });
   }
 
   private _onTicker = () => {
@@ -498,6 +518,7 @@ export class BaseFurniture
 
     this.furnitureLoader.loadFurni(this._type).then((result) => {
       this.loadFurniResult = result;
+      this._resolveLoadFurniResult(result);
       this._updateFurniture();
     });
 

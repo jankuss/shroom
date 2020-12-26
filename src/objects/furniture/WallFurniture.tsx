@@ -54,6 +54,14 @@ export class WallFurniture extends RoomObject implements IFurniture {
     options.behaviors?.forEach((behavior) => behavior.setParent(this));
   }
 
+  public get extradata() {
+    return this._baseFurniture.extradata;
+  }
+
+  public get validDirections() {
+    return this._baseFurniture.validDirections;
+  }
+
   public get id() {
     return this._id;
   }

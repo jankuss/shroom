@@ -31,9 +31,23 @@ export function Default() {
       });
 
       furniture.onClick = action(`Furniture ${i} clicked`);
+      furniture.validDirections.then(action(`Furniture ${i} valid directions`));
 
       room.addRoomObject(furniture);
     }
+
+    const dice = new FloorFurniture({
+      roomX: 1,
+      roomY: 3,
+      roomZ: 0,
+      type: "edice",
+      direction: 0,
+    });
+
+    dice.extradata.then(action("Extra Data"));
+    dice.validDirections.then(action(`Dice valid directions`));
+
+    room.addRoomObject(dice);
 
     application.stage.addChild(room);
   });

@@ -32,7 +32,7 @@ export class FloorFurniture
   private _animation?: string;
   private _highlight: boolean = false;
 
-  public readonly placementType = "wall";
+  public readonly placementType = "floor";
 
   private _onClick: HitEventHandler | undefined;
   private _onDoubleClick: HitEventHandler | undefined;
@@ -78,6 +78,14 @@ export class FloorFurniture
 
   public get id() {
     return this._id;
+  }
+
+  public get extradata() {
+    return this._baseFurniture.extradata;
+  }
+
+  public get validDirections() {
+    return this._baseFurniture.validDirections;
   }
 
   constructor(

@@ -101,12 +101,9 @@ export function Walking() {
 
     setTimeout(() => {
       avatar.walk(1, 2, 0, { direction: 4 });
-    }, 3000);
-
-    setTimeout(() => {
       avatar.walk(2, 2, 0, { direction: 2 });
       avatar.walk(3, 2, 0, { direction: 2 });
-    }, 5000);
+    }, 3000);
 
     room.x = application.screen.width / 2 - room.roomWidth / 2;
     room.y = application.screen.height / 2 - room.roomHeight / 2;

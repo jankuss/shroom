@@ -1,4 +1,6 @@
 import { HitTexture } from "../../hitdetection/HitTexture";
+import { FurnitureIndexData } from "../data/FurnitureIndexData";
+import { FurnitureExtraData } from "../FurnitureExtraData";
 import { DrawDefinition } from "./DrawDefinition";
 import { getFurniDrawDefinition } from "./getFurniDrawDefinition";
 import { parseAssets } from "./parseAssets";
@@ -19,6 +21,8 @@ export type Hitmap = (
 export type LoadFurniResult = {
   getDrawDefinition: GetFurniDrawDefinition;
   getTexture: (name: string) => HitTexture;
+  getExtraData: () => FurnitureExtraData;
+  directions: number[];
 };
 
 export async function loadFurni(
@@ -32,6 +36,10 @@ export async function loadFurni(
       name: string,
       revision?: number
     ) => Promise<string>;
+    getIndex: (
+      type: string,
+      revision?: number
+    ) => Promise<{ visualization?: string; logic?: string }>;
   }
 ): Promise<LoadFurniResult> {
   const type = typeWithColor.split("*")[0];
@@ -41,6 +49,8 @@ export async function loadFurni(
 
   const assetsXml = await parseStringAsync(assetsString);
   const visualizationXml = await parseStringAsync(visualizationString);
+
+  const indexData = await options.getIndex(type, revision);
 
   const assetMap = parseAssets(assetsXml);
   const visualization = parseVisualization(visualizationXml);
@@ -63,7 +73,6 @@ export async function loadFurni(
 
     return textures;
   };
-
   const textures = await loadTextures();
 
   return {
@@ -81,5 +90,9 @@ export async function loadFurni(
 
       return texture;
     },
+    getExtraData: () => {
+      return indexData;
+    },
+    directions: visualization.directions,
   };
 }
