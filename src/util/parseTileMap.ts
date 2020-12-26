@@ -173,6 +173,8 @@ class Walls {
 
   constructor(infos: WallBuilderInfo[]) {
     infos.forEach((info) => {
+      if (info.invalid) return;
+
       switch (info.type) {
         case "row":
           if (info.startY == null) throw new Error("Invalid start y");
@@ -285,7 +287,13 @@ function getWalls(tilemap: TileType[][]) {
         currentPosition.y
       );
 
-      if (current !== "x" && adjacent === "x") {
+      const adjacentInfo = getTileInfo(
+        tilemap,
+        currentPosition.x - 1,
+        currentPosition.y
+      );
+
+      if (current !== "x" && (adjacent === "x" || adjacentInfo.rowDoor)) {
       } else {
         // Mark the wall as invalid. This means the wall won't be shown,
         // but we still continue following the edge tiles.

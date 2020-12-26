@@ -427,11 +427,11 @@ export function OtherRoomShape() {
     const room = Room.create(shroom, {
       tilemap: `
         xxxxxxx
-        x0xxx00
+        xxxx000
+        xxxx000
         xxxxx00
         xxxxx00
-        xxxxx00
-        x000000
+        0000000
         x000000
       `,
     });
