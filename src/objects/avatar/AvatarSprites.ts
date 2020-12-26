@@ -30,7 +30,7 @@ export class AvatarSprites extends RoomObject {
   private _zIndex: number = 0;
   private _currentFrame: number = 0;
   private _clickHandler: ClickHandler = new ClickHandler();
-  private _assets: PIXI.Sprite[] = [];
+  private _assets: HitSprite[] = [];
 
   private _refreshFrame = false;
   private _refreshLook = false;
@@ -201,7 +201,10 @@ export class AvatarSprites extends RoomObject {
     drawDefinition: AvatarDrawDefinition,
     currentFrame: number
   ) {
-    this._assets.forEach((value) => (value.visible = false));
+    this._assets.forEach((value) => {
+      value.visible = false;
+      value.ignore = true;
+    });
     this.container?.destroy();
 
     this.container = new PIXI.Container();
@@ -226,6 +229,7 @@ export class AvatarSprites extends RoomObject {
       sprite.y = asset.y;
       sprite.visible = true;
       sprite.mirrored = asset.mirror;
+      sprite.ignore = false;
 
       this._sprites.set(asset.fileId, sprite);
       this.container?.addChild(sprite);

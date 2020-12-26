@@ -11,6 +11,7 @@ export type HitEventType = "click";
 export interface HitEvent {
   stopPropagation(): void;
   absorb(): void;
+  mouseEvent: MouseEvent;
   tag?: string;
 }
 

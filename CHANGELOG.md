@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Easy handling of **all** actions through `addAction`, `removeAction` and `hasAction`
   - Loading and display of avatar items
 
+- Expose `MouseEvent` in hit detection through the `mouseEvent` property
+
 ### Fixed
 
 - Parsing of walls
