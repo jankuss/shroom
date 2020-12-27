@@ -202,6 +202,8 @@ export class AvatarSprites extends RoomObject {
     drawDefinition: AvatarDrawDefinition,
     currentFrame: number
   ) {
+    if (!this.mounted) return;
+
     this._assets.forEach((value) => {
       value.visible = false;
       value.ignore = true;
