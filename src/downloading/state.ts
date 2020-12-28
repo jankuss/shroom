@@ -38,6 +38,7 @@ export type Action =
     }
   | { type: "FURNI_ASSETS_SUCCESS" }
   | { type: "FURNI_ASSETS_COUNT"; payload: number }
+  | { type: "FURNI_ASSETS_DOWNLOAD_COUNT" }
   | { type: "FIGURE_ASSETS_COUNT"; payload: number }
   | { type: "STARTED" };
 
@@ -51,6 +52,7 @@ export interface State {
   lastFurniAsset?: { id: string; revision?: string };
   furniAssetsCount?: number;
   furniAssetsCompletedCount?: number;
+  furniAssetsDownloadCount?: number;
   figureAssetsCount?: number;
   figureAssetsCompletedCount?: number;
   started: boolean;
@@ -161,125 +163,125 @@ export async function run({
     await dumpFurniFromFurniData(hofFurniUrl, furniData, furniFolder, dispatch);
 
     dispatch({ type: "FURNI_ASSETS_SUCCESS" });
+    console.log("finalizou");
   }
 }
 
 export function reducer(state: State, action: Action): State {
-  if (action.type === "STARTED") {
-    return {
-      ...state,
-      started: true,
-    };
-  }
+  switch (action.type) {
+    case "STARTED":
+      return {
+        ...state,
+        started: true,
+      };
 
-  if (action.type === "FIGURE_MAP_LOADING") {
-    return {
-      ...state,
-      figureMap: "runs",
-    };
-  }
+    case "FIGURE_MAP_LOADING":
+      return {
+        ...state,
+        figureMap: "runs",
+      };
 
-  if (action.type === "FIGURE_MAP_SUCCESS") {
-    return {
-      ...state,
-      figureMap: "success",
-    };
-  }
+    case "FIGURE_MAP_SUCCESS":
+      return {
+        ...state,
+        figureMap: "success",
+      };
 
-  if (action.type === "FIGURE_DATA_LOADING") {
-    return {
-      ...state,
-      figureData: "runs",
-    };
-  }
+    case "FIGURE_DATA_LOADING":
+      return {
+        ...state,
+        figureData: "runs",
+      };
 
-  if (action.type === "FIGURE_DATA_SUCCESS") {
-    return {
-      ...state,
-      figureData: "success",
-    };
-  }
+    case "FIGURE_DATA_SUCCESS":
+      return {
+        ...state,
+        figureData: "success",
+      };
 
-  if (action.type === "FURNI_DATA_LOADING") {
-    return {
-      ...state,
-      furniData: "runs",
-    };
-  }
+    case "FURNI_DATA_LOADING":
+      return {
+        ...state,
+        furniData: "runs",
+      };
 
-  if (action.type === "FURNI_DATA_SUCCESS") {
-    return {
-      ...state,
-      furniData: "success",
-    };
-  }
+    case "FURNI_DATA_SUCCESS":
+      return {
+        ...state,
+        furniData: "success",
+      };
 
-  if (action.type === "FIGURE_ASSETS_LOADING") {
-    return {
-      ...state,
-      figureAssets: "runs",
-    };
-  }
+    case "FIGURE_ASSETS_LOADING":
+      return {
+        ...state,
+        figureAssets: "runs",
+      };
 
-  if (action.type === "FIGURE_ASSETS_PROGRESS_SUCCESS") {
-    return {
-      ...state,
-      lastFigureAsset: action.payload,
-      figureAssetsCompletedCount: (state.figureAssetsCompletedCount ?? 0) + 1,
-    };
-  }
+    case "FIGURE_ASSETS_PROGRESS_SUCCESS":
+      return {
+        ...state,
+        lastFigureAsset: action.payload,
+        figureAssetsCompletedCount: (state.figureAssetsCompletedCount ?? 0) + 1,
+      };
 
-  if (action.type === "FIGURE_ASSETS_SUCCESS") {
-    return {
-      ...state,
-      figureAssets: "success",
-    };
-  }
+    case "FURNI_ASSETS_DOWNLOAD_COUNT":
+      return {
+        ...state,
+        furniAssetsDownloadCount: (state.furniAssetsDownloadCount ?? 0) + 1,
+      };
 
-  if (action.type === "FURNI_ASSETS_LOADING") {
-    return {
-      ...state,
-      furniAssets: "runs",
-    };
-  }
+    case "FIGURE_ASSETS_SUCCESS":
+      return {
+        ...state,
+        figureAssets: "success",
+      };
 
-  if (action.type === "FURNI_ASSETS_PROGRESS_SUCCESS") {
-    return {
-      ...state,
-      lastFurniAsset: action.payload,
-      furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
-    };
-  }
+    case "FURNI_ASSETS_LOADING":
+      return {
+        ...state,
+        furniAssets: "runs",
+      };
 
-  if (action.type === "FURNI_ASSETS_PROGRESS_ERROR") {
-    return {
-      ...state,
-      furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
-    };
-  }
+    case "FURNI_ASSETS_PROGRESS_SUCCESS":
+      return {
+        ...state,
+        lastFurniAsset: action.payload,
+        furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
+      };
 
-  if (action.type === "FURNI_ASSETS_SUCCESS") {
-    return {
-      ...state,
-      furniAssets: "success",
-    };
-  }
+    case "FURNI_ASSETS_PROGRESS_ERROR":
+      return {
+        ...state,
+        furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
+      };
 
-  if (action.type === "FURNI_ASSETS_COUNT") {
-    return {
-      ...state,
-      furniAssetsCount: action.payload,
-    };
-  }
+    case "FURNI_ASSETS_PROGRESS_ERROR":
+      return {
+        ...state,
+        furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
+      };
 
-  if (action.type === "FIGURE_ASSETS_COUNT") {
-    return {
-      ...state,
-      figureAssetsCount: action.payload,
-    };
-  }
+    case "FURNI_ASSETS_SUCCESS":
+      return {
+        ...state,
+        furniAssets: "success",
+      };
 
-  return state;
+    case "FURNI_ASSETS_COUNT":
+      return {
+        ...state,
+        furniAssetsCount: action.payload,
+      };
+
+    case "FIGURE_ASSETS_COUNT":
+      return {
+        ...state,
+        figureAssetsCount: action.payload,
+      };
+
+    default:
+      return state;
+  }
 }
 
 export const initialState: State = {

@@ -43,7 +43,7 @@
   },
   "scripts": {
     "dev": "tsc --watch",
-    "dump": "yarn ts-node src/downloading/cli.tsx",
+    "dump": "yarn ts-node-dev src/downloading/cli/index.tsx dump",
     "test": "jest",
     "build": "rm -rf dist && tsc",
     "prepublishOnly": "yarn build"

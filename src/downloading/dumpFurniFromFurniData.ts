@@ -1,6 +1,6 @@
 import Bluebird = require("bluebird");
 import { parseStringPromise } from "xml2js";
-import { dumpFurni } from "./dumpFurni";
+import { downloadFurni, dumpFurni } from "./dumpFurni";
 import { Action } from "./state";
 
 export async function dumpFurniFromFurniData(
@@ -9,41 +9,75 @@ export async function dumpFurniFromFurniData(
   folder: string,
   dispatch: (action: Action) => void
 ) {
+  console.time("downloadAndDump");
+
   const data = await parseStringPromise(furniData);
 
   const furniTypes: any[] = data.furnidata.roomitemtypes[0].furnitype;
   const wallTypes: any[] = data.furnidata.wallitemtypes[0].furnitype;
 
   const usedIds = new Set<string>();
-  const allFurni = [...wallTypes, ...furniTypes];
+
+  // We will filter duplicated values to report the right amount of files to be downloaded and dumped.
+  const allFurni: any[] = [...wallTypes, ...furniTypes].reduce(
+    (items, item) => {
+      const name = item["$"].classname.split("*")[0];
+
+      if (usedIds.has(name)) return items;
+
+      usedIds.add(name);
+
+      return [...items, item];
+    },
+    []
+  );
 
   dispatch({ type: "FURNI_ASSETS_COUNT", payload: allFurni.length });
 
   await Bluebird.map(
     allFurni,
-    async (value) => {
+    async (value: any) => {
       const name = value["$"].classname.split("*")[0];
 
-      if (usedIds.has(name)) return;
-      usedIds.add(name);
+      const revision: number | undefined =
+        value.revision != null ? value.revision[0] : undefined;
+
+      try {
+        await downloadFurni(dcrUrl, revision?.toString(), name, folder);
+
+        dispatch({ type: "FURNI_ASSETS_DOWNLOADED_COUNT" });
+      } catch (e) {
+        console.log("downloadFurni error: ", e.message);
+      }
+    },
+    { concurrency: 5 } // Safe concurrency to avoid 422 from sulake
+  );
+
+  await Bluebird.map(
+    allFurni,
+    async (value: any) => {
+      const name = value["$"].classname.split("*")[0];
 
       const revision: number | undefined =
         value.revision != null ? value.revision[0] : undefined;
 
       try {
         await dumpFurni(dcrUrl, revision?.toString(), name, folder);
+
         dispatch({
           type: "FURNI_ASSETS_PROGRESS_SUCCESS",
           payload: { id: name, revision: revision?.toString() },
         });
       } catch (err) {
-        //console.log(`Error dumping ${value.revision[0]}/${name}`);
+        // console.log(`Error dumping ${value.revision[0]}/${name}`);
         dispatch({
           type: "FURNI_ASSETS_PROGRESS_ERROR",
           payload: { id: name, revision: revision?.toString() },
         });
       }
     },
-    { concurrency: 30 }
+    { concurrency: 15 } // Safe concurrency to avoid CPU bottleneck
   );
+
+  console.timeEnd("downloadAndDump");
 }

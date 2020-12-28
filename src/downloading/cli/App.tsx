@@ -62,17 +62,18 @@ const ProgressDisplay = ({
   total,
   current,
   children,
+  showPercentage,
 }: {
   total: number;
   current: number;
   children: React.ReactNode;
+  showPercentage?: boolean;
 }) => {
-  const percentage = (current / total) * 100;
+  const progress = (current / total) * 100;
 
   return (
     <Text>
-      <Text>{percentage.toFixed(1)}%</Text>
-      {` - `}
+      {showPercentage && <Text>{progress.toFixed(1)}% - </Text>}
       {children}
     </Text>
   );
@@ -110,31 +111,47 @@ export const App = ({
 
   const renderFurniAssetsExtra = () => {
     if (state.furniAssets !== "runs") return;
-    if (state.lastFurniAsset == null) return;
-    if (state.furniAssetsCount == null) return;
-    if (state.furniAssetsCompletedCount == null) return;
+    if (!state.furniAssetsCount) return;
 
     return (
-      <ProgressDisplay
-        total={state.furniAssetsCount}
-        current={state.furniAssetsCompletedCount}
-      >
-        Processed: <Text bold>{state.lastFurniAsset.id}</Text>, Revision:{" "}
-        <Text bold>{state.lastFurniAsset.revision}</Text>
-      </ProgressDisplay>
+      <>
+        <ProgressDisplay
+          total={state.furniAssetsCount}
+          current={state.furniAssetsDownloadCount ?? 0}
+        >
+          Downloaded furnitures:{" "}
+          <Text bold>
+            {state.furniAssetsDownloadCount}/{state.furniAssetsCount}
+          </Text>
+        </ProgressDisplay>
+
+        <Newline />
+
+        {state.lastFurniAsset && (
+          <ProgressDisplay
+            total={state.furniAssetsCount}
+            current={state.furniAssetsCompletedCount ?? 0}
+            showPercentage
+          >
+            Processed: <Text bold>{state.lastFurniAsset.id}</Text>, Revision:{" "}
+            <Text bold>{state.lastFurniAsset.revision}</Text>
+          </ProgressDisplay>
+        )}
+      </>
     );
   };
 
   const renderFigureAssetsExtra = () => {
     if (state.figureAssets !== "runs") return;
-    if (state.lastFigureAsset == null) return;
-    if (state.figureAssetsCount == null) return;
-    if (state.figureAssetsCompletedCount == null) return;
+    if (!state.lastFigureAsset) return;
+    if (!state.figureAssetsCount) return;
+    if (!state.figureAssetsCompletedCount) return;
 
     return (
       <ProgressDisplay
         total={state.figureAssetsCount}
         current={state.figureAssetsCompletedCount}
+        showPercentage
       >
         Processed: <Text bold>{state.lastFigureAsset}</Text>
       </ProgressDisplay>
@@ -168,12 +185,15 @@ export const App = ({
       {steps.figureMap && (
         <StepTitle step="figureMap" state={state.figureMap} />
       )}
+
       {steps.figureData && (
         <StepTitle step="figureData" state={state.figureData} />
       )}
+
       {steps.furniData && (
         <StepTitle step="furniData" state={state.furniData} />
       )}
+
       {steps.figureAssets && (
         <StepTitle
           step="figureAssets"
@@ -181,6 +201,7 @@ export const App = ({
           extra={renderFigureAssetsExtra()}
         />
       )}
+
       {steps.furniAssets && (
         <StepTitle
           step="furniAssets"

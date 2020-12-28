@@ -1,7 +1,9 @@
 import fetch from "node-fetch";
 
+const MAX_TIMEOUT = 30000;
+
 export async function tryFetch(url: string) {
-  const response = await fetch(url);
+  const response = await fetch(url, { timeout: MAX_TIMEOUT });
 
   if (response.status !== 200) {
     throw new Error(

@@ -3,8 +3,11 @@ import * as path from "path";
 
 function execute(command: string) {
   return new Promise((resolve, reject) =>
-    exec(command, {maxBuffer: 1024 * 1024}, (error: ExecException | null, stdout: string, stderr: string) =>
-      error ? reject(error) : resolve(stdout)
+    exec(
+      command,
+      { maxBuffer: 1024 * 1024 },
+      (error: ExecException | null, stdout: string, stderr: string) =>
+        error ? reject(error) : resolve(stdout)
     )
   );
 }
@@ -27,34 +30,35 @@ export async function extractSwf(
   const regexIds = /\[.*\]\s*[0-9]*\s*(.*) defines id ([0-9]*)/gm;
   const regexNames = /exports ([0-9]*) as "(.*)"/gm;
 
-  const arr: [string, number][] = [];
-  let match: any;
-  do {
-    match = regexIds.exec(result);
-    if (match) {
-      arr.push([match[1], Number(match[2])]);
-    }
-  } while (match);
-
+  const images: { id: number; type: string; files: any[] }[] = [];
   const map = new Map<number, string[]>();
-  do {
-    match = regexNames.exec(result);
-    if (match) {
-      const key = Number(match[1]);
+
+  let match: any = regexIds.exec(result);
+  let matchNames: any = regexNames.exec(result);
+
+  while (match && matchNames) {
+    const id = +match[2];
+    const type = match[1];
+
+    if (matchNames) {
+      const key = +matchNames[1];
       const current = map.get(key);
 
-      if (current) {
-        map.set(key, [...current, match[2]]);
+      if (current && map.has(key)) {
+        map.set(key, [...current, matchNames[2]]);
       } else {
-        map.set(key, [match[2]]);
+        map.set(key, [matchNames[2]]);
       }
     }
-  } while (match);
 
-  const results = arr.map(([type, id]) => ({ type, files: map.get(id), id }));
+    images.push({ id, type, files: map.get(id) ?? [] });
 
-  for (let i = 0; i < results.length; i++) {
-    const { id, type, files = [] } = results[i];
+    match = regexIds.exec(result);
+    matchNames = regexNames.exec(result);
+  }
+
+  for (let i = 0; i < images.length; i++) {
+    const { id, type, files = [] } = images[i];
 
     for (let j = 0; j < files.length; j++) {
       const file = files[j];
@@ -62,7 +66,7 @@ export async function extractSwf(
 
       const swfName = path.basename(swf, ".swf");
 
-      if (fileName != null && file != null) {
+      if (fileName && file) {
         const realFileName = !preserveFileNameFor.includes(fileName[1])
           ? file.replace(`${swfName}_`, "")
           : file;
