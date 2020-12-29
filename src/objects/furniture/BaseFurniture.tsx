@@ -13,8 +13,6 @@ import { HitTexture } from "../hitdetection/HitTexture";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 import { HighlightFilter } from "./filter/HighlightFilter";
 import { FurnitureFetch } from "../../interfaces/IFurnitureLoader";
-import { FurnitureIndexData } from "./data/FurnitureIndexData";
-import { FurnitureExtraData } from "./FurnitureExtraData";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -380,15 +378,12 @@ export class BaseFurniture
       sprite.tint = parseInt(tint, 16);
     }
 
-    if (layer != null) {
-      if (layer.alpha != null) {
-        if (this.highlight) {
-          sprite.alpha = 1;
-        } else {
-          sprite.alpha = layer.alpha / 255;
-        }
-      }
+    let alpha = this._getAlpha({
+      baseAlpha: this.alpha,
+      layerAlpha: layer?.alpha,
+    });
 
+    if (layer != null) {
       if (layer.ink != null) {
         if (this.highlight) {
           sprite.visible = false;
@@ -403,10 +398,10 @@ export class BaseFurniture
         sprite.visible = false;
       } else {
         sprite.visible = true;
-        sprite.alpha = this.alpha / 5;
+        sprite.alpha = alpha / 5;
       }
     } else {
-      sprite.alpha = this.alpha;
+      sprite.alpha = alpha;
     }
 
     if (mask) {
@@ -523,6 +518,18 @@ export class BaseFurniture
     });
 
     this._updateFurniture();
+  }
+
+  private _getAlpha({
+    layerAlpha,
+    baseAlpha,
+  }: {
+    layerAlpha?: number;
+    baseAlpha: number;
+  }) {
+    if (layerAlpha != null) return (layerAlpha / 255) * baseAlpha;
+
+    return baseAlpha;
   }
 
   destroyed() {
