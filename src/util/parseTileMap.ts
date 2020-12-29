@@ -2,6 +2,8 @@ import { Wall } from "../objects/room/Wall";
 import { TileType, TileTypeNumber } from "../types/TileType";
 import { getNumberOfTileType, getTileInfo } from "./getTileInfo";
 import { isTile } from "./isTile";
+import { ColumnWall, getColumnWalls } from "./tilemap/getColumnWalls";
+import { getRowWalls, RowWall } from "./tilemap/getRowWalls";
 
 export type ParsedTileType =
   | {
@@ -31,7 +33,7 @@ export function parseTileMap(
   positionOffsets: { x: number; y: number };
   maskOffsets: { x: number; y: number };
 } {
-  const wallInfo = new Walls(getWalls(tilemap));
+  const wallInfo = new Walls(getRowWalls(tilemap), getColumnWalls(tilemap));
 
   assertTileMapHasPadding(tilemap);
 
@@ -64,12 +66,12 @@ export function parseTileMap(
       const wall = wallInfo.getWall(x, y);
 
       if (wall != null) {
-        switch (wall) {
+        switch (wall.kind) {
           case "column":
             result[resultY][resultX] = {
               kind: "colWall",
               type: "wall",
-              height: tileInfo.height ?? 0,
+              height: wall.height,
             };
             break;
 
@@ -77,7 +79,7 @@ export function parseTileMap(
             result[resultY][resultX] = {
               kind: "rowWall",
               type: "wall",
-              height: tileInfo.height ?? 0,
+              height: wall.height,
               hideBorder: tileInfoAbove.rowDoor ? true : false,
             };
             break;
@@ -86,7 +88,7 @@ export function parseTileMap(
             result[resultY][resultX] = {
               kind: "innerCorner",
               type: "wall",
-              height: tileInfo.height ?? 0,
+              height: wall.height,
             };
             break;
 
@@ -94,7 +96,7 @@ export function parseTileMap(
             result[resultY][resultX] = {
               kind: "outerCorner",
               type: "wall",
-              height: tileInfo.height ?? 0,
+              height: wall.height,
             };
             break;
         }
@@ -143,58 +145,20 @@ export function parseTileMap(
   };
 }
 
-type WallBuilderInfo =
-  | {
-      type: "row";
-      invalid: boolean;
-      startY?: number;
-      endY?: number;
-      x?: number;
-    }
-  | {
-      type: "column";
-      invalid: boolean;
-      startX?: number;
-      endX?: number;
-      y?: number;
-    };
-
-function getTile(tilemap: TileType[][], x: number, y: number) {
-  const row = tilemap[y];
-
-  if (row == null) return "x";
-
-  return row[x] ?? "x";
-}
-
 class Walls {
-  private _rowWalls = new Map<string, { type: "row" }>();
-  private _colWalls = new Map<string, { type: "column" }>();
+  private _rowWalls = new Map<string, RowWall>();
+  private _colWalls = new Map<string, ColumnWall>();
 
-  constructor(infos: WallBuilderInfo[]) {
-    infos.forEach((info) => {
-      if (info.invalid) return;
+  constructor(rowWalls: RowWall[], colWalls: ColumnWall[]) {
+    rowWalls.forEach((info) => {
+      for (let y = info.startY; y <= info.endY; y++) {
+        this._rowWalls.set(`${info.x}_${y}`, info);
+      }
+    });
 
-      switch (info.type) {
-        case "row":
-          if (info.startY == null) throw new Error("Invalid start y");
-          if (info.endY == null) throw new Error("Invalid end y");
-          if (info.x == null) throw new Error("Invalid x");
-
-          for (let y = info.endY; y <= info.startY; y++) {
-            this._rowWalls.set(`${info.x}_${y}`, { type: "row" });
-          }
-          break;
-
-        case "column":
-          if (info.startX == null) throw new Error("Invalid start y");
-          if (info.endX == null) throw new Error("Invalid end y");
-          if (info.y == null) throw new Error("Invalid x");
-
-          for (let x = info.startX; x <= info.endX; x++) {
-            this._colWalls.set(`${x}_${info.y}`, { type: "column" });
-          }
-          break;
+    colWalls.forEach((info) => {
+      for (let x = info.startX; x <= info.endX; x++) {
+        this._colWalls.set(`${x}_${info.y}`, info);
       }
     });
   }
@@ -213,180 +177,31 @@ class Walls {
 
     if (rightColWall != null && bottomRowWall != null) {
       // This is a outer corner
-      return "outerCorner" as const;
+      return {
+        kind: "outerCorner" as const,
+        height: Math.min(rightColWall.height, bottomRowWall.height),
+      };
     }
 
     const leftColWall = this._getColWall(x, y);
     const topRowWall = this._getRowWall(x, y);
 
     if (leftColWall != null && topRowWall != null) {
-      return "innerCorner" as const;
+      return {
+        kind: "innerCorner" as const,
+        height: Math.min(leftColWall.height, topRowWall.height),
+      };
     }
 
     const rowWall = this._getRowWall(x, y);
-    if (rowWall != null) return rowWall.type;
+    if (rowWall != null)
+      return {
+        kind: "row" as const,
+        height: rowWall.height,
+      };
 
     const colWall = this._getColWall(x, y);
-    if (colWall != null) return colWall.type;
-  }
-}
-
-function getWalls(tilemap: TileType[][]) {
-  const start = findWallStartingTile(tilemap);
-
-  if (start == null) return [];
-
-  let currentWall: WallBuilderInfo = {
-    type: "row",
-    invalid: false,
-    startY: start.y,
-    x: start.x - 1,
-  };
-  let currentPosition = start;
-
-  const walls: WallBuilderInfo[] = [];
-
-  while (true) {
-    if (tilemap[currentPosition.y][currentPosition.x] == null) break;
-
-    const nextRowTilePosition = {
-      ...currentPosition,
-      y: currentPosition.y - 1,
-    };
-    const nextColTilePosition = {
-      ...currentPosition,
-      x: currentPosition.x + 1,
-    };
-    const aroundCornerTilePosition = {
-      y: currentPosition.y - 1,
-      x: currentPosition.x + 1,
-    };
-
-    const nextRowTile = getTile(
-      tilemap,
-      nextRowTilePosition.x,
-      nextRowTilePosition.y
-    );
-    const nextColTile = getTile(
-      tilemap,
-      nextColTilePosition.x,
-      nextColTilePosition.y
-    );
-    const aroundCornerTile = getTile(
-      tilemap,
-      aroundCornerTilePosition.x,
-      aroundCornerTilePosition.y
-    );
-
-    const current = getTile(tilemap, currentPosition.x, currentPosition.y);
-
-    if (currentWall.type === "row") {
-      const adjacent = getTile(
-        tilemap,
-        currentPosition.x - 1,
-        currentPosition.y
-      );
-
-      const adjacentInfo = getTileInfo(
-        tilemap,
-        currentPosition.x - 1,
-        currentPosition.y
-      );
-
-      if (current !== "x" && (adjacent === "x" || adjacentInfo.rowDoor)) {
-      } else {
-        // Mark the wall as invalid. This means the wall won't be shown,
-        // but we still continue following the edge tiles.
-
-        currentWall.invalid = true;
-      }
-
-      if (nextRowTile !== "x") {
-        currentPosition = nextRowTilePosition;
-      } else {
-        currentWall.endY = currentPosition.y;
-        walls.push(currentWall);
-
-        currentWall = {
-          type: "column",
-          invalid: false,
-          startX: currentPosition.x,
-          y: currentPosition.y - 1,
-        };
-      }
-    } else if (currentWall.type === "column") {
-      const adjacent = getTile(
-        tilemap,
-        currentPosition.x,
-        currentPosition.y - 1
-      );
-
-      if (current !== "x" && adjacent === "x") {
-      } else {
-        // Mark the wall as invalid. This means the wall won't be shown,
-        // but we still continue following the edge tiles.
-
-        currentWall.invalid = true;
-      }
-
-      if (nextColTile !== "x" && aroundCornerTile === "x") {
-        currentPosition = nextColTilePosition;
-      } else {
-        currentWall.endX = currentPosition.x;
-
-        if (aroundCornerTile !== "x") {
-          currentPosition = aroundCornerTilePosition;
-          walls.push(currentWall);
-
-          currentWall = {
-            type: "row",
-            invalid: false,
-            startY: currentPosition.y,
-            x: aroundCornerTilePosition.x - 1,
-          };
-        } else {
-          walls.push(currentWall);
-          break;
-        }
-      }
-    }
-  }
-
-  return walls;
-}
-
-function findWallStartingTile(tilemap: TileType[][]) {
-  let y = tilemap.length - 1;
-  let x = 0;
-
-  while (true) {
-    const currentTile = tilemap[y][x];
-    const info = getTileInfo(tilemap, x, y);
-
-    if (currentTile !== "x" && !info.rowDoor) {
-      return { x, y };
-    }
-
-    y--;
-
-    if (y < 0) {
-      y = tilemap.length - 1;
-      x++;
-    }
-  }
-}
-
-class RowWall {
-  private min: number = -1;
-
-  setValueIfLower(value: number) {
-    if (this.min === -1 || this.min > value) {
-      this.min = value;
-    }
-  }
-
-  isWallAllowed(value: number) {
-    return this.min === -1 || this.min >= value;
+    if (colWall != null) return { kind: "column", height: colWall.height };
   }
 }
 
