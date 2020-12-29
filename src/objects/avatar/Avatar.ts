@@ -311,10 +311,10 @@ export class Avatar extends RoomObject implements IMoveable, IRoomPositioned {
   }
 
   /**
-   * @deprecated Use `getRoomRect()`
+   * @deprecated Use `getRoomObjectRect()`
    */
   getScreenPosition() {
-    return this.getRoomRect();
+    return this.getRoomObjectRect();
   }
 
   private _updatePosition() {
