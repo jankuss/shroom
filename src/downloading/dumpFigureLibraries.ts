@@ -44,7 +44,7 @@ export async function dumpFigureLibraries(
         downloadSuccess();
       } catch (e) {}
     },
-    { concurrency: Infinity } // We can use this limit because if the download get stucked, we will retry it after a short time ;)
+    { concurrency: 100 } // We can use this limit because if the download get stucked, we will retry it after a short time ;)
   );
 
   await Bluebird.map(
