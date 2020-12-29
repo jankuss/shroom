@@ -13,6 +13,7 @@ test("parses single wall", () => {
       startY: 1,
       endY: 2,
       x: 0,
+      height: 0,
     },
   ]);
 });
@@ -31,11 +32,13 @@ test("parses cornered room", () => {
       startY: 3,
       endY: 4,
       x: 0,
+      height: 0,
     },
     {
       startY: 1,
       endY: 2,
       x: 2,
+      height: 0,
     },
   ]);
 });
@@ -55,16 +58,19 @@ test("parses walls correctly with out of place tile", () => {
       startY: 4,
       endY: 5,
       x: 0,
+      height: 0,
     },
     {
       startY: 2,
       endY: 2,
       x: 1,
+      height: 0,
     },
     {
       startY: 1,
       endY: 1,
       x: 3,
+      height: 0,
     },
   ]);
 });
@@ -84,16 +90,19 @@ test("parses walls correctly with out of place tile", () => {
       startY: 4,
       endY: 5,
       x: 0,
+      height: 0,
     },
     {
       startY: 2,
       endY: 2,
       x: 1,
+      height: 0,
     },
     {
       startY: 1,
       endY: 1,
       x: 3,
+      height: 0,
     },
   ]);
 });
