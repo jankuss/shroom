@@ -436,7 +436,13 @@ export function OtherRoomShape() {
       `,
     });
 
-    application.stage.addChild(RoomCamera.forScreen(room));
+    const camera = RoomCamera.forScreen(room);
+
+    camera.onOffsetChange = (offsets) => {
+      console.log(offsets);
+    };
+
+    application.stage.addChild(camera);
   });
 }
 

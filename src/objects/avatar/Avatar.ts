@@ -8,6 +8,7 @@ import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
 import { IMoveable } from "../IMoveable";
 import { AvatarAction } from "./enum/AvatarAction";
+import { IRoomPositioned, RoomObjectRect } from "../room/IRoomPositioned";
 
 interface Options {
   look: string;
@@ -17,7 +18,7 @@ interface Options {
   roomZ: number;
 }
 
-export class Avatar extends RoomObject implements IMoveable {
+export class Avatar extends RoomObject implements IMoveable, IRoomPositioned {
   private _avatarSprites: AvatarSprites;
   private _moveAnimation:
     | ObjectAnimation<{ type: "walk"; direction: number } | { type: "move" }>
@@ -164,6 +165,15 @@ export class Avatar extends RoomObject implements IMoveable {
     this._updateAvatarSprites();
   }
 
+  getRoomObjectRect(): RoomObjectRect {
+    return {
+      x: this._avatarSprites.x,
+      y: this._avatarSprites.y,
+      width: 64,
+      height: 0,
+    };
+  }
+
   clearMovement() {
     const current = this._moveAnimation?.clear();
 
@@ -300,11 +310,11 @@ export class Avatar extends RoomObject implements IMoveable {
     return getZOrder(roomX, roomY, roomZ) + 1;
   }
 
+  /**
+   * @deprecated Use `getRoomRect()`
+   */
   getScreenPosition() {
-    return {
-      x: this._avatarSprites.x,
-      y: this._avatarSprites.y,
-    };
+    return this.getRoomRect();
   }
 
   private _updatePosition() {

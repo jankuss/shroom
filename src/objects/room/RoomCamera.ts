@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { IRoomPositioned } from "./IRoomPositioned";
 
 import { Room } from "./Room";
 
@@ -9,11 +10,27 @@ export class RoomCamera extends PIXI.Container {
 
   private _offsets: { x: number; y: number } = { x: 0, y: 0 };
   private _animatedOffsets: { x: number; y: number } = { x: 0, y: 0 };
+  private _onOffsetChange: (offsets: {
+    x: number;
+    y: number;
+  }) => void = () => {};
 
   private _container: PIXI.Container;
   private _tween: any;
 
   private _interactionManager: PIXI.InteractionManager;
+
+  public get onOffsetChange() {
+    return this._onOffsetChange;
+  }
+
+  public set onOffsetChange(value) {
+    this._onOffsetChange = value;
+  }
+
+  public get offsets() {
+    return this._offsets;
+  }
 
   static forScreen(room: Room, options?: RoomCameraOptions) {
     return new RoomCamera(room, () => room.application.screen, options);
@@ -59,6 +76,15 @@ export class RoomCamera extends PIXI.Container {
 
       TWEEN.update(value);
     });
+  }
+
+  getScreenPosition(positioned: IRoomPositioned) {
+    const rect = positioned.getRoomObjectRect();
+
+    return {
+      x: this.offsets.x + rect.x,
+      y: this.offsets.y + rect.y,
+    };
   }
 
   private _handlePointerUp = (event: PIXI.InteractionEvent) => {
@@ -133,6 +159,8 @@ export class RoomCamera extends PIXI.Container {
         this._container.x = this._offsets.x;
         this._container.y = this._offsets.y;
     }
+
+    this.onOffsetChange({ x: this._container.x, y: this._container.y });
   }
 
   private _isOutOfBounds(offsets: { x: number; y: number }) {
