@@ -18,8 +18,10 @@ export const downloadFurni = async (
     ? path.join(folder, revision)
     : path.join(folder);
 
+  // This code will act like a cache, it will skip download if file is already downloaded.
   try {
-    await fs.stat(furniDirectory);
+    const downloadedSwfFile = path.resolve(path.join(`${furniDirectory}.swf`));
+    await fs.stat(downloadedSwfFile);
     return;
   } catch (e) {}
 
@@ -39,7 +41,6 @@ export const downloadFurni = async (
 };
 
 export async function dumpFurni(
-  dcrUrl: string,
   revision: string | undefined,
   name: string,
   folder: string
@@ -52,5 +53,16 @@ export async function dumpFurni(
     ? path.join(folder, revision)
     : path.join(folder);
 
-  await extractSwf(furniDirectory, path.join(revisionDirectory, `${name}.swf`));
+  // This code will act like a cache, it will skip the dump if the swf have already been dumped.
+  try {
+    const binFileName = `manifest.bin`;
+    const binPath = path.resolve(path.join(furniDirectory, binFileName));
+    await fs.stat(binPath);
+    return;
+  } catch (e) {}
+
+  await extractSwf({
+    out: furniDirectory,
+    swf: path.join(revisionDirectory, `${name}.swf`),
+  });
 }

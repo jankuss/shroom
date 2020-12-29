@@ -21,44 +21,52 @@ function getExtension(str: string) {
   }
 }
 
-export async function extractSwf(
-  out: string,
-  swf: string,
-  preserveFileNameFor: ("bin" | "png")[] = []
-) {
+interface IExtractSwf {
+  out: string;
+  swf: string;
+  preserveFileNameFor?: ("bin" | "png")[];
+}
+
+export async function extractSwf({
+  swf,
+  out,
+  preserveFileNameFor = [],
+}: IExtractSwf) {
   const result: string = (await execute(`swfdump ${swf}`)) as any;
   const regexIds = /\[.*\]\s*[0-9]*\s*(.*) defines id ([0-9]*)/gm;
   const regexNames = /exports ([0-9]*) as "(.*)"/gm;
 
-  const images: { id: number; type: string; files: any[] }[] = [];
+  const arr: [string, number][] = [];
   const map = new Map<number, string[]>();
 
-  let match: any = regexIds.exec(result);
-  let matchNames: any = regexNames.exec(result);
+  let match: any;
 
-  while (match && matchNames) {
-    const id = +match[2];
-    const type = match[1];
+  do {
+    match = regexIds.exec(result);
 
-    if (matchNames) {
-      const key = +matchNames[1];
+    if (match) {
+      arr.push([match[1], Number(match[2])]);
+    }
+  } while (match);
+
+  do {
+    match = regexNames.exec(result);
+
+    if (match) {
+      const key = Number(match[1]);
       const current = map.get(key);
 
-      if (current && map.has(key)) {
-        map.set(key, [...current, matchNames[2]]);
+      if (current) {
+        map.set(key, [...current, match[2]]);
       } else {
-        map.set(key, [matchNames[2]]);
+        map.set(key, [match[2]]);
       }
     }
+  } while (match);
 
-    images.push({ id, type, files: map.get(id) ?? [] });
-
-    match = regexIds.exec(result);
-    matchNames = regexNames.exec(result);
-  }
-
-  for (let i = 0; i < images.length; i++) {
-    const { id, type, files = [] } = images[i];
+  for (let i = 0; i < arr.length; i++) {
+    const [type, id] = arr[i];
+    const files = map.get(id) ?? [];
 
     for (let j = 0; j < files.length; j++) {
       const file = files[j];

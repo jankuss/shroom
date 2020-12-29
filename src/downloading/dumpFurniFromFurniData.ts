@@ -45,12 +45,10 @@ export async function dumpFurniFromFurniData(
       try {
         await downloadFurni(dcrUrl, revision?.toString(), name, folder);
 
-        dispatch({ type: "FURNI_ASSETS_DOWNLOADED_COUNT" });
-      } catch (e) {
-        console.log("downloadFurni error: ", e.message);
-      }
+        dispatch({ type: "FURNI_ASSETS_DOWNLOAD_COUNT" });
+      } catch (e) {}
     },
-    { concurrency: 5 } // Safe concurrency to avoid 422 from sulake
+    { concurrency: Infinity } // Safe concurrency to avoid 422 from sulake
   );
 
   await Bluebird.map(
@@ -62,7 +60,7 @@ export async function dumpFurniFromFurniData(
         value.revision != null ? value.revision[0] : undefined;
 
       try {
-        await dumpFurni(dcrUrl, revision?.toString(), name, folder);
+        await dumpFurni(revision?.toString(), name, folder);
 
         dispatch({
           type: "FURNI_ASSETS_PROGRESS_SUCCESS",
@@ -76,8 +74,6 @@ export async function dumpFurniFromFurniData(
         });
       }
     },
-    { concurrency: 15 } // Safe concurrency to avoid CPU bottleneck
+    { concurrency: 30 } // Safe concurrency to avoid CPU bottleneck
   );
-
-  console.timeEnd("downloadAndDump");
 }

@@ -5,6 +5,7 @@ import * as path from "path";
 import { dumpFigureLibraries } from "./dumpFigureLibraries";
 import { dumpFurniFromFurniData } from "./dumpFurniFromFurniData";
 import { createOffsetSnapshot } from "../objects/avatar/util";
+import Bluebird from "bluebird";
 
 export type Steps = {
   figureMap: boolean;
@@ -40,6 +41,7 @@ export type Action =
   | { type: "FURNI_ASSETS_COUNT"; payload: number }
   | { type: "FURNI_ASSETS_DOWNLOAD_COUNT" }
   | { type: "FIGURE_ASSETS_COUNT"; payload: number }
+  | { type: "FIGURE_ASSETS_DOWNLOAD_COUNT" }
   | { type: "STARTED" };
 
 export interface State {
@@ -55,6 +57,7 @@ export interface State {
   furniAssetsDownloadCount?: number;
   figureAssetsCount?: number;
   figureAssetsCompletedCount?: number;
+  figureAssetsDownloadCount?: number;
   started: boolean;
 }
 
@@ -123,48 +126,71 @@ export async function run({
     dispatch({ type: "FURNI_DATA_SUCCESS" });
   }
 
-  if (steps.figureAssets) {
-    dispatch({ type: "FIGURE_ASSETS_LOADING" });
+  const figureAssetsJob = () =>
+    new Promise(async (resolve, reject) => {
+      if (steps.figureAssets) {
+        dispatch({ type: "FIGURE_ASSETS_LOADING" });
 
-    const gordonUrl = figureMapUrl.split("/").slice(0, -1).join("/");
-    const figureFolder = path.join(libraryFolder, "figure");
-    await fs.mkdir(figureFolder, { recursive: true });
+        const gordonUrl = figureMapUrl.split("/").slice(0, -1).join("/");
+        const figureFolder = path.join(libraryFolder, "figure");
+        await fs.mkdir(figureFolder, { recursive: true });
 
-    await dumpFigureLibraries(
-      makeAbsolute(gordonUrl),
-      figureMapString,
-      figureFolder,
-      dispatch
-    );
-
-    const snapshot = await createOffsetSnapshot(
-      figureMapString,
-      async (name) => {
-        const file = await fs.readFile(
-          path.join(figureFolder, `${name}/${name}_manifest.bin`)
+        await dumpFigureLibraries(
+          makeAbsolute(gordonUrl),
+          figureMapString,
+          figureFolder,
+          dispatch
         );
 
-        return file.toString("utf-8");
+        const snapshot = await createOffsetSnapshot(
+          figureMapString,
+          async (name) => {
+            const file = await fs.readFile(
+              path.join(figureFolder, `${name}/${name}_manifest.bin`)
+            );
+
+            return file.toString("utf-8");
+          }
+        );
+
+        const offsetsPath = path.join(libraryFolder, "offsets.json");
+
+        await fs.writeFile(offsetsPath, snapshot);
+
+        dispatch({ type: "FIGURE_ASSETS_SUCCESS" });
+
+        resolve(true);
       }
-    );
+    });
 
-    const offsetsPath = path.join(libraryFolder, "offsets.json");
+  const furniAssetsJob = () =>
+    new Promise(async (resolve, reject) => {
+      if (steps.furniAssets) {
+        dispatch({ type: "FURNI_ASSETS_LOADING" });
 
-    await fs.writeFile(offsetsPath, snapshot);
+        const furniFolder = path.join(libraryFolder, "hof_furni");
 
-    dispatch({ type: "FIGURE_ASSETS_SUCCESS" });
-  }
+        await fs.mkdir(furniFolder, { recursive: true });
+        await dumpFurniFromFurniData(
+          hofFurniUrl,
+          furniData,
+          furniFolder,
+          dispatch
+        );
 
-  if (steps.furniAssets) {
-    dispatch({ type: "FURNI_ASSETS_LOADING" });
+        dispatch({ type: "FURNI_ASSETS_SUCCESS" });
 
-    const furniFolder = path.join(libraryFolder, "hof_furni");
-    await fs.mkdir(furniFolder, { recursive: true });
-    await dumpFurniFromFurniData(hofFurniUrl, furniData, furniFolder, dispatch);
+        resolve(true);
+      }
+    });
 
-    dispatch({ type: "FURNI_ASSETS_SUCCESS" });
-    console.log("finalizou");
-  }
+  await Bluebird.map(
+    [figureAssetsJob, furniAssetsJob],
+    (job) => {
+      job();
+    },
+    { concurrency: Infinity }
+  );
 }
 
 export function reducer(state: State, action: Action): State {
@@ -277,6 +303,12 @@ export function reducer(state: State, action: Action): State {
       return {
         ...state,
         figureAssetsCount: action.payload,
+      };
+
+    case "FIGURE_ASSETS_DOWNLOAD_COUNT":
+      return {
+        ...state,
+        figureAssetsDownloadCount: (state?.figureAssetsDownloadCount ?? 0) + 1,
       };
 
     default:

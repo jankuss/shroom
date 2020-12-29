@@ -143,18 +143,32 @@ export const App = ({
 
   const renderFigureAssetsExtra = () => {
     if (state.figureAssets !== "runs") return;
-    if (!state.lastFigureAsset) return;
     if (!state.figureAssetsCount) return;
-    if (!state.figureAssetsCompletedCount) return;
 
     return (
-      <ProgressDisplay
-        total={state.figureAssetsCount}
-        current={state.figureAssetsCompletedCount}
-        showPercentage
-      >
-        Processed: <Text bold>{state.lastFigureAsset}</Text>
-      </ProgressDisplay>
+      <>
+        <ProgressDisplay
+          total={state.figureAssetsCount}
+          current={state.figureAssetsDownloadCount ?? 0}
+        >
+          Downloaded figures:{" "}
+          <Text bold>
+            {state.figureAssetsDownloadCount}/{state.figureAssetsCount}
+          </Text>
+        </ProgressDisplay>
+
+        <Newline />
+
+        {state.lastFigureAsset && (
+          <ProgressDisplay
+            total={state.figureAssetsCount}
+            current={state.figureAssetsCompletedCount ?? 0}
+            showPercentage
+          >
+            Processed: <Text bold>{state.lastFigureAsset}</Text>
+          </ProgressDisplay>
+        )}
+      </>
     );
   };
 
