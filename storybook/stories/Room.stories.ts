@@ -368,53 +368,77 @@ export function LandscapeColor() {
   });
 }
 
-export function FunkyRoomShape() {
+export function RoomModelTest1() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
-      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
-      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
-      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
-      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
-      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
-      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
-      xxxxxxxxxxxxxxxxxxxxxxx000000000xx
-      xxxxxxxxxxxxxxxxxxxxxxxx00000000xx
-      xxxxxxxxxxxxxxxxxxxxxxxxx0000000xx
-      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
-      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
-      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
-      xxxxxxxxxxxxxxxxxxxx000000000xxxxx
-      xxxxxxxxxxxxxxxxxxxx000000000xxxxx
-      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
-      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
-      xxxxxxxxxxxxxxxxxxxxx000000000000x
-      xxxxxxxxxxxxxxxxxxxxx000000000000x
-      xxxxxxxxxxxxxxxxxxxxx000000000000x
-      x00000000xxxxxxxxxxxx000000000000x
-      x00000000xxxxxxxxxxxx0000000000000
-      x00000000xxxxxxxxxxxx0000000000000
-      x00000000xxxxxxxxxxxx000000000000x
-      x00000000xxxxxxxxxxxx000000000000x
-      x00000000xxxxxxxxxxxx000000000000x
-      x00000000xxxxxxxxxxxx000000000000x
-      x00000000xxxxxxxxxxxx00000000xxxxx
-      xxxx00xxxxxxxxxxxxxxx00000000xxxxx
-      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
-      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
-      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
-      xxxxxxxxxxxxxxxxxxxxx00000000xxxxx
-      xxxx0xxxxxxxxxxxxxxxxx00xxxxxxxxxx
-      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      xxxxxxxxxxxxxxxxxxx
+      xxxxxxx222222222222
+      xxxxxxx222222222222
+      xxxxxxx222222222222
+      xxxxxxx222222222222
+      xxxxxxx222222222222
+      xxxxxxx222222222222
+      xxxxxxx22222222xxxx
+      xxxxxxx11111111xxxx
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x2222xx11111111xxxx
+      x2222xx00000000xxxx
+      x2222xx000000000000
+      x2222xx000000000000
+      x2222xx000000000000
+      x2222xx000000000000
+      22222xx000000000000
+      x2222xx000000000000
+      xxxxxxxxxxxxxxxxxxx
+      `,
+    });
+
+    application.stage.addChild(RoomCamera.forScreen(room));
+  });
+}
+
+export function RoomModelTest2() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+      xxxxxxxxxxxxxxxxxxxx
+      x222221111111111111x
+      x222221111111111111x
+      2222221111111111111x
+      x222221111111111111x
+      x222221111111111111x
+      x222221111111111111x
+      xxxxxxxx1111xxxxxxxx
+      xxxxxxxx0000xxxxxxxx
+      x000000x0000x000000x
+      x000000x0000x000000x
+      x00000000000x000000x
+      x00000000000x000000x
+      x000000000000000000x
+      x000000000000000000x
+      xxxxxxxx00000000000x
+      x000000x00000000000x
+      x000000x0000xxxxxxxx
+      x00000000000x000000x
+      x00000000000x000000x
+      x00000000000x000000x
+      x00000000000x000000x
+      xxxxxxxx0000x000000x
+      x000000x0000x000000x
+      x000000x0000x000000x
+      x000000000000000000x
+      x000000000000000000x
+      x000000000000000000x
+      x000000000000000000x
+      xxxxxxxxxxxxxxxxxxxx
       `,
     });
 

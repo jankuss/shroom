@@ -57,6 +57,9 @@ export function getTileInfo(tiles: TileType[][], x: number, y: number) {
     isTile(rightType) &&
     isTile(type);
 
+  const stairs = getStairs(tiles, x, y);
+  const baseHeight = isTile(type) ? type : undefined;
+
   return {
     rowEdge: leftType === "x" && isTile(type),
     colEdge: topType === "x" && isTile(type),
@@ -65,8 +68,8 @@ export function getTileInfo(tiles: TileType[][], x: number, y: number) {
       isTile(type) &&
       isTile(topType) &&
       isTile(leftType),
-    stairs: getStairs(tiles, x, y),
-    height: isTile(type) ? type : undefined,
+    stairs: stairs,
+    height: baseHeight,
     rowDoor: rowDoor,
   };
 }
