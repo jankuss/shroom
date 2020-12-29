@@ -62,7 +62,6 @@ export function parseTileMap(
 
       const tileInfo = getTileInfo(tilemap, x, y);
       const tileInfoAbove = getTileInfo(tilemap, x, y + 1);
-      const tileInfoRight = getTileInfo(tilemap, x, y);
 
       const wall = wallInfo.getWall(x, y);
 
