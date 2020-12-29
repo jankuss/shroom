@@ -42,11 +42,9 @@ export async function dumpFigureLibraries(
         await fs.writeFile(swfLocation, buffer);
 
         downloadSuccess();
-      } catch (e) {
-        console.log("dumpFigureLibraries error: ", e);
-      }
+      } catch (e) {}
     },
-    { concurrency: Infinity }
+    { concurrency: Infinity } // We can use this limit because if the download get stucked, we will retry it after a short time ;)
   );
 
   await Bluebird.map(
@@ -54,18 +52,18 @@ export async function dumpFigureLibraries(
     async (item) => {
       const id = item["$"].id;
       const fileName = `${id}.swf`;
-      const binFileName = `${id}_manifest.bin`;
+      const manifestFileName = `${id}_manifest.bin`;
 
       const resolvedOutPath = path.resolve(path.join(out, id));
       const swfLocation = path.join(resolvedOutPath, fileName);
-      const binLocation = path.join(resolvedOutPath, binFileName);
+      const manifestFileLocation = path.join(resolvedOutPath, manifestFileName);
 
       const success = () =>
         dispatch({ type: "FIGURE_ASSETS_PROGRESS_SUCCESS", payload: fileName });
 
-      // It will skip the dump process if the swf location have been already created
+      // It will skip the dump process if the manifest file have been already created
       try {
-        await fs.stat(binLocation);
+        await fs.stat(manifestFileLocation);
         return success();
       } catch (e) {}
 
@@ -75,8 +73,8 @@ export async function dumpFigureLibraries(
         preserveFileNameFor: ["bin"],
       });
 
-      success();
+      return success();
     },
-    { concurrency: 30 }
+    { concurrency: 30 } // Safe concurrency to avoid CPU bottleneck
   );
 }

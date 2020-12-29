@@ -10,11 +10,11 @@ export async function fetchFurni(
       ? `${dcrUrl}/${revision}/${name}.swf`
       : `${dcrUrl}/${name}.swf`;
 
-  const blob = await tryFetchBuffer(url);
+  const buffer = await tryFetchBuffer(url);
 
   return {
     revision,
     name,
-    blob,
+    buffer,
   };
 }

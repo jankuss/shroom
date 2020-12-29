@@ -1,7 +1,7 @@
-import { fetchFurni } from "./fetchFurni";
+import * as path from "path";
 
 import { promises as fs } from "fs";
-import * as path from "path";
+import { fetchFurni } from "./fetchFurni";
 import { extractSwf } from "./extractSwf";
 
 export const downloadFurni = async (
@@ -18,7 +18,7 @@ export const downloadFurni = async (
     ? path.join(folder, revision)
     : path.join(folder);
 
-  // This code will act like a cache, it will skip download if file is already downloaded.
+  // This code will act like a cache, it will skip the download if the file have been already downloaded.
   try {
     const downloadedSwfFile = path.resolve(path.join(`${furniDirectory}.swf`));
     await fs.stat(downloadedSwfFile);
@@ -26,13 +26,13 @@ export const downloadFurni = async (
   } catch (e) {}
 
   try {
-    const data = await fetchFurni(dcrUrl, revision, name);
+    const furniture = await fetchFurni(dcrUrl, revision, name);
 
     await fs.mkdir(furniDirectory, { recursive: true });
 
     await fs.writeFile(
-      path.join(revisionDirectory, `${data.name}.swf`),
-      data.blob,
+      path.join(revisionDirectory, `${furniture.name}.swf`),
+      furniture.buffer,
       "binary"
     );
   } catch (e) {

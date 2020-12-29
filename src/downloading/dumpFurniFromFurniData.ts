@@ -1,4 +1,4 @@
-import Bluebird = require("bluebird");
+import Bluebird from "bluebird";
 import { parseStringPromise } from "xml2js";
 import { downloadFurni, dumpFurni } from "./dumpFurni";
 import { Action } from "./state";
@@ -9,8 +9,6 @@ export async function dumpFurniFromFurniData(
   folder: string,
   dispatch: (action: Action) => void
 ) {
-  console.time("downloadAndDump");
-
   const data = await parseStringPromise(furniData);
 
   const furniTypes: any[] = data.furnidata.roomitemtypes[0].furnitype;
@@ -48,7 +46,7 @@ export async function dumpFurniFromFurniData(
         dispatch({ type: "FURNI_ASSETS_DOWNLOAD_COUNT" });
       } catch (e) {}
     },
-    { concurrency: Infinity } // Safe concurrency to avoid 422 from sulake
+    { concurrency: Infinity } // We can use this limit because if the download get stucked, we will retry it after a short time ;)
   );
 
   await Bluebird.map(
