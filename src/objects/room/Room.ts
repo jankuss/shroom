@@ -35,6 +35,23 @@ export interface Dependencies {
 
 type TileMap = TileType[][] | string;
 
+interface CreateOptions {
+  /**
+   * A tilemap string or 2d-array. This should have the following format
+   * ```
+   * xxxx  <- Upper padding
+   * x000  <- Tiles
+   * x000
+   * x000
+   *
+   * |
+   * |
+   * Side padding
+   * ```
+   */
+  tilemap: TileMap;
+}
+
 export class Room
   extends PIXI.Container
   implements IRoomGeometry, IRoomObjectContainer, ITileMap {
@@ -98,158 +115,6 @@ export class Room
       };
     },
   };
-
-  public get roomObjects() {
-    return this._roomObjectContainer.roomObjects;
-  }
-
-  public get hideWalls() {
-    return this._hideWalls;
-  }
-
-  public set hideWalls(value) {
-    this._hideWalls = value;
-    this._updateTiles();
-  }
-
-  public get hideFloor() {
-    return this._hideFloor;
-  }
-
-  public set hideFloor(value) {
-    this._hideFloor = value;
-    this._updateTiles();
-  }
-
-  public get wallHeight() {
-    return this._wallHeight;
-  }
-
-  public set wallHeight(value) {
-    this._wallHeight = value;
-    this._updateWallHeight();
-  }
-
-  public get wallHeightWithZ() {
-    return this.wallHeight + this._largestDiff * 32;
-  }
-
-  public get tileHeight() {
-    return this._tileHeight;
-  }
-
-  public set tileHeight(value) {
-    this._tileHeight = value;
-    this._updateTileHeight();
-  }
-
-  public get wallDepth() {
-    return this._wallDepth;
-  }
-
-  public set wallDepth(value) {
-    this._wallDepth = value;
-    this._updateWallDepth();
-  }
-
-  private _updateWallDepth() {
-    this._updatePosition();
-    this.visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.wallDepth = this.wallDepth;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _updateWallHeight() {
-    this._updatePosition();
-    this.visualization.updateRoom(this);
-    this.visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.wallHeight = this.wallHeightWithZ;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _updateTileHeight() {
-    this._updatePosition();
-    this.visualization.disableCache();
-    this._floor.forEach((floor) => {
-      floor.tileHeight = this.tileHeight;
-    });
-    this._walls.forEach((wall) => {
-      wall.tileHeight = this.tileHeight;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _getObjectPositionWithOffset(roomX: number, roomY: number) {
-    return {
-      x: roomX + this._positionOffsets.x,
-      y: roomY + this._positionOffsets.y,
-    };
-  }
-
-  private _getTilePositionWithOffset(roomX: number, roomY: number) {
-    return {
-      x: roomX + this._wallOffsets.x,
-      y: roomY + this._wallOffsets.y,
-    };
-  }
-
-  getTileAtPosition(roomX: number, roomY: number) {
-    const { x, y } = this._getObjectPositionWithOffset(roomX, roomY);
-
-    const row = this.parsedTileMap[y];
-    if (row == null) return;
-    if (row[x] == null) return;
-
-    return row[x];
-  }
-
-  get onTileClick() {
-    return this._onTileClick;
-  }
-
-  set onTileClick(value) {
-    this._onTileClick = value;
-  }
-
-  get wallTexture() {
-    return this._wallTexture;
-  }
-
-  set wallTexture(value) {
-    this._wallTexture = value;
-    this._loadWallTextures();
-  }
-
-  get floorTexture() {
-    return this._floorTexture;
-  }
-
-  set floorTexture(value) {
-    this._floorTexture = value;
-    this._loadFloorTextures();
-  }
-
-  get wallColor() {
-    return this._wallColor;
-  }
-
-  set wallColor(value) {
-    this._wallColor = value;
-    this._updateTextures();
-  }
-
-  get floorColor() {
-    return this._floorColor;
-  }
-
-  set floorColor(value) {
-    this._floorColor = value;
-    this._updateTextures();
-  }
 
   constructor({
     animationTicker,
@@ -317,12 +182,24 @@ export class Room
     this.addChild(this.visualization);
   }
 
+  /**
+   * Creates a new room.
+   * @param shroom A shroom instance
+   * @param options Room creation options
+   */
+  static create(shroom: Shroom, { tilemap }: CreateOptions) {
+    return new Room({ ...shroom.dependencies, tilemap });
+  }
+
   private _updatePosition() {
     this.visualization.x =
       Math.round(-this.roomBounds.minX / 2) * 2 + this._tileMapBounds.minX;
     this.visualization.y = Math.round(-this.roomBounds.minY / 2) * 2;
   }
 
+  /**
+   * Bounds of the room
+   */
   public get roomBounds() {
     return {
       ...this._tileMapBounds,
@@ -333,10 +210,146 @@ export class Room
     };
   }
 
+  /**
+   * Room objects which are attached to the room.
+   */
+  public get roomObjects() {
+    return this._roomObjectContainer.roomObjects;
+  }
+
+  /**
+   * When set to true, hides the walls
+   */
+  public get hideWalls() {
+    return this._hideWalls;
+  }
+
+  public set hideWalls(value) {
+    this._hideWalls = value;
+    this._updateTiles();
+  }
+
+  /**
+   * When set to true, hide the floor. This will also hide the walls.
+   */
+  public get hideFloor() {
+    return this._hideFloor;
+  }
+
+  public set hideFloor(value) {
+    this._hideFloor = value;
+    this._updateTiles();
+  }
+
+  /**
+   * Height of the walls in the room.
+   */
+  public get wallHeight() {
+    return this._wallHeight;
+  }
+
+  public set wallHeight(value) {
+    this._wallHeight = value;
+    this._updateWallHeight();
+  }
+
+  public get wallHeightWithZ() {
+    return this.wallHeight + this._largestDiff * 32;
+  }
+
+  /**
+   * Height of the tile
+   */
+  public get tileHeight() {
+    return this._tileHeight;
+  }
+
+  public set tileHeight(value) {
+    this._tileHeight = value;
+    this._updateTileHeight();
+  }
+
+  /**
+   * Depth of the wall
+   */
+  public get wallDepth() {
+    return this._wallDepth;
+  }
+
+  public set wallDepth(value) {
+    this._wallDepth = value;
+    this._updateWallDepth();
+  }
+
+  /**
+   * A callback which is called with the tile position when a tile is clicked.
+   */
+  get onTileClick() {
+    return this._onTileClick;
+  }
+
+  set onTileClick(value) {
+    this._onTileClick = value;
+  }
+
+  /**
+   * Texture of the wall.
+   */
+  get wallTexture() {
+    return this._wallTexture;
+  }
+
+  set wallTexture(value) {
+    this._wallTexture = value;
+    this._loadWallTextures();
+  }
+
+  /**
+   * Texture of the floor.
+   */
+  get floorTexture() {
+    return this._floorTexture;
+  }
+
+  set floorTexture(value) {
+    this._floorTexture = value;
+    this._loadFloorTextures();
+  }
+
+  /**
+   * Color of the wall.
+   */
+  get wallColor() {
+    return this._wallColor;
+  }
+
+  set wallColor(value) {
+    this._wallColor = value;
+    this._updateTextures();
+  }
+
+  /**
+   * Color of the floor.
+   */
+  get floorColor() {
+    return this._floorColor;
+  }
+
+  set floorColor(value) {
+    this._floorColor = value;
+    this._updateTextures();
+  }
+
+  /**
+   * Height of the room.
+   */
   public get roomHeight() {
     return this.roomBounds.maxY - this.roomBounds.minY;
   }
 
+  /**
+   * Width of the room.
+   */
   public get roomWidth() {
     return this.roomBounds.maxX - this.roomBounds.minX;
   }
@@ -345,8 +358,52 @@ export class Room
     return this.parsedTileMap;
   }
 
-  static create(shroom: Shroom, { tilemap }: { tilemap: TileMap }) {
-    return new Room({ ...shroom.dependencies, tilemap });
+  private _updateWallDepth() {
+    this._updatePosition();
+    this.visualization.disableCache();
+    this._walls.forEach((wall) => {
+      wall.wallDepth = this.wallDepth;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _updateWallHeight() {
+    this._updatePosition();
+    this.visualization.updateRoom(this);
+    this.visualization.disableCache();
+    this._walls.forEach((wall) => {
+      wall.wallHeight = this.wallHeightWithZ;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _updateTileHeight() {
+    this._updatePosition();
+    this.visualization.disableCache();
+    this._floor.forEach((floor) => {
+      floor.tileHeight = this.tileHeight;
+    });
+    this._walls.forEach((wall) => {
+      wall.tileHeight = this.tileHeight;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _getObjectPositionWithOffset(roomX: number, roomY: number) {
+    return {
+      x: roomX + this._positionOffsets.x,
+      y: roomY + this._positionOffsets.y,
+    };
+  }
+
+  getTileAtPosition(roomX: number, roomY: number) {
+    const { x, y } = this._getObjectPositionWithOffset(roomX, roomY);
+
+    const row = this.parsedTileMap[y];
+    if (row == null) return;
+    if (row[x] == null) return;
+
+    return row[x];
   }
 
   private _loadWallTextures() {
@@ -377,10 +434,18 @@ export class Room
     this.visualization.enableCache();
   }
 
+  /**
+   * Adds and registers a room object to a room.
+   * @param object The room object to attach
+   */
   addRoomObject(object: IRoomObject) {
     this._roomObjectContainer.addRoomObject(object);
   }
 
+  /**
+   * Removes and destroys a room object from the room.
+   * @param object The room object to remove
+   */
   removeRoomObject(object: IRoomObject) {
     this._roomObjectContainer.removeRoomObject(object);
   }
