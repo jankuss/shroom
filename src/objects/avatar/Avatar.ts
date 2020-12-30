@@ -8,6 +8,7 @@ import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
 import { IMoveable } from "../IMoveable";
 import { AvatarAction } from "./enum/AvatarAction";
+import { IScreenPositioned } from "../IScreenPositioned";
 
 interface Options {
   look: string;
@@ -17,7 +18,7 @@ interface Options {
   roomZ: number;
 }
 
-export class Avatar extends RoomObject implements IMoveable {
+export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _avatarSprites: AvatarSprites;
   private _moveAnimation:
     | ObjectAnimation<{ type: "walk"; direction: number } | { type: "move" }>
@@ -162,6 +163,16 @@ export class Avatar extends RoomObject implements IMoveable {
   set actions(value) {
     this._actions = value;
     this._updateAvatarSprites();
+  }
+
+  get screenPosition() {
+    const worldTransform = this._avatarSprites.worldTransform;
+    if (worldTransform == null) return;
+
+    return {
+      x: worldTransform.tx,
+      y: worldTransform.ty,
+    };
   }
 
   clearMovement() {
