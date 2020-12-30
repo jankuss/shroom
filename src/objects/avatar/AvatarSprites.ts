@@ -18,9 +18,9 @@ interface Options {
 }
 
 export class AvatarSprites extends RoomObject {
-  private container: PIXI.Container | undefined;
-  private avatarLoaderResult: AvatarLoaderResult | undefined;
-  private avatarDrawDefinition: AvatarDrawDefinition | undefined;
+  private _container: PIXI.Container | undefined;
+  private _avatarLoaderResult: AvatarLoaderResult | undefined;
+  private _avatarDrawDefinition: AvatarDrawDefinition | undefined;
 
   private _lookOptions: LookOptions | undefined;
   private _nextLookOptions: LookOptions | undefined;
@@ -77,6 +77,10 @@ export class AvatarSprites extends RoomObject {
 
   get y() {
     return this._y;
+  }
+
+  get worldTransform() {
+    return this._container?.worldTransform;
   }
 
   set y(value) {
@@ -157,40 +161,40 @@ export class AvatarSprites extends RoomObject {
   }
 
   private _updateLayerOfCurrentContainer(newLayer: "door" | "tile") {
-    if (this.container == null) return;
-    this.visualization.removeBehindWallChild(this.container);
-    this.visualization.removeContainerChild(this.container);
+    if (this._container == null) return;
+    this.visualization.removeBehindWallChild(this._container);
+    this.visualization.removeContainerChild(this._container);
 
     if (newLayer === "door") {
-      this.visualization.addBehindWallChild(this.container);
+      this.visualization.addBehindWallChild(this._container);
       return;
     }
 
-    this.visualization.addContainerChild(this.container);
+    this.visualization.addContainerChild(this._container);
   }
 
   private _positionChanged() {
-    if (this.avatarDrawDefinition == null) return;
-    this._updatePosition(this.avatarDrawDefinition);
+    if (this._avatarDrawDefinition == null) return;
+    this._updatePosition(this._avatarDrawDefinition);
   }
 
   private _updatePosition(definition: AvatarDrawDefinition) {
-    if (this.container == null) return;
+    if (this._container == null) return;
 
-    this.container.x = this.x + definition.offsetX;
-    this.container.y = this.y + definition.offsetY;
-    this.container.zIndex = this.zIndex;
+    this._container.x = this.x + definition.offsetX;
+    this._container.y = this.y + definition.offsetY;
+    this._container.zIndex = this.zIndex;
   }
 
   private _updateSprites() {
-    if (this.avatarLoaderResult == null) return;
+    if (this._avatarLoaderResult == null) return;
     if (this._lookOptions == null) return;
 
-    const definition = this.avatarLoaderResult.getDrawDefinition(
+    const definition = this._avatarLoaderResult.getDrawDefinition(
       this._lookOptions
     );
 
-    this.avatarDrawDefinition = definition;
+    this._avatarDrawDefinition = definition;
 
     this._updateSpritesWithAvatarDrawDefinition(definition, this.currentFrame);
     this._updatePosition(definition);
@@ -208,9 +212,9 @@ export class AvatarSprites extends RoomObject {
       value.visible = false;
       value.ignore = true;
     });
-    this.container?.destroy();
+    this._container?.destroy();
 
-    this.container = new PIXI.Container();
+    this._container = new PIXI.Container();
 
     drawDefinition.parts.forEach((part) => {
       const frame = currentFrame % part.assets.length;
@@ -235,16 +239,16 @@ export class AvatarSprites extends RoomObject {
       sprite.ignore = false;
 
       this._sprites.set(asset.fileId, sprite);
-      this.container?.addChild(sprite);
+      this._container?.addChild(sprite);
     });
   }
 
   private createAsset(part: AvatarDrawPart, asset: AvatarAsset) {
-    if (this.avatarLoaderResult == null)
+    if (this._avatarLoaderResult == null)
       throw new Error(
         "Cant create asset when avatar loader result not present"
       );
-    const texture = this.avatarLoaderResult.getTexture(asset.fileId);
+    const texture = this._avatarLoaderResult.getTexture(asset.fileId);
 
     if (texture == null) return;
 
@@ -284,7 +288,7 @@ export class AvatarSprites extends RoomObject {
         .then((result) => {
           if (requestId !== this._updateId) return;
 
-          this.avatarLoaderResult = result;
+          this._avatarLoaderResult = result;
 
           this._lookOptions = lookOptions;
           this._nextLookOptions = undefined;
@@ -295,13 +299,13 @@ export class AvatarSprites extends RoomObject {
   }
 
   private _updateFrame() {
-    if (this.avatarDrawDefinition == null) return;
+    if (this._avatarDrawDefinition == null) return;
 
     this._updateSpritesWithAvatarDrawDefinition(
-      this.avatarDrawDefinition,
+      this._avatarDrawDefinition,
       this.currentFrame
     );
-    this._updatePosition(this.avatarDrawDefinition);
+    this._updatePosition(this._avatarDrawDefinition);
     this._updateLayerOfCurrentContainer(this.layer);
   }
 
@@ -322,6 +326,6 @@ export class AvatarSprites extends RoomObject {
   }
 
   destroyed(): void {
-    this.container?.destroy();
+    this._container?.destroy();
   }
 }

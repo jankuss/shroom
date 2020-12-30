@@ -8,6 +8,7 @@ import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
 import { IMoveable } from "../IMoveable";
 import { AvatarAction } from "./enum/AvatarAction";
+import { IScreenPositioned } from "../IScreenPositioned";
 
 interface Options {
   look: string;
@@ -17,7 +18,7 @@ interface Options {
   roomZ: number;
 }
 
-export class Avatar extends RoomObject implements IMoveable {
+export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _avatarSprites: AvatarSprites;
   private _moveAnimation:
     | ObjectAnimation<{ type: "walk"; direction: number } | { type: "move" }>
@@ -164,6 +165,16 @@ export class Avatar extends RoomObject implements IMoveable {
     this._updateAvatarSprites();
   }
 
+  get screenPosition() {
+    const worldTransform = this._avatarSprites.worldTransform;
+    if (worldTransform == null) return;
+
+    return {
+      x: worldTransform.tx,
+      y: worldTransform.ty,
+    };
+  }
+
   clearMovement() {
     const current = this._moveAnimation?.clear();
 
@@ -300,6 +311,9 @@ export class Avatar extends RoomObject implements IMoveable {
     return getZOrder(roomX, roomY, roomZ) + 1;
   }
 
+  /**
+   * @deprecated Use `screenPosition` instead. This will be the actual position on the screen.
+   */
   getScreenPosition() {
     return {
       x: this._avatarSprites.x,
