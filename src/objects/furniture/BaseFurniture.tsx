@@ -1,8 +1,7 @@
 import * as PIXI from "pixi.js";
-import { ClickHandler } from "../ClickHandler";
-import { HitEvent } from "../../interfaces/IHitDetection";
-import { HitSprite } from "../hitdetection/HitSprite";
 
+import { ClickHandler } from "../hitdetection/ClickHandler";
+import { HitSprite } from "../hitdetection/HitSprite";
 import { RoomObject } from "../RoomObject";
 import { DrawPart } from "./util/DrawDefinition";
 import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";

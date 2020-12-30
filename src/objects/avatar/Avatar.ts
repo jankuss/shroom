@@ -4,11 +4,11 @@ import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { AvatarSprites } from "./AvatarSprites";
 import { LookOptions } from "./util/createLookServer";
-import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
+import { ObjectAnimation } from "../animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
-import { IMoveable } from "../IMoveable";
+import { IMoveable } from "../interfaces/IMoveable";
 import { AvatarAction } from "./enum/AvatarAction";
-import { IScreenPositioned } from "../IScreenPositioned";
+import { IScreenPositioned } from "../interfaces/IScreenPositioned";
 
 export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _avatarSprites: AvatarSprites;

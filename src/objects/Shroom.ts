@@ -1,8 +1,8 @@
 import { IConfiguration } from "../interfaces/IConfiguration";
-import { AnimationTicker } from "./AnimationTicker";
+import { AnimationTicker } from "./animation/AnimationTicker";
 import { AvatarLoader } from "./avatar/AvatarLoader";
 import { FurnitureLoader } from "./furniture/FurnitureLoader";
-import { FurnitureData } from "./FurnitureData";
+import { FurnitureData } from "./furniture/FurnitureData";
 import { HitDetection } from "./hitdetection/HitDetection";
 import { Dependencies } from "./room/Room";
 

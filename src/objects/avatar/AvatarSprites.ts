@@ -7,7 +7,7 @@ import {
 } from "./util/getAvatarDrawDefinition";
 import { LookOptions } from "./util/createLookServer";
 import { AvatarLoaderResult } from "../../interfaces/IAvatarLoader";
-import { ClickHandler } from "../ClickHandler";
+import { ClickHandler } from "../hitdetection/ClickHandler";
 import { HitSprite } from "../hitdetection/HitSprite";
 import { isSetEqual } from "../../util/isSetEqual";
 
