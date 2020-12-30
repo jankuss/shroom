@@ -311,6 +311,9 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     return getZOrder(roomX, roomY, roomZ) + 1;
   }
 
+  /**
+   * @deprecated Use `screenPosition` instead. This will be the actual position on the screen.
+   */
   getScreenPosition() {
     return {
       x: this._avatarSprites.x,
