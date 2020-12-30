@@ -12,6 +12,7 @@ import { HitTexture } from "../hitdetection/HitTexture";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 import { HighlightFilter } from "./filter/HighlightFilter";
 import { FurnitureFetch } from "../../interfaces/IFurnitureLoader";
+import { getDirectionForFurniture } from "./util/getDirectionForFurniture";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -255,7 +256,10 @@ export class BaseFurniture
   ) {
     this.destroySprites();
 
-    const { parts } = loadFurniResult.getDrawDefinition(direction, animation);
+    const { parts } = loadFurniResult.getDrawDefinition(
+      getDirectionForFurniture(direction, loadFurniResult.directions),
+      animation
+    );
 
     if (animation != null) {
       this.cancelTicker = this.animationTicker.subscribe((frame) =>
