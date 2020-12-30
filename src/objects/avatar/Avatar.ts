@@ -10,14 +10,6 @@ import { IMoveable } from "../IMoveable";
 import { AvatarAction } from "./enum/AvatarAction";
 import { IScreenPositioned } from "../IScreenPositioned";
 
-interface Options {
-  look: string;
-  direction: number;
-  roomX: number;
-  roomY: number;
-  roomZ: number;
-}
-
 export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _avatarSprites: AvatarSprites;
   private _moveAnimation:
@@ -42,6 +34,25 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _actions: Set<AvatarAction> = new Set();
   private _fx: { type: "dance"; id: string } | undefined;
 
+  constructor({ look, roomX, roomY, roomZ, direction }: Options) {
+    super();
+
+    this._direction = direction;
+    this._look = look;
+    this._roomX = roomX;
+    this._roomY = roomY;
+    this._roomZ = roomZ;
+
+    this._avatarSprites = new AvatarSprites({
+      look: this._getCurrentLookOptions(),
+      zIndex: this._calculateZIndex(),
+      position: { x: 0, y: 0 },
+    });
+  }
+
+  /**
+   * Set this with a callback if you want to capture clicks on the Avatar.
+   */
   public get onClick() {
     return this._avatarSprites.onClick;
   }
@@ -50,6 +61,9 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._avatarSprites.onClick = value;
   }
 
+  /**
+   * Set this with a callback if you want to capture double clicks on the Avatar.
+   */
   public get onDoubleClick() {
     return this._avatarSprites.onDoubleClick;
   }
@@ -76,22 +90,19 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     }
   }
 
-  constructor({ look, roomX, roomY, roomZ, direction }: Options) {
-    super();
-
-    this._direction = direction;
-    this._look = look;
-    this._roomX = roomX;
-    this._roomY = roomY;
-    this._roomZ = roomZ;
-
-    this._avatarSprites = new AvatarSprites({
-      look: this._getCurrentLookOptions(),
-      zIndex: this._calculateZIndex(),
-      position: { x: 0, y: 0 },
-    });
-  }
-
+  /**
+   * The x position of the avatar in the room.
+   * The y-Axis is marked in the following graphic:
+   *
+   * ```
+   *    |
+   *    |
+   *    |
+   *   / \
+   *  /   \   <- x-Axis
+   * /     \
+   * ```
+   */
   get roomX() {
     return this._roomX;
   }
@@ -101,6 +112,19 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updatePosition();
   }
 
+  /**
+   * The y position of the avatar in the room.
+   * The y-Axis is marked in the following graphic:
+   *
+   * ```
+   *              |
+   *              |
+   *              |
+   *             / \
+   * y-Axis ->  /   \
+   *           /     \
+   * ```
+   */
   get roomY() {
     return this._roomY;
   }
@@ -110,6 +134,19 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updatePosition();
   }
 
+  /**
+   * The z position of the avatar in the room.
+   * The z-Axis is marked in the following graphic:
+   *
+   * ```
+   *              |
+   *   z-Axis ->  |
+   *              |
+   *             / \
+   *            /   \
+   *           /     \
+   * ```
+   */
   get roomZ() {
     return this._roomZ;
   }
@@ -119,6 +156,10 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updatePosition();
   }
 
+  /**
+   * Sets the item of the user. Note that this won't have an effect if you don't supply
+   * an action which supports items. These are usually `CarryItem` and `UseItem`.
+   */
   get item() {
     return this._item;
   }
@@ -128,15 +169,22 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updateAvatarSprites();
   }
 
-  get drinking() {
-    return this._drinking;
-  }
-
-  set drinking(value) {
-    this._drinking = value;
-    this._updateAvatarSprites();
-  }
-
+  /**
+   * Sets the direction of the avatar. Following numbers map to the
+   * following directions of the avatar:
+   *
+   * ```
+   *              x-Axis
+   *          x--------------
+   *          |
+   *          |   7  0  1
+   *          |
+   *  y-Axis  |   6  x  2
+   *          |
+   *          |   5  4  3
+   *
+   * ```
+   */
   get direction() {
     return this._direction;
   }
@@ -147,6 +195,11 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updateAvatarSprites();
   }
 
+  /**
+   * If set to true, the avatar will be waving. You can
+   * achieve the same behavior by adding the wave action manually
+   * through `addAction`.
+   */
   get waving() {
     return this._waving;
   }
@@ -156,6 +209,9 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updateAvatarSprites();
   }
 
+  /**
+   * The active actions of the avatar.
+   */
   get actions() {
     return this._actions;
   }
@@ -165,6 +221,10 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updateAvatarSprites();
   }
 
+  /**
+   * The apparent position of the avatar on the screen. This is useful
+   * for placing UI relative to the user.
+   */
   get screenPosition() {
     const worldTransform = this._avatarSprites.worldTransform;
     if (worldTransform == null) return;
@@ -175,6 +235,9 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     };
   }
 
+  /**
+   * Clears the enqueued movement of the avatar.
+   */
   clearMovement() {
     const current = this._moveAnimation?.clear();
 
@@ -259,6 +322,16 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updateAvatarSprites();
   }
 
+  /**
+   * Walk the user to a position. This will trigger the walking animation, change the direction
+   * and smoothly move the user to its new position. Note that you have to implement
+   * your own pathfinding logic on top of it.
+   *
+   * @param roomX New x-Position
+   * @param roomY New y-Position
+   * @param roomZ New z-Position
+   * @param options Optionally specify the direction of user movement
+   */
   walk(
     roomX: number,
     roomY: number,
@@ -279,6 +352,14 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._roomZ = roomZ;
   }
 
+  /**
+   * Move the user to a new position. This will smoothly animate the user to the
+   * specified position.
+   *
+   * @param roomX New x-Position
+   * @param roomY New y-Position
+   * @param roomZ New z-Position
+   */
   move(roomX: number, roomY: number, roomZ: number) {
     this._moveAnimation?.move(
       { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
@@ -379,10 +460,18 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     );
   }
 
+  /**
+   * Make an action active.
+   * @param action The action to add
+   */
   addAction(action: AvatarAction) {
     this.actions = new Set(this._actions).add(action);
   }
 
+  /**
+   * Remove an action from the active actions.
+   * @param action The action to remove
+   */
   removeAction(action: AvatarAction) {
     const newSet = new Set(this._actions);
     newSet.delete(action);
@@ -390,6 +479,10 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this.actions = newSet;
   }
 
+  /**
+   * Check if an action is active.
+   * @param action The action to check
+   */
   hasAction(action: AvatarAction) {
     return this.actions.has(action);
   }
@@ -401,4 +494,68 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
       this._cancelAnimation();
     }
   }
+}
+
+interface Options {
+  /** Look of the avatar */
+  look: string;
+  /**
+   * Direction of the avatar. Following numbers map to the
+   * following directions of the avatar:
+   *
+   * ```
+   *              x-Axis
+   *          x--------------
+   *          |
+   *          |   7  0  1
+   *          |
+   *  y-Axis  |   6  x  2
+   *          |
+   *          |   5  4  3
+   *
+   * ```
+   */
+  direction: number;
+  /**
+   * The x position of the avatar in the room.
+   * The y-Axis is marked in the following graphic:
+   *
+   * ```
+   *    |
+   *    |
+   *    |
+   *   / \
+   *  /   \   <- x-Axis
+   * /     \
+   * ```
+   */
+  roomX: number;
+  /**
+   * The y position of the avatar in the room.
+   * The y-Axis is marked in the following graphic:
+   *
+   * ```
+   *              |
+   *              |
+   *              |
+   *             / \
+   * y-Axis ->  /   \
+   *           /     \
+   * ```
+   */
+  roomY: number;
+  /**
+   * The z position of the avatar in the room.
+   * The z-Axis is marked in the following graphic:
+   *
+   * ```
+   *              |
+   *   z-Axis ->  |
+   *              |
+   *             / \
+   *            /   \
+   *           /     \
+   * ```
+   */
+  roomZ: number;
 }
