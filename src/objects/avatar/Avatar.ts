@@ -25,7 +25,6 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _waving: boolean = false;
   private _direction: number = 0;
   private _item: string | number | undefined;
-  private _drinking: boolean = false;
   private _look: string;
   private _roomX: number = 0;
   private _roomY: number = 0;
