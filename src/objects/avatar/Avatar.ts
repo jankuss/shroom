@@ -496,12 +496,13 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   }
 }
 
-interface Options {
+interface Options extends RoomPosition {
   /** Look of the avatar */
   look: string;
   /**
    * Direction of the avatar. Following numbers map to the
-   * following directions of the avatar:
+   * following directions of the avatar. The `x` would be the location of the
+   * avatar and the numbers represent for which number the avatar faces in which direction.
    *
    * ```
    *              x-Axis
@@ -516,46 +517,4 @@ interface Options {
    * ```
    */
   direction: number;
-  /**
-   * The x position of the avatar in the room.
-   * The y-Axis is marked in the following graphic:
-   *
-   * ```
-   *    |
-   *    |
-   *    |
-   *   / \
-   *  /   \   <- x-Axis
-   * /     \
-   * ```
-   */
-  roomX: number;
-  /**
-   * The y position of the avatar in the room.
-   * The y-Axis is marked in the following graphic:
-   *
-   * ```
-   *              |
-   *              |
-   *              |
-   *             / \
-   * y-Axis ->  /   \
-   *           /     \
-   * ```
-   */
-  roomY: number;
-  /**
-   * The z position of the avatar in the room.
-   * The z-Axis is marked in the following graphic:
-   *
-   * ```
-   *              |
-   *   z-Axis ->  |
-   *              |
-   *             / \
-   *            /   \
-   *           /     \
-   * ```
-   */
-  roomZ: number;
 }
