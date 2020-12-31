@@ -11,8 +11,15 @@ import { Layer } from "./util/visualization/parseLayers";
 import { HitTexture } from "../hitdetection/HitTexture";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 import { HighlightFilter } from "./filter/HighlightFilter";
-import { FurnitureFetch } from "../../interfaces/IFurnitureLoader";
+import {
+  FurnitureFetch,
+  IFurnitureLoader,
+} from "../../interfaces/IFurnitureLoader";
 import { getDirectionForFurniture } from "./util/getDirectionForFurniture";
+import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
+import { IHitDetection } from "../../interfaces/IHitDetection";
+import { IRoomContext } from "../../interfaces/IRoomContext";
+import { Shroom } from "../Shroom";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -25,9 +32,22 @@ type SpriteWithStaticOffset = {
   zIndex?: number;
 };
 
-export class BaseFurniture
-  extends RoomObject
-  implements IFurnitureEventHandlers {
+interface BaseFurnitureDependencies {
+  placeholder: PIXI.Texture | undefined;
+  visualization: IFurnitureVisualization;
+  animationTicker: IAnimationTicker;
+  furnitureLoader: IFurnitureLoader;
+  hitDetection: IHitDetection;
+}
+
+export interface BaseFurnitureProps {
+  type: FurnitureFetch;
+  direction: number;
+  animation: string | undefined;
+  getMaskId?: MaskIdGetter;
+}
+
+export class BaseFurniture implements IFurnitureEventHandlers {
   private elements: SpriteWithStaticOffset[] = [];
   private loadFurniResult: LoadFurniResult | undefined;
   private unknownSprite: PIXI.Sprite | undefined;
@@ -49,6 +69,93 @@ export class BaseFurniture
 
   private _highlight: boolean = false;
   private _alpha: number = 1;
+
+  private animatedSprites: {
+    sprites: Map<string, SpriteWithStaticOffset>;
+    frames: string[];
+  }[] = [];
+
+  private _maskNodes: MaskNode[] = [];
+  private _cancelTicker: (() => void) | undefined = undefined;
+  private _getMaskId: MaskIdGetter;
+
+  private _dependencies?: {
+    placeholder: PIXI.Texture | undefined;
+    visualization: IFurnitureVisualization;
+    animationTicker: IAnimationTicker;
+    furnitureLoader: IFurnitureLoader;
+    hitDetection: IHitDetection;
+  };
+
+  public get dependencies() {
+    if (this._dependencies == null) throw new Error("Invalid dependencies");
+
+    return this._dependencies;
+  }
+
+  public set dependencies(value) {
+    this._dependencies = value;
+    this._loadFurniture();
+  }
+
+  public get mounted() {
+    return this._dependencies != null;
+  }
+
+  static fromRoomContext(context: IRoomContext, props: BaseFurnitureProps) {
+    return new BaseFurniture({
+      dependencies: {
+        placeholder: context.configuration.placeholder,
+        animationTicker: context.animationTicker,
+        furnitureLoader: context.furnitureLoader,
+        hitDetection: context.hitDetection,
+        visualization: context.visualization,
+      },
+      ...props,
+    });
+  }
+
+  static fromShroom(
+    shroom: Shroom,
+    visualization: IFurnitureVisualization,
+    props: BaseFurnitureProps
+  ) {
+    return new BaseFurniture({
+      dependencies: {
+        animationTicker: shroom.dependencies.animationTicker,
+        furnitureLoader: shroom.dependencies.furnitureLoader,
+        hitDetection: shroom.dependencies.hitDetection,
+        placeholder: shroom.dependencies.configuration.placeholder,
+        visualization,
+      },
+      ...props,
+    });
+  }
+
+  constructor({
+    type,
+    direction,
+    animation = "0",
+    getMaskId = () => undefined,
+    dependencies,
+  }: {
+    dependencies?: BaseFurnitureDependencies;
+  } & BaseFurnitureProps) {
+    this._direction = direction;
+    this._animation = animation;
+    this._type = type;
+    this._getMaskId = getMaskId;
+
+    if (dependencies != null) {
+      this.dependencies = dependencies;
+    }
+
+    PIXI.Ticker.shared.add(this._onTicker);
+
+    this._loadFurniResultPromise = new Promise<LoadFurniResult>((resolve) => {
+      this._resolveLoadFurniResult = resolve;
+    });
+  }
 
   public get extradata() {
     return this._loadFurniResultPromise.then((result) => {
@@ -147,42 +254,12 @@ export class BaseFurniture
     this._refreshFurniture = true;
   }
 
-  private animatedSprites: {
-    sprites: Map<string, SpriteWithStaticOffset>;
-    frames: string[];
-  }[] = [];
-
-  private _maskNodes: MaskNode[] = [];
-
-  private cancelTicker: (() => void) | undefined = undefined;
-
-  private _getMaskId: MaskIdGetter;
-
   public get maskId() {
     return this._getMaskId;
   }
 
   public set maskId(value) {
     this._getMaskId = value;
-  }
-
-  constructor(
-    type: FurnitureFetch,
-    direction: number,
-    animation: string = "0",
-    getMaskId: MaskIdGetter = () => undefined
-  ) {
-    super();
-    this._direction = direction;
-    this._animation = animation;
-    this._type = type;
-    this._getMaskId = getMaskId;
-
-    PIXI.Ticker.shared.add(this._onTicker);
-
-    this._loadFurniResultPromise = new Promise<LoadFurniResult>((resolve) => {
-      this._resolveLoadFurniResult = resolve;
-    });
   }
 
   private _onTicker = () => {
@@ -228,13 +305,19 @@ export class BaseFurniture
     if (!this.mounted) return;
 
     if (this.loadFurniResult != null) {
-      this.updateSprites(this.loadFurniResult, this.direction, this.animation);
+      this._updateFurnitureSprites(
+        this.loadFurniResult,
+        this.direction,
+        this.animation
+      );
     } else {
-      this.updateUnknown();
+      this._updateUnknown();
     }
   }
 
-  updateUnknown() {
+  _updateUnknown() {
+    if (!this.mounted) return;
+
     this.destroySprites();
 
     this.unknownSprite = new PIXI.Sprite(this._unknownTexture);
@@ -245,15 +328,17 @@ export class BaseFurniture
     this.unknownSprite.y = y;
     this.unknownSprite.zIndex = this.zIndex;
 
-    this.visualization.addContainerChild(this.unknownSprite);
+    this.dependencies.visualization.container.addChild(this.unknownSprite);
     this.elements.push({ sprite: this.unknownSprite, x, y, zIndex: 0 });
   }
 
-  updateSprites(
+  _updateFurnitureSprites(
     loadFurniResult: LoadFurniResult,
     direction: number,
     animation?: string
   ) {
+    if (!this.mounted) return;
+
     this.destroySprites();
 
     const { parts } = loadFurniResult.getDrawDefinition(
@@ -262,8 +347,8 @@ export class BaseFurniture
     );
 
     if (animation != null) {
-      this.cancelTicker = this.animationTicker.subscribe((frame) =>
-        this.setCurrentFrame(frame)
+      this._cancelTicker = this.dependencies.animationTicker.subscribe(
+        (frame) => this._setCurrentFrame(frame)
       );
     }
 
@@ -282,25 +367,30 @@ export class BaseFurniture
           const maskId = this.maskId(this.direction);
 
           if (maskId != null) {
-            this.visualization.addMask(maskId, asset.sprite.sprite);
+            this.dependencies.visualization.addMask(
+              maskId,
+              asset.sprite.sprite
+            );
           }
         } else {
-          this.visualization.addContainerChild(asset.sprite.sprite);
+          this.dependencies.visualization.container.addChild(
+            asset.sprite.sprite
+          );
         }
       } else if (asset.kind === "animated") {
         this.animatedSprites.push(asset);
         const sprites = [...asset.sprites.values()];
 
         sprites.forEach((sprite) => {
-          this.visualization.addContainerChild(sprite.sprite);
+          this.dependencies.visualization.container.addChild(sprite.sprite);
         });
       }
     });
 
-    this.setCurrentFrame(this.animationTicker.current());
+    this._setCurrentFrame(this.dependencies.animationTicker.current());
   }
 
-  private setCurrentFrame(frame: number) {
+  private _setCurrentFrame(frame: number) {
     this.animatedSprites.forEach((animatedSprite) => {
       const previousFrameIndex = (frame - 1) % animatedSprite.frames.length;
       const frameIndex = frame % animatedSprite.frames.length;
@@ -321,7 +411,7 @@ export class BaseFurniture
     });
   }
 
-  private createSprite(
+  private _createSprite(
     asset: Asset,
     layer: Layer | undefined,
     texture: HitTexture,
@@ -342,7 +432,7 @@ export class BaseFurniture
     }
   ): SpriteWithStaticOffset {
     const sprite = new HitSprite({
-      hitDetection: this.hitDetection,
+      hitDetection: this.dependencies.hitDetection,
       mirrored: asset.flipH,
       tag: layer?.tag,
     });
@@ -447,7 +537,7 @@ export class BaseFurniture
         assets != null && assets.length === 1 ? assets[0] : asset;
 
       if (actualAsset != null) {
-        const sprite = this.createSprite(
+        const sprite = this._createSprite(
           actualAsset,
           layer,
           getTexture(actualAsset),
@@ -480,7 +570,7 @@ export class BaseFurniture
       const name = getAssetTextureName(spriteFrame);
       if (sprites.has(name)) return;
 
-      const sprite = this.createSprite(spriteFrame, layer, texture, {
+      const sprite = this._createSprite(spriteFrame, layer, texture, {
         x,
         y,
         zIndex,
@@ -511,10 +601,12 @@ export class BaseFurniture
     this.animatedSprites = [];
   }
 
-  registered(): void {
-    this._unknownTexture = this.configuration.placeholder ?? undefined;
+  private _loadFurniture() {
+    if (!this.mounted) return;
 
-    this.furnitureLoader.loadFurni(this._type).then((result) => {
+    this._unknownTexture = this.dependencies.placeholder ?? undefined;
+
+    this.dependencies.furnitureLoader.loadFurni(this._type).then((result) => {
       this.loadFurniResult = result;
       this._resolveLoadFurniResult(result);
       this._updateFurniture();
@@ -535,13 +627,18 @@ export class BaseFurniture
     return baseAlpha;
   }
 
-  destroyed() {
+  destroy() {
     this.destroySprites();
 
-    if (this.cancelTicker != null) {
-      this.cancelTicker();
+    if (this._cancelTicker != null) {
+      this._cancelTicker();
     }
 
     PIXI.Ticker.shared.remove(this._onTicker);
   }
+}
+
+export interface IFurnitureVisualization {
+  container: PIXI.Container;
+  addMask(maskId: string, element: PIXI.DisplayObject): void;
 }

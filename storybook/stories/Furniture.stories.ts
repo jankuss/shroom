@@ -1,4 +1,13 @@
-import { FloorFurniture, Room, WallFurniture } from "@jankuss/shroom";
+import * as PIXI from "pixi.js";
+
+import {
+  BaseFurniture,
+  FloorFurniture,
+  FurnitureVisualization,
+  PlacementFloorFurniture,
+  Room,
+  WallFurniture,
+} from "@jankuss/shroom";
 import { createShroom } from "./common/createShroom";
 import { action } from "@storybook/addon-actions";
 
@@ -308,6 +317,59 @@ export function DifferentFetchTypes() {
 
     room.addRoomObject(wallFurniture);
     room.addRoomObject(floorFurniture);
+
+    application.stage.addChild(room);
+  });
+}
+
+export function DetachedFurniture() {
+  return createShroom(({ application, shroom }) => {
+    const container = new PIXI.Container();
+    application.stage.addChild(container);
+
+    const furniture = BaseFurniture.fromShroom(
+      shroom,
+      FurnitureVisualization.fromContainer(container),
+      {
+        animation: "0",
+        direction: 0,
+        type: { type: "club_sofa", kind: "type" },
+      }
+    );
+  });
+}
+
+export function PlacementFloorFurnitureTest() {
+  return createShroom(({ application, shroom }) => {
+    const container = new PIXI.Container();
+    application.stage.addChild(container);
+
+    const room = Room.create(shroom, {
+      tilemap: `
+       xxxxxxxxxxx
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+      `,
+    });
+
+    const furniture = new FloorFurniture({
+      roomX: 0,
+      roomY: 0,
+      roomZ: 0,
+      animation: "0",
+      direction: 2,
+      type: "club_sofa",
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    room.addRoomObject(furniture);
 
     application.stage.addChild(room);
   });

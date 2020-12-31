@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 
 import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
-import { AvatarSprites } from "./AvatarSprites";
+import { BaseAvatar } from "./BaseAvatar";
 import { LookOptions } from "./util/createLookServer";
 import { ObjectAnimation } from "../animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
@@ -11,7 +11,7 @@ import { AvatarAction } from "./enum/AvatarAction";
 import { IScreenPositioned } from "../interfaces/IScreenPositioned";
 
 export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
-  private _avatarSprites: AvatarSprites;
+  private _avatarSprites: BaseAvatar;
   private _moveAnimation:
     | ObjectAnimation<{ type: "walk"; direction: number } | { type: "move" }>
     | undefined;
@@ -42,7 +42,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._roomY = roomY;
     this._roomZ = roomZ;
 
-    this._avatarSprites = new AvatarSprites({
+    this._avatarSprites = new BaseAvatar({
       look: this._getCurrentLookOptions(),
       zIndex: this._calculateZIndex(),
       position: { x: 0, y: 0 },
@@ -404,6 +404,12 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _updatePosition() {
     if (!this.mounted) return;
 
+    this._avatarSprites.dependencies = {
+      animationTicker: this.animationTicker,
+      avatarLoader: this.avatarLoader,
+      hitDetection: this.hitDetection,
+    };
+
     const { roomX, roomY, roomZ } = this._getDisplayRoomPosition();
 
     const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
@@ -423,16 +429,20 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     }
 
     const item = this.tilemap.getTileAtPosition(roomXrounded, roomYrounded);
+    if (item?.type === "door") {
+      this.visualization.container.removeChild(this._avatarSprites);
+      this.visualization.behindWallContainer.addChild(this._avatarSprites);
+    }
 
-    this._avatarSprites.layer = item?.type === "door" ? "door" : "tile";
+    if (item == null || item.type !== "door") {
+      this.visualization.behindWallContainer.removeChild(this._avatarSprites);
+      this.visualization.container.addChild(this._avatarSprites);
+    }
   }
 
   registered(): void {
     this._updatePosition();
-
     this._updateAvatarSprites();
-
-    this.roomObjectContainer.addRoomObject(this._avatarSprites);
 
     this._moveAnimation = new ObjectAnimation(
       this.animationTicker,

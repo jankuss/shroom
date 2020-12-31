@@ -22,6 +22,7 @@ import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
 import { ILandscapeContainer } from "./ILandscapeContainer";
 import { RoomObjectContainer } from "./RoomObjectContainer";
+import { BehaviorSubject } from "rxjs";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -107,6 +108,10 @@ export class Room
 
   private _largestDiff: number;
 
+  private _activeTileSubject = new BehaviorSubject<RoomPosition | undefined>(
+    undefined
+  );
+
   private _landscapeContainer: ILandscapeContainer = {
     getMaskLevel: (roomX, roomY) => {
       return {
@@ -115,6 +120,10 @@ export class Room
       };
     },
   };
+
+  public get onActiveTileChange() {
+    return this._activeTileSubject;
+  }
 
   constructor({
     animationTicker,
@@ -176,6 +185,8 @@ export class Room
       configuration: this.configuration,
       tilemap: this,
       landscapeContainer: this._landscapeContainer,
+      application: this._application,
+      room: this,
     };
 
     this._updateTiles();
@@ -490,9 +501,19 @@ export class Room
   }
 
   private _registerTileCursor(position: RoomPosition, door: boolean = false) {
-    const cursor = new TileCursor(position, door, (position) => {
-      this.onTileClick && this.onTileClick(position);
-    });
+    const cursor = new TileCursor(
+      position,
+      door,
+      (position) => {
+        this.onTileClick && this.onTileClick(position);
+      },
+      (position) => {
+        this._activeTileSubject.next(position);
+      },
+      (position) => {
+        this._activeTileSubject.next(undefined);
+      }
+    );
 
     this._cursors.push(cursor);
 

@@ -6,10 +6,15 @@ import {
   AvatarDrawPart,
 } from "./util/getAvatarDrawDefinition";
 import { LookOptions } from "./util/createLookServer";
-import { AvatarLoaderResult } from "../../interfaces/IAvatarLoader";
+import {
+  AvatarLoaderResult,
+  IAvatarLoader,
+} from "../../interfaces/IAvatarLoader";
 import { ClickHandler } from "../hitdetection/ClickHandler";
 import { HitSprite } from "../hitdetection/HitSprite";
 import { isSetEqual } from "../../util/isSetEqual";
+import { IHitDetection } from "../../interfaces/IHitDetection";
+import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 
 interface Options {
   look: LookOptions;
@@ -17,7 +22,13 @@ interface Options {
   zIndex: number;
 }
 
-export class AvatarSprites extends RoomObject {
+export interface BaseAvatarDependencies {
+  hitDetection: IHitDetection;
+  animationTicker: IAnimationTicker;
+  avatarLoader: IAvatarLoader;
+}
+
+export class BaseAvatar extends PIXI.Container {
   private _container: PIXI.Container | undefined;
   private _avatarLoaderResult: AvatarLoaderResult | undefined;
   private _avatarDrawDefinition: AvatarDrawDefinition | undefined;
@@ -25,9 +36,6 @@ export class AvatarSprites extends RoomObject {
   private _lookOptions: LookOptions | undefined;
   private _nextLookOptions: LookOptions | undefined;
 
-  private _x: number = 0;
-  private _y: number = 0;
-  private _zIndex: number = 0;
   private _currentFrame: number = 0;
   private _clickHandler: ClickHandler = new ClickHandler();
   private _assets: HitSprite[] = [];
@@ -40,14 +48,22 @@ export class AvatarSprites extends RoomObject {
   private _layer: "door" | "tile" = "tile";
   private _updateId = 0;
 
-  public get layer() {
-    return this._layer;
+  private _dependencies?: BaseAvatarDependencies;
+
+  public get dependencies() {
+    if (this._dependencies == null)
+      throw new Error("Invalid dependencies in BaseAvatar");
+
+    return this._dependencies;
   }
 
-  public set layer(value) {
-    this._updateLayer(this._layer, value);
+  public set dependencies(value) {
+    this._dependencies = value;
+    this._handleDependenciesSet();
+  }
 
-    this._layer = value;
+  private get mounted() {
+    return this._dependencies != null;
   }
 
   get onClick() {
@@ -64,39 +80,6 @@ export class AvatarSprites extends RoomObject {
 
   set onDoubleClick(value) {
     this._clickHandler.onDoubleClick = value;
-  }
-
-  get x() {
-    return this._x;
-  }
-
-  set x(value) {
-    this._x = value;
-    this._positionChanged();
-  }
-
-  get y() {
-    return this._y;
-  }
-
-  get worldTransform() {
-    return this._container?.worldTransform;
-  }
-
-  set y(value) {
-    this._y = value;
-    this._positionChanged();
-  }
-
-  get zIndex() {
-    return this._zIndex;
-  }
-
-  set zIndex(value) {
-    if (value === this._zIndex) return;
-
-    this._zIndex = value;
-    this._positionChanged();
   }
 
   get lookOptions() {
@@ -128,10 +111,9 @@ export class AvatarSprites extends RoomObject {
 
   constructor(options: Options) {
     super();
-
-    this._x = options.position.x;
-    this._y = options.position.y;
-    this._zIndex = options.zIndex;
+    this.x = options.position.x;
+    this.y = options.position.y;
+    this.zIndex = options.zIndex;
     this._nextLookOptions = options.look;
   }
 
@@ -152,27 +134,6 @@ export class AvatarSprites extends RoomObject {
     }
   }
 
-  private _updateLayer(
-    oldLayer: "door" | "tile" | undefined,
-    newLayer: "door" | "tile"
-  ) {
-    if (oldLayer === newLayer) return;
-    this._updateLayerOfCurrentContainer(newLayer);
-  }
-
-  private _updateLayerOfCurrentContainer(newLayer: "door" | "tile") {
-    if (this._container == null) return;
-    this.visualization.removeBehindWallChild(this._container);
-    this.visualization.removeContainerChild(this._container);
-
-    if (newLayer === "door") {
-      this.visualization.addBehindWallChild(this._container);
-      return;
-    }
-
-    this.visualization.addContainerChild(this._container);
-  }
-
   private _positionChanged() {
     if (this._avatarDrawDefinition == null) return;
     this._updatePosition(this._avatarDrawDefinition);
@@ -181,9 +142,8 @@ export class AvatarSprites extends RoomObject {
   private _updatePosition(definition: AvatarDrawDefinition) {
     if (this._container == null) return;
 
-    this._container.x = this.x + definition.offsetX;
-    this._container.y = this.y + definition.offsetY;
-    this._container.zIndex = this.zIndex;
+    this._container.x = definition.offsetX;
+    this._container.y = definition.offsetY;
   }
 
   private _updateSprites() {
@@ -198,8 +158,6 @@ export class AvatarSprites extends RoomObject {
 
     this._updateSpritesWithAvatarDrawDefinition(definition, this.currentFrame);
     this._updatePosition(definition);
-
-    this._updateLayer(undefined, this.layer);
   }
 
   private _updateSpritesWithAvatarDrawDefinition(
@@ -241,6 +199,8 @@ export class AvatarSprites extends RoomObject {
       this._sprites.set(asset.fileId, sprite);
       this._container?.addChild(sprite);
     });
+
+    this.addChild(this._container);
   }
 
   private createAsset(part: AvatarDrawPart, asset: AvatarAsset) {
@@ -253,11 +213,10 @@ export class AvatarSprites extends RoomObject {
     if (texture == null) return;
 
     const sprite = new HitSprite({
-      hitDetection: this.hitDetection,
+      hitDetection: this.dependencies.hitDetection,
       mirrored: asset.mirror,
     });
 
-    sprite.zIndex = this.zIndex;
     sprite.hitTexture = texture;
 
     sprite.x = asset.x;
@@ -283,7 +242,7 @@ export class AvatarSprites extends RoomObject {
     if (lookOptions != null) {
       const requestId = ++this._updateId;
 
-      this.avatarLoader
+      this.dependencies.avatarLoader
         .getAvatarDrawDefinition({ ...lookOptions, initial: true })
         .then((result) => {
           if (requestId !== this._updateId) return;
@@ -306,13 +265,12 @@ export class AvatarSprites extends RoomObject {
       this.currentFrame
     );
     this._updatePosition(this._avatarDrawDefinition);
-    this._updateLayerOfCurrentContainer(this.layer);
   }
 
-  registered(): void {
+  private _handleDependenciesSet(): void {
     this._reloadLook();
 
-    this.animationTicker.subscribe(() => {
+    this.dependencies.animationTicker.subscribe(() => {
       if (this._refreshLook) {
         this._refreshLook = false;
         this._reloadLook();
@@ -325,7 +283,7 @@ export class AvatarSprites extends RoomObject {
     });
   }
 
-  destroyed(): void {
+  destroy(): void {
     this._container?.destroy();
   }
 }

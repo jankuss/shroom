@@ -16,6 +16,7 @@ export class FloorFurniture
   extends RoomObject
   implements IFurniture, IMoveable {
   private _baseFurniture: BaseFurniture;
+
   private _moveAnimation: ObjectAnimation<undefined> | undefined;
 
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
@@ -38,7 +39,7 @@ export class FloorFurniture
   private _onDoubleClick: HitEventHandler | undefined;
 
   constructor(
-    options: {
+    private options: {
       roomX: number;
       roomY: number;
       roomZ: number;
@@ -62,13 +63,13 @@ export class FloorFurniture
       this._type = options.type;
     }
 
-    this._baseFurniture = new BaseFurniture(
-      getFurnitureFetch(options, "floor"),
-      options.direction,
-      options.animation
-    );
-
     options.behaviors?.forEach((behavior) => behavior.setParent(this));
+
+    this._baseFurniture = new BaseFurniture({
+      animation: this.animation,
+      direction: this.direction,
+      type: getFurnitureFetch(this.options, "floor"),
+    });
   }
 
   /**
@@ -316,7 +317,14 @@ export class FloorFurniture
   }
 
   registered(): void {
-    this.roomObjectContainer.addRoomObject(this._baseFurniture);
+    this._baseFurniture.dependencies = {
+      animationTicker: this.animationTicker,
+      furnitureLoader: this.furnitureLoader,
+      hitDetection: this.hitDetection,
+      placeholder: this.configuration.placeholder,
+      visualization: this.visualization,
+    };
+
     this._moveAnimation = new ObjectAnimation(
       this.animationTicker,
       {
