@@ -327,15 +327,11 @@ export function DetachedFurniture() {
     const container = new PIXI.Container();
     application.stage.addChild(container);
 
-    const furniture = BaseFurniture.fromShroom(
-      shroom,
-      FurnitureVisualization.fromContainer(container),
-      {
-        animation: "0",
-        direction: 0,
-        type: { type: "club_sofa", kind: "type" },
-      }
-    );
+    const furniture = BaseFurniture.fromShroom(shroom, container, {
+      animation: "0",
+      direction: 0,
+      type: { type: "club_sofa", kind: "type" },
+    });
   });
 }
 
