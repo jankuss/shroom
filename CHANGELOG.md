@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Furniture will now only use valid directions
 - `screenPosition` property for `Avatar`
+- Add `BaseAvatar` for rendering avatars without a room
+- Add `BaseFurniture` for rendering furniture without a room
 
 ### Fixed
 
