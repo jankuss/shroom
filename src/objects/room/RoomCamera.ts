@@ -11,9 +11,9 @@ export class RoomCamera extends PIXI.Container {
   private _animatedOffsets: { x: number; y: number } = { x: 0, y: 0 };
 
   private _container: PIXI.Container;
-  private _tween: any;
+  private _parentContainer: PIXI.Container;
 
-  private _interactionManager: PIXI.InteractionManager;
+  private _tween: any;
 
   static forScreen(room: Room, options?: RoomCameraOptions) {
     return new RoomCamera(room, () => room.application.screen, options);
@@ -26,31 +26,26 @@ export class RoomCamera extends PIXI.Container {
   ) {
     super();
 
-    this._interactionManager = this._room.application.renderer.plugins.interaction;
+    this._parentContainer = new PIXI.Container();
+    this._parentContainer.hitArea = this._parentBounds();
+    this._parentContainer.interactive = true;
 
-    this._interactionManager.addListener(
-      "pointerdown",
-      this._handlePointerDown
-    );
-    this._interactionManager.addListener(
-      "pointermove",
-      this._handlePointerMove
-    );
-    this._interactionManager.addListener("pointerup", this._handlePointerUp);
+    this._container = new PIXI.Container();
+    this._container.addChild(this._room);
+    this._parentContainer.addChild(this._container);
+
+    this.addChild(this._parentContainer);
+
+    this._parentContainer.addListener("pointerdown", this._handlePointerDown);
+    this._parentContainer.addListener("pointermove", this._handlePointerMove);
+    this._parentContainer.addListener("pointerup", this._handlePointerUp);
 
     // These events (cancel, out, leave) are semantically equal to lifting the pointer up.
     // We just use the pointerup event handler here.
 
-    this._interactionManager.addListener(
-      "pointercancel",
-      this._handlePointerUp
-    );
-    this._interactionManager.addListener("pointerout", this._handlePointerUp);
-    this._interactionManager.addListener("pointerleave", this._handlePointerUp);
-
-    this._container = new PIXI.Container();
-    this._container.addChild(this._room);
-    this.addChild(this._container);
+    this._parentContainer.addListener("pointercancel", this._handlePointerUp);
+    this._parentContainer.addListener("pointerout", this._handlePointerUp);
+    this._parentContainer.addListener("pointerleave", this._handlePointerUp);
 
     let last: number | undefined;
     this._room.application.ticker.add(() => {
@@ -291,31 +286,25 @@ export class RoomCamera extends PIXI.Container {
     this._updatePosition();
   }
   destroy() {
-    this._interactionManager.removeListener(
+    this._parentContainer.removeListener(
       "pointerdown",
       this._handlePointerDown
     );
-    this._interactionManager.removeListener(
+    this._parentContainer.removeListener(
       "pointermove",
       this._handlePointerMove
     );
-    this._interactionManager.removeListener("pointerup", this._handlePointerUp);
+    this._parentContainer.removeListener("pointerup", this._handlePointerUp);
 
     // These events (cancel, out, leave) are semantically equal to lifting the pointer up.
     // We just use the pointerup event handler here.
 
-    this._interactionManager.removeListener(
+    this._parentContainer.removeListener(
       "pointercancel",
       this._handlePointerUp
     );
-    this._interactionManager.removeListener(
-      "pointerout",
-      this._handlePointerUp
-    );
-    this._interactionManager.removeListener(
-      "pointerleave",
-      this._handlePointerUp
-    );
+    this._parentContainer.removeListener("pointerout", this._handlePointerUp);
+    this._parentContainer.removeListener("pointerleave", this._handlePointerUp);
   }
 }
 

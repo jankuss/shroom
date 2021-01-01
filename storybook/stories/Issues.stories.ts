@@ -1,4 +1,5 @@
-import { Avatar, Room, FloorFurniture } from "@jankuss/shroom";
+import * as PIXI from "pixi.js";
+import { Avatar, Room, FloorFurniture, RoomCamera } from "@jankuss/shroom";
 import { action } from "@storybook/addon-actions";
 import { createShroom } from "./common/createShroom";
 
@@ -163,5 +164,35 @@ export function Issue38() {
     room.addRoomObject(avatar);
 
     application.stage.addChild(room);
+  });
+}
+
+export function Issue56() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+            xxxxxxxxxxxx
+            xxxxx000xxxx
+            xxxxx000xxxx
+            x00000000000
+            x00000000000
+            x00000000000
+            xxxxx000xxxx
+            xxxxx000xxxx
+            xxxxxxxxxxxx
+            `,
+    });
+
+    const container = RoomCamera.forScreen(room);
+    application.stage.addChild(container);
+
+    const window = new PIXI.Graphics();
+
+    window.beginFill(0xffffff);
+    window.drawRect(0, 0, 200, 400);
+    window.endFill();
+    window.interactive = true;
+
+    application.stage.addChild(window);
   });
 }
