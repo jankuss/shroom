@@ -22,7 +22,7 @@ import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
 import { ILandscapeContainer } from "./ILandscapeContainer";
 import { RoomObjectContainer } from "./RoomObjectContainer";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -108,9 +108,7 @@ export class Room
 
   private _largestDiff: number;
 
-  private _activeTileSubject = new BehaviorSubject<RoomPosition | undefined>(
-    undefined
-  );
+  private _activeTileSubject = new Subject<RoomPosition | undefined>();
 
   private _landscapeContainer: ILandscapeContainer = {
     getMaskLevel: (roomX, roomY) => {
