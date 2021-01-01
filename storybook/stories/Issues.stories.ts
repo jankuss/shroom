@@ -194,5 +194,15 @@ export function Issue56() {
     window.interactive = true;
 
     application.stage.addChild(window);
+
+    const child = document.createElement("div");
+    child.style.width = "200px";
+    child.style.height = "64px";
+    child.style.backgroundColor = "#ffffff";
+    child.style.position = "absolute";
+    child.style.left = "200px";
+    child.style.top = "50px";
+
+    document.body.appendChild(child);
   });
 }
