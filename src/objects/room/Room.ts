@@ -22,7 +22,7 @@ import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
 import { ILandscapeContainer } from "./ILandscapeContainer";
 import { RoomObjectContainer } from "./RoomObjectContainer";
-import { BehaviorSubject, Subject } from "rxjs";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -120,7 +120,7 @@ export class Room
   };
 
   public get onActiveTileChange() {
-    return this._activeTileSubject;
+    return this._activeTileSubject.asObservable();
   }
 
   constructor({
