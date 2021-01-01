@@ -12,9 +12,9 @@ export class RoomCamera extends PIXI.Container {
 
   private _container: PIXI.Container;
   private _parentContainer: PIXI.Container;
-  private _interactionManager: PIXI.InteractionManager;
 
   private _tween: any;
+  private _target: EventTarget;
 
   static forScreen(room: Room, options?: RoomCameraOptions) {
     return new RoomCamera(room, () => room.application.screen, options);
@@ -27,7 +27,8 @@ export class RoomCamera extends PIXI.Container {
   ) {
     super();
 
-    this._interactionManager = _room.application.renderer.plugins.interaction;
+    const target = this._options?.target ?? window;
+    this._target = target;
 
     this._parentContainer = new PIXI.Container();
     this._parentContainer.hitArea = this._parentBounds();
@@ -39,19 +40,13 @@ export class RoomCamera extends PIXI.Container {
 
     this.addChild(this._parentContainer);
 
+    // Activation of the camera is only triggered by a down event on the parent container.
     this._parentContainer.addListener("pointerdown", this._handlePointerDown);
-    this._parentContainer.addListener("pointermove", this._handlePointerMove);
-    this._interactionManager.addListener("pointerup", this._handlePointerUp);
-
-    // These events (cancel, out, leave) are semantically equal to lifting the pointer up.
-    // We just use the pointerup event handler here.
-
-    this._interactionManager.addListener(
-      "pointercancel",
-      this._handlePointerUp
+    this._target.addEventListener(
+      "pointermove",
+      this._handlePointerMove as any
     );
-    this._interactionManager.addListener("pointerout", this._handlePointerUp);
-    this._interactionManager.addListener("pointerleave", this._handlePointerUp);
+    this._target.addEventListener("pointerup", this._handlePointerUp as any);
 
     let last: number | undefined;
     this._room.application.ticker.add(() => {
@@ -62,11 +57,11 @@ export class RoomCamera extends PIXI.Container {
     });
   }
 
-  private _handlePointerUp = (event: PIXI.InteractionEvent) => {
+  private _handlePointerUp = (event: PointerEvent) => {
     if (this._state.type === "WAITING" || this._state.type === "ANIMATE_ZERO")
       return;
 
-    if (this._state.pointerId !== event.data.pointerId) return;
+    if (this._state.pointerId !== event.pointerId) return;
 
     let animatingBack = false;
 
@@ -88,21 +83,21 @@ export class RoomCamera extends PIXI.Container {
     }
   };
 
-  private _handlePointerMove = (event: PIXI.InteractionEvent) => {
-    const position = event.data.getLocalPosition(this.parent);
+  private _handlePointerMove = (event: PointerEvent) => {
+    const box = this._room.application.view.getBoundingClientRect();
+    const position = new PIXI.Point(
+      event.clientX - box.x - this.parent.worldTransform.tx,
+      event.clientY - box.y - this.parent.worldTransform.tx
+    );
 
     switch (this._state.type) {
       case "WAIT_FOR_DISTANCE": {
-        this._tryUpgradeWaitForDistance(
-          this._state,
-          position,
-          event.data.pointerId
-        );
+        this._tryUpgradeWaitForDistance(this._state, position, event.pointerId);
         break;
       }
 
       case "DRAGGING": {
-        this._updateDragging(this._state, position, event.data.pointerId);
+        this._updateDragging(this._state, position, event.pointerId);
         break;
       }
     }
@@ -296,21 +291,11 @@ export class RoomCamera extends PIXI.Container {
       "pointerdown",
       this._handlePointerDown
     );
-    this._parentContainer.removeListener(
+    this._target.removeEventListener(
       "pointermove",
-      this._handlePointerMove
+      this._handlePointerMove as any
     );
-    this._parentContainer.removeListener("pointerup", this._handlePointerUp);
-
-    // These events (cancel, out, leave) are semantically equal to lifting the pointer up.
-    // We just use the pointerup event handler here.
-
-    this._parentContainer.removeListener(
-      "pointercancel",
-      this._handlePointerUp
-    );
-    this._parentContainer.removeListener("pointerout", this._handlePointerUp);
-    this._parentContainer.removeListener("pointerleave", this._handlePointerUp);
+    this._target.removeEventListener("pointerup", this._handlePointerUp as any);
   }
 }
 
@@ -345,4 +330,4 @@ type RoomCameraState =
   | CameraDraggingState
   | CameraAnimateZeroState;
 
-type RoomCameraOptions = { duration?: number };
+type RoomCameraOptions = { duration?: number; target?: EventTarget };
