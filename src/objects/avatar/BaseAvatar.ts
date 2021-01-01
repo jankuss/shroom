@@ -15,6 +15,7 @@ import { HitSprite } from "../hitdetection/HitSprite";
 import { isSetEqual } from "../../util/isSetEqual";
 import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
+import { Shroom } from "../Shroom";
 
 interface Options {
   look: LookOptions;
@@ -281,6 +282,12 @@ export class BaseAvatar extends PIXI.Container {
         this._updateFrame();
       }
     });
+  }
+
+  static fromShroom(shroom: Shroom, options: Options) {
+    const avatar = new BaseAvatar({ ...options });
+    avatar.dependencies = shroom.dependencies;
+    return avatar;
   }
 
   destroy(): void {

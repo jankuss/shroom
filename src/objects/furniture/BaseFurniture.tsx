@@ -2,7 +2,6 @@ import * as PIXI from "pixi.js";
 
 import { ClickHandler } from "../hitdetection/ClickHandler";
 import { HitSprite } from "../hitdetection/HitSprite";
-import { RoomObject } from "../RoomObject";
 import { DrawPart } from "./util/DrawDefinition";
 import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
 import { LoadFurniResult } from "./util/loadFurni";
@@ -117,7 +116,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   static fromShroom(
     shroom: Shroom,
-    visualization: IFurnitureVisualization,
+    container: PIXI.Container,
     props: BaseFurnitureProps
   ) {
     return new BaseFurniture({
@@ -126,7 +125,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         furnitureLoader: shroom.dependencies.furnitureLoader,
         hitDetection: shroom.dependencies.hitDetection,
         placeholder: shroom.dependencies.configuration.placeholder,
-        visualization,
+        visualization: {
+          container,
+          addMask: () => {},
+        },
       },
       ...props,
     });

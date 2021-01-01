@@ -17,5 +17,6 @@ export { AnimationTicker } from "./objects/animation/AnimationTicker";
 export { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
 export { AvatarLoader } from "./objects/avatar/AvatarLoader";
 export { AvatarAction } from "./objects/avatar/enum/AvatarAction";
-export { BaseFurniture } from "./objects/furniture/BaseFurniture";
 export { FurnitureVisualization } from "./objects/furniture/FurnitureVisualization";
+export { BaseFurniture } from "./objects/furniture/BaseFurniture";
+export { BaseAvatar } from "./objects/avatar/BaseAvatar";
