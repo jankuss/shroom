@@ -1,20 +1,27 @@
 export interface IFurnitureVisualizationData {
-  getLayerCount(size: string): number;
-  getLayers(size: string): Layer[];
-  getDirections(size: string): number[];
+  getLayerCount(size: number): number;
+  getLayer(size: number, layerId: number): FurnitureLayer | undefined;
+  getDirections(size: number): number[];
   getDirectionLayer(
-    size: string,
+    size: number,
     direction: number,
     layerId: number
-  ): DirectionLayer;
+  ): FurnitureDirectionLayer | undefined;
   getAnimationLayer(
-    size: string,
+    size: number,
     animationId: number,
     id: number
-  ): AnimationLayer | undefined;
+  ): FurnitureAnimationLayer | undefined;
+  getFrameCount(size: number, animationId: number): number | undefined;
+  getColor(size: number, colorId: number, layerId: number): string | undefined;
+  getAnimation(size: number, animationId: number): Animation | undefined;
 }
 
-export interface Layer {
+export interface Animation {
+  transitionTo?: number;
+}
+
+export interface FurnitureLayer {
   id: number;
   z: number;
   tag?: string;
@@ -23,10 +30,13 @@ export interface Layer {
   ink?: string;
 }
 
-export interface DirectionLayer {
+export interface FurnitureDirectionLayer {
   z: number;
 }
 
-export interface AnimationLayer {
+export interface FurnitureAnimationLayer {
   frames: number[];
+  frameRepeat?: number;
+  random?: boolean;
+  loopCount?: number;
 }

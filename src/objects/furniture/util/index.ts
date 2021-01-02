@@ -1,4 +1,7 @@
-export { DrawDefinition, DrawPart } from "./DrawDefinition";
+export {
+  FurniDrawDefinition as DrawDefinition,
+  FurniDrawPart as DrawPart,
+} from "./DrawDefinition";
 export * from "./parseAssets";
 export * from "./visualization/parseVisualization";
 export * from "./parseStringAsync";

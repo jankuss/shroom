@@ -1,7 +1,9 @@
 import { HitTexture } from "../../hitdetection/HitTexture";
+import { FurnitureAssetsData } from "../data/FurnitureAssetsData";
 import { FurnitureIndexData } from "../data/FurnitureIndexData";
+import { FurnitureVisualizationData } from "../data/FurnitureVisualizationData";
 import { FurnitureExtraData } from "../FurnitureExtraData";
-import { DrawDefinition } from "./DrawDefinition";
+import { FurniDrawDefinition } from "./DrawDefinition";
 import { getFurniDrawDefinition } from "./getFurniDrawDefinition";
 import { parseAssets } from "./parseAssets";
 import { parseStringAsync } from "./parseStringAsync";
@@ -10,7 +12,7 @@ import { parseVisualization } from "./visualization/parseVisualization";
 export type GetFurniDrawDefinition = (
   direction: number,
   animation?: string
-) => DrawDefinition;
+) => FurniDrawDefinition;
 
 export type Hitmap = (
   x: number,
@@ -20,7 +22,7 @@ export type Hitmap = (
 
 export type LoadFurniResult = {
   getDrawDefinition: GetFurniDrawDefinition;
-  getTexture: (name: string) => HitTexture;
+  getTexture: (name: string) => HitTexture | undefined;
   getExtraData: () => FurnitureExtraData;
   directions: number[];
 };
@@ -55,6 +57,9 @@ export async function loadFurni(
   const assetMap = parseAssets(assetsXml);
   const visualization = parseVisualization(visualizationXml);
 
+  const assetsData = new FurnitureAssetsData(assetsString);
+  const visualizationData = new FurnitureVisualizationData(visualizationString);
+
   const loadTextures = async () => {
     const assetsToLoad = Array.from(assetMap.values()).filter(
       (asset) => asset.source == null || asset.source === asset.name
@@ -77,17 +82,19 @@ export async function loadFurni(
 
   return {
     getDrawDefinition: (direction: number, animation?: string) =>
-      getFurniDrawDefinition({
-        type: typeWithColor,
-        direction,
-        visualization,
-        assetMap,
-        animation,
-      }),
+      getFurniDrawDefinition(
+        {
+          type: typeWithColor,
+          direction,
+          animation,
+        },
+        {
+          assetsData,
+          visualizationData,
+        }
+      ),
     getTexture: (name) => {
       const texture = textures.get(name);
-      if (texture == null) throw new Error(`Invalid texture: ${name}`);
-
       return texture;
     },
     getExtraData: () => {

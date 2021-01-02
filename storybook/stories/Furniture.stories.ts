@@ -312,3 +312,79 @@ export function DifferentFetchTypes() {
     application.stage.addChild(room);
   });
 }
+
+export function GldGate() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+       xxxxxxxxxxx
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+      `,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    const floorFurniture = new FloorFurniture({
+      type: "gld_gate",
+      direction: 2,
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      animation: "0",
+    });
+
+    const floorFurniture2 = new FloorFurniture({
+      type: "gld_gate",
+      direction: 2,
+      roomX: 1,
+      roomY: 3,
+      roomZ: 0,
+      animation: "1",
+    });
+
+    let b = false;
+
+    const floorFurniture3 = new FloorFurniture({
+      type: "gld_gate",
+      direction: 2,
+      roomX: 1,
+      roomY: 5,
+      roomZ: 0,
+      animation: "0",
+    });
+
+    floorFurniture3.onClick = () => {
+      b = !b;
+
+      if (b) {
+        floorFurniture3.animation = "100";
+      } else {
+        floorFurniture3.animation = "101";
+      }
+    };
+
+    const floorFurniture4 = new FloorFurniture({
+      type: "gld_gate",
+      direction: 2,
+      roomX: 1,
+      roomY: 7,
+      roomZ: 0,
+      animation: "101",
+    });
+
+    //room.addRoomObject(floorFurniture);
+    //room.addRoomObject(floorFurniture2);
+    room.addRoomObject(floorFurniture3);
+    //room.addRoomObject(floorFurniture4);
+
+    application.stage.addChild(room);
+  });
+}

@@ -1,151 +1,151 @@
 import { Visualization } from "./visualization/parseVisualization";
 import { AssetMap } from "./parseAssets";
-import { DrawDefinition, DrawPart } from "./DrawDefinition";
+import { FurniDrawDefinition, FurniDrawPart } from "./DrawDefinition";
 import { layerToChar } from "./index";
 import { FramesData } from "./visualization/parseAnimations";
+import {
+  FurnitureAnimationLayer,
+  FurnitureDirectionLayer,
+  IFurnitureVisualizationData,
+  FurnitureLayer,
+} from "../data/interfaces/IFurnitureVisualizationData";
+import {
+  FurnitureAsset,
+  IFurnitureAssetsData,
+} from "../data/interfaces/IFurnitureAssetsData";
 
-export function getFurniDrawDefinition({
-  type: typeWithColor,
-  direction,
-  visualization,
-  assetMap,
-  animation,
-}: {
+interface FurniDrawDefinitionOptions {
   type: string;
   direction: number;
-  visualization: Visualization;
-  assetMap: AssetMap;
   animation?: string;
-}): DrawDefinition {
+}
+
+interface FurniDrawDefinitionDependencies {
+  visualizationData: IFurnitureVisualizationData;
+  assetsData: IFurnitureAssetsData;
+}
+
+export function getFurniDrawDefinition(
+  { type: typeWithColor, direction, animation }: FurniDrawDefinitionOptions,
+  { visualizationData, assetsData }: FurniDrawDefinitionDependencies
+): FurniDrawDefinition {
   const typeSplitted = typeWithColor.split("*");
   const type = typeSplitted[0];
   const color = typeSplitted[1];
 
   const size = 64;
-  const parts: DrawPart[] = [];
+  const parts: FurniDrawPart[] = [];
+  const animationNumber = animation != null ? Number(animation) : undefined;
 
-  const animationFrameCount =
-    animation != null ? visualization.getFrameCount(animation) : undefined;
-  const frameCount = animationFrameCount != null ? animationFrameCount : 1;
+  const frameCount =
+    animationNumber != null
+      ? visualizationData.getFrameCount(size, animationNumber)
+      : 1;
 
-  const getAsset = (char: string, layerIndex: number): DrawPart | undefined => {
-    const frameInfo = animation
-      ? visualization.getAnimation(animation, layerIndex.toString())
+  const layerCount = visualizationData.getLayerCount(size);
+
+  const animationData =
+    animationNumber != null
+      ? visualizationData.getAnimation(size, animationNumber)
       : undefined;
 
-    const frameRepeat = frameInfo?.frameRepeat ?? 1;
+  const getAssetName = (char: string, frame: number) =>
+    `${type}_${size}_${char}_${direction}_${frame}`;
 
-    const getAssetName = (frame: string) =>
-      `${type}_${size}_${char}_${direction}_${frame}`;
-    const asset = assetMap.get(getAssetName("0"));
-
-    const assets = frameInfo?.frames
-      .flatMap((frame) => Array<string>(frameRepeat).fill(frame))
-      .map((frame) => getAssetName(frame))
-      .map((id) => {
-        const asset = assetMap.get(id);
-        if (asset == null) throw new Error("Invalid asset");
-
-        return asset;
-      });
-
-    const layer = visualization.getLayer(layerIndex.toString());
-    const layerOverride = visualization.getDirectionLayerOverride(
+  for (let layerIndex = 0; layerIndex < layerCount; layerIndex++) {
+    const directionLayer = visualizationData.getDirectionLayer(
+      size,
       direction,
-      layerIndex.toString()
+      layerIndex
     );
-    const layerColor = visualization.getColor(
-      color ?? "0",
-      layerIndex.toString()
+    const layer = visualizationData.getLayer(size, layerIndex);
+    const char = layerToChar[layerIndex];
+    const animationLayer =
+      animationNumber != null
+        ? visualizationData.getAnimationLayer(size, animationNumber, layerIndex)
+        : undefined;
+
+    const colorLayer =
+      color != null
+        ? visualizationData.getColor(size, Number(color), layerIndex)
+        : undefined;
+
+    parts.push(
+      getDrawPart({
+        layer,
+        directionLayer,
+        animation: animationLayer,
+        assetsData: assetsData,
+        color: colorLayer,
+        getAssetName: (frame) => getAssetName(char, frame),
+      })
     );
-
-    const actualLayer = layerOverride || layer;
-
-    return {
-      z: actualLayer != null ? actualLayer.zIndex : undefined,
-      shadow: char === "sd",
-      frameRepeat,
-      tint: layerColor,
-      layer,
-      asset,
-      assets,
-    };
-  };
-
-  const shadow = getAsset("sd", -1);
-
-  const mask = assetMap.get(`${type}_${size}_${direction}_mask`);
-
-  if (mask != null) {
-    parts.push({
-      asset: mask,
-      frameRepeat: 1,
-      layer: {
-        zIndex: undefined,
-        alpha: undefined,
-        ignoreMouse: undefined,
-        ink: undefined,
-        tag: undefined,
-      },
-      shadow: false,
-      mask: true,
-    });
   }
 
-  if (shadow != null) {
-    parts.push(shadow);
-  }
-
-  for (let i = 0; i < visualization.layerCount; i++) {
-    const asset = getAsset(layerToChar[i], i);
-
-    if (!asset) continue;
-
-    parts.push(asset);
-  }
+  parts.push({
+    asset: assetsData.getAsset(getAssetName("sd", 0)),
+    frameRepeat: 1,
+    shadow: true,
+    layer: undefined,
+  });
 
   return {
     parts,
     frameCount,
+    transitionTo: animationData?.transitionTo,
   };
 }
 
-function getDisplayFrame(
-  framesInfo: FramesData | undefined,
-  nonNormalizedFrame: number,
-  frameCount: number
-) {
-  let displayFrame = "0";
-  let frameRepeat: number = 1;
+function getDrawPart({
+  layer,
+  animation,
+  directionLayer,
+  assetsData,
+  color,
+  getAssetName,
+}: {
+  layer: FurnitureLayer | undefined;
+  animation: FurnitureAnimationLayer | undefined;
+  directionLayer: FurnitureDirectionLayer | undefined;
+  assetsData: IFurnitureAssetsData;
+  color?: string;
+  getAssetName: (frame: number) => string;
+}): FurniDrawPart {
+  const z = directionLayer?.z ?? layer?.z ?? 0;
 
-  if (framesInfo != null) {
-    const { frames, frameRepeat: actualFrameRepeat } = framesInfo;
+  const baseAsset = assetsData.getAsset(getAssetName(0));
 
-    if (actualFrameRepeat != null) {
-      frameRepeat = actualFrameRepeat;
-    }
+  let assets: FurnitureAsset[] | undefined = undefined;
+  if (animation != null) {
+    const repeat = animation.frameRepeat ?? 1;
 
-    const frame = nonNormalizedFrame % (frameCount * frameRepeat);
+    assets = animation.frames
+      .flatMap((frameNumber) => new Array<number>(repeat).fill(frameNumber))
+      .map(
+        (frameNumber): FurnitureAsset => {
+          const asset = assetsData.getAsset(getAssetName(frameNumber));
 
-    const repeatedFrames = frames.flatMap((frame) =>
-      Array<string>(frameRepeat).fill(frame)
-    );
+          if (asset == null)
+            return { x: 0, y: 0, flipH: false, name: "unknown", valid: true };
 
-    displayFrame = repeatedFrames[frame];
+          return asset;
+        }
+      );
+  }
 
-    for (let i = 0; i < frame; i++) {
-      const current = repeatedFrames[i];
-      const next = repeatedFrames[i + 1];
-
-      if (next == null) {
-        displayFrame = current;
-        break;
-      }
-    }
+  if ((assets == null || assets.length === 0) && baseAsset != null) {
+    assets = [baseAsset];
   }
 
   return {
-    frameRepeat,
-    displayFrame,
+    mask: false,
+    shadow: false,
+    frameRepeat: animation?.frameRepeat ?? 1,
+    asset: baseAsset,
+    layer,
+    z,
+    tint: color,
+    assets,
+    loopCount: animation?.loopCount,
   };
 }
