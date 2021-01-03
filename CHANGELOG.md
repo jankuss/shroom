@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix wall display for some room models
 - Fix alpha for furniture
 - Tile Cursor now shows above flooring items
+- Fix `RoomCamera` drag stopping when going over dom elements
+- Fix `RoomCamera` drag passing through other PIXI elements
 
 ## [0.2.0] - 2020-12-27
 
