@@ -149,6 +149,8 @@ export class BaseFurniture
     this._refreshFurniture = true;
   }
 
+  private _runningAnimation: string | undefined;
+
   private animatedSprites: {
     sprites: Map<string, SpriteWithStaticOffset>;
     frames: string[];
@@ -245,6 +247,33 @@ export class BaseFurniture
     }
   }
 
+  private _handleAnimation(transitionTo?: number) {
+    const newAnimation = this._getDisplayAnimation();
+    if (newAnimation != this._runningAnimation) {
+      this.cancelTicker && this.cancelTicker();
+
+      this._startFrame = undefined;
+      this._runningAnimation = newAnimation;
+
+      let newAnimationNumber: number | undefined = Number(newAnimation);
+      if (isNaN(newAnimationNumber)) {
+        newAnimationNumber = undefined;
+      }
+
+      if (this._frameCount != null) {
+        this.cancelTicker = this.animationTicker.subscribe((frame) => {
+          this.setCurrentFrame(frame, transitionTo ?? newAnimationNumber);
+        });
+        this.setCurrentFrame(this.animationTicker.current());
+      }
+    } else if (newAnimation == null) {
+      this.cancelTicker && this.cancelTicker();
+
+      this._startFrame = undefined;
+      this._runningAnimation = undefined;
+    }
+  }
+
   updateUnknown() {
     this.destroySprites();
 
@@ -278,20 +307,6 @@ export class BaseFurniture
 
     this._frameCount = frameCount;
 
-    if (animation != null) {
-      this._startFrame = undefined;
-
-      if (this.cancelTicker != null) {
-        this.cancelTicker && this.cancelTicker();
-      }
-
-      this.cancelTicker = this.animationTicker.subscribe((frame) =>
-        this.setCurrentFrame(frame, transitionTo)
-      );
-    } else {
-      this.cancelTicker && this.cancelTicker();
-    }
-
     parts.forEach((part, index) => {
       const asset = this.createAssetFromPart(
         part,
@@ -322,13 +337,13 @@ export class BaseFurniture
       }
     });
 
-    this.setCurrentFrame(this.animationTicker.current());
+    this._handleAnimation(transitionTo);
   }
 
   private _transitionToAnimation(animation: string) {
-    if (this._animationOverride === animation) return;
-
-    this.animation = animation;
+    this._startFrame = undefined;
+    this._animationOverride = animation;
+    this._refreshFurniture = true;
   }
 
   private _getDisplayAnimation() {
@@ -372,9 +387,9 @@ export class BaseFurniture
       }
     });
 
-    if (maxFrameCount != null && progress > maxFrameCount) {
-      console.log(progress, maxFrameCount);
-      const transitionToNormalized = transitionTo?.toString() ?? this.animation;
+    if (maxFrameCount != null && progress >= maxFrameCount) {
+      const transitionToNormalized =
+        transitionTo?.toString() ?? this._getDisplayAnimation();
       if (transitionToNormalized != null) {
         this._transitionToAnimation(transitionToNormalized);
         return;

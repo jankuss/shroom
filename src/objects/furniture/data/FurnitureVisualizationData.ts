@@ -42,7 +42,7 @@ export class FurnitureVisualizationData
 
   getFrameCount(size: number, animationId: number): number | undefined {
     const frameSequences = this.querySelectorAll(
-      `visualization[size="${size}"] frameSequence`
+      `visualization[size="${size}"] animation[id="${animationId}"] frameSequence`
     );
 
     let count: number | undefined;

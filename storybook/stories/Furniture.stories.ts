@@ -42,6 +42,7 @@ export function Default() {
       roomZ: 0,
       type: "edice",
       direction: 0,
+      animation: "0",
     });
 
     dice.extradata.then(action("Extra Data"));

@@ -89,6 +89,18 @@ export function getFurniDrawDefinition(
     layer: undefined,
   });
 
+  const mask = assetsData.getAsset(`${type}_${size}_${direction}_mask`);
+
+  if (mask != null) {
+    parts.push({
+      asset: mask,
+      frameRepeat: 1,
+      layer: undefined,
+      shadow: false,
+      mask: true,
+    });
+  }
+
   return {
     parts,
     frameCount,
