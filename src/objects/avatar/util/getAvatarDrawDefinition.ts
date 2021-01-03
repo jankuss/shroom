@@ -78,6 +78,8 @@ export function getAvatarDrawDefinition(
     .filter(notNullOrUndefined)
     .sort((a, b) => b.z - a.z);
 
+  const removeSetTypes = new Set<AvatarFigurePartType>();
+
   const drawPartMap = new Map<string, AvatarDrawPart[]>();
 
   activeActions.forEach((action) => {
@@ -111,6 +113,12 @@ export function getAvatarDrawDefinition(
         .map((part) => ({ ...part, bodypart: bodyPart }))
         .filter((item) => activePartSet.has(item.type));
 
+      parts.forEach(({ hiddenLayers }) => {
+        hiddenLayers.forEach((layer) =>
+          removeSetTypes.add(layer as AvatarFigurePartType)
+        );
+      });
+
       // Get drawing parts for this body part
       const drawParts = getBodyPart(
         {
@@ -125,10 +133,16 @@ export function getAvatarDrawDefinition(
       const localDrawPartMap = new Map<string, AvatarDrawPart[]>();
 
       // Group body part draw parts by part type
-      drawParts.forEach((part) => {
+      drawParts.resolvedParts.forEach((part) => {
         const existing = localDrawPartMap.get(part.type) ?? [];
         localDrawPartMap.set(part.type, [...existing, part]);
       });
+
+      // For what is the `remove-set-type` in the partsets?
+
+      // drawParts.removeSetTypes.forEach((partType) =>
+      //   removeSetTypes.add(partType)
+      // );
 
       // Override the result draw parts with the draw parts for this body part
       localDrawPartMap.forEach((parts, type) => drawPartMap.set(type, parts));
@@ -137,6 +151,7 @@ export function getAvatarDrawDefinition(
 
   // Get draw parts in the order specified by the draworder.
   const drawParts = drawOrderAdditional
+    .filter((type) => !removeSetTypes.has(type as AvatarFigurePartType))
     .flatMap((partType) => drawPartMap.get(partType))
     .filter(notNullOrUndefined);
 
@@ -167,13 +182,17 @@ function getBodyPart(
     figureMap,
     geometry,
   }: AvatarDependencies
-): AvatarDrawPart[] {
+): {
+  resolvedParts: AvatarDrawPart[];
+  removeSetTypes: Set<AvatarFigurePartType>;
+} {
   if (actionData == null) throw new Error("Invalid action data");
 
   let remainingPartCount = parts.length - 1;
   let assetPartDefinition = actionData.assetpartdefinition;
 
   const resolvedParts: AvatarDrawPart[] = [];
+  const removeSetTypes = new Set<AvatarFigurePartType>();
 
   while (remainingPartCount >= 0) {
     const part = parts[remainingPartCount];
@@ -190,6 +209,10 @@ function getBodyPart(
     }
 
     const partInfo = partSetsData.getPartInfo(part.type);
+
+    if (partInfo?.removeSetType != null) {
+      removeSetTypes.add(partInfo.removeSetType as AvatarFigurePartType);
+    }
 
     const assets = framesIndexed.map((animationFrame) =>
       getAssetForFrame({
@@ -220,7 +243,10 @@ function getBodyPart(
     remainingPartCount--;
   }
 
-  return resolvedParts;
+  return {
+    resolvedParts,
+    removeSetTypes,
+  };
 }
 
 function getAssetForFrame({
@@ -292,7 +318,10 @@ function getAssetForFrame({
       flipH = !flipH;
     }
 
-    const libraryId = figureMap.getLibraryOfPart(partId, flippedMeta.partType);
+    let libraryId = figureMap.getLibraryOfPart(partId, flippedMeta.partType);
+    if (libraryId == null) {
+      libraryId = getLibraryForPartType(flippedMeta.partType);
+    }
 
     if (libraryId != null) {
       const asset = getAssetFromPartMeta(
@@ -309,6 +338,14 @@ function getAssetForFrame({
     } else {
     }
   } else {
+  }
+}
+
+function getLibraryForPartType(partType: AvatarFigurePartType) {
+  switch (partType) {
+    case AvatarFigurePartType.LeftSleeve:
+    case AvatarFigurePartType.RightSleeve:
+      return "hh_human_shirt";
   }
 }
 

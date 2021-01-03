@@ -1,7 +1,9 @@
+import * as PIXI from "pixi.js";
+
 import {
+  BaseFurniture,
   FloorFurniture,
   Room,
-  RoomCamera,
   WallFurniture,
 } from "@jankuss/shroom";
 import { createShroom } from "./common/createShroom";
@@ -319,20 +321,41 @@ export function DifferentFetchTypes() {
   });
 }
 
+export function DetachedFurniture() {
+  return createShroom(({ application, shroom }) => {
+    const container = new PIXI.Container();
+    container.sortableChildren = true;
+
+    application.stage.addChild(container);
+
+    const furniture = BaseFurniture.fromShroom(shroom, container, {
+      animation: "0",
+      direction: 2,
+      type: { type: "club_sofa", kind: "type" },
+    });
+
+    furniture.x = 100;
+    furniture.y = 100;
+  });
+}
+
 export function GldGate() {
   return createShroom(({ application, shroom }) => {
+    const container = new PIXI.Container();
+    application.stage.addChild(container);
+
     const room = Room.create(shroom, {
       tilemap: `
-       xxxxxxxxxxx
-       x0000000000
-       x0000000000
-       x0000000000
-       x0000000000
-       x0000000000
-       x0000000000
-       x0000000000
-       x0000000000
-      `,
+           xxxxxxxxxxx
+           x0000000000
+           x0000000000
+           x0000000000
+           x0000000000
+           x0000000000
+           x0000000000
+           x0000000000
+           x0000000000
+          `,
     });
 
     room.x = application.screen.width / 2 - room.roomWidth / 2;
@@ -395,8 +418,11 @@ export function GldGate() {
   });
 }
 
-export function BigRoom() {
+export function TileCursorFloorItems() {
   return createShroom(({ application, shroom }) => {
+    const container = new PIXI.Container();
+    application.stage.addChild(container);
+
     const room = Room.create(shroom, {
       tilemap: `
        xxxxxxxxxxx
@@ -411,23 +437,28 @@ export function BigRoom() {
       `,
     });
 
-    fetch("./furni.json")
-      .then((response) => response.json())
-      .then((value) => {
-        value.forEach((value) => {
-          room.addRoomObject(
-            new FloorFurniture({
-              direction: value.rot,
-              roomX: value.x,
-              roomY: value.y,
-              roomZ: value.z,
-              type: value.item,
-              animation: value.extra_data,
-            })
-          );
-        });
-      });
+    const furniture = new FloorFurniture({
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      animation: "0",
+      direction: 2,
+      type: "lc_glass_floor",
+    });
 
-    application.stage.addChild(RoomCamera.forScreen(room));
+    const furniture2 = new FloorFurniture({
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      animation: "0",
+      direction: 4,
+      type: "club_sofa",
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    room.addRoomObject(furniture);
+    room.addRoomObject(furniture2);
+    application.stage.addChild(room);
   });
 }

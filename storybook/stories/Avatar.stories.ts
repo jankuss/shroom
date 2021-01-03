@@ -166,3 +166,67 @@ export function Drinking() {
     application.stage.addChild(room);
   });
 }
+
+export function AvatarInDoor() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+           xxxxxxxx
+           x0000000
+           x0000000
+           00000000
+           x0000000
+          `,
+    });
+
+    const avatar = new Avatar({
+      look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
+      direction: 2,
+      roomX: 0,
+      roomY: 3,
+      roomZ: 0,
+    });
+
+    setTimeout(() => {
+      avatar.walk(1, 3, 0, { direction: 2 });
+    }, 3000);
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    room.addRoomObject(avatar);
+
+    application.stage.addChild(room);
+  });
+}
+
+export function AvatarHairBack() {
+  return createShroom(({ application, shroom }) => {
+    const look = `hd-180-1.hr-831-61.ha-1012-68.ch-215-66.lg-280-110.sh-305-62`;
+
+    const room = Room.create(shroom, {
+      tilemap: `
+           xxxxxxxx
+           x0000000
+           x0000000
+           00000000
+           x0000000
+          `,
+    });
+
+    const avatar = new Avatar({
+      look: look,
+      direction: 0,
+      roomX: 4,
+      roomY: 4,
+      roomZ: 0,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    room.addRoomObject(avatar);
+
+    application.stage.addChild(room);
+  });
+}
