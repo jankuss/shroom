@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `screenPosition` property for `Avatar`
 - Add `BaseAvatar` for rendering avatars without a room
 - Add `BaseFurniture` for rendering furniture without a room
-- Add `onActiveTileChange` events for detecing hovered tile
+- Add `onActiveTileChange` events for detecing hovered tile (useful for furniture placement preview)
 - Add ability to share a shroom instance with multiple applications through `Shroom.createShared`
 
 ### Fixed
@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tile Cursor now shows above flooring items
 - Fix `RoomCamera` drag stopping when going over dom elements
 - Fix `RoomCamera` drag passing through other PIXI elements
+- Fix Avatar hair clipping through hats
+- Fix Avatar sleeves for some T-Shirts because library wasn't detected
 
 ## [0.2.0] - 2020-12-27
 
