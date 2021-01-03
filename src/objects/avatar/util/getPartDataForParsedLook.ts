@@ -10,7 +10,10 @@ export function getPartDataForParsedLook(
   Array.from(parsedLook.entries()).forEach(([type, { setId, colorId }]) => {
     const parts = figureData.getParts(type, setId.toString());
     const colorValue = figureData.getColor(type, colorId.toString());
-    const hiddenLayers: string[] = [];
+    const hiddenLayers: string[] = figureData.getHiddenLayers(
+      type,
+      setId.toString()
+    );
 
     parts?.forEach((part) => {
       const current = partByType.get(part.type) ?? [];
