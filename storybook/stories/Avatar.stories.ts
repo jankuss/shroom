@@ -230,3 +230,34 @@ export function AvatarHairBack() {
     application.stage.addChild(room);
   });
 }
+
+export function AvatarPlain() {
+  return createShroom(({ application, shroom }) => {
+    const look = `hd-99999-99999`;
+
+    const room = Room.create(shroom, {
+      tilemap: `
+           xxxxxxxx
+           x0000000
+           x0000000
+           00000000
+           x0000000
+          `,
+    });
+
+    const avatar = new Avatar({
+      look: look,
+      direction: 2,
+      roomX: 4,
+      roomY: 4,
+      roomZ: 0,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    room.addRoomObject(avatar);
+
+    application.stage.addChild(room);
+  });
+}

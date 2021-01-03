@@ -60,7 +60,16 @@ export class AvatarLoader implements IAvatarLoader {
   private lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
 
   constructor(private options: Options) {
-    this.lookServer = this.options.createLookServer();
+    this.lookServer = this.options.createLookServer().then(async (server) => {
+      // Wait for the placeholder model to load
+      await this._getAvatarDrawDefinition(server, {
+        direction: 0,
+        actions: new Set(),
+        look: "hd-99999-99999",
+      });
+
+      return server;
+    });
   }
 
   private _loadEffect(type: string, id: string) {
@@ -142,11 +151,18 @@ export class AvatarLoader implements IAvatarLoader {
   async getAvatarDrawDefinition(
     options: LookOptions
   ): Promise<AvatarLoaderResult> {
+    const getDrawDefinition = await this.lookServer;
+
+    return this._getAvatarDrawDefinition(getDrawDefinition, options);
+  }
+
+  async _getAvatarDrawDefinition(
+    getDrawDefinition: LookServer,
+    options: LookOptions
+  ): Promise<AvatarLoaderResult> {
     const { actions, look, item, effect, initial } = options;
 
     const loadedFiles = new Map<string, Promise<HitTexture>>();
-
-    const getDrawDefinition = await this.lookServer;
 
     let effectData: IAvatarEffectData | undefined;
     if (effect != null) {
