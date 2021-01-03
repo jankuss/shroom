@@ -25,10 +25,6 @@ export class RoomVisualization
 
   private _roomVisualizationMetaSubject: BehaviorSubject<RoomVisualizationMeta>;
 
-  public get masks() {
-    return this._roomVisualizationMetaSubject.value.masks;
-  }
-
   subscribeRoomMeta(
     listener: (value: RoomVisualizationMeta) => void
   ): { unsubscribe: () => void } {
@@ -67,6 +63,30 @@ export class RoomVisualization
     this.addChild(this._cursorLayer);
   }
 
+  public get masks() {
+    return this._roomVisualizationMetaSubject.value.masks;
+  }
+
+  public get container() {
+    return this._container;
+  }
+
+  public get behindWallContainer() {
+    return this._behindWallPlane;
+  }
+
+  public get landscapeContainer() {
+    return this._landscapeContainer;
+  }
+
+  public get floorContainer() {
+    return this._floorPlane;
+  }
+
+  public get wallContainer() {
+    return this._wallPlane;
+  }
+
   private _updateRoomVisualizationMeta(meta: Partial<RoomVisualizationMeta>) {
     this._roomVisualizationMetaSubject.next({
       masks: this.masks,
@@ -100,10 +120,6 @@ export class RoomVisualization
     };
   }
 
-  addLandscape(element: PIXI.DisplayObject): void {
-    this._landscapeContainer.addChild(element);
-  }
-
   updateRoom(room: Room) {
     this.room = room;
     this.masks.forEach((mask) => mask.updateRoom(room));
@@ -114,43 +130,11 @@ export class RoomVisualization
     });
   }
 
-  addTileCursorChild(element: PIXI.DisplayObject): void {
-    this._tileCursorPlane.addChild(element);
-  }
-
-  removeBehindWallChild(element: PIXI.DisplayObject): void {
-    this._behindWallPlane.removeChild(element);
-  }
-
-  removeContainerChild(element: PIXI.DisplayObject): void {
-    this._container.removeChild(element);
-  }
-
-  addBehindWallChild(element: PIXI.DisplayObject): void {
-    this._behindWallPlane.addChild(element);
-  }
-
-  addWallChild(element: PIXI.DisplayObject): void {
-    this._wallPlane.addChild(element);
-  }
-
-  addCursorChild(element: PIXI.DisplayObject): void {
-    this._cursorLayer.addChild(element);
-  }
-
   disableCache() {
     this._plane.cacheAsBitmap = false;
   }
 
   enableCache() {
     this._plane.cacheAsBitmap = true;
-  }
-
-  addFloorChild(element: PIXI.DisplayObject): void {
-    this._floorPlane.addChild(element);
-  }
-
-  addContainerChild(element: PIXI.DisplayObject): void {
-    this._container.addChild(element);
   }
 }
