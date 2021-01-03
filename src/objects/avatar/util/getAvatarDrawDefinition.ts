@@ -345,8 +345,6 @@ function getLibraryForPartType(partType: AvatarFigurePartType) {
   switch (partType) {
     case AvatarFigurePartType.LeftSleeve:
     case AvatarFigurePartType.RightSleeve:
-    case AvatarFigurePartType.LeftCoatSleeve:
-    case AvatarFigurePartType.RightCoatSleeve:
       return "hh_human_shirt";
   }
 }
