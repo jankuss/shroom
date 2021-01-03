@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `BaseAvatar` for rendering avatars without a room
 - Add `BaseFurniture` for rendering furniture without a room
 - Add `onActiveTileChange` events for detecing hovered tile
+- Add ability to share a shroom instance with multiple applications through `Shroom.createShared`
 
 ### Fixed
 
