@@ -136,9 +136,9 @@ export class Tile extends RoomObject implements ITexturable {
     this._container.addChild(tile);
 
     if (!this._door) {
-      this.visualization.addFloorChild(this._container);
+      this.visualization.floorContainer.addChild(this._container);
     } else {
-      this.visualization.addBehindWallChild(this._container);
+      this.visualization.behindWallContainer.addChild(this._container);
       this._container.zIndex = -1;
     }
   }

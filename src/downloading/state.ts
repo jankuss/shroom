@@ -5,6 +5,7 @@ import * as path from "path";
 import { dumpFigureLibraries } from "./dumpFigureLibraries";
 import { dumpFurniFromFurniData } from "./dumpFurniFromFurniData";
 import { createOffsetSnapshot } from "../objects/avatar/util";
+import Bluebird from "bluebird";
 
 export type Steps = {
   figureMap: boolean;
@@ -38,7 +39,9 @@ export type Action =
     }
   | { type: "FURNI_ASSETS_SUCCESS" }
   | { type: "FURNI_ASSETS_COUNT"; payload: number }
+  | { type: "FURNI_ASSETS_DOWNLOAD_COUNT" }
   | { type: "FIGURE_ASSETS_COUNT"; payload: number }
+  | { type: "FIGURE_ASSETS_DOWNLOAD_COUNT" }
   | { type: "STARTED" };
 
 export interface State {
@@ -51,8 +54,10 @@ export interface State {
   lastFurniAsset?: { id: string; revision?: string };
   furniAssetsCount?: number;
   furniAssetsCompletedCount?: number;
+  furniAssetsDownloadCount?: number;
   figureAssetsCount?: number;
   figureAssetsCompletedCount?: number;
+  figureAssetsDownloadCount?: number;
   started: boolean;
 }
 
@@ -121,165 +126,194 @@ export async function run({
     dispatch({ type: "FURNI_DATA_SUCCESS" });
   }
 
-  if (steps.figureAssets) {
-    dispatch({ type: "FIGURE_ASSETS_LOADING" });
+  const figureAssetsJob = () =>
+    new Promise(async (resolve, reject) => {
+      if (steps.figureAssets) {
+        dispatch({ type: "FIGURE_ASSETS_LOADING" });
 
-    const gordonUrl = figureMapUrl.split("/").slice(0, -1).join("/");
-    const figureFolder = path.join(libraryFolder, "figure");
-    await fs.mkdir(figureFolder, { recursive: true });
+        const gordonUrl = figureMapUrl.split("/").slice(0, -1).join("/");
+        const figureFolder = path.join(libraryFolder, "figure");
+        await fs.mkdir(figureFolder, { recursive: true });
 
-    await dumpFigureLibraries(
-      makeAbsolute(gordonUrl),
-      figureMapString,
-      figureFolder,
-      dispatch
-    );
-
-    const snapshot = await createOffsetSnapshot(
-      figureMapString,
-      async (name) => {
-        const file = await fs.readFile(
-          path.join(figureFolder, `${name}/${name}_manifest.bin`)
+        await dumpFigureLibraries(
+          makeAbsolute(gordonUrl),
+          figureMapString,
+          figureFolder,
+          dispatch
         );
 
-        return file.toString("utf-8");
+        const snapshot = await createOffsetSnapshot(
+          figureMapString,
+          async (name) => {
+            const file = await fs.readFile(
+              path.join(figureFolder, `${name}/${name}_manifest.bin`)
+            );
+
+            return file.toString("utf-8");
+          }
+        );
+
+        const offsetsPath = path.join(libraryFolder, "offsets.json");
+
+        await fs.writeFile(offsetsPath, snapshot);
+
+        dispatch({ type: "FIGURE_ASSETS_SUCCESS" });
+
+        resolve(true);
       }
-    );
+    });
 
-    const offsetsPath = path.join(libraryFolder, "offsets.json");
+  const furniAssetsJob = () =>
+    new Promise(async (resolve, reject) => {
+      if (steps.furniAssets) {
+        dispatch({ type: "FURNI_ASSETS_LOADING" });
 
-    await fs.writeFile(offsetsPath, snapshot);
+        const furniFolder = path.join(libraryFolder, "hof_furni");
 
-    dispatch({ type: "FIGURE_ASSETS_SUCCESS" });
-  }
+        await fs.mkdir(furniFolder, { recursive: true });
+        await dumpFurniFromFurniData(
+          hofFurniUrl,
+          furniData,
+          furniFolder,
+          dispatch
+        );
 
-  if (steps.furniAssets) {
-    dispatch({ type: "FURNI_ASSETS_LOADING" });
+        dispatch({ type: "FURNI_ASSETS_SUCCESS" });
 
-    const furniFolder = path.join(libraryFolder, "hof_furni");
-    await fs.mkdir(furniFolder, { recursive: true });
-    await dumpFurniFromFurniData(hofFurniUrl, furniData, furniFolder, dispatch);
+        resolve(true);
+      }
+    });
 
-    dispatch({ type: "FURNI_ASSETS_SUCCESS" });
-  }
+  await Bluebird.map(
+    [figureAssetsJob, furniAssetsJob],
+    (job) => {
+      job();
+    },
+    { concurrency: Infinity }
+  );
 }
 
 export function reducer(state: State, action: Action): State {
-  if (action.type === "STARTED") {
-    return {
-      ...state,
-      started: true,
-    };
-  }
+  switch (action.type) {
+    case "STARTED":
+      return {
+        ...state,
+        started: true,
+      };
 
-  if (action.type === "FIGURE_MAP_LOADING") {
-    return {
-      ...state,
-      figureMap: "runs",
-    };
-  }
+    case "FIGURE_MAP_LOADING":
+      return {
+        ...state,
+        figureMap: "runs",
+      };
 
-  if (action.type === "FIGURE_MAP_SUCCESS") {
-    return {
-      ...state,
-      figureMap: "success",
-    };
-  }
+    case "FIGURE_MAP_SUCCESS":
+      return {
+        ...state,
+        figureMap: "success",
+      };
 
-  if (action.type === "FIGURE_DATA_LOADING") {
-    return {
-      ...state,
-      figureData: "runs",
-    };
-  }
+    case "FIGURE_DATA_LOADING":
+      return {
+        ...state,
+        figureData: "runs",
+      };
 
-  if (action.type === "FIGURE_DATA_SUCCESS") {
-    return {
-      ...state,
-      figureData: "success",
-    };
-  }
+    case "FIGURE_DATA_SUCCESS":
+      return {
+        ...state,
+        figureData: "success",
+      };
 
-  if (action.type === "FURNI_DATA_LOADING") {
-    return {
-      ...state,
-      furniData: "runs",
-    };
-  }
+    case "FURNI_DATA_LOADING":
+      return {
+        ...state,
+        furniData: "runs",
+      };
 
-  if (action.type === "FURNI_DATA_SUCCESS") {
-    return {
-      ...state,
-      furniData: "success",
-    };
-  }
+    case "FURNI_DATA_SUCCESS":
+      return {
+        ...state,
+        furniData: "success",
+      };
 
-  if (action.type === "FIGURE_ASSETS_LOADING") {
-    return {
-      ...state,
-      figureAssets: "runs",
-    };
-  }
+    case "FIGURE_ASSETS_LOADING":
+      return {
+        ...state,
+        figureAssets: "runs",
+      };
 
-  if (action.type === "FIGURE_ASSETS_PROGRESS_SUCCESS") {
-    return {
-      ...state,
-      lastFigureAsset: action.payload,
-      figureAssetsCompletedCount: (state.figureAssetsCompletedCount ?? 0) + 1,
-    };
-  }
+    case "FIGURE_ASSETS_PROGRESS_SUCCESS":
+      return {
+        ...state,
+        lastFigureAsset: action.payload,
+        figureAssetsCompletedCount: (state.figureAssetsCompletedCount ?? 0) + 1,
+      };
 
-  if (action.type === "FIGURE_ASSETS_SUCCESS") {
-    return {
-      ...state,
-      figureAssets: "success",
-    };
-  }
+    case "FURNI_ASSETS_DOWNLOAD_COUNT":
+      return {
+        ...state,
+        furniAssetsDownloadCount: (state.furniAssetsDownloadCount ?? 0) + 1,
+      };
 
-  if (action.type === "FURNI_ASSETS_LOADING") {
-    return {
-      ...state,
-      furniAssets: "runs",
-    };
-  }
+    case "FIGURE_ASSETS_SUCCESS":
+      return {
+        ...state,
+        figureAssets: "success",
+      };
 
-  if (action.type === "FURNI_ASSETS_PROGRESS_SUCCESS") {
-    return {
-      ...state,
-      lastFurniAsset: action.payload,
-      furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
-    };
-  }
+    case "FURNI_ASSETS_LOADING":
+      return {
+        ...state,
+        furniAssets: "runs",
+      };
 
-  if (action.type === "FURNI_ASSETS_PROGRESS_ERROR") {
-    return {
-      ...state,
-      furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
-    };
-  }
+    case "FURNI_ASSETS_PROGRESS_SUCCESS":
+      return {
+        ...state,
+        lastFurniAsset: action.payload,
+        furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
+      };
 
-  if (action.type === "FURNI_ASSETS_SUCCESS") {
-    return {
-      ...state,
-      furniAssets: "success",
-    };
-  }
+    case "FURNI_ASSETS_PROGRESS_ERROR":
+      return {
+        ...state,
+        furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
+      };
 
-  if (action.type === "FURNI_ASSETS_COUNT") {
-    return {
-      ...state,
-      furniAssetsCount: action.payload,
-    };
-  }
+    case "FURNI_ASSETS_PROGRESS_ERROR":
+      return {
+        ...state,
+        furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
+      };
 
-  if (action.type === "FIGURE_ASSETS_COUNT") {
-    return {
-      ...state,
-      figureAssetsCount: action.payload,
-    };
-  }
+    case "FURNI_ASSETS_SUCCESS":
+      return {
+        ...state,
+        furniAssets: "success",
+      };
 
-  return state;
+    case "FURNI_ASSETS_COUNT":
+      return {
+        ...state,
+        furniAssetsCount: action.payload,
+      };
+
+    case "FIGURE_ASSETS_COUNT":
+      return {
+        ...state,
+        figureAssetsCount: action.payload,
+      };
+
+    case "FIGURE_ASSETS_DOWNLOAD_COUNT":
+      return {
+        ...state,
+        figureAssetsDownloadCount: (state?.figureAssetsDownloadCount ?? 0) + 1,
+      };
+
+    default:
+      return state;
+  }
 }
 
 export const initialState: State = {

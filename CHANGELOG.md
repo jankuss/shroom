@@ -11,12 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Furniture will now only use valid directions
 - `screenPosition` property for `Avatar`
+- Add `BaseAvatar` for rendering avatars without a room
+- Add `BaseFurniture` for rendering furniture without a room
+- Add `onActiveTileChange` events for detecing hovered tile
 
 ### Fixed
 
 - Fix bug in AvatarSprites when updating without being mounted
 - Fix wall display for some room models
 - Fix alpha for furniture
+- Tile Cursor now shows above flooring items
+- Fix `RoomCamera` drag stopping when going over dom elements
+- Fix `RoomCamera` drag passing through other PIXI elements
 
 ## [0.2.0] - 2020-12-27
 

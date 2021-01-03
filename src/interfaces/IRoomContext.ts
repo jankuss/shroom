@@ -1,4 +1,5 @@
 import { ILandscapeContainer } from "../objects/room/ILandscapeContainer";
+import { Room } from "../objects/room/Room";
 import { IAnimationTicker } from "./IAnimationTicker";
 import { IAvatarLoader } from "./IAvatarLoader";
 import { IConfiguration } from "./IConfiguration";
@@ -20,4 +21,6 @@ export interface IRoomContext {
   configuration: IConfiguration;
   tilemap: ITileMap;
   landscapeContainer: ILandscapeContainer;
+  application: PIXI.Application;
+  room: Room;
 }

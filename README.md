@@ -2,9 +2,9 @@
 
 Shroom is a room rendering engine for retros.
 
-## Documenation
+## Documentation
 
-The documenation can be found [here](https://jankuss.github.io/shroom/docs/).
+The documentation can be found [here](https://jankuss.github.io/shroom/docs/).
 
 ## Official Discord Server
 
