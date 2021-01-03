@@ -1,4 +1,9 @@
-import { FloorFurniture, Room, WallFurniture } from "@jankuss/shroom";
+import {
+  FloorFurniture,
+  Room,
+  RoomCamera,
+  WallFurniture,
+} from "@jankuss/shroom";
 import { createShroom } from "./common/createShroom";
 import { action } from "@storybook/addon-actions";
 
@@ -387,5 +392,42 @@ export function GldGate() {
     //room.addRoomObject(floorFurniture4);
 
     application.stage.addChild(room);
+  });
+}
+
+export function BigRoom() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+       xxxxxxxxxxx
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+      `,
+    });
+
+    fetch("./furni.json")
+      .then((response) => response.json())
+      .then((value) => {
+        value.forEach((value) => {
+          room.addRoomObject(
+            new FloorFurniture({
+              direction: value.rot,
+              roomX: value.x,
+              roomY: value.y,
+              roomZ: value.z,
+              type: value.item,
+              animation: value.extra_data,
+            })
+          );
+        });
+      });
+
+    application.stage.addChild(RoomCamera.forScreen(room));
   });
 }
