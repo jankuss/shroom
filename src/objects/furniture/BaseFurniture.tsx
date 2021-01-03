@@ -260,11 +260,16 @@ export class BaseFurniture
         newAnimationNumber = undefined;
       }
 
+      const transitionToWithFallback = transitionTo ?? newAnimationNumber;
+
       if (this._frameCount != null) {
         this.cancelTicker = this.animationTicker.subscribe((frame) => {
-          this.setCurrentFrame(frame, transitionTo ?? newAnimationNumber);
+          this.setCurrentFrame(frame, transitionToWithFallback);
         });
-        this.setCurrentFrame(this.animationTicker.current());
+        this.setCurrentFrame(
+          this.animationTicker.current(),
+          transitionToWithFallback
+        );
       }
     } else if (newAnimation == null) {
       this.cancelTicker && this.cancelTicker();
@@ -343,7 +348,12 @@ export class BaseFurniture
   private _transitionToAnimation(animation: string) {
     this._startFrame = undefined;
     this._animationOverride = animation;
-    this._refreshFurniture = true;
+
+    if (this._runningAnimation !== animation) {
+      this._refreshFurniture = true;
+    } else {
+      this.setCurrentFrame(this.animationTicker.current());
+    }
   }
 
   private _getDisplayAnimation() {
@@ -360,40 +370,40 @@ export class BaseFurniture
     let maxFrameCount: number | undefined;
 
     this.animatedSprites.forEach((animatedSprite) => {
+      animatedSprite.sprites.forEach(
+        (sprite) => (sprite.sprite.visible = false)
+      );
+    });
+
+    this.animatedSprites.forEach((animatedSprite) => {
       const frameCount = (this._frameCount ?? 1) * animatedSprite.frameRepeat;
       if (maxFrameCount == null || frameCount > maxFrameCount) {
         maxFrameCount = frameCount;
       }
 
-      const previousFrameIndex = progress - 1;
       let frameIndex = progress;
 
       if (frameIndex > animatedSprite.frames.length - 1) {
         frameIndex = animatedSprite.frames.length - 1;
       }
 
-      const frameIdPrevious = animatedSprite.frames[previousFrameIndex];
+      frameIndex = frameIndex % frameCount;
+
       const frameIdCurrent = animatedSprite.frames[frameIndex];
-
-      const previous = animatedSprite.sprites.get(frameIdPrevious);
       const current = animatedSprite.sprites.get(frameIdCurrent);
-
-      if (previous) {
-        previous.sprite.visible = false;
-      }
 
       if (current) {
         current.sprite.visible = true;
       }
     });
 
-    if (maxFrameCount != null && progress >= maxFrameCount) {
-      const transitionToNormalized =
-        transitionTo?.toString() ?? this._getDisplayAnimation();
-      if (transitionToNormalized != null) {
-        this._transitionToAnimation(transitionToNormalized);
-        return;
-      }
+    if (
+      maxFrameCount != null &&
+      progress >= maxFrameCount &&
+      transitionTo != null
+    ) {
+      this._transitionToAnimation(transitionTo.toString());
+      return;
     }
   }
 
