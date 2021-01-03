@@ -3,8 +3,11 @@ import * as path from "path";
 
 function execute(command: string) {
   return new Promise((resolve, reject) =>
-    exec(command, {maxBuffer: 1024 * 1024}, (error: ExecException | null, stdout: string, stderr: string) =>
-      error ? reject(error) : resolve(stdout)
+    exec(
+      command,
+      { maxBuffer: 1024 * 1024 },
+      (error: ExecException | null, stdout: string, stderr: string) =>
+        error ? reject(error) : resolve(stdout)
     )
   );
 }
@@ -18,27 +21,37 @@ function getExtension(str: string) {
   }
 }
 
-export async function extractSwf(
-  out: string,
-  swf: string,
-  preserveFileNameFor: ("bin" | "png")[] = []
-) {
+interface IExtractSwf {
+  out: string;
+  swf: string;
+  preserveFileNameFor?: ("bin" | "png")[];
+}
+
+export async function extractSwf({
+  swf,
+  out,
+  preserveFileNameFor = [],
+}: IExtractSwf) {
   const result: string = (await execute(`swfdump ${swf}`)) as any;
   const regexIds = /\[.*\]\s*[0-9]*\s*(.*) defines id ([0-9]*)/gm;
   const regexNames = /exports ([0-9]*) as "(.*)"/gm;
 
   const arr: [string, number][] = [];
+  const map = new Map<number, string[]>();
+
   let match: any;
+
   do {
     match = regexIds.exec(result);
+
     if (match) {
       arr.push([match[1], Number(match[2])]);
     }
   } while (match);
 
-  const map = new Map<number, string[]>();
   do {
     match = regexNames.exec(result);
+
     if (match) {
       const key = Number(match[1]);
       const current = map.get(key);
@@ -51,10 +64,9 @@ export async function extractSwf(
     }
   } while (match);
 
-  const results = arr.map(([type, id]) => ({ type, files: map.get(id), id }));
-
-  for (let i = 0; i < results.length; i++) {
-    const { id, type, files = [] } = results[i];
+  for (let i = 0; i < arr.length; i++) {
+    const [type, id] = arr[i];
+    const files = map.get(id) ?? [];
 
     for (let j = 0; j < files.length; j++) {
       const file = files[j];
@@ -62,7 +74,7 @@ export async function extractSwf(
 
       const swfName = path.basename(swf, ".swf");
 
-      if (fileName != null && file != null) {
+      if (fileName && file) {
         const realFileName = !preserveFileNameFor.includes(fileName[1])
           ? file.replace(`${swfName}_`, "")
           : file;
