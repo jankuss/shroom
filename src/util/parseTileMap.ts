@@ -61,7 +61,8 @@ export function parseTileMap(
       const resultY = y;
 
       const tileInfo = getTileInfo(tilemap, x, y);
-      const tileInfoAbove = getTileInfo(tilemap, x, y + 1);
+      const tileInfoBelow = getTileInfo(tilemap, x, y + 1);
+      const tileInfoRight = getTileInfo(tilemap, x + 1, y);
 
       const wall = wallInfo.getWall(x, y);
 
@@ -72,6 +73,8 @@ export function parseTileMap(
               kind: "colWall",
               type: "wall",
               height: wall.height,
+              hideBorder:
+                tileInfoBelow.height != null && tileInfoBelow.height > 0,
             };
             break;
 
@@ -80,7 +83,9 @@ export function parseTileMap(
               kind: "rowWall",
               type: "wall",
               height: wall.height,
-              hideBorder: tileInfoAbove.rowDoor ? true : false,
+              hideBorder:
+                tileInfoBelow.rowDoor ||
+                (tileInfoRight.height != null && tileInfoRight.height > 0),
             };
             break;
 
