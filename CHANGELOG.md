@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add ability to share a shroom instance with multiple applications through `Shroom.createShared`
 - Furniture will now only use valid directions
 
-### Change
+### Changed
 
 - Change default wall color to use the original
 
