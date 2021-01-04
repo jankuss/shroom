@@ -8,4 +8,4 @@ The documentation can be found [here](https://jankuss.github.io/shroom/docs/).
 
 ## Official Discord Server
 
-If you need support or you just want to talk about `shroom`, feel free to join us on our [Official Discord Server](https://discord.gg/SazkYzhsru).
+If you need support or you just want to talk about `shroom`, feel free to join us on our [Official Discord Server](https://discord.gg/PjeS9JHeaE).
