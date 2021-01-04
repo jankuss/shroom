@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix `RoomCamera` drag passing through other PIXI elements
 - Fix Avatar hair clipping through hats
 - Fix Avatar sleeves for some T-Shirts because library wasn't detected
+- Fix wall border showing for tiles on a higher level than the wall
 
 ## [0.2.0] - 2020-12-27
 
