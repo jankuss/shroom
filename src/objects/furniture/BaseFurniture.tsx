@@ -2,11 +2,9 @@ import * as PIXI from "pixi.js";
 
 import { ClickHandler } from "../hitdetection/ClickHandler";
 import { HitSprite } from "../hitdetection/HitSprite";
-import { DrawPart } from "./util/DrawDefinition";
+import { FurniDrawPart } from "./util/DrawDefinition";
 import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
 import { LoadFurniResult } from "./util/loadFurni";
-import { Asset } from "./util/parseAssets";
-import { Layer } from "./util/visualization/parseLayers";
 import { HitTexture } from "../hitdetection/HitTexture";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 import { HighlightFilter } from "./filter/HighlightFilter";
@@ -15,6 +13,8 @@ import {
   IFurnitureLoader,
 } from "../../interfaces/IFurnitureLoader";
 import { getDirectionForFurniture } from "./util/getDirectionForFurniture";
+import { FurnitureAsset } from "./data/interfaces/IFurnitureAssetsData";
+import { FurnitureLayer } from "./data/interfaces/IFurnitureVisualizationData";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IRoomContext } from "../../interfaces/IRoomContext";
@@ -68,10 +68,12 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   private _highlight: boolean = false;
   private _alpha: number = 1;
+  private _frameCount: number | undefined;
 
   private animatedSprites: {
     sprites: Map<string, SpriteWithStaticOffset>;
     frames: string[];
+    frameRepeat: number;
   }[] = [];
 
   private _maskNodes: MaskNode[] = [];
@@ -252,9 +254,18 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   }
 
   public set animation(value) {
+    this._animationOverride = undefined;
     this._animation = value;
     this._refreshFurniture = true;
   }
+
+  private _runningAnimation: string | undefined;
+
+  private _animationOverride: string | undefined;
+
+  private _startFrame: number | undefined;
+
+  private cancelTicker: (() => void) | undefined = undefined;
 
   public get maskId() {
     return this._getMaskId;
@@ -310,10 +321,44 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       this._updateFurnitureSprites(
         this.loadFurniResult,
         this.direction,
-        this.animation
+        this._getDisplayAnimation()
       );
     } else {
       this._updateUnknown();
+    }
+  }
+
+  private _handleAnimation(transitionTo?: number) {
+    const newAnimation = this._getDisplayAnimation();
+    if (newAnimation != this._runningAnimation) {
+      this.cancelTicker && this.cancelTicker();
+
+      this._startFrame = undefined;
+      this._runningAnimation = newAnimation;
+
+      let newAnimationNumber: number | undefined = Number(newAnimation);
+      if (isNaN(newAnimationNumber)) {
+        newAnimationNumber = undefined;
+      }
+
+      const transitionToWithFallback = transitionTo ?? newAnimationNumber;
+
+      if (this._frameCount != null) {
+        this.cancelTicker = this.dependencies.animationTicker.subscribe(
+          (frame) => {
+            this._setCurrentFrame(frame, transitionToWithFallback);
+          }
+        );
+        this._setCurrentFrame(
+          this.dependencies.animationTicker.current(),
+          transitionToWithFallback
+        );
+      }
+    } else if (newAnimation == null) {
+      this.cancelTicker && this.cancelTicker();
+
+      this._startFrame = undefined;
+      this._runningAnimation = undefined;
     }
   }
 
@@ -343,16 +388,16 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
     this.destroySprites();
 
-    const { parts } = loadFurniResult.getDrawDefinition(
+    const {
+      parts,
+      frameCount,
+      transitionTo,
+    } = loadFurniResult.getDrawDefinition(
       getDirectionForFurniture(direction, loadFurniResult.directions),
       animation
     );
 
-    if (animation != null) {
-      this._cancelTicker = this.dependencies.animationTicker.subscribe(
-        (frame) => this._setCurrentFrame(frame)
-      );
-    }
+    this._frameCount = frameCount;
 
     parts.forEach((part, index) => {
       const asset = this.createAssetFromPart(
@@ -389,33 +434,74 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       }
     });
 
-    this._setCurrentFrame(this.dependencies.animationTicker.current());
+    this._handleAnimation(transitionTo);
   }
 
-  private _setCurrentFrame(frame: number) {
+  private _transitionToAnimation(animation: string) {
+    this._startFrame = undefined;
+    this._animationOverride = animation;
+
+    if (this._runningAnimation !== animation) {
+      this._refreshFurniture = true;
+    } else {
+      this._setCurrentFrame(this.dependencies.animationTicker.current());
+    }
+  }
+
+  private _getDisplayAnimation() {
+    if (this._animationOverride != null) return this._animationOverride;
+
+    return this.animation;
+  }
+
+  private _setCurrentFrame(frame: number, transitionTo?: number) {
+    if (this._startFrame == null) this._startFrame = frame;
+
+    const progress = frame - this._startFrame;
+
     this.animatedSprites.forEach((animatedSprite) => {
-      const previousFrameIndex = (frame - 1) % animatedSprite.frames.length;
-      const frameIndex = frame % animatedSprite.frames.length;
+      animatedSprite.sprites.forEach(
+        (sprite) => (sprite.sprite.visible = false)
+      );
+    });
 
-      const frameIdPrevious = animatedSprite.frames[previousFrameIndex];
-      const frameIdCurrent = animatedSprite.frames[frameIndex];
+    let maxFrameCount: number | undefined = undefined;
 
-      const previous = animatedSprite.sprites.get(frameIdPrevious);
-      const current = animatedSprite.sprites.get(frameIdCurrent);
-
-      if (previous) {
-        previous.sprite.visible = false;
+    this.animatedSprites.forEach((animatedSprite) => {
+      const frameCount = (this._frameCount ?? 1) * animatedSprite.frameRepeat;
+      if (maxFrameCount == null || frameCount > maxFrameCount) {
+        maxFrameCount = frameCount;
       }
+
+      let frameIndex = progress;
+
+      if (frameIndex > animatedSprite.frames.length - 1) {
+        frameIndex = animatedSprite.frames.length - 1;
+      }
+
+      frameIndex = frameIndex % frameCount;
+
+      const frameIdCurrent = animatedSprite.frames[frameIndex];
+      const current = animatedSprite.sprites.get(frameIdCurrent);
 
       if (current) {
         current.sprite.visible = true;
       }
     });
+
+    if (
+      maxFrameCount != null &&
+      progress >= maxFrameCount &&
+      transitionTo != null
+    ) {
+      this._transitionToAnimation(transitionTo.toString());
+      return;
+    }
   }
 
   private _createSprite(
-    asset: Asset,
-    layer: Layer | undefined,
+    asset: FurnitureAsset,
+    layer: FurnitureLayer | undefined,
     texture: HitTexture,
     {
       x,
@@ -441,7 +527,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
     sprite.hitTexture = texture;
 
-    if (layer?.ignoreMouse !== "1") {
+    if (layer?.ignoreMouse !== true) {
       sprite.addEventListener("click", (event) =>
         this._clickHandler.handleClick(event)
       );
@@ -512,7 +598,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   }
 
   private createAssetFromPart(
-    { asset, shadow, tint, layer, z, assets, mask }: DrawPart,
+    { asset, shadow, tint, layer, z, assets, mask, frameRepeat }: FurniDrawPart,
     { x, y }: { x: number; y: number },
     loadFurniResult: LoadFurniResult,
     index: number
@@ -522,10 +608,12 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         kind: "animated";
         sprites: Map<string, SpriteWithStaticOffset>;
         frames: string[];
+        frameRepeat: number;
       } {
-    const getAssetTextureName = (asset: Asset) => asset.source ?? asset.name;
+    const getAssetTextureName = (asset: FurnitureAsset) =>
+      asset.source ?? asset.name;
 
-    const getTexture = (asset: Asset) =>
+    const getTexture = (asset: FurnitureAsset) =>
       loadFurniResult.getTexture(getAssetTextureName(asset));
 
     const zIndex = (z ?? 0) + index * 0.01;
@@ -539,23 +627,22 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         assets != null && assets.length === 1 ? assets[0] : asset;
 
       if (actualAsset != null) {
-        const sprite = this._createSprite(
-          actualAsset,
-          layer,
-          getTexture(actualAsset),
-          {
+        const texture = getTexture(actualAsset);
+
+        if (texture != null) {
+          const sprite = this._createSprite(actualAsset, layer, texture, {
             x,
             y,
             zIndex,
             shadow,
             tint,
             mask,
+          });
+          if (mask != null && mask) {
+            return { kind: "mask", sprite: sprite };
+          } else {
+            return { kind: "simple", sprite: sprite };
           }
-        );
-        if (mask != null && mask) {
-          return { kind: "mask", sprite: sprite };
-        } else {
-          return { kind: "simple", sprite: sprite };
         }
       }
 
@@ -571,6 +658,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       const texture = getTexture(spriteFrame);
       const name = getAssetTextureName(spriteFrame);
       if (sprites.has(name)) return;
+      if (texture == null) return;
 
       const sprite = this._createSprite(spriteFrame, layer, texture, {
         x,
@@ -589,6 +677,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       kind: "animated",
       sprites: sprites,
       frames: assets.map((asset) => getAssetTextureName(asset)),
+      frameRepeat,
     };
   }
 

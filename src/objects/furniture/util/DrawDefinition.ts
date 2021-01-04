@@ -1,18 +1,20 @@
-import { Asset } from "./parseAssets";
-import { Layer } from "./visualization/parseLayers";
+import { FurnitureAsset } from "../data/interfaces/IFurnitureAssetsData";
+import { FurnitureLayer } from "../data/interfaces/IFurnitureVisualizationData";
 
-export type DrawPart = {
+export type FurniDrawPart = {
   z?: number;
   shadow: boolean;
   frameRepeat: number;
-  asset: Asset | undefined;
-  layer: Layer | undefined;
+  asset: FurnitureAsset | undefined;
+  layer: FurnitureLayer | undefined;
   tint?: string;
-  assets?: Asset[];
+  assets?: FurnitureAsset[];
   mask?: boolean;
+  loopCount?: number;
 };
 
-export interface DrawDefinition {
-  parts: DrawPart[];
+export interface FurniDrawDefinition {
+  parts: FurniDrawPart[];
   frameCount?: number;
+  transitionTo?: number;
 }
