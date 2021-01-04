@@ -45,6 +45,27 @@ export function Stairs() {
   });
 }
 
+export function StairWalls() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxxxxxxxx
+        x44321000
+        x44321000
+        x33000000
+        x22000000
+        x11000000
+        x00000000
+      `,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    application.stage.addChild(room);
+  });
+}
+
 export function MultipleSubsequentStairs() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
