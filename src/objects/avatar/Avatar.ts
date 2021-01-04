@@ -12,6 +12,7 @@ import { IScreenPositioned } from "../interfaces/IScreenPositioned";
 
 export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _avatarSprites: BaseAvatar;
+
   private _moveAnimation:
     | ObjectAnimation<{ type: "walk"; direction: number } | { type: "move" }>
     | undefined;
@@ -32,6 +33,9 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
   private _actions: Set<AvatarAction> = new Set();
   private _fx: { type: "dance"; id: string } | undefined;
+  private _loadingAvatarSprites: BaseAvatar;
+  private _placeholderSprites: BaseAvatar | undefined;
+  private _loaded = false;
 
   constructor({ look, roomX, roomY, roomZ, direction }: Options) {
     super();
@@ -42,10 +46,26 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._roomY = roomY;
     this._roomZ = roomZ;
 
-    this._avatarSprites = new BaseAvatar({
-      look: this._getCurrentLookOptions(),
+    this._placeholderSprites = new BaseAvatar({
+      look: this._getPlaceholderLookOptions(),
       zIndex: this._calculateZIndex(),
       position: { x: 0, y: 0 },
+      onLoad: () => {
+        this._updateAvatarSprites();
+      },
+    });
+    this._placeholderSprites.alpha = 0.5;
+
+    this._avatarSprites = this._placeholderSprites;
+
+    this._loadingAvatarSprites = new BaseAvatar({
+      look: this._getLookOptions(),
+      position: { x: 0, y: 0 },
+      zIndex: this._calculateZIndex(),
+      onLoad: () => {
+        this._loaded = true;
+        this._updateAvatarSprites();
+      },
     });
   }
 
@@ -190,7 +210,6 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
 
   set direction(value) {
     this._direction = value;
-    this._updatePosition();
     this._updateAvatarSprites();
   }
 
@@ -247,7 +266,24 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     }
   }
 
+  private _getPlaceholderLookOptions(): LookOptions {
+    return {
+      actions: new Set(),
+      direction: this.direction,
+      look: "hd-99999-99999",
+      effect: undefined,
+      initial: false,
+      item: undefined,
+    };
+  }
+
   private _getCurrentLookOptions(): LookOptions {
+    if (!this._loaded) return this._getPlaceholderLookOptions();
+
+    return this._getLookOptions();
+  }
+
+  private _getLookOptions(): LookOptions {
     const combinedActions = new Set(this.actions);
 
     if (this._walking) {
@@ -270,6 +306,21 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _updateAvatarSprites() {
     if (!this.mounted) return;
 
+    if (this._loaded) {
+      if (this._placeholderSprites != null) {
+        this.visualization.container.removeChild(this._placeholderSprites);
+        this.visualization.behindWallContainer.removeChild(
+          this._placeholderSprites
+        );
+      }
+
+      this._placeholderSprites = undefined;
+
+      this._avatarSprites = this._loadingAvatarSprites;
+    } else if (this._placeholderSprites != null) {
+      this._avatarSprites = this._placeholderSprites;
+    }
+
     const look = this._getCurrentLookOptions();
     const animating = true;
 
@@ -284,6 +335,8 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     if (avatarSprites != null) {
       avatarSprites.lookOptions = look;
     }
+
+    this._updatePosition();
   }
 
   private _updateFrame() {
@@ -404,12 +457,6 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _updatePosition() {
     if (!this.mounted) return;
 
-    this._avatarSprites.dependencies = {
-      animationTicker: this.animationTicker,
-      avatarLoader: this.avatarLoader,
-      hitDetection: this.hitDetection,
-    };
-
     const { roomX, roomY, roomZ } = this._getDisplayRoomPosition();
 
     const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
@@ -441,7 +488,20 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   }
 
   registered(): void {
-    this._updatePosition();
+    if (this._placeholderSprites != null) {
+      this._placeholderSprites.dependencies = {
+        animationTicker: this.animationTicker,
+        avatarLoader: this.avatarLoader,
+        hitDetection: this.hitDetection,
+      };
+    }
+
+    this._loadingAvatarSprites.dependencies = {
+      animationTicker: this.animationTicker,
+      avatarLoader: this.avatarLoader,
+      hitDetection: this.hitDetection,
+    };
+
     this._updateAvatarSprites();
 
     this._moveAnimation = new ObjectAnimation(

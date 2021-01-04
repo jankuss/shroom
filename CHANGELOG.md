@@ -9,12 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add Avatar placeholder when loading
+- Furniture will now only use valid directions
+- `screenPosition` property for `Avatar`
 - Add `BaseAvatar` for rendering avatars without a room
 - Add `BaseFurniture` for rendering furniture without a room
 - `screenPosition` property for `Avatar`
 - Add `onActiveTileChange` events for detecing hovered tile (useful for furniture placement preview)
 - Add ability to share a shroom instance with multiple applications through `Shroom.createShared`
 - Furniture will now only use valid directions
+
+### Change
+
+- Change default wall color to use the original
 
 ### Fixed
 
@@ -27,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix Avatar hair clipping through hats
 - Fix Avatar sleeves for some T-Shirts because library wasn't detected
 - Fix animations for some furnitures
+- Fix wall border showing for tiles on a higher level than the wall
 
 ## [0.2.0] - 2020-12-27
 
