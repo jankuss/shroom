@@ -70,23 +70,30 @@ export function parseTileMap(
       if (wall != null) {
         switch (wall.kind) {
           case "column":
+            const colWallHeightDiff =
+              tileInfoBelow.height != null
+                ? Math.abs(tileInfoBelow.height - wall.height)
+                : 0;
+
             result[resultY][resultX] = {
               kind: "colWall",
               type: "wall",
               height: wall.height,
-              hideBorder:
-                tileInfoBelow.height != null && tileInfoBelow.height > 0,
+              hideBorder: colWallHeightDiff > 0,
             };
             break;
 
           case "row":
+            const rowWallHeightDiff =
+              tileInfoRight.height != null
+                ? Math.abs(tileInfoRight.height - wall.height)
+                : 0;
+
             result[resultY][resultX] = {
               kind: "rowWall",
               type: "wall",
               height: wall.height,
-              hideBorder:
-                tileInfoBelow.rowDoor ||
-                (tileInfoRight.height != null && tileInfoRight.height > 0),
+              hideBorder: tileInfoBelow.rowDoor || rowWallHeightDiff > 0,
             };
             break;
 

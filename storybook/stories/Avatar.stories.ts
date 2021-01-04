@@ -1,5 +1,6 @@
 import { Room, Avatar, AvatarAction } from "@jankuss/shroom";
 import { createShroom } from "./common/createShroom";
+import { action } from "@storybook/addon-actions";
 
 export default {
   title: "Avatar",
@@ -107,7 +108,6 @@ export function Walking() {
 
     room.x = application.screen.width / 2 - room.roomWidth / 2;
     room.y = application.screen.height / 2 - room.roomHeight / 2;
-
     room.addRoomObject(avatar);
 
     application.stage.addChild(room);
@@ -256,6 +256,43 @@ export function AvatarPlain() {
     room.x = application.screen.width / 2 - room.roomWidth / 2;
     room.y = application.screen.height / 2 - room.roomHeight / 2;
 
+    room.addRoomObject(avatar);
+
+    application.stage.addChild(room);
+  });
+}
+
+export function EventHandling() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+           xxxxxxxx
+           x0000000
+           x0000000
+           x0000000
+           x0000000
+          `,
+    });
+
+    const avatar = new Avatar({
+      look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
+      direction: 4,
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+    });
+
+    avatar.onClick = action("Click");
+    avatar.onDoubleClick = action("Double Click");
+
+    setTimeout(() => {
+      avatar.walk(1, 2, 0, { direction: 4 });
+      avatar.walk(2, 2, 0, { direction: 2 });
+      avatar.walk(3, 2, 0, { direction: 2 });
+    }, 3000);
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
     room.addRoomObject(avatar);
 
     application.stage.addChild(room);

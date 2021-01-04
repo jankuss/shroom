@@ -53,6 +53,8 @@ export class BaseAvatar extends PIXI.Container {
   private _dependencies?: BaseAvatarDependencies;
   private _onLoad: (() => void) | undefined;
 
+  private _cancelTicker: (() => void) | undefined;
+
   public get dependencies() {
     if (this._dependencies == null)
       throw new Error("Invalid dependencies in BaseAvatar");
@@ -275,7 +277,11 @@ export class BaseAvatar extends PIXI.Container {
   private _handleDependenciesSet(): void {
     this._reloadLook();
 
-    this.dependencies.animationTicker.subscribe(() => {
+    if (this._cancelTicker != null) {
+      this._cancelTicker();
+    }
+
+    this._cancelTicker = this.dependencies.animationTicker.subscribe(() => {
       if (this._refreshLook) {
         this._refreshLook = false;
         this._reloadLook();
@@ -296,6 +302,11 @@ export class BaseAvatar extends PIXI.Container {
 
   destroy(): void {
     super.destroy();
+    this._assets.forEach((asset) => asset.destroy());
     this._container?.destroy();
+
+    if (this._cancelTicker != null) {
+      this._cancelTicker();
+    }
   }
 }

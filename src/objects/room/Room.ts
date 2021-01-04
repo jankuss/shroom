@@ -22,7 +22,7 @@ import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
 import { ILandscapeContainer } from "./ILandscapeContainer";
 import { RoomObjectContainer } from "./RoomObjectContainer";
-import { BehaviorSubject, Observable, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import { StairCorner } from "./StairCorner";
 
 export interface Dependencies {
