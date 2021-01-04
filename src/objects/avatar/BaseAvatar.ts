@@ -17,10 +17,11 @@ import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { Shroom } from "../Shroom";
 
-interface Options {
+export interface BaseAvatarOptions {
   look: LookOptions;
   position: { x: number; y: number };
   zIndex: number;
+  onLoad?: () => void;
 }
 
 export interface BaseAvatarDependencies {
@@ -50,6 +51,7 @@ export class BaseAvatar extends PIXI.Container {
   private _updateId = 0;
 
   private _dependencies?: BaseAvatarDependencies;
+  private _onLoad: (() => void) | undefined;
 
   public get dependencies() {
     if (this._dependencies == null)
@@ -110,12 +112,13 @@ export class BaseAvatar extends PIXI.Container {
     this._refreshFrame = true;
   }
 
-  constructor(options: Options) {
+  constructor(options: BaseAvatarOptions) {
     super();
     this.x = options.position.x;
     this.y = options.position.y;
     this.zIndex = options.zIndex;
     this._nextLookOptions = options.look;
+    this._onLoad = options.onLoad;
   }
 
   private _updateLookOptions(
@@ -254,6 +257,7 @@ export class BaseAvatar extends PIXI.Container {
           this._nextLookOptions = undefined;
 
           this._updateSprites();
+          this._onLoad && this._onLoad();
         });
     }
   }
@@ -284,13 +288,14 @@ export class BaseAvatar extends PIXI.Container {
     });
   }
 
-  static fromShroom(shroom: Shroom, options: Options) {
+  static fromShroom(shroom: Shroom, options: BaseAvatarOptions) {
     const avatar = new BaseAvatar({ ...options });
     avatar.dependencies = shroom.dependencies;
     return avatar;
   }
 
   destroy(): void {
+    super.destroy();
     this._container?.destroy();
   }
 }

@@ -25,6 +25,13 @@ import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
 import { getPartDataForParsedLook, PartData } from "./getPartDataForParsedLook";
 import { getDrawOrderForActions } from "./getDrawOrderForActions";
 
+const basePartSet = new Set<AvatarFigurePartType>([
+  AvatarFigurePartType.LeftHand,
+  AvatarFigurePartType.RightHand,
+  AvatarFigurePartType.Body,
+  AvatarFigurePartType.Head,
+]);
+
 /**
  * Returns a definition of how the avatar should be drawn.
  * @param options Look options
@@ -106,7 +113,21 @@ export function getAvatarDrawDefinition(
           }
 
           const partsForType = partByType.get(item.id);
-          if (partsForType == null) return [];
+          if (partsForType == null) {
+            if (basePartSet.has(item.id as AvatarFigurePartType)) {
+              return [
+                {
+                  id: "1",
+                  type: item.id,
+                  color: undefined,
+                  colorable: false,
+                  hiddenLayers: [],
+                },
+              ];
+            }
+
+            return [];
+          }
 
           return partsForType;
         })
