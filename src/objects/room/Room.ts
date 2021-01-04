@@ -23,6 +23,7 @@ import { ITileMap } from "../../interfaces/ITileMap";
 import { ILandscapeContainer } from "./ILandscapeContainer";
 import { RoomObjectContainer } from "./RoomObjectContainer";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
+import { StairCorner } from "./StairCorner";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -75,7 +76,7 @@ export class Room
   public readonly application: PIXI.Application;
 
   private _walls: Wall[] = [];
-  private _floor: (Tile | Stair)[] = [];
+  private _floor: (Tile | Stair | StairCorner)[] = [];
   private _cursors: TileCursor[] = [];
   private _doorWall: Wall | undefined;
 
@@ -491,7 +492,7 @@ export class Room
     this.addRoomObject(wall);
   }
 
-  private _registerTile(tile: Stair | Tile) {
+  private _registerTile(tile: Stair | StairCorner | Tile) {
     if (this.hideFloor) return;
 
     this._floor.push(tile);
@@ -675,6 +676,32 @@ export class Room
               tileHeight: this.tileHeight,
               color: this.tileColor,
               direction: tile.kind,
+            })
+          );
+
+          this._registerTileCursor({
+            roomX: x,
+            roomY: y,
+            roomZ: tile.z,
+          });
+
+          this._registerTileCursor({
+            roomX: x,
+            roomY: y,
+            roomZ: tile.z + 1,
+          });
+        }
+
+        if (tile.type === "stairCorner") {
+          this._registerTile(
+            new StairCorner({
+              geometry: this,
+              roomX: x,
+              roomY: y,
+              roomZ: tile.z,
+              tileHeight: this.tileHeight,
+              color: this.tileColor,
+              type: tile.kind,
             })
           );
 

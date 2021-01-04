@@ -4,7 +4,13 @@ import { isTile } from "./isTile";
 const offsets = {
   none: { x: 0, y: 0 },
   top: { x: 0, y: -1 },
+  bottom: { x: 0, y: 1 },
   left: { x: -1, y: 0 },
+  topLeft: { x: -1, y: -1 },
+  bottomLeft: { x: -1, y: 1 },
+  right: { x: 1, y: 0 },
+  topRight: { x: 1, y: -1 },
+  bottomRight: { x: 1, y: 1 },
 };
 
 export function getNumberOfTileType(tileType: TileType): number | "x" {
@@ -81,6 +87,12 @@ function getStairs(tiles: TileType[][], x: number, y: number) {
   const type = getTile(tiles, x, y);
   const topType = getTile(tiles, x, y, "top");
   const leftType = getTile(tiles, x, y, "left");
+  const rightType = getTile(tiles, x, y, "right");
+  const topLeftType = getTile(tiles, x, y, "topLeft");
+  const bottomLeftType = getTile(tiles, x, y, "bottomLeft");
+  const topRightType = getTile(tiles, x, y, "topRight");
+  
+
 
   if (isTile(topType) && isTile(type)) {
     const diff = Number(topType) - Number(type);
@@ -111,6 +123,30 @@ function getStairs(tiles: TileType[][], x: number, y: number) {
       if (destinationStairs == null || destinationStairs.direction === 2) {
         return { direction: 2 as const };
       }
+    }
+  }
+
+  if (isTile(topLeftType) && isTile(type) && (leftType === 'x' || Number(leftType) <= Number(type))) 
+  {
+    const diff = Number(topLeftType) - Number(type);
+    if (diff === 1) {
+      return { cornerType: 'front' as const, isCorner: true};
+    }
+  }
+
+  if (isTile(bottomLeftType) && isTile(type) && (leftType === 'x' || Number(leftType) <= Number(type))) 
+  {
+    const diff = Number(bottomLeftType) - Number(type);
+    if (diff === 1) {
+      return { cornerType: 'left' as const, isCorner: true};
+    }
+  }
+
+  if (isTile(topRightType) && isTile(type) && (rightType === 'x' || Number(rightType) <= Number(type))) 
+  {
+    const diff = Number(topRightType) - Number(type);
+    if (diff === 1) {
+      return { cornerType: 'right' as const, isCorner: true};
     }
   }
 }

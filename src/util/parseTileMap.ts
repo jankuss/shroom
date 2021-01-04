@@ -7,14 +7,15 @@ import { getRowWalls, RowWall } from "./tilemap/getRowWalls";
 
 export type ParsedTileType =
   | {
-      type: "wall";
-      kind: "colWall" | "rowWall" | "innerCorner" | "outerCorner";
-      height: number;
-      hideBorder?: boolean;
-    }
+    type: "wall";
+    kind: "colWall" | "rowWall" | "innerCorner" | "outerCorner";
+    height: number;
+    hideBorder?: boolean;
+  }
   | { type: "tile"; z: number }
   | { type: "hidden" }
   | { type: "stairs"; kind: 0 | 2; z: number }
+  | { type: "stairCorner"; kind: 'left' | 'right' | 'front'; z: number }
   | { type: "door"; z: number };
 
 /**
@@ -109,11 +110,20 @@ export function parseTileMap(
 
       if (!tileInfo.rowDoor || hasDoor) {
         if (tileInfo.stairs != null && tileInfo.height != null) {
-          result[resultY][resultX] = {
-            type: "stairs",
-            kind: tileInfo.stairs.direction,
-            z: tileInfo.height,
-          };
+
+          if (tileInfo.stairs.isCorner) {
+            result[resultY][resultX] = {
+              type: "stairCorner",
+              kind: tileInfo.stairs.cornerType,
+              z: tileInfo.height,
+            };
+          } else {
+            result[resultY][resultX] = {
+              type: "stairs",
+              kind: tileInfo.stairs.direction!,
+              z: tileInfo.height,
+            };
+          }
 
           applyHighLowTile(tileInfo.height);
         } else if (tileInfo.height != null) {
