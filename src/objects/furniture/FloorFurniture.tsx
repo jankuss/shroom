@@ -63,13 +63,13 @@ export class FloorFurniture
       this._type = options.type;
     }
 
-    options.behaviors?.forEach((behavior) => behavior.setParent(this));
-
     this._baseFurniture = new BaseFurniture({
       animation: this.animation,
       direction: this.direction,
       type: getFurnitureFetch(this.options, "floor"),
     });
+
+    options.behaviors?.forEach((behavior) => behavior.setParent(this));
   }
 
   /**
