@@ -394,9 +394,9 @@ export function GldGate() {
       b = !b;
 
       if (b) {
-        floorFurniture3.animation = "100";
+        floorFurniture3.animation = "1";
       } else {
-        floorFurniture3.animation = "101";
+        floorFurniture3.animation = "0";
       }
     };
 

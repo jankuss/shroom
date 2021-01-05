@@ -1,17 +1,21 @@
 import { FurnitureAsset } from "../data/interfaces/IFurnitureAssetsData";
 import { FurnitureLayer } from "../data/interfaces/IFurnitureVisualizationData";
 
-export type FurniDrawPart = {
+export type BaseFurniDrawPart = {
+  layerIndex: number;
   z?: number;
   shadow: boolean;
   frameRepeat: number;
-  asset: FurnitureAsset | undefined;
   layer: FurnitureLayer | undefined;
   tint?: string;
-  assets?: FurnitureAsset[];
   mask?: boolean;
   loopCount?: number;
 };
+
+export type FurniDrawPart = {
+  asset: FurnitureAsset | undefined;
+  assets?: FurnitureAsset[];
+} & BaseFurniDrawPart;
 
 export interface FurniDrawDefinition {
   parts: FurniDrawPart[];

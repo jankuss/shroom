@@ -2,6 +2,7 @@ import { HitTexture } from "../../hitdetection/HitTexture";
 import { FurnitureAssetsData } from "../data/FurnitureAssetsData";
 import { FurnitureIndexData } from "../data/FurnitureIndexData";
 import { FurnitureVisualizationData } from "../data/FurnitureVisualizationData";
+import { IFurnitureVisualizationData } from "../data/interfaces/IFurnitureVisualizationData";
 import { FurnitureExtraData } from "../FurnitureExtraData";
 import { FurniDrawDefinition } from "./DrawDefinition";
 import { getFurniDrawDefinition } from "./getFurniDrawDefinition";
@@ -25,6 +26,7 @@ export type LoadFurniResult = {
   getTexture: (name: string) => HitTexture | undefined;
   getExtraData: () => FurnitureExtraData;
   directions: number[];
+  visualizationData: IFurnitureVisualizationData;
 };
 
 export async function loadFurni(
@@ -101,5 +103,6 @@ export async function loadFurni(
       return indexData;
     },
     directions: visualization.directions,
+    visualizationData,
   };
 }
