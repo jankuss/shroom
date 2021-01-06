@@ -44,14 +44,22 @@ export class WallFurniture extends RoomObject implements IFurniture {
     this._animation = options.animation;
     this._direction = options.direction;
 
-    this._baseFurniture = new BaseFurniture(
-      getFurnitureFetch(options, "wall"),
-      options.direction,
-      options.animation,
-      (direction) => getMaskId(direction, this.roomX, this.roomY)
-    );
+    this._baseFurniture = new BaseFurniture({
+      animation: this.animation,
+      direction: this.direction,
+      type: getFurnitureFetch(options, "wall"),
+      getMaskId: (direction) => getMaskId(direction, this.roomX, this.roomY),
+    });
 
     options.behaviors?.forEach((behavior) => behavior.setParent(this));
+  }
+
+  public get extradata() {
+    return this._baseFurniture.extradata;
+  }
+
+  public get validDirections() {
+    return this._baseFurniture.validDirections;
   }
 
   public get id() {
@@ -64,6 +72,14 @@ export class WallFurniture extends RoomObject implements IFurniture {
 
   public set highlight(value) {
     this._highlight = this._highlight;
+  }
+
+  public get alpha() {
+    return this._baseFurniture.alpha;
+  }
+
+  public set alpha(value: number) {
+    this._baseFurniture.alpha = value;
   }
 
   public get type() {
@@ -170,7 +186,14 @@ export class WallFurniture extends RoomObject implements IFurniture {
   }
 
   registered(): void {
+    this._baseFurniture.dependencies = {
+      animationTicker: this.animationTicker,
+      furnitureLoader: this.furnitureLoader,
+      hitDetection: this.hitDetection,
+      placeholder: this.configuration.placeholder,
+      visualization: this.visualization,
+    };
+
     this.updatePosition();
-    this.roomObjectContainer.addRoomObject(this._baseFurniture);
   }
 }

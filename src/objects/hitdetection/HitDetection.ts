@@ -15,6 +15,14 @@ export class HitDetection implements IHitDetection {
     app.view.addEventListener("click", (event) => this.handleClick(event), {
       capture: true,
     });
+
+    app.view.addEventListener(
+      "contextmenu",
+      (event) => this.handleClick(event),
+      {
+        capture: true,
+      }
+    );
   }
 
   private _debugHitDetection() {
@@ -56,7 +64,7 @@ export class HitDetection implements IHitDetection {
     x: number,
     y: number,
     invoke: (element: HitDetectionElement, event: HitEvent) => void,
-    domEvent?: Event
+    domEvent: MouseEvent
   ) {
     const elements = this.performHitTest(x, y);
     let stopped = false;
@@ -68,6 +76,7 @@ export class HitDetection implements IHitDetection {
       absorb: () => {
         domEvent?.stopImmediatePropagation();
       },
+      mouseEvent: domEvent,
     };
 
     for (let i = 0; i < elements.length; i++) {

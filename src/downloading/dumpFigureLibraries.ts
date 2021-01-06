@@ -1,10 +1,10 @@
 import { promises as fs } from "fs";
 import { parseStringPromise } from "xml2js";
-import fetch from "node-fetch";
 import { extractSwf } from "./extractSwf";
 import { Promise as Bluebird } from "bluebird";
 import * as path from "path";
 import { Action } from "./state";
+import { tryFetchBuffer } from "./fetching";
 
 export async function dumpFigureLibraries(
   gordon: string,
@@ -29,28 +29,52 @@ export async function dumpFigureLibraries(
       await fs.mkdir(resolvedOutPath, { recursive: true });
 
       const swfLocation = path.join(resolvedOutPath, fileName);
+      const downloadSuccess = () =>
+        dispatch({ type: "FIGURE_ASSETS_DOWNLOAD_COUNT" });
+
+      try {
+        await fs.stat(swfLocation);
+        return downloadSuccess();
+      } catch (e) {}
+
+      try {
+        const buffer = await tryFetchBuffer(file);
+        await fs.writeFile(swfLocation, buffer);
+
+        downloadSuccess();
+      } catch (e) {}
+    },
+    { concurrency: 30 } // We can use this limit because if the download get stucked, we will retry it after a short time ;)
+  );
+
+  await Bluebird.map(
+    libs,
+    async (item) => {
+      const id = item["$"].id;
+      const fileName = `${id}.swf`;
+      const manifestFileName = `${id}_manifest.bin`;
+
+      const resolvedOutPath = path.resolve(path.join(out, id));
+      const swfLocation = path.join(resolvedOutPath, fileName);
+      const manifestFileLocation = path.join(resolvedOutPath, manifestFileName);
 
       const success = () =>
         dispatch({ type: "FIGURE_ASSETS_PROGRESS_SUCCESS", payload: fileName });
 
+      // It will skip the dump process if the manifest file have been already created
       try {
-        await fs.stat(swfLocation);
-        success();
-        return;
-      } catch (e) {
-        // Continue if file doesnt exist yet
-      }
+        await fs.stat(manifestFileLocation);
+        return success();
+      } catch (e) {}
 
-      const response = await fetch(file);
-      const buffer = await response.buffer();
+      await extractSwf({
+        out: resolvedOutPath,
+        swf: swfLocation,
+        preserveFileNameFor: ["bin"],
+      });
 
-      if (response.status !== 200) return;
-
-      await fs.writeFile(swfLocation, buffer);
-      await extractSwf(resolvedOutPath, swfLocation, ["bin"]);
-
-      success();
+      return success();
     },
-    { concurrency: 30 }
+    { concurrency: 30 } // Safe concurrency to avoid CPU bottleneck
   );
 }

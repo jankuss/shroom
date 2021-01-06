@@ -42,7 +42,9 @@ export class TileCursor extends RoomObject {
   constructor(
     private position: RoomPosition,
     private door: boolean,
-    private onClick: (position: RoomPosition) => void
+    private onClick: (position: RoomPosition) => void,
+    private onOver: (position: RoomPosition) => void,
+    private onOut: (position: RoomPosition) => void
   ) {
     super();
     this._roomX = position.roomX;
@@ -87,7 +89,7 @@ export class TileCursor extends RoomObject {
 
     graphics.zIndex = this.door
       ? 0
-      : getZOrder(this._roomX, this._roomY, this._roomZ);
+      : getZOrder(this._roomX, this._roomY, this._roomZ) - 1;
     graphics.x = x;
     graphics.y = y;
 
@@ -102,9 +104,9 @@ export class TileCursor extends RoomObject {
     this.graphics = this._createGraphics();
 
     if (this.door) {
-      this.visualization.addBehindWallChild(this.graphics);
+      this.visualization.behindWallContainer.addChild(this.graphics);
     } else {
-      this.visualization.addTileCursorChild(this.graphics);
+      this.visualization.container.addChild(this.graphics);
     }
     this.updateGraphics();
   }
@@ -113,5 +115,11 @@ export class TileCursor extends RoomObject {
     if (this.hover === hover) return;
     this.hover = hover;
     this.updateGraphics();
+
+    if (hover) {
+      this.onOver(this.position);
+    } else {
+      this.onOut(this.position);
+    }
   }
 }

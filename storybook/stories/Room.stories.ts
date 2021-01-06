@@ -3,6 +3,7 @@ import {
   Room,
   Landscape,
   WallFurniture,
+  RoomCamera,
 } from "@jankuss/shroom";
 
 import { createShroom } from "./common/createShroom";
@@ -34,6 +35,27 @@ export function Stairs() {
         x1100
         x0000
         x0000
+      `,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    application.stage.addChild(room);
+  });
+}
+
+export function StairWalls() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxxxxxxxx
+        x44321000
+        x44321000
+        x33000000
+        x22000000
+        x11000000
+        x00000000
       `,
     });
 
@@ -364,6 +386,102 @@ export function LandscapeColor() {
     room.addRoomObject(window9);
 
     application.stage.addChild(room);
+  });
+}
+
+export function RoomModelTest1() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+      xxxxxxxxxxxxxxxxxxx
+      xxxxxxx222222222222
+      xxxxxxx222222222222
+      xxxxxxx222222222222
+      xxxxxxx222222222222
+      xxxxxxx222222222222
+      xxxxxxx222222222222
+      xxxxxxx22222222xxxx
+      xxxxxxx11111111xxxx
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x222221111111111111
+      x2222xx11111111xxxx
+      x2222xx00000000xxxx
+      x2222xx000000000000
+      x2222xx000000000000
+      x2222xx000000000000
+      x2222xx000000000000
+      22222xx000000000000
+      x2222xx000000000000
+      xxxxxxxxxxxxxxxxxxx
+      `,
+    });
+
+    application.stage.addChild(RoomCamera.forScreen(room));
+  });
+}
+
+export function RoomModelTest2() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+      xxxxxxxxxxxxxxxxxxxx
+      x222221111111111111x
+      x222221111111111111x
+      2222221111111111111x
+      x222221111111111111x
+      x222221111111111111x
+      x222221111111111111x
+      xxxxxxxx1111xxxxxxxx
+      xxxxxxxx0000xxxxxxxx
+      x000000x0000x000000x
+      x000000x0000x000000x
+      x00000000000x000000x
+      x00000000000x000000x
+      x000000000000000000x
+      x000000000000000000x
+      xxxxxxxx00000000000x
+      x000000x00000000000x
+      x000000x0000xxxxxxxx
+      x00000000000x000000x
+      x00000000000x000000x
+      x00000000000x000000x
+      x00000000000x000000x
+      xxxxxxxx0000x000000x
+      x000000x0000x000000x
+      x000000x0000x000000x
+      x000000000000000000x
+      x000000000000000000x
+      x000000000000000000x
+      x000000000000000000x
+      xxxxxxxxxxxxxxxxxxxx
+      `,
+    });
+
+    application.stage.addChild(RoomCamera.forScreen(room));
+  });
+}
+
+export function OtherRoomShape() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxxxxxx
+        xxxx000
+        xxxx000
+        xxxxx00
+        xxxxx00
+        0000000
+        x000000
+      `,
+    });
+
+    application.stage.addChild(RoomCamera.forScreen(room));
   });
 }
 

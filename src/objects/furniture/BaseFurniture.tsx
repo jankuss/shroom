@@ -1,18 +1,24 @@
 import * as PIXI from "pixi.js";
-import { ClickHandler } from "../ClickHandler";
-import { HitEvent } from "../../interfaces/IHitDetection";
-import { HitSprite } from "../hitdetection/HitSprite";
 
-import { RoomObject } from "../RoomObject";
-import { DrawPart } from "./util/DrawDefinition";
+import { ClickHandler } from "../hitdetection/ClickHandler";
+import { HitSprite } from "../hitdetection/HitSprite";
+import { FurniDrawPart } from "./util/DrawDefinition";
 import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
 import { LoadFurniResult } from "./util/loadFurni";
-import { Asset } from "./util/parseAssets";
-import { Layer } from "./util/visualization/parseLayers";
 import { HitTexture } from "../hitdetection/HitTexture";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 import { HighlightFilter } from "./filter/HighlightFilter";
-import { FurnitureFetch } from "../../interfaces/IFurnitureLoader";
+import {
+  FurnitureFetch,
+  IFurnitureLoader,
+} from "../../interfaces/IFurnitureLoader";
+import { getDirectionForFurniture } from "./util/getDirectionForFurniture";
+import { FurnitureAsset } from "./data/interfaces/IFurnitureAssetsData";
+import { FurnitureLayer } from "./data/interfaces/IFurnitureVisualizationData";
+import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
+import { IHitDetection } from "../../interfaces/IHitDetection";
+import { IRoomContext } from "../../interfaces/IRoomContext";
+import { Shroom } from "../Shroom";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -25,9 +31,22 @@ type SpriteWithStaticOffset = {
   zIndex?: number;
 };
 
-export class BaseFurniture
-  extends RoomObject
-  implements IFurnitureEventHandlers {
+interface BaseFurnitureDependencies {
+  placeholder: PIXI.Texture | undefined;
+  visualization: IFurnitureVisualization;
+  animationTicker: IAnimationTicker;
+  furnitureLoader: IFurnitureLoader;
+  hitDetection: IHitDetection;
+}
+
+export interface BaseFurnitureProps {
+  type: FurnitureFetch;
+  direction: number;
+  animation: string | undefined;
+  getMaskId?: MaskIdGetter;
+}
+
+export class BaseFurniture implements IFurnitureEventHandlers {
   private elements: SpriteWithStaticOffset[] = [];
   private loadFurniResult: LoadFurniResult | undefined;
   private unknownSprite: PIXI.Sprite | undefined;
@@ -40,12 +59,119 @@ export class BaseFurniture
   private _type: FurnitureFetch;
   private _unknownTexture: PIXI.Texture | undefined;
   private _clickHandler = new ClickHandler();
+  private _loadFurniResultPromise: Promise<LoadFurniResult>;
+  private _resolveLoadFurniResult: (result: LoadFurniResult) => void = () => {};
 
   private _refreshPosition: boolean = false;
   private _refreshFurniture: boolean = false;
   private _refreshZIndex: boolean = false;
 
   private _highlight: boolean = false;
+  private _alpha: number = 1;
+  private _frameCount: number | undefined;
+
+  private animatedSprites: {
+    sprites: Map<string, SpriteWithStaticOffset>;
+    frames: string[];
+    frameRepeat: number;
+  }[] = [];
+
+  private _maskNodes: MaskNode[] = [];
+  private _cancelTicker: (() => void) | undefined = undefined;
+  private _getMaskId: MaskIdGetter;
+
+  private _dependencies?: {
+    placeholder: PIXI.Texture | undefined;
+    visualization: IFurnitureVisualization;
+    animationTicker: IAnimationTicker;
+    furnitureLoader: IFurnitureLoader;
+    hitDetection: IHitDetection;
+  };
+
+  public get dependencies() {
+    if (this._dependencies == null) throw new Error("Invalid dependencies");
+
+    return this._dependencies;
+  }
+
+  public set dependencies(value) {
+    this._dependencies = value;
+    this._loadFurniture();
+  }
+
+  public get mounted() {
+    return this._dependencies != null;
+  }
+
+  static fromRoomContext(context: IRoomContext, props: BaseFurnitureProps) {
+    return new BaseFurniture({
+      dependencies: {
+        placeholder: context.configuration.placeholder,
+        animationTicker: context.animationTicker,
+        furnitureLoader: context.furnitureLoader,
+        hitDetection: context.hitDetection,
+        visualization: context.visualization,
+      },
+      ...props,
+    });
+  }
+
+  static fromShroom(
+    shroom: Shroom,
+    container: PIXI.Container,
+    props: BaseFurnitureProps
+  ) {
+    return new BaseFurniture({
+      dependencies: {
+        animationTicker: shroom.dependencies.animationTicker,
+        furnitureLoader: shroom.dependencies.furnitureLoader,
+        hitDetection: shroom.dependencies.hitDetection,
+        placeholder: shroom.dependencies.configuration.placeholder,
+        visualization: {
+          container,
+          addMask: () => {},
+        },
+      },
+      ...props,
+    });
+  }
+
+  constructor({
+    type,
+    direction,
+    animation = "0",
+    getMaskId = () => undefined,
+    dependencies,
+  }: {
+    dependencies?: BaseFurnitureDependencies;
+  } & BaseFurnitureProps) {
+    this._direction = direction;
+    this._animation = animation;
+    this._type = type;
+    this._getMaskId = getMaskId;
+
+    if (dependencies != null) {
+      this.dependencies = dependencies;
+    }
+
+    PIXI.Ticker.shared.add(this._onTicker);
+
+    this._loadFurniResultPromise = new Promise<LoadFurniResult>((resolve) => {
+      this._resolveLoadFurniResult = resolve;
+    });
+  }
+
+  public get extradata() {
+    return this._loadFurniResultPromise.then((result) => {
+      return result.getExtraData();
+    });
+  }
+
+  public get validDirections() {
+    return this._loadFurniResultPromise.then((result) => {
+      return result.directions;
+    });
+  }
 
   public get highlight() {
     return this._highlight;
@@ -53,6 +179,15 @@ export class BaseFurniture
 
   public set highlight(value) {
     this._highlight = value;
+    this._refreshFurniture = true;
+  }
+
+  public get alpha() {
+    return this._alpha;
+  }
+
+  public set alpha(value) {
+    this._alpha = value;
     this._refreshFurniture = true;
   }
 
@@ -119,20 +254,18 @@ export class BaseFurniture
   }
 
   public set animation(value) {
+    this._animationOverride = undefined;
     this._animation = value;
     this._refreshFurniture = true;
   }
 
-  private animatedSprites: {
-    sprites: Map<string, SpriteWithStaticOffset>;
-    frames: string[];
-  }[] = [];
+  private _runningAnimation: string | undefined;
 
-  private _maskNodes: MaskNode[] = [];
+  private _animationOverride: string | undefined;
+
+  private _startFrame: number | undefined;
 
   private cancelTicker: (() => void) | undefined = undefined;
-
-  private _getMaskId: MaskIdGetter;
 
   public get maskId() {
     return this._getMaskId;
@@ -142,35 +275,22 @@ export class BaseFurniture
     this._getMaskId = value;
   }
 
-  constructor(
-    type: FurnitureFetch,
-    direction: number,
-    animation: string = "0",
-    getMaskId: MaskIdGetter = () => undefined
-  ) {
-    super();
-    this._direction = direction;
-    this._animation = animation;
-    this._type = type;
-    this._getMaskId = getMaskId;
+  private _onTicker = () => {
+    if (this._refreshFurniture) {
+      this._refreshFurniture = false;
+      this._updateFurniture();
+    }
 
-    PIXI.Ticker.shared.add(() => {
-      if (this._refreshFurniture) {
-        this._refreshFurniture = false;
-        this._updateFurniture();
-      }
+    if (this._refreshPosition) {
+      this._refreshPosition = false;
+      this._updatePosition();
+    }
 
-      if (this._refreshPosition) {
-        this._refreshPosition = false;
-        this._updatePosition();
-      }
-
-      if (this._refreshZIndex) {
-        this._refreshZIndex = false;
-        this._updateZIndex();
-      }
-    });
-  }
+    if (this._refreshZIndex) {
+      this._refreshZIndex = false;
+      this._updateZIndex();
+    }
+  };
 
   private _updateSprites(cb: (element: SpriteWithStaticOffset) => void) {
     this.elements.forEach(cb);
@@ -198,13 +318,53 @@ export class BaseFurniture
     if (!this.mounted) return;
 
     if (this.loadFurniResult != null) {
-      this.updateSprites(this.loadFurniResult, this.direction, this.animation);
+      this._updateFurnitureSprites(
+        this.loadFurniResult,
+        this.direction,
+        this._getDisplayAnimation()
+      );
     } else {
-      this.updateUnknown();
+      this._updateUnknown();
     }
   }
 
-  updateUnknown() {
+  private _handleAnimation(transitionTo?: number) {
+    const newAnimation = this._getDisplayAnimation();
+    if (newAnimation != this._runningAnimation) {
+      this.cancelTicker && this.cancelTicker();
+
+      this._startFrame = undefined;
+      this._runningAnimation = newAnimation;
+
+      let newAnimationNumber: number | undefined = Number(newAnimation);
+      if (isNaN(newAnimationNumber)) {
+        newAnimationNumber = undefined;
+      }
+
+      const transitionToWithFallback = transitionTo ?? newAnimationNumber;
+
+      if (this._frameCount != null) {
+        this.cancelTicker = this.dependencies.animationTicker.subscribe(
+          (frame) => {
+            this._setCurrentFrame(frame, transitionToWithFallback);
+          }
+        );
+        this._setCurrentFrame(
+          this.dependencies.animationTicker.current(),
+          transitionToWithFallback
+        );
+      }
+    } else if (newAnimation == null) {
+      this.cancelTicker && this.cancelTicker();
+
+      this._startFrame = undefined;
+      this._runningAnimation = undefined;
+    }
+  }
+
+  _updateUnknown() {
+    if (!this.mounted) return;
+
     this.destroySprites();
 
     this.unknownSprite = new PIXI.Sprite(this._unknownTexture);
@@ -215,24 +375,29 @@ export class BaseFurniture
     this.unknownSprite.y = y;
     this.unknownSprite.zIndex = this.zIndex;
 
-    this.visualization.addContainerChild(this.unknownSprite);
+    this.dependencies.visualization.container.addChild(this.unknownSprite);
     this.elements.push({ sprite: this.unknownSprite, x, y, zIndex: 0 });
   }
 
-  updateSprites(
+  _updateFurnitureSprites(
     loadFurniResult: LoadFurniResult,
     direction: number,
     animation?: string
   ) {
+    if (!this.mounted) return;
+
     this.destroySprites();
 
-    const { parts } = loadFurniResult.getDrawDefinition(direction, animation);
+    const {
+      parts,
+      frameCount,
+      transitionTo,
+    } = loadFurniResult.getDrawDefinition(
+      getDirectionForFurniture(direction, loadFurniResult.directions),
+      animation
+    );
 
-    if (animation != null) {
-      this.cancelTicker = this.animationTicker.subscribe((frame) =>
-        this.setCurrentFrame(frame)
-      );
-    }
+    this._frameCount = frameCount;
 
     parts.forEach((part, index) => {
       const asset = this.createAssetFromPart(
@@ -249,48 +414,94 @@ export class BaseFurniture
           const maskId = this.maskId(this.direction);
 
           if (maskId != null) {
-            this.visualization.addMask(maskId, asset.sprite.sprite);
+            this.dependencies.visualization.addMask(
+              maskId,
+              asset.sprite.sprite
+            );
           }
         } else {
-          this.visualization.addContainerChild(asset.sprite.sprite);
+          this.dependencies.visualization.container.addChild(
+            asset.sprite.sprite
+          );
         }
       } else if (asset.kind === "animated") {
         this.animatedSprites.push(asset);
         const sprites = [...asset.sprites.values()];
 
         sprites.forEach((sprite) => {
-          this.visualization.addContainerChild(sprite.sprite);
+          this.dependencies.visualization.container.addChild(sprite.sprite);
         });
       }
     });
 
-    this.setCurrentFrame(this.animationTicker.current());
+    this._handleAnimation(transitionTo);
   }
 
-  private setCurrentFrame(frame: number) {
+  private _transitionToAnimation(animation: string) {
+    this._startFrame = undefined;
+    this._animationOverride = animation;
+
+    if (this._runningAnimation !== animation) {
+      this._refreshFurniture = true;
+    } else {
+      this._setCurrentFrame(this.dependencies.animationTicker.current());
+    }
+  }
+
+  private _getDisplayAnimation() {
+    if (this._animationOverride != null) return this._animationOverride;
+
+    return this.animation;
+  }
+
+  private _setCurrentFrame(frame: number, transitionTo?: number) {
+    if (this._startFrame == null) this._startFrame = frame;
+
+    const progress = frame - this._startFrame;
+
     this.animatedSprites.forEach((animatedSprite) => {
-      const previousFrameIndex = (frame - 1) % animatedSprite.frames.length;
-      const frameIndex = frame % animatedSprite.frames.length;
+      animatedSprite.sprites.forEach(
+        (sprite) => (sprite.sprite.visible = false)
+      );
+    });
 
-      const frameIdPrevious = animatedSprite.frames[previousFrameIndex];
-      const frameIdCurrent = animatedSprite.frames[frameIndex];
+    let maxFrameCount: number | undefined = undefined;
 
-      const previous = animatedSprite.sprites.get(frameIdPrevious);
-      const current = animatedSprite.sprites.get(frameIdCurrent);
-
-      if (previous) {
-        previous.sprite.visible = false;
+    this.animatedSprites.forEach((animatedSprite) => {
+      const frameCount = (this._frameCount ?? 1) * animatedSprite.frameRepeat;
+      if (maxFrameCount == null || frameCount > maxFrameCount) {
+        maxFrameCount = frameCount;
       }
+
+      let frameIndex = progress;
+
+      if (frameIndex > animatedSprite.frames.length - 1) {
+        frameIndex = animatedSprite.frames.length - 1;
+      }
+
+      frameIndex = frameIndex % frameCount;
+
+      const frameIdCurrent = animatedSprite.frames[frameIndex];
+      const current = animatedSprite.sprites.get(frameIdCurrent);
 
       if (current) {
         current.sprite.visible = true;
       }
     });
+
+    if (
+      maxFrameCount != null &&
+      progress >= maxFrameCount &&
+      transitionTo != null
+    ) {
+      this._transitionToAnimation(transitionTo.toString());
+      return;
+    }
   }
 
-  private createSprite(
-    asset: Asset,
-    layer: Layer | undefined,
+  private _createSprite(
+    asset: FurnitureAsset,
+    layer: FurnitureLayer | undefined,
     texture: HitTexture,
     {
       x,
@@ -309,14 +520,14 @@ export class BaseFurniture
     }
   ): SpriteWithStaticOffset {
     const sprite = new HitSprite({
-      hitDetection: this.hitDetection,
+      hitDetection: this.dependencies.hitDetection,
       mirrored: asset.flipH,
       tag: layer?.tag,
     });
 
     sprite.hitTexture = texture;
 
-    if (layer?.ignoreMouse !== "1") {
+    if (layer?.ignoreMouse !== true) {
       sprite.addEventListener("click", (event) =>
         this._clickHandler.handleClick(event)
       );
@@ -348,15 +559,12 @@ export class BaseFurniture
       sprite.tint = parseInt(tint, 16);
     }
 
-    if (layer != null) {
-      if (layer.alpha != null) {
-        if (this.highlight) {
-          sprite.alpha = 1;
-        } else {
-          sprite.alpha = layer.alpha / 255;
-        }
-      }
+    let alpha = this._getAlpha({
+      baseAlpha: this.alpha,
+      layerAlpha: layer?.alpha,
+    });
 
+    if (layer != null) {
       if (layer.ink != null) {
         if (this.highlight) {
           sprite.visible = false;
@@ -371,8 +579,10 @@ export class BaseFurniture
         sprite.visible = false;
       } else {
         sprite.visible = true;
-        sprite.alpha = 0.195;
+        sprite.alpha = alpha / 5;
       }
+    } else {
+      sprite.alpha = alpha;
     }
 
     if (mask) {
@@ -388,7 +598,7 @@ export class BaseFurniture
   }
 
   private createAssetFromPart(
-    { asset, shadow, tint, layer, z, assets, mask }: DrawPart,
+    { asset, shadow, tint, layer, z, assets, mask, frameRepeat }: FurniDrawPart,
     { x, y }: { x: number; y: number },
     loadFurniResult: LoadFurniResult,
     index: number
@@ -398,10 +608,12 @@ export class BaseFurniture
         kind: "animated";
         sprites: Map<string, SpriteWithStaticOffset>;
         frames: string[];
+        frameRepeat: number;
       } {
-    const getAssetTextureName = (asset: Asset) => asset.source ?? asset.name;
+    const getAssetTextureName = (asset: FurnitureAsset) =>
+      asset.source ?? asset.name;
 
-    const getTexture = (asset: Asset) =>
+    const getTexture = (asset: FurnitureAsset) =>
       loadFurniResult.getTexture(getAssetTextureName(asset));
 
     const zIndex = (z ?? 0) + index * 0.01;
@@ -415,23 +627,22 @@ export class BaseFurniture
         assets != null && assets.length === 1 ? assets[0] : asset;
 
       if (actualAsset != null) {
-        const sprite = this.createSprite(
-          actualAsset,
-          layer,
-          getTexture(actualAsset),
-          {
+        const texture = getTexture(actualAsset);
+
+        if (texture != null) {
+          const sprite = this._createSprite(actualAsset, layer, texture, {
             x,
             y,
             zIndex,
             shadow,
             tint,
             mask,
+          });
+          if (mask != null && mask) {
+            return { kind: "mask", sprite: sprite };
+          } else {
+            return { kind: "simple", sprite: sprite };
           }
-        );
-        if (mask != null && mask) {
-          return { kind: "mask", sprite: sprite };
-        } else {
-          return { kind: "simple", sprite: sprite };
         }
       }
 
@@ -447,8 +658,9 @@ export class BaseFurniture
       const texture = getTexture(spriteFrame);
       const name = getAssetTextureName(spriteFrame);
       if (sprites.has(name)) return;
+      if (texture == null) return;
 
-      const sprite = this.createSprite(spriteFrame, layer, texture, {
+      const sprite = this._createSprite(spriteFrame, layer, texture, {
         x,
         y,
         zIndex,
@@ -465,6 +677,7 @@ export class BaseFurniture
       kind: "animated",
       sprites: sprites,
       frames: assets.map((asset) => getAssetTextureName(asset)),
+      frameRepeat,
     };
   }
 
@@ -479,22 +692,44 @@ export class BaseFurniture
     this.animatedSprites = [];
   }
 
-  registered(): void {
-    this._unknownTexture = this.configuration.placeholder ?? undefined;
+  private _loadFurniture() {
+    if (!this.mounted) return;
 
-    this.furnitureLoader.loadFurni(this._type).then((result) => {
+    this._unknownTexture = this.dependencies.placeholder ?? undefined;
+
+    this.dependencies.furnitureLoader.loadFurni(this._type).then((result) => {
       this.loadFurniResult = result;
+      this._resolveLoadFurniResult(result);
       this._updateFurniture();
     });
 
     this._updateFurniture();
   }
 
-  destroyed() {
+  private _getAlpha({
+    layerAlpha,
+    baseAlpha,
+  }: {
+    layerAlpha?: number;
+    baseAlpha: number;
+  }) {
+    if (layerAlpha != null) return (layerAlpha / 255) * baseAlpha;
+
+    return baseAlpha;
+  }
+
+  destroy() {
     this.destroySprites();
 
-    if (this.cancelTicker != null) {
-      this.cancelTicker();
+    if (this._cancelTicker != null) {
+      this._cancelTicker();
     }
+
+    PIXI.Ticker.shared.remove(this._onTicker);
   }
+}
+
+export interface IFurnitureVisualization {
+  container: PIXI.Container;
+  addMask(maskId: string, element: PIXI.DisplayObject): void;
 }

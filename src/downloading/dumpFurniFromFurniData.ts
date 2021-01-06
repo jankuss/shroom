@@ -1,6 +1,6 @@
-import Bluebird = require("bluebird");
+import Bluebird from "bluebird";
 import { parseStringPromise } from "xml2js";
-import { dumpFurni } from "./dumpFurni";
+import { downloadFurni, dumpFurni } from "./dumpFurni";
 import { Action } from "./state";
 
 export async function dumpFurniFromFurniData(
@@ -15,35 +15,63 @@ export async function dumpFurniFromFurniData(
   const wallTypes: any[] = data.furnidata.wallitemtypes[0].furnitype;
 
   const usedIds = new Set<string>();
-  const allFurni = [...wallTypes, ...furniTypes];
+
+  // We will filter duplicated values to report the right amount of files to be downloaded and dumped.
+  const allFurni: any[] = [...wallTypes, ...furniTypes].reduce(
+    (items, item) => {
+      const name = item["$"].classname.split("*")[0];
+
+      if (usedIds.has(name)) return items;
+
+      usedIds.add(name);
+
+      return [...items, item];
+    },
+    []
+  );
 
   dispatch({ type: "FURNI_ASSETS_COUNT", payload: allFurni.length });
 
   await Bluebird.map(
     allFurni,
-    async (value) => {
+    async (value: any) => {
       const name = value["$"].classname.split("*")[0];
-
-      if (usedIds.has(name)) return;
-      usedIds.add(name);
 
       const revision: number | undefined =
         value.revision != null ? value.revision[0] : undefined;
 
       try {
-        await dumpFurni(dcrUrl, revision?.toString(), name, folder);
+        await downloadFurni(dcrUrl, revision?.toString(), name, folder);
+
+        dispatch({ type: "FURNI_ASSETS_DOWNLOAD_COUNT" });
+      } catch (e) {}
+    },
+    { concurrency: 30 } // We can use this limit because if the download get stucked, we will retry it after a short time ;)
+  );
+
+  await Bluebird.map(
+    allFurni,
+    async (value: any) => {
+      const name = value["$"].classname.split("*")[0];
+
+      const revision: number | undefined =
+        value.revision != null ? value.revision[0] : undefined;
+
+      try {
+        await dumpFurni(revision?.toString(), name, folder);
+
         dispatch({
           type: "FURNI_ASSETS_PROGRESS_SUCCESS",
           payload: { id: name, revision: revision?.toString() },
         });
       } catch (err) {
-        //console.log(`Error dumping ${value.revision[0]}/${name}`);
+        // console.log(`Error dumping ${value.revision[0]}/${name}`);
         dispatch({
           type: "FURNI_ASSETS_PROGRESS_ERROR",
           payload: { id: name, revision: revision?.toString() },
         });
       }
     },
-    { concurrency: 30 }
+    { concurrency: 30 } // Safe concurrency to avoid CPU bottleneck
   );
 }

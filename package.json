@@ -1,6 +1,6 @@
 {
   "name": "@jankuss/shroom",
-  "version": "0.1.7",
+  "version": "0.3.1",
   "main": "dist/index.js",
   "license": "LGPL-3.0-or-later",
   "repository": {
@@ -8,6 +8,7 @@
     "url": "https://github.com/jankuss/shroom.git"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/bluebird": "^3.5.33",
     "@types/jest": "^26.0.15",
     "@types/node": "^14.14.13",
@@ -21,9 +22,11 @@
     "prettier": "2.2.1",
     "ts-jest": "^26.4.3",
     "ts-node": "^9.0.0",
+    "ts-node-dev": "^1.1.1",
     "typescript": "^4.0.3"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "bluebird": "^3.7.2",
     "chalk": "^4.1.0",
     "events": "^3.2.0",
@@ -43,7 +46,7 @@
   },
   "scripts": {
     "dev": "tsc --watch",
-    "dump": "yarn ts-node src/downloading/cli.tsx",
+    "dump": "yarn ts-node-dev src/downloading/cli/index.tsx dump",
     "test": "jest",
     "build": "rm -rf dist && tsc",
     "prepublishOnly": "yarn build"

@@ -1,5 +1,5 @@
-import { HitEvent } from "../interfaces/IHitDetection";
-import { HitEventHandler } from "./hitdetection/HitSprite";
+import { HitEvent } from "../../interfaces/IHitDetection";
+import { HitEventHandler } from "./HitSprite";
 
 export class ClickHandler {
   private _doubleClickInfo?: {

@@ -1,0 +1,4250 @@
+[
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 15,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 14,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 13,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 16,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 10,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 12,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 15,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hrella_poster_3",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 14,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 13,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 9,
+      "y": 6,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 9,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 12,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 12,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 12,
+      "y": 6,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 9,
+      "y": 6,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 11,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 10,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 9,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 8,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 5,
+      "y": 6,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 4,
+      "y": 6,
+      "z": 3.4,
+      "rot": 4
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 3,
+      "y": 6,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 2,
+      "y": 6,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 7,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 5,
+      "y": 5,
+      "z": 3.4,
+      "rot": 4
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 3,
+      "y": 4,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 5,
+      "y": 4,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 3,
+      "y": 3,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 5,
+      "y": 3,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 5,
+      "y": 2,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 5,
+      "y": 1,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 4,
+      "y": 1,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 3,
+      "y": 1,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 2,
+      "y": 1,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 1,
+      "y": 1,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 1,
+      "y": 2,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 1,
+      "y": 3,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 1,
+      "y": 4,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 1,
+      "y": 5,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 1,
+      "y": 6,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 2,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 3,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 4,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 5,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 4,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 6,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 2,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 26,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 5,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 25,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 6,
+      "y": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 6,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 8,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 9,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 10,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 11,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 12,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 13,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 14,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "3",
+      "x": 1,
+      "y": 19,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "3",
+      "x": 1,
+      "y": 26,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "4",
+      "x": 1,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "4",
+      "x": 1,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 19,
+      "z": 0.2,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 4,
+      "y": 19,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 9,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 10,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 13,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 12,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 14,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "3",
+      "x": 1,
+      "y": 15,
+      "z": 2.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 11,
+      "y": 1,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 10,
+      "y": 1,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 9,
+      "y": 1,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 8,
+      "y": 1,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 7,
+      "y": 1,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "4",
+      "x": 1,
+      "y": 15,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 13,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 10,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 15,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 15,
+      "y": 7,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 11,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 10,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 9,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 8,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 7,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "3",
+      "x": 12,
+      "y": 1,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 6,
+      "y": 2,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 2,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 6,
+      "y": 6,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 3,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 4,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 5,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 6,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 5,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 4,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 3,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 2,
+      "y": 7,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 3,
+      "y": 7,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 4,
+      "y": 7,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 5,
+      "y": 7,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 2,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 1,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 6,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 6,
+      "y": 4,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 6,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 1,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "4",
+      "x": 6,
+      "y": 7,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "4",
+      "x": 1,
+      "y": 7,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "4",
+      "x": 12,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 12,
+      "y": 7,
+      "z": 0.2,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "4",
+      "x": 6,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "4",
+      "x": 6,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "4",
+      "x": 1,
+      "y": 7,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 15,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "2",
+      "x": 14,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "2",
+      "x": 12,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 15,
+      "y": 25,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 14,
+      "y": 25,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 12,
+      "y": 25,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 15,
+      "y": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 14,
+      "y": 24,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "2",
+      "x": 12,
+      "y": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 15,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 14,
+      "y": 22,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 12,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 15,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 14,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 12,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 1,
+      "y": 17,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 1,
+      "y": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 2,
+      "y": 17,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "2",
+      "x": 2,
+      "y": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 4,
+      "y": 17,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 4,
+      "y": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 15,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 15,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 13,
+      "y": 3,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 13,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 15,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 1,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 1,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 2,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 2,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 1,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 2,
+      "y": 5,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 4,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 4,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 4,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_balrail",
+      "extra_data": "1",
+      "x": 13,
+      "y": 7,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xm09_man_a",
+      "extra_data": "0",
+      "x": 16,
+      "y": 2,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 9,
+      "y": 22,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 8,
+      "y": 22,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 8,
+      "y": 23,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 9,
+      "y": 23,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 4,
+      "y": 5,
+      "z": 3.35,
+      "rot": 2
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 3,
+      "y": 5,
+      "z": 3.35,
+      "rot": 2
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 2,
+      "y": 5,
+      "z": 3.35,
+      "rot": 2
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 4,
+      "y": 4,
+      "z": 3.35,
+      "rot": 2
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 2,
+      "y": 4,
+      "z": 3.35,
+      "rot": 2
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 4,
+      "y": 3,
+      "z": 3.35,
+      "rot": 2
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 2,
+      "y": 3,
+      "z": 3.35,
+      "rot": 2
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 2,
+      "y": 2,
+      "z": 3.35,
+      "rot": 2
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 3,
+      "y": 2,
+      "z": 3.35,
+      "rot": 2
+    },
+    {
+      "item": "tile_brown",
+      "extra_data": "",
+      "x": 4,
+      "y": 2,
+      "z": 3.35,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 7,
+      "y": 7,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 10,
+      "y": 7,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 12,
+      "y": 5,
+      "z": 0.1,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 12,
+      "y": 3,
+      "z": 0.1,
+      "rot": 2
+    },
+    {
+      "item": "xmas2011_icefall",
+      "extra_data": "1",
+      "x": 1,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 12,
+      "y": 2,
+      "z": 0.1,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 8,
+      "y": 7,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xm09_forestwall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xm09_forestwall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas12_barrel",
+      "extra_data": "",
+      "x": 9,
+      "y": 1,
+      "z": 0.5,
+      "rot": 4
+    },
+    {
+      "item": "xmas2011_rock1",
+      "extra_data": "1",
+      "x": 6,
+      "y": 2,
+      "z": 0.5,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_tree2",
+      "extra_data": "2",
+      "x": 5,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_rock2",
+      "extra_data": "1",
+      "x": 2,
+      "y": 7,
+      "z": 0.5,
+      "rot": 0
+    },
+    {
+      "item": "qt_xm10_icelupin",
+      "extra_data": "1",
+      "x": 4,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "penguin_elf",
+      "extra_data": "",
+      "x": 5,
+      "y": 5,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xm09_candyCane",
+      "extra_data": "1",
+      "x": 4,
+      "y": 6,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas08_lantern",
+      "extra_data": "1",
+      "x": 4,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 2,
+      "y": 13,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 7,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 8,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 10,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 10,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 9,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 7,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 10,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 9,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 7,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "0",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xm09_bauble_17",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xm09_bauble_10",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xm09_bauble_14",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xm09_bauble_9",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_comfy_bench",
+      "extra_data": "",
+      "x": 7,
+      "y": 6,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_comfy_bench",
+      "extra_data": "",
+      "x": 10,
+      "y": 6,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "gift_mypod",
+      "extra_data": "",
+      "x": 7,
+      "y": 1,
+      "z": 0.5,
+      "rot": 2
+    },
+    {
+      "item": "pframe",
+      "extra_data": "2",
+      "x": 12,
+      "y": 2,
+      "z": 1,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_firewood",
+      "extra_data": "2",
+      "x": 11,
+      "y": 1,
+      "z": 0.5,
+      "rot": 0
+    },
+    {
+      "item": "rare_globe",
+      "extra_data": "1",
+      "x": 9,
+      "y": 6,
+      "z": 0.2,
+      "rot": 0
+    },
+    {
+      "item": "xmas13_gingerbread",
+      "extra_data": "",
+      "x": 9,
+      "y": 4,
+      "z": 1.01,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_sofatable",
+      "extra_data": "",
+      "x": 8,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stool",
+      "extra_data": "",
+      "x": 9,
+      "y": 2,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_stool",
+      "extra_data": "",
+      "x": 8,
+      "y": 2,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_stool",
+      "extra_data": "",
+      "x": 7,
+      "y": 3,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stool",
+      "extra_data": "",
+      "x": 7,
+      "y": 4,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xm09_firwall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "wcandleset",
+      "extra_data": "1",
+      "x": 12,
+      "y": 7,
+      "z": 1.2,
+      "rot": 0
+    },
+    {
+      "item": "joulutahti",
+      "extra_data": "",
+      "x": 8,
+      "y": 1,
+      "z": 0.5,
+      "rot": 2
+    },
+    {
+      "item": "xm09_cocoa",
+      "extra_data": "0",
+      "x": 2,
+      "y": 21,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "books_1",
+      "extra_data": "6",
+      "x": 12,
+      "y": 5,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "xmas_giftbag",
+      "extra_data": "1",
+      "x": 7,
+      "y": 2,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "computer_laptop",
+      "extra_data": "",
+      "x": 11,
+      "y": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "computer_laptop",
+      "extra_data": "",
+      "x": 10,
+      "y": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "computer_laptop",
+      "extra_data": "0",
+      "x": 8,
+      "y": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "computer_laptop",
+      "extra_data": "",
+      "x": 7,
+      "y": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_snowlog",
+      "extra_data": "",
+      "x": 13,
+      "y": 5,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xm09_man_b",
+      "extra_data": "2",
+      "x": 16,
+      "y": 2,
+      "z": 1,
+      "rot": 4
+    },
+    {
+      "item": "xm09_man_c",
+      "extra_data": "7",
+      "x": 16,
+      "y": 2,
+      "z": 1.8,
+      "rot": 4
+    },
+    {
+      "item": "xmas2011_tree4",
+      "extra_data": "1",
+      "x": 15,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_tree3",
+      "extra_data": "",
+      "x": 16,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_tree1",
+      "extra_data": "2",
+      "x": 16,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_cubetree",
+      "extra_data": "",
+      "x": 16,
+      "y": 5,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas08_lantern",
+      "extra_data": "1",
+      "x": 14,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_rock1",
+      "extra_data": "1",
+      "x": 16,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_tree2",
+      "extra_data": "2",
+      "x": 13,
+      "y": 4,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas_snow",
+      "extra_data": "",
+      "x": 14,
+      "y": 25,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas_snow",
+      "extra_data": "",
+      "x": 15,
+      "y": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas_snow",
+      "extra_data": "1",
+      "x": 14,
+      "y": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas_snow",
+      "extra_data": "",
+      "x": 3,
+      "y": 17,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas_snow",
+      "extra_data": "",
+      "x": 15,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 12,
+      "y": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 10,
+      "y": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 10,
+      "y": 12,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 10,
+      "y": 13,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 8,
+      "y": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 9,
+      "y": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 9,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 8,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 16,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 15,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 19,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 11,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 10,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 7,
+      "y": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 8,
+      "y": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 9,
+      "y": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 10,
+      "y": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 11,
+      "y": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 13,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 10,
+      "y": 14,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 12,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 11,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 11,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 11,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 11,
+      "y": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 11,
+      "y": 25,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 1,
+      "y": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 5,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 4,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 17,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 2,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 1,
+      "y": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 3,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 7,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 9,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 8,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 5,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 4,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 6,
+      "y": 12,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 1,
+      "y": 15,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 2,
+      "y": 15,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 3,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 4,
+      "y": 15,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 2,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xm09_firwall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 6,
+      "y": 8,
+      "z": 0.1,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 6,
+      "y": 13,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 4,
+      "y": 15,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 2,
+      "y": 15,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "shelves_silo",
+      "extra_data": "",
+      "x": 1,
+      "y": 9,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 11,
+      "y": 12,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 7,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 8,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 10,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 10,
+      "y": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 8,
+      "y": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 6,
+      "y": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 2,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 2,
+      "y": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 4,
+      "y": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 4,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 4,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 2,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 2,
+      "y": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 4,
+      "y": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 2,
+      "y": 9,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 4,
+      "y": 9,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 2,
+      "y": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 4,
+      "y": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 4,
+      "y": 13,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_sofatable",
+      "extra_data": "",
+      "x": 3,
+      "y": 13,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_chair",
+      "extra_data": "",
+      "x": 5,
+      "y": 14,
+      "z": 0,
+      "rot": 6
+    },
+    {
+      "item": "xmas11_chair",
+      "extra_data": "",
+      "x": 5,
+      "y": 13,
+      "z": 0,
+      "rot": 6
+    },
+    {
+      "item": "xmas11_chair",
+      "extra_data": "",
+      "x": 2,
+      "y": 14,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_chair",
+      "extra_data": "",
+      "x": 2,
+      "y": 13,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "wcandleset",
+      "extra_data": "1",
+      "x": 6,
+      "y": 10,
+      "z": 1.1,
+      "rot": 6
+    },
+    {
+      "item": "joulutahti",
+      "extra_data": "",
+      "x": 1,
+      "y": 12,
+      "z": 0.5,
+      "rot": 2
+    },
+    {
+      "item": "xmas14_starfish",
+      "extra_data": "1",
+      "x": 9,
+      "y": 4,
+      "z": 1,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stove",
+      "extra_data": "1",
+      "x": 2,
+      "y": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_firewood",
+      "extra_data": "",
+      "x": 1,
+      "y": 8,
+      "z": 0.5,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_firewood",
+      "extra_data": "1",
+      "x": 2,
+      "y": 9,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "books_0",
+      "extra_data": "0",
+      "x": 1,
+      "y": 11,
+      "z": 0.5,
+      "rot": 0
+    },
+    {
+      "item": "gift_mypod",
+      "extra_data": "",
+      "x": 1,
+      "y": 13,
+      "z": 0.5,
+      "rot": 0
+    },
+    {
+      "item": "rcandleset",
+      "extra_data": "1",
+      "x": 1,
+      "y": 14,
+      "z": 0.5,
+      "rot": 0
+    },
+    {
+      "item": "turkey",
+      "extra_data": "",
+      "x": 5,
+      "y": 6,
+      "z": 4.5,
+      "rot": 0
+    },
+    {
+      "item": "xm09_stocking",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_comfy_chair",
+      "extra_data": "",
+      "x": 3,
+      "y": 8,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_comfy_chair",
+      "extra_data": "",
+      "x": 5,
+      "y": 8,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_nghtstnd",
+      "extra_data": "1",
+      "x": 4,
+      "y": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_footstool",
+      "extra_data": "",
+      "x": 3,
+      "y": 9,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_footstool",
+      "extra_data": "",
+      "x": 5,
+      "y": 9,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "uni_hipdeer",
+      "extra_data": "1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "uni_girlcoatrack",
+      "extra_data": "0",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas_giftbag",
+      "extra_data": "0",
+      "x": 2,
+      "y": 11,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "books_1",
+      "extra_data": "6",
+      "x": 6,
+      "y": 15,
+      "z": 1.1,
+      "rot": 0
+    },
+    {
+      "item": "pframe",
+      "extra_data": "1",
+      "x": 2,
+      "y": 15,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_balrail",
+      "extra_data": "1",
+      "x": 4,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 9,
+      "y": 21,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 7,
+      "y": 26,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 6,
+      "y": 19,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 4,
+      "y": 26,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xm09_forestwall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_cubetree",
+      "extra_data": "",
+      "x": 5,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_rock1",
+      "extra_data": "1",
+      "x": 6,
+      "y": 18,
+      "z": 0.5,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_rock2",
+      "extra_data": "3",
+      "x": 6,
+      "y": 16,
+      "z": 0.5,
+      "rot": 2
+    },
+    {
+      "item": "xmas2011_tree1",
+      "extra_data": "2",
+      "x": 1,
+      "y": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_snowlog",
+      "extra_data": "",
+      "x": 1,
+      "y": 17,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas2011_tree2",
+      "extra_data": "1",
+      "x": 1,
+      "y": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_tree4",
+      "extra_data": "1",
+      "x": 4,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "snowb_snowpuff",
+      "extra_data": "",
+      "x": 2,
+      "y": 17,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "snowb_snowpuff",
+      "extra_data": "",
+      "x": 15,
+      "y": 5,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "penguin_basic",
+      "extra_data": "",
+      "x": 3,
+      "y": 16,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "xmas08_lantern",
+      "extra_data": "1",
+      "x": 5,
+      "y": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 2,
+      "y": 26,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_wall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 4,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 10,
+      "y": 15,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 10,
+      "y": 11,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 14,
+      "y": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "4",
+      "x": 14,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 11,
+      "y": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 11,
+      "y": 21,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 11,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 11,
+      "y": 26,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "2",
+      "x": 6,
+      "y": 21,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 20,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 21,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 22,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 23,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 24,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_elewood",
+      "extra_data": "1",
+      "x": 1,
+      "y": 25,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "item": "wood_tv",
+      "extra_data": "1",
+      "x": 1,
+      "y": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_footstool",
+      "extra_data": "",
+      "x": 3,
+      "y": 23,
+      "z": 0,
+      "rot": 6
+    },
+    {
+      "item": "xmas11_footstool",
+      "extra_data": "",
+      "x": 3,
+      "y": 24,
+      "z": 0,
+      "rot": 6
+    },
+    {
+      "item": "computer_flatscreen",
+      "extra_data": "",
+      "x": 5,
+      "y": 20,
+      "z": 1,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_chair",
+      "extra_data": "",
+      "x": 5,
+      "y": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "joulutahti_notrd",
+      "extra_data": "",
+      "x": 1,
+      "y": 20,
+      "z": 0.5,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_btlr",
+      "extra_data": "0",
+      "x": 11,
+      "y": 2,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "gift_vase",
+      "extra_data": "",
+      "x": 1,
+      "y": 24,
+      "z": 2.1,
+      "rot": 0
+    },
+    {
+      "item": "gift_mypod",
+      "extra_data": "",
+      "x": 4,
+      "y": 20,
+      "z": 0.5,
+      "rot": 2
+    },
+    {
+      "item": "triplecandle",
+      "extra_data": "1",
+      "x": 1,
+      "y": 22,
+      "z": 0.5,
+      "rot": 0
+    },
+    {
+      "item": "rcandleset",
+      "extra_data": "1",
+      "x": 1,
+      "y": 21,
+      "z": 0.5,
+      "rot": 0
+    },
+    {
+      "item": "xmasduck",
+      "extra_data": "",
+      "x": 8,
+      "y": 26,
+      "z": 1,
+      "rot": 2
+    },
+    {
+      "item": "campfire",
+      "extra_data": "1",
+      "x": 16,
+      "y": 4,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xm09_stocking",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "books_0",
+      "extra_data": "1",
+      "x": 1,
+      "y": 25,
+      "z": 0.5,
+      "rot": 0
+    },
+    {
+      "item": "gift_mdlcar0",
+      "extra_data": "1",
+      "x": 5,
+      "y": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_balrail",
+      "extra_data": "1",
+      "x": 11,
+      "y": 22,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas2011_balrail",
+      "extra_data": "1",
+      "x": 11,
+      "y": 19,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas2011_balrail",
+      "extra_data": "1",
+      "x": 12,
+      "y": 18,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_tree3",
+      "extra_data": "",
+      "x": 2,
+      "y": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_tree2",
+      "extra_data": "0",
+      "x": 15,
+      "y": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_rock2",
+      "extra_data": "1",
+      "x": 14,
+      "y": 18,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 8,
+      "y": 14,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 7,
+      "y": 14,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "ktchn10_block",
+      "extra_data": "2",
+      "x": 1,
+      "y": 5,
+      "z": 3.5,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 8,
+      "y": 12,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 7,
+      "y": 12,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 8,
+      "y": 10,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 7,
+      "y": 10,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 7,
+      "y": 8,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 9,
+      "y": 9,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 9,
+      "y": 8,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 11,
+      "y": 9,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 11,
+      "y": 8,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 13,
+      "y": 9,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 13,
+      "y": 8,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 15,
+      "y": 8,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 15,
+      "y": 10,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 15,
+      "y": 12,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 15,
+      "y": 14,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 15,
+      "y": 16,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 13,
+      "y": 16,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 9,
+      "y": 16,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 11,
+      "y": 16,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonefloor",
+      "extra_data": "",
+      "x": 7,
+      "y": 16,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "ktchn10_block",
+      "extra_data": "2",
+      "x": 1,
+      "y": 2,
+      "z": 3.5,
+      "rot": 0
+    },
+    {
+      "item": "fridge",
+      "extra_data": "0",
+      "x": 1,
+      "y": 1,
+      "z": 3.5,
+      "rot": 2
+    },
+    {
+      "item": "ktchn10_pot",
+      "extra_data": "1",
+      "x": 1,
+      "y": 4,
+      "z": 4.7,
+      "rot": 0
+    },
+    {
+      "item": "ktchn10_stove",
+      "extra_data": "1",
+      "x": 1,
+      "y": 3,
+      "z": 3.5,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_luxdish3",
+      "extra_data": "1",
+      "x": 1,
+      "y": 5,
+      "z": 4.5,
+      "rot": 0
+    },
+    {
+      "item": "pudding",
+      "extra_data": "",
+      "x": 1,
+      "y": 2,
+      "z": 4.5,
+      "rot": 0
+    },
+    {
+      "item": "books_1",
+      "extra_data": "2",
+      "x": 4,
+      "y": 14,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_sofatable",
+      "extra_data": "",
+      "x": 4,
+      "y": 5,
+      "z": 3.5,
+      "rot": 0
+    },
+    {
+      "item": "ktchn_trash",
+      "extra_data": "1",
+      "x": 1,
+      "y": 6,
+      "z": 3.5,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stool",
+      "extra_data": "",
+      "x": 5,
+      "y": 4,
+      "z": 3.5,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_stool",
+      "extra_data": "",
+      "x": 4,
+      "y": 4,
+      "z": 3.4,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_stool",
+      "extra_data": "",
+      "x": 3,
+      "y": 5,
+      "z": 3.4,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stool",
+      "extra_data": "",
+      "x": 3,
+      "y": 6,
+      "z": 3.5,
+      "rot": 2
+    },
+    {
+      "item": "svnr_fi",
+      "extra_data": "",
+      "x": 5,
+      "y": 1,
+      "z": 3.5,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_firewood",
+      "extra_data": "1",
+      "x": 6,
+      "y": 1,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_comfy_chair",
+      "extra_data": "",
+      "x": 4,
+      "y": 1,
+      "z": 3.5,
+      "rot": 4
+    },
+    {
+      "item": "drinks",
+      "extra_data": "",
+      "x": 2,
+      "y": 2,
+      "z": 3.4,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_cubetree",
+      "extra_data": "",
+      "x": 14,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 7,
+      "y": 21,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 6,
+      "y": 21,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_stonedivider",
+      "extra_data": "",
+      "x": 9,
+      "y": 26,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_comfy_bench",
+      "extra_data": "",
+      "x": 7,
+      "y": 22,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_sofatable",
+      "extra_data": "",
+      "x": 8,
+      "y": 22,
+      "z": 0.15,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_comfy_bench",
+      "extra_data": "",
+      "x": 10,
+      "y": 22,
+      "z": 0,
+      "rot": 6
+    },
+    {
+      "item": "wcandleset",
+      "extra_data": "1",
+      "x": 11,
+      "y": 26,
+      "z": 1.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas13_jack",
+      "extra_data": "1",
+      "x": 6,
+      "y": 26,
+      "z": 1.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas13_gingerbread",
+      "extra_data": "",
+      "x": 9,
+      "y": 23,
+      "z": 1.15,
+      "rot": 2
+    },
+    {
+      "item": "xmas14_starfish",
+      "extra_data": "1",
+      "x": 4,
+      "y": 22,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas2011_tree4",
+      "extra_data": "1",
+      "x": 16,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_rock1",
+      "extra_data": "1",
+      "x": 14,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_tree1",
+      "extra_data": "1",
+      "x": 16,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_snowlog",
+      "extra_data": "",
+      "x": 14,
+      "y": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_snowlog",
+      "extra_data": "",
+      "x": 12,
+      "y": 19,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "xmas2011_tree2",
+      "extra_data": "2",
+      "x": 12,
+      "y": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xm09_man_a",
+      "extra_data": "3",
+      "x": 12,
+      "y": 22,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xm09_man_b",
+      "extra_data": "6",
+      "x": 12,
+      "y": 22,
+      "z": 1,
+      "rot": 2
+    },
+    {
+      "item": "xm09_man_c",
+      "extra_data": "1",
+      "x": 12,
+      "y": 22,
+      "z": 1.8,
+      "rot": 2
+    },
+    {
+      "item": "xmas08_snowpl",
+      "extra_data": "",
+      "x": 16,
+      "y": 23,
+      "z": 0,
+      "rot": 6
+    },
+    {
+      "item": "xm09_candyCane",
+      "extra_data": "2",
+      "x": 16,
+      "y": 24,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 11,
+      "y": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "tile_marble",
+      "extra_data": "",
+      "x": 13,
+      "y": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_balrail",
+      "extra_data": "",
+      "x": 10,
+      "y": 11,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_balrail",
+      "extra_data": "",
+      "x": 10,
+      "y": 13,
+      "z": 0.1,
+      "rot": 2
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 11,
+      "y": 14,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_balrail",
+      "extra_data": "0",
+      "x": 12,
+      "y": 11,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_balrail",
+      "extra_data": "",
+      "x": 10,
+      "y": 11,
+      "z": 0.1,
+      "rot": 2
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 13,
+      "y": 14,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 13,
+      "y": 12,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 7,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 9,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 9,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "hween09_floor",
+      "extra_data": "",
+      "x": 7,
+      "y": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_comfy_bench",
+      "extra_data": "",
+      "x": 10,
+      "y": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_comfy_bench",
+      "extra_data": "",
+      "x": 7,
+      "y": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_sofatable",
+      "extra_data": "",
+      "x": 13,
+      "y": 14,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_comfy_chair",
+      "extra_data": "",
+      "x": 11,
+      "y": 13,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_comfy_chair",
+      "extra_data": "",
+      "x": 12,
+      "y": 12,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_comfy_chair",
+      "extra_data": "",
+      "x": 14,
+      "y": 12,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_comfy_chair",
+      "extra_data": "",
+      "x": 11,
+      "y": 15,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "books_0",
+      "extra_data": "0",
+      "x": 14,
+      "y": 15,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_nghtstnd",
+      "extra_data": "1",
+      "x": 11,
+      "y": 14,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "xmas11_nghtstnd",
+      "extra_data": "1",
+      "x": 13,
+      "y": 12,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_comfy_chair",
+      "extra_data": "",
+      "x": 7,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_comfy_chair",
+      "extra_data": "",
+      "x": 10,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_footstool",
+      "extra_data": "",
+      "x": 10,
+      "y": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_footstool",
+      "extra_data": "",
+      "x": 7,
+      "y": 19,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "xmas11_firewood",
+      "extra_data": "",
+      "x": 9,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas11_firewood",
+      "extra_data": "1",
+      "x": 8,
+      "y": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "doormat_plain*6",
+      "extra_data": "",
+      "x": 3,
+      "y": 19,
+      "z": 0.1,
+      "rot": 2
+    },
+    {
+      "item": "doormat_plain*6",
+      "extra_data": "",
+      "x": 2,
+      "y": 19,
+      "z": 0.1,
+      "rot": 2
+    },
+    {
+      "item": "doormat_plain*6",
+      "extra_data": "",
+      "x": 11,
+      "y": 25,
+      "z": 0.1,
+      "rot": 0
+    },
+    {
+      "item": "dimmer_swtch",
+      "extra_data": "2,1,2,#0053F7,76",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icewall",
+      "extra_data": "",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas2011_tree1",
+      "extra_data": "2",
+      "x": 14,
+      "y": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "gift_coal",
+      "extra_data": "",
+      "x": 5,
+      "y": 2,
+      "z": 3.5,
+      "rot": 0
+    },
+    {
+      "item": "wf_act_teleport_to",
+      "extra_data": "1",
+      "x": 1,
+      "y": 26,
+      "z": 185,
+      "rot": 4
+    },
+    {
+      "item": "wf_trg_enter_room",
+      "extra_data": "0",
+      "x": 1,
+      "y": 26,
+      "z": 184.5,
+      "rot": 2
+    },
+    {
+      "item": "wf_floor_switch2",
+      "extra_data": "3",
+      "x": 10,
+      "y": 2,
+      "z": 0,
+      "rot": 2
+    },
+    {
+      "item": "wf_trg_state_changed",
+      "extra_data": "",
+      "x": 1,
+      "y": 19,
+      "z": 184.5,
+      "rot": 2
+    },
+    {
+      "item": "wf_act_teleport_to",
+      "extra_data": "",
+      "x": 1,
+      "y": 19,
+      "z": 185,
+      "rot": 4
+    },
+    {
+      "item": "wcandle",
+      "extra_data": "1",
+      "x": 10,
+      "y": 15,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "wcandle",
+      "extra_data": "1",
+      "x": 11,
+      "y": 24,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "wcandle",
+      "extra_data": "1",
+      "x": 15,
+      "y": 7,
+      "z": 1.1,
+      "rot": 0
+    },
+    {
+      "item": "gift_incense",
+      "extra_data": "1",
+      "x": 6,
+      "y": 23,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "wcandle",
+      "extra_data": "1",
+      "x": 14,
+      "y": 11,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "item": "wcandleset",
+      "extra_data": "1",
+      "x": 11,
+      "y": 21,
+      "z": 1.1,
+      "rot": 0
+    },
+    {
+      "item": "icelow",
+      "extra_data": "",
+      "x": 15,
+      "y": 2,
+      "z": 0,
+      "rot": 4
+    },
+    {
+      "item": "tree4",
+      "extra_data": "0",
+      "x": 11,
+      "y": 12,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "es_epictree",
+      "extra_data": "2",
+      "x": 13,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "xmas08_icerug",
+      "extra_data": "3",
+      "x": 13,
+      "y": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "CF_1000000_Dragon",
+      "extra_data": "",
+      "x": 13,
+      "y": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "item": "wf_act_teleport_to",
+      "extra_data": "1",
+      "x": 3,
+      "y": 4,
+      "z": 51,
+      "rot": 6
+    },
+    {
+      "item": "wf_floor_switch2",
+      "extra_data": "2",
+      "x": 3,
+      "y": 1,
+      "z": 3.5,
+      "rot": 2
+    },
+    {
+      "item": "wf_trg_state_changed",
+      "extra_data": "0",
+      "x": 3,
+      "y": 4,
+      "z": 51.5,
+      "rot": 0
+    }
+  ]

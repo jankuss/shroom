@@ -1,29 +1,19 @@
 import * as PIXI from "pixi.js";
 
 import { RoomObject } from "../RoomObject";
-import {
-  PrimaryAction,
-  PrimaryActionKind,
-} from "./util/getAvatarDrawDefinition";
 import { getZOrder } from "../../util/getZOrder";
-import { AvatarSprites } from "./AvatarSprites";
-import { avatarFramesObject } from "./util/avatarFrames";
+import { BaseAvatar } from "./BaseAvatar";
 import { LookOptions } from "./util/createLookServer";
-import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
+import { ObjectAnimation } from "../animation/ObjectAnimation";
 import { RoomPosition } from "../../types/RoomPosition";
-import { ParsedTileType } from "../../util/parseTileMap";
-import { IMoveable } from "../IMoveable";
+import { IMoveable } from "../interfaces/IMoveable";
+import { AvatarAction } from "./enum/AvatarAction";
+import { IScreenPositioned } from "../interfaces/IScreenPositioned";
+import { HitEventHandler } from "../hitdetection/HitSprite";
 
-interface Options {
-  look: string;
-  direction: number;
-  roomX: number;
-  roomY: number;
-  roomZ: number;
-}
+export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
+  private _avatarSprites: BaseAvatar;
 
-export class Avatar extends RoomObject implements IMoveable {
-  private _avatarSprites: AvatarSprites;
   private _moveAnimation:
     | ObjectAnimation<{ type: "walk"; direction: number } | { type: "move" }>
     | undefined;
@@ -34,32 +24,22 @@ export class Avatar extends RoomObject implements IMoveable {
 
   private _cancelAnimation: (() => void) | undefined;
 
-  private _primaryAction: PrimaryActionKind = "std";
   private _waving: boolean = false;
   private _direction: number = 0;
-  private _item: number | undefined;
-  private _drinking: boolean = false;
+  private _item: string | number | undefined;
   private _look: string;
   private _roomX: number = 0;
   private _roomY: number = 0;
   private _roomZ: number = 0;
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
+  private _actions: Set<AvatarAction> = new Set();
+  private _fx: { type: "dance"; id: string } | undefined;
+  private _loadingAvatarSprites: BaseAvatar;
+  private _placeholderSprites: BaseAvatar | undefined;
+  private _loaded = false;
 
-  public get onClick() {
-    return this._avatarSprites.onClick;
-  }
-
-  public set onClick(value) {
-    this._avatarSprites.onClick = value;
-  }
-
-  public get onDoubleClick() {
-    return this._avatarSprites.onDoubleClick;
-  }
-
-  public set onDoubleClick(value) {
-    this._avatarSprites.onDoubleClick = value;
-  }
+  private _onClick: HitEventHandler | undefined = undefined;
+  private _onDoubleClick: HitEventHandler | undefined = undefined;
 
   constructor({ look, roomX, roomY, roomZ, direction }: Options) {
     super();
@@ -70,13 +50,84 @@ export class Avatar extends RoomObject implements IMoveable {
     this._roomY = roomY;
     this._roomZ = roomZ;
 
-    this._avatarSprites = new AvatarSprites({
-      look: this._getCurrentLookOptions(),
+    this._placeholderSprites = new BaseAvatar({
+      look: this._getPlaceholderLookOptions(),
       zIndex: this._calculateZIndex(),
       position: { x: 0, y: 0 },
+      onLoad: () => {
+        this._updateAvatarSprites();
+      },
+    });
+    this._placeholderSprites.alpha = 0.5;
+
+    this._avatarSprites = this._placeholderSprites;
+
+    this._loadingAvatarSprites = new BaseAvatar({
+      look: this._getLookOptions(),
+      position: { x: 0, y: 0 },
+      zIndex: this._calculateZIndex(),
+      onLoad: () => {
+        this._loaded = true;
+        this._updateAvatarSprites();
+      },
     });
   }
 
+  /**
+   * Set this with a callback if you want to capture clicks on the Avatar.
+   */
+  public get onClick() {
+    return this._onClick;
+  }
+
+  public set onClick(value) {
+    this._onClick = value;
+    this._updateEventHandlers();
+  }
+
+  /**
+   * Set this with a callback if you want to capture double clicks on the Avatar.
+   */
+  public get onDoubleClick() {
+    return this._onDoubleClick;
+  }
+
+  public set onDoubleClick(value) {
+    this._onDoubleClick = value;
+    this._updateEventHandlers();
+  }
+
+  public get dance() {
+    if (this._fx?.type === "dance") {
+      return this._fx.id;
+    }
+  }
+
+  public set dance(value) {
+    if (this._fx == undefined || this._fx.type === "dance") {
+      if (value == null) {
+        this._fx = undefined;
+      } else {
+        this._fx = { type: "dance", id: value };
+      }
+
+      this._updateAvatarSprites();
+    }
+  }
+
+  /**
+   * The x position of the avatar in the room.
+   * The y-Axis is marked in the following graphic:
+   *
+   * ```
+   *    |
+   *    |
+   *    |
+   *   / \
+   *  /   \   <- x-Axis
+   * /     \
+   * ```
+   */
   get roomX() {
     return this._roomX;
   }
@@ -86,6 +137,19 @@ export class Avatar extends RoomObject implements IMoveable {
     this._updatePosition();
   }
 
+  /**
+   * The y position of the avatar in the room.
+   * The y-Axis is marked in the following graphic:
+   *
+   * ```
+   *              |
+   *              |
+   *              |
+   *             / \
+   * y-Axis ->  /   \
+   *           /     \
+   * ```
+   */
   get roomY() {
     return this._roomY;
   }
@@ -95,6 +159,19 @@ export class Avatar extends RoomObject implements IMoveable {
     this._updatePosition();
   }
 
+  /**
+   * The z position of the avatar in the room.
+   * The z-Axis is marked in the following graphic:
+   *
+   * ```
+   *              |
+   *   z-Axis ->  |
+   *              |
+   *             / \
+   *            /   \
+   *           /     \
+   * ```
+   */
   get roomZ() {
     return this._roomZ;
   }
@@ -104,6 +181,10 @@ export class Avatar extends RoomObject implements IMoveable {
     this._updatePosition();
   }
 
+  /**
+   * Sets the item of the user. Note that this won't have an effect if you don't supply
+   * an action which supports items. These are usually `CarryItem` and `UseItem`.
+   */
   get item() {
     return this._item;
   }
@@ -113,34 +194,36 @@ export class Avatar extends RoomObject implements IMoveable {
     this._updateAvatarSprites();
   }
 
-  get drinking() {
-    return this._drinking;
-  }
-
-  set drinking(value) {
-    this._drinking = value;
-    this._updateAvatarSprites();
-  }
-
+  /**
+   * Sets the direction of the avatar. Following numbers map to the
+   * following directions of the avatar:
+   *
+   * ```
+   *              x-Axis
+   *          x--------------
+   *          |
+   *          |   7  0  1
+   *          |
+   *  y-Axis  |   6  x  2
+   *          |
+   *          |   5  4  3
+   *
+   * ```
+   */
   get direction() {
     return this._direction;
   }
 
   set direction(value) {
     this._direction = value;
-    this._updatePosition();
     this._updateAvatarSprites();
   }
 
-  get action() {
-    return this._primaryAction;
-  }
-
-  set action(value) {
-    this._primaryAction = value;
-    this._updateAvatarSprites();
-  }
-
+  /**
+   * If set to true, the avatar will be waving. You can
+   * achieve the same behavior by adding the wave action manually
+   * through `addAction`.
+   */
   get waving() {
     return this._waving;
   }
@@ -150,6 +233,35 @@ export class Avatar extends RoomObject implements IMoveable {
     this._updateAvatarSprites();
   }
 
+  /**
+   * The active actions of the avatar.
+   */
+  get actions() {
+    return this._actions;
+  }
+
+  set actions(value) {
+    this._actions = value;
+    this._updateAvatarSprites();
+  }
+
+  /**
+   * The apparent position of the avatar on the screen. This is useful
+   * for placing UI relative to the user.
+   */
+  get screenPosition() {
+    const worldTransform = this._avatarSprites.worldTransform;
+    if (worldTransform == null) return;
+
+    return {
+      x: worldTransform.tx,
+      y: worldTransform.ty,
+    };
+  }
+
+  /**
+   * Clears the enqueued movement of the avatar.
+   */
   clearMovement() {
     const current = this._moveAnimation?.clear();
 
@@ -160,57 +272,70 @@ export class Avatar extends RoomObject implements IMoveable {
     }
   }
 
-  private _getWavingAction() {
-    if (this.waving) {
-      return {
-        frame:
-          avatarFramesObject.wav[this._frame % avatarFramesObject.wav.length],
-      };
+  private _updateEventHandlers() {
+    if (this._placeholderSprites != null) {
+      this._placeholderSprites.onClick = this._onClick;
+      this._placeholderSprites.onDoubleClick = this._onDoubleClick;
     }
+
+    this._loadingAvatarSprites.onClick = this._onClick;
+    this._loadingAvatarSprites.onDoubleClick = this._onDoubleClick;
   }
 
-  private _getDrinkingAction() {
-    if (this.item != null) {
-      return {
-        kind: this.drinking ? ("drk" as const) : ("crr" as const),
-        item: this.item,
-      };
-    }
-  }
-
-  private _getCurrentPrimaryAction(): PrimaryAction {
-    const walkFrame =
-      avatarFramesObject.wlk[this._frame % avatarFramesObject.wlk.length];
-
-    if (this._walking || this.action === "wlk") {
-      return {
-        kind: "wlk",
-        frame: walkFrame,
-      };
-    }
-
+  private _getPlaceholderLookOptions(): LookOptions {
     return {
-      kind: this.action,
+      actions: new Set(),
+      direction: this.direction,
+      look: "hd-99999-99999",
+      effect: undefined,
+      initial: false,
+      item: undefined,
     };
   }
 
   private _getCurrentLookOptions(): LookOptions {
+    if (!this._loaded) return this._getPlaceholderLookOptions();
+
+    return this._getLookOptions();
+  }
+
+  private _getLookOptions(): LookOptions {
+    const combinedActions = new Set(this.actions);
+
+    if (this._walking) {
+      combinedActions.add(AvatarAction.Move);
+    }
+
+    if (this.waving) {
+      combinedActions.add(AvatarAction.Wave);
+    }
+
     return {
-      action: this._getCurrentPrimaryAction(),
-      actions: {
-        wav: this._getWavingAction(),
-        item: this._getDrinkingAction(),
-      },
+      actions: combinedActions,
       direction: this.direction,
       look: this._look,
+      item: this.item,
+      effect: this._fx,
     };
   }
 
   private _updateAvatarSprites() {
     if (!this.mounted) return;
 
+    if (this._loaded) {
+      if (this._placeholderSprites != null) {
+        this._placeholderSprites.destroy();
+      }
+
+      this._placeholderSprites = undefined;
+
+      this._avatarSprites = this._loadingAvatarSprites;
+    } else if (this._placeholderSprites != null) {
+      this._avatarSprites = this._placeholderSprites;
+    }
+
     const look = this._getCurrentLookOptions();
-    const animating = this._isAnimating(look);
+    const animating = true;
 
     if (animating) {
       this._startAnimation();
@@ -223,6 +348,13 @@ export class Avatar extends RoomObject implements IMoveable {
     if (avatarSprites != null) {
       avatarSprites.lookOptions = look;
     }
+
+    this._updatePosition();
+    this._updateEventHandlers();
+  }
+
+  private _updateFrame() {
+    this._avatarSprites.currentFrame = this._frame;
   }
 
   private _startAnimation() {
@@ -233,7 +365,7 @@ export class Avatar extends RoomObject implements IMoveable {
 
     this._cancelAnimation = this.animationTicker.subscribe((value) => {
       this._frame = value - start;
-      this._updateAvatarSprites();
+      this._updateFrame();
     });
   }
 
@@ -256,13 +388,16 @@ export class Avatar extends RoomObject implements IMoveable {
     this._updateAvatarSprites();
   }
 
-  private _isAnimating(look: LookOptions) {
-    if (look.action.kind === "wlk") return true;
-    if (look.actions.wav != null) return true;
-
-    return false;
-  }
-
+  /**
+   * Walk the user to a position. This will trigger the walking animation, change the direction
+   * and smoothly move the user to its new position. Note that you have to implement
+   * your own pathfinding logic on top of it.
+   *
+   * @param roomX New x-Position
+   * @param roomY New y-Position
+   * @param roomZ New z-Position
+   * @param options Optionally specify the direction of user movement
+   */
   walk(
     roomX: number,
     roomY: number,
@@ -283,6 +418,14 @@ export class Avatar extends RoomObject implements IMoveable {
     this._roomZ = roomZ;
   }
 
+  /**
+   * Move the user to a new position. This will smoothly animate the user to the
+   * specified position.
+   *
+   * @param roomX New x-Position
+   * @param roomY New y-Position
+   * @param roomZ New z-Position
+   */
   move(roomX: number, roomY: number, roomZ: number) {
     this._moveAnimation?.move(
       { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
@@ -315,6 +458,9 @@ export class Avatar extends RoomObject implements IMoveable {
     return getZOrder(roomX, roomY, roomZ) + 1;
   }
 
+  /**
+   * @deprecated Use `screenPosition` instead. This will be the actual position on the screen.
+   */
   getScreenPosition() {
     return {
       x: this._avatarSprites.x,
@@ -344,13 +490,33 @@ export class Avatar extends RoomObject implements IMoveable {
     }
 
     const item = this.tilemap.getTileAtPosition(roomXrounded, roomYrounded);
+    if (item?.type === "door") {
+      this.visualization.container.removeChild(this._avatarSprites);
+      this.visualization.behindWallContainer.addChild(this._avatarSprites);
+    }
 
-    this._avatarSprites.layer = item?.type === "door" ? "door" : "tile";
+    if (item == null || item.type !== "door") {
+      this.visualization.behindWallContainer.removeChild(this._avatarSprites);
+      this.visualization.container.addChild(this._avatarSprites);
+    }
   }
 
   registered(): void {
-    this._updatePosition();
-    this.roomObjectContainer.addRoomObject(this._avatarSprites);
+    if (this._placeholderSprites != null) {
+      this._placeholderSprites.dependencies = {
+        animationTicker: this.animationTicker,
+        avatarLoader: this.avatarLoader,
+        hitDetection: this.hitDetection,
+      };
+    }
+
+    this._loadingAvatarSprites.dependencies = {
+      animationTicker: this.animationTicker,
+      avatarLoader: this.avatarLoader,
+      hitDetection: this.hitDetection,
+    };
+
+    this._updateAvatarSprites();
 
     this._moveAnimation = new ObjectAnimation(
       this.animationTicker,
@@ -375,8 +541,33 @@ export class Avatar extends RoomObject implements IMoveable {
       },
       this.configuration.avatarMovementDuration
     );
+  }
 
-    this._updateAvatarSprites();
+  /**
+   * Make an action active.
+   * @param action The action to add
+   */
+  addAction(action: AvatarAction) {
+    this.actions = new Set(this._actions).add(action);
+  }
+
+  /**
+   * Remove an action from the active actions.
+   * @param action The action to remove
+   */
+  removeAction(action: AvatarAction) {
+    const newSet = new Set(this._actions);
+    newSet.delete(action);
+
+    this.actions = newSet;
+  }
+
+  /**
+   * Check if an action is active.
+   * @param action The action to check
+   */
+  hasAction(action: AvatarAction) {
+    return this.actions.has(action);
   }
 
   destroyed(): void {
@@ -386,4 +577,27 @@ export class Avatar extends RoomObject implements IMoveable {
       this._cancelAnimation();
     }
   }
+}
+
+interface Options extends RoomPosition {
+  /** Look of the avatar */
+  look: string;
+  /**
+   * Direction of the avatar. Following numbers map to the
+   * following directions of the avatar. The `x` would be the location of the
+   * avatar and the numbers represent for which number the avatar faces in which direction.
+   *
+   * ```
+   *              x-Axis
+   *          x--------------
+   *          |
+   *          |   7  0  1
+   *          |
+   *  y-Axis  |   6  x  2
+   *          |
+   *          |   5  4  3
+   *
+   * ```
+   */
+  direction: number;
 }

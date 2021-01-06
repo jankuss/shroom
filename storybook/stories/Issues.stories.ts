@@ -1,4 +1,5 @@
-import { Avatar, Room, FloorFurniture } from "@jankuss/shroom";
+import * as PIXI from "pixi.js";
+import { Avatar, Room, FloorFurniture, RoomCamera } from "@jankuss/shroom";
 import { action } from "@storybook/addon-actions";
 import { createShroom } from "./common/createShroom";
 
@@ -131,5 +132,77 @@ export function Issue31() {
     room.addRoomObject(furniture6);
 
     application.stage.addChild(room);
+  });
+}
+
+export function Issue38() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+            xxxxxxxxxxxx
+            xxxxx000xxxx
+            xxxxx000xxxx
+            x00000000000
+            x00000000000
+            x00000000000
+            xxxxx000xxxx
+            xxxxx000xxxx
+            xxxxxxxxxxxx
+            `,
+    });
+
+    const avatar = new Avatar({
+      look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
+      direction: 2,
+      roomX: 3,
+      roomY: 5,
+      roomZ: 0,
+    });
+
+    room.onTileClick = action("Position");
+
+    room.addRoomObject(avatar);
+
+    application.stage.addChild(room);
+  });
+}
+
+export function Issue56() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+            xxxxxxxxxxxx
+            xxxxx000xxxx
+            xxxxx000xxxx
+            x00000000000
+            x00000000000
+            x00000000000
+            xxxxx000xxxx
+            xxxxx000xxxx
+            xxxxxxxxxxxx
+            `,
+    });
+
+    const container = RoomCamera.forScreen(room);
+    application.stage.addChild(container);
+
+    const window = new PIXI.Graphics();
+
+    window.beginFill(0xffffff);
+    window.drawRect(0, 0, 200, 400);
+    window.endFill();
+    window.interactive = true;
+
+    application.stage.addChild(window);
+
+    const child = document.createElement("div");
+    child.style.width = "200px";
+    child.style.height = "64px";
+    child.style.backgroundColor = "#ffffff";
+    child.style.position = "absolute";
+    child.style.left = "200px";
+    child.style.top = "50px";
+
+    document.body.appendChild(child);
   });
 }

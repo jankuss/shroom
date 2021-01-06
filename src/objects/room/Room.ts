@@ -22,6 +22,7 @@ import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
 import { ILandscapeContainer } from "./ILandscapeContainer";
 import { RoomObjectContainer } from "./RoomObjectContainer";
+import { Subject } from "rxjs";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -34,6 +35,23 @@ export interface Dependencies {
 }
 
 type TileMap = TileType[][] | string;
+
+interface CreateOptions {
+  /**
+   * A tilemap string or 2d-array. This should have the following format
+   * ```
+   * xxxx  <- Upper padding
+   * x000  <- Tiles
+   * x000
+   * x000
+   *
+   * |
+   * |
+   * Side padding
+   * ```
+   */
+  tilemap: TileMap;
+}
 
 export class Room
   extends PIXI.Container
@@ -90,6 +108,8 @@ export class Room
 
   private _largestDiff: number;
 
+  private _activeTileSubject = new Subject<RoomPosition | undefined>();
+
   private _landscapeContainer: ILandscapeContainer = {
     getMaskLevel: (roomX, roomY) => {
       return {
@@ -99,156 +119,8 @@ export class Room
     },
   };
 
-  public get roomObjects() {
-    return this._roomObjectContainer.roomObjects;
-  }
-
-  public get hideWalls() {
-    return this._hideWalls;
-  }
-
-  public set hideWalls(value) {
-    this._hideWalls = value;
-    this.updateTiles();
-  }
-
-  public get hideFloor() {
-    return this._hideFloor;
-  }
-
-  public set hideFloor(value) {
-    this._hideFloor = value;
-    this.updateTiles();
-  }
-
-  public get wallHeight() {
-    return this._wallHeight;
-  }
-
-  public set wallHeight(value) {
-    this._wallHeight = value;
-    this._updateWallHeight();
-  }
-
-  public get wallHeightWithZ() {
-    return this.wallHeight + this._largestDiff * 32;
-  }
-
-  public get tileHeight() {
-    return this._tileHeight;
-  }
-
-  public set tileHeight(value) {
-    this._tileHeight = value;
-    this._updateTileHeight();
-  }
-
-  public get wallDepth() {
-    return this._wallDepth;
-  }
-
-  public set wallDepth(value) {
-    this._wallDepth = value;
-    this._updateWallDepth();
-  }
-
-  private _updateWallDepth() {
-    this._updatePosition();
-    this.visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.wallDepth = this.wallDepth;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _updateWallHeight() {
-    this._updatePosition();
-    this.visualization.updateRoom(this);
-    this.visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.wallHeight = this.wallHeightWithZ;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _updateTileHeight() {
-    this._updatePosition();
-    this.visualization.disableCache();
-    this._floor.forEach((floor) => {
-      floor.tileHeight = this.tileHeight;
-    });
-    this._walls.forEach((wall) => {
-      wall.tileHeight = this.tileHeight;
-    });
-    this.visualization.enableCache();
-  }
-
-  private _getObjectPositionWithOffset(roomX: number, roomY: number) {
-    return {
-      x: roomX + this._positionOffsets.x,
-      y: roomY + this._positionOffsets.y,
-    };
-  }
-
-  private _getTilePositionWithOffset(roomX: number, roomY: number) {
-    return {
-      x: roomX + this._wallOffsets.x,
-      y: roomY + this._wallOffsets.y,
-    };
-  }
-
-  getTileAtPosition(roomX: number, roomY: number) {
-    const { x, y } = this._getObjectPositionWithOffset(roomX, roomY);
-
-    const row = this.parsedTileMap[y];
-    if (row == null) return;
-    if (row[x] == null) return;
-
-    return row[x];
-  }
-
-  get onTileClick() {
-    return this._onTileClick;
-  }
-
-  set onTileClick(value) {
-    this._onTileClick = value;
-  }
-
-  get wallTexture() {
-    return this._wallTexture;
-  }
-
-  set wallTexture(value) {
-    this._wallTexture = value;
-    this.loadWallTextures();
-  }
-
-  get floorTexture() {
-    return this._floorTexture;
-  }
-
-  set floorTexture(value) {
-    this._floorTexture = value;
-    this.loadFloorTextures();
-  }
-
-  get wallColor() {
-    return this._wallColor;
-  }
-
-  set wallColor(value) {
-    this._wallColor = value;
-    this.updateTextures();
-  }
-
-  get floorColor() {
-    return this._floorColor;
-  }
-
-  set floorColor(value) {
-    this._floorColor = value;
-    this.updateTextures();
+  public get onActiveTileChange() {
+    return this._activeTileSubject.asObservable();
   }
 
   constructor({
@@ -311,10 +183,21 @@ export class Room
       configuration: this.configuration,
       tilemap: this,
       landscapeContainer: this._landscapeContainer,
+      application: this._application,
+      room: this,
     };
 
-    this.updateTiles();
+    this._updateTiles();
     this.addChild(this.visualization);
+  }
+
+  /**
+   * Creates a new room.
+   * @param shroom A shroom instance
+   * @param options Room creation options
+   */
+  static create(shroom: Shroom, { tilemap }: CreateOptions) {
+    return new Room({ ...shroom.dependencies, tilemap });
   }
 
   private _updatePosition() {
@@ -323,6 +206,9 @@ export class Room
     this.visualization.y = Math.round(-this.roomBounds.minY / 2) * 2;
   }
 
+  /**
+   * Bounds of the room
+   */
   public get roomBounds() {
     return {
       ...this._tileMapBounds,
@@ -333,10 +219,146 @@ export class Room
     };
   }
 
+  /**
+   * Room objects which are attached to the room.
+   */
+  public get roomObjects() {
+    return this._roomObjectContainer.roomObjects;
+  }
+
+  /**
+   * When set to true, hides the walls
+   */
+  public get hideWalls() {
+    return this._hideWalls;
+  }
+
+  public set hideWalls(value) {
+    this._hideWalls = value;
+    this._updateTiles();
+  }
+
+  /**
+   * When set to true, hide the floor. This will also hide the walls.
+   */
+  public get hideFloor() {
+    return this._hideFloor;
+  }
+
+  public set hideFloor(value) {
+    this._hideFloor = value;
+    this._updateTiles();
+  }
+
+  /**
+   * Height of the walls in the room.
+   */
+  public get wallHeight() {
+    return this._wallHeight;
+  }
+
+  public set wallHeight(value) {
+    this._wallHeight = value;
+    this._updateWallHeight();
+  }
+
+  public get wallHeightWithZ() {
+    return this.wallHeight + this._largestDiff * 32;
+  }
+
+  /**
+   * Height of the tile
+   */
+  public get tileHeight() {
+    return this._tileHeight;
+  }
+
+  public set tileHeight(value) {
+    this._tileHeight = value;
+    this._updateTileHeight();
+  }
+
+  /**
+   * Depth of the wall
+   */
+  public get wallDepth() {
+    return this._wallDepth;
+  }
+
+  public set wallDepth(value) {
+    this._wallDepth = value;
+    this._updateWallDepth();
+  }
+
+  /**
+   * A callback which is called with the tile position when a tile is clicked.
+   */
+  get onTileClick() {
+    return this._onTileClick;
+  }
+
+  set onTileClick(value) {
+    this._onTileClick = value;
+  }
+
+  /**
+   * Texture of the wall.
+   */
+  get wallTexture() {
+    return this._wallTexture;
+  }
+
+  set wallTexture(value) {
+    this._wallTexture = value;
+    this._loadWallTextures();
+  }
+
+  /**
+   * Texture of the floor.
+   */
+  get floorTexture() {
+    return this._floorTexture;
+  }
+
+  set floorTexture(value) {
+    this._floorTexture = value;
+    this._loadFloorTextures();
+  }
+
+  /**
+   * Color of the wall.
+   */
+  get wallColor() {
+    return this._wallColor;
+  }
+
+  set wallColor(value) {
+    this._wallColor = value;
+    this._updateTextures();
+  }
+
+  /**
+   * Color of the floor.
+   */
+  get floorColor() {
+    return this._floorColor;
+  }
+
+  set floorColor(value) {
+    this._floorColor = value;
+    this._updateTextures();
+  }
+
+  /**
+   * Height of the room.
+   */
   public get roomHeight() {
     return this.roomBounds.maxY - this.roomBounds.minY;
   }
 
+  /**
+   * Width of the room.
+   */
   public get roomWidth() {
     return this.roomBounds.maxX - this.roomBounds.minX;
   }
@@ -345,26 +367,71 @@ export class Room
     return this.parsedTileMap;
   }
 
-  static create(shroom: Shroom, { tilemap }: { tilemap: TileMap }) {
-    return new Room({ ...shroom.dependencies, tilemap });
+  private _updateWallDepth() {
+    this._updatePosition();
+    this.visualization.disableCache();
+    this._walls.forEach((wall) => {
+      wall.wallDepth = this.wallDepth;
+    });
+    this.visualization.enableCache();
   }
 
-  private loadWallTextures() {
+  private _updateWallHeight() {
+    this._updatePosition();
+    this.visualization.updateRoom(this);
+    this.visualization.disableCache();
+    this._walls.forEach((wall) => {
+      wall.wallHeight = this.wallHeightWithZ;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _updateTileHeight() {
+    this._updatePosition();
+    this.visualization.disableCache();
+    this._floor.forEach((floor) => {
+      floor.tileHeight = this.tileHeight;
+    });
+    this._walls.forEach((wall) => {
+      wall.tileHeight = this.tileHeight;
+    });
+    this.visualization.enableCache();
+  }
+
+  private _getObjectPositionWithOffset(roomX: number, roomY: number) {
+    return {
+      x: roomX + this._positionOffsets.x,
+      y: roomY + this._positionOffsets.y,
+    };
+  }
+
+  getTileAtPosition(roomX: number, roomY: number) {
+    const { x, y } = this._getObjectPositionWithOffset(roomX, roomY);
+
+    const row = this.parsedTileMap[y];
+    if (row == null) return;
+    if (row[x] == null) return;
+
+    return row[x];
+  }
+
+  private _loadWallTextures() {
     Promise.resolve(this.wallTexture).then((texture) => {
       this._currentWallTexture = texture;
-      this.updateTextures();
+      this._updateTextures();
     });
   }
 
-  private loadFloorTextures() {
+  private _loadFloorTextures() {
     Promise.resolve(this.floorTexture).then((texture) => {
       this._currentFloorTexture = texture;
-      this.updateTextures();
+      this._updateTextures();
     });
   }
 
-  private updateTextures() {
+  private _updateTextures() {
     this.visualization.disableCache();
+    this._updateTiles();
     this._walls.forEach((wall) => {
       wall.texture = this._currentWallTexture;
       wall.color = this._wallColor;
@@ -376,10 +443,18 @@ export class Room
     this.visualization.enableCache();
   }
 
+  /**
+   * Adds and registers a room object to a room.
+   * @param object The room object to attach
+   */
   addRoomObject(object: IRoomObject) {
     this._roomObjectContainer.addRoomObject(object);
   }
 
+  /**
+   * Removes and destroys a room object from the room.
+   * @param object The room object to remove
+   */
   removeRoomObject(object: IRoomObject) {
     this._roomObjectContainer.removeRoomObject(object);
   }
@@ -409,31 +484,41 @@ export class Room
     };
   }
 
-  private registerWall(wall: Wall) {
+  private _registerWall(wall: Wall) {
     if (this.hideWalls || this.hideFloor) return;
 
     this._walls.push(wall);
     this.addRoomObject(wall);
   }
 
-  private registerTile(tile: Stair | Tile) {
+  private _registerTile(tile: Stair | Tile) {
     if (this.hideFloor) return;
 
     this._floor.push(tile);
     this.addRoomObject(tile);
   }
 
-  private registerTileCursor(position: RoomPosition, door: boolean = false) {
-    const cursor = new TileCursor(position, door, (position) => {
-      this.onTileClick && this.onTileClick(position);
-    });
+  private _registerTileCursor(position: RoomPosition, door: boolean = false) {
+    const cursor = new TileCursor(
+      position,
+      door,
+      (position) => {
+        this.onTileClick && this.onTileClick(position);
+      },
+      (position) => {
+        this._activeTileSubject.next(position);
+      },
+      (position) => {
+        this._activeTileSubject.next(undefined);
+      }
+    );
 
     this._cursors.push(cursor);
 
     this.addRoomObject(cursor);
   }
 
-  private resetTiles() {
+  private _resetTiles() {
     [...this._floor, ...this._walls, ...this._cursors].forEach((value) =>
       value.destroy()
     );
@@ -444,8 +529,20 @@ export class Room
     this._doorWall = undefined;
   }
 
-  private updateTiles() {
-    this.resetTiles();
+  private _getWallColor() {
+    if (this.wallColor == null && this._currentWallTexture != null) {
+      return "#ffffff";
+    }
+
+    if (this.wallColor == null && this._currentWallTexture == null) {
+      return "#b6b8c7";
+    }
+
+    return "#ffffff";
+  }
+
+  private _updateTiles() {
+    this._resetTiles();
 
     const tiles = this.parsedTileMap;
 
@@ -454,7 +551,7 @@ export class Room
         const tile = tiles[y][x];
 
         if (tile.type === "door") {
-          this.registerTile(
+          this._registerTile(
             new Tile({
               geometry: this,
               roomX: x,
@@ -475,18 +572,18 @@ export class Room
             tileHeight: this.tileHeight,
             wallHeight: this.wallHeightWithZ,
             roomZ: tile.z,
-            color: this.wallColor ?? "#ffffff",
+            color: this._getWallColor(),
             texture: this._currentWallTexture,
             wallDepth: this.wallDepth,
             hideBorder: true,
             doorHeight: 30,
           });
 
-          this.registerWall(wall);
+          this._registerWall(wall);
 
           this._doorWall = wall;
 
-          this.registerTileCursor(
+          this._registerTileCursor(
             {
               roomX: x,
               roomY: y,
@@ -497,7 +594,7 @@ export class Room
         }
 
         if (tile.type === "tile") {
-          this.registerTile(
+          this._registerTile(
             new Tile({
               geometry: this,
               roomX: x,
@@ -509,7 +606,7 @@ export class Room
             })
           );
 
-          this.registerTileCursor({
+          this._registerTileCursor({
             roomX: x,
             roomY: y,
             roomZ: tile.z,
@@ -519,7 +616,7 @@ export class Room
         const direction = getWallDirection(tile);
 
         if (direction != null && tile.type === "wall") {
-          this.registerWall(
+          this._registerWall(
             new Wall({
               geometry: this,
               roomX: x,
@@ -528,7 +625,7 @@ export class Room
               tileHeight: this.tileHeight,
               wallHeight: this.wallHeightWithZ,
               roomZ: tile.height,
-              color: this.wallColor ?? "#ffffff",
+              color: this._getWallColor(),
               texture: this._currentWallTexture,
               wallDepth: this.wallDepth,
               hideBorder: tile.hideBorder,
@@ -537,7 +634,7 @@ export class Room
         }
 
         if (tile.type === "wall" && tile.kind === "innerCorner") {
-          this.registerWall(
+          this._registerWall(
             new Wall({
               geometry: this,
               roomX: x,
@@ -547,12 +644,12 @@ export class Room
               wallHeight: this.wallHeightWithZ,
               side: false,
               roomZ: tile.height,
-              color: "#ffffff",
+              color: this._getWallColor(),
               wallDepth: this.wallDepth,
             })
           );
 
-          this.registerWall(
+          this._registerWall(
             new Wall({
               geometry: this,
               roomX: x,
@@ -562,14 +659,14 @@ export class Room
               wallHeight: this.wallHeightWithZ,
               side: false,
               roomZ: tile.height,
-              color: "#ffffff",
+              color: this._getWallColor(),
               wallDepth: this.wallDepth,
             })
           );
         }
 
         if (tile.type === "stairs") {
-          this.registerTile(
+          this._registerTile(
             new Stair({
               geometry: this,
               roomX: x,
@@ -581,13 +678,13 @@ export class Room
             })
           );
 
-          this.registerTileCursor({
+          this._registerTileCursor({
             roomX: x,
             roomY: y,
             roomZ: tile.z,
           });
 
-          this.registerTileCursor({
+          this._registerTileCursor({
             roomX: x,
             roomY: y,
             roomZ: tile.z + 1,
@@ -595,6 +692,11 @@ export class Room
         }
       }
     }
+  }
+
+  destroy() {
+    super.destroy();
+    this.roomObjects.forEach((object) => this.removeRoomObject(object));
   }
 }
 

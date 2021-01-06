@@ -5,6 +5,71 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2020-01-04
+
+### Fixed
+
+- Avatar `onClick` and `onDoubleClick` not firing
+- Wall border hiding for some room models where they shouldn't
+
+## [0.3.0] - 2020-01-04
+
+### Added
+
+- Add Avatar placeholder when loading
+- Furniture will now only use valid directions
+- `screenPosition` property for `Avatar`
+- Add `BaseAvatar` for rendering avatars without a room
+- Add `BaseFurniture` for rendering furniture without a room
+- Add `onActiveTileChange` events for detecing hovered tile (useful for furniture placement preview)
+- Add ability to share a shroom instance with multiple applications through `Shroom.createShared`
+- Furniture will now only use valid directions
+
+### Changed
+
+- Change default wall color to use the original
+- Improve asset dumping behavior (thanks @thereis)
+
+### Fixed
+
+- Fix bug in AvatarSprites when updating without being mounted
+- Fix wall display for some room models
+- Fix alpha for furniture
+- Tile Cursor now shows above flooring items
+- Fix `RoomCamera` drag stopping when going over dom elements
+- Fix `RoomCamera` drag passing through other PIXI elements
+- Fix Avatar hair clipping through hats
+- Fix Avatar sleeves for some T-Shirts because library wasn't detected
+- Fix animations for some furnitures
+- Fix wall border showing for tiles on a higher level than the wall (thanks @tuttarealstep)
+
+## [0.2.0] - 2020-12-27
+
+### Added
+
+- Furniture property for alpha (thanks @sindreslungaard)
+- **Avatar Refactor**
+
+  Large parts of the avatar rendering has been refactored to match the vanilla flash rendering of avatars.
+  This means:
+
+  - Easy handling of **all** actions through `addAction`, `removeAction` and `hasAction`
+  - Loading and display of avatar items
+
+- Expose `MouseEvent` in hit detection through the `mouseEvent` property
+- Expose data in `index.bin` through `extradata` on furniture
+- Expose valid directions through `validDirections` on furniture
+
+### Fixed
+
+- Parsing of walls
+
+## [0.1.8] - 2020-12-24
+
+### Fixed
+
+- Cause of random crashes during asset extraction
+
 ## [0.1.7] - 2020-12-19
 
 ### Fixed

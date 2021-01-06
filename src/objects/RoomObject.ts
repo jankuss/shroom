@@ -9,6 +9,10 @@ export abstract class RoomObject implements IRoomObject {
     return this._context != null;
   }
 
+  protected get room() {
+    return this.getRoomContext().room;
+  }
+
   protected get configuration() {
     return this.getRoomContext().configuration;
   }
@@ -49,7 +53,11 @@ export abstract class RoomObject implements IRoomObject {
     return this.getRoomContext().landscapeContainer;
   }
 
-  private getRoomContext(): IRoomContext {
+  protected get application() {
+    return this.getRoomContext().application;
+  }
+
+  protected getRoomContext(): IRoomContext {
     if (this._context == null) throw new Error("Invalid context");
 
     return this._context;

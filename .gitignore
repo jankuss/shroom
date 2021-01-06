@@ -9,3 +9,4 @@ node_modules
 /example/public/images
 /storybook/public/resources
 /storybook/public/images
+yarn.lock

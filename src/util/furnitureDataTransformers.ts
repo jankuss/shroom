@@ -1,4 +1,4 @@
-import { FurnitureData } from "../objects/FurnitureData";
+import { FurnitureData } from "../objects/furniture/FurnitureData";
 import { FurnitureInfo } from "../interfaces/IFurnitureData";
 
 export function transformFirst<T>(

@@ -392,7 +392,10 @@ export class Wall extends RoomObject {
           borderWidth: this.wallDepth,
         });
 
-        this._border = right.border;
+        if (!this._hideBorder) {
+          this._border = right.border;
+        }
+
         this._primary = right.primary;
         this._top = right.top;
         break;
@@ -434,6 +437,6 @@ export class Wall extends RoomObject {
       }
     }
 
-    this.visualization.addWallChild(this._container);
+    this.visualization.wallContainer.addChild(this._container);
   }
 }

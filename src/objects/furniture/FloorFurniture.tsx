@@ -4,10 +4,10 @@ import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
 import { IFurniture, IFurnitureBehavior } from "./IFurniture";
-import { ObjectAnimation } from "../../util/animation/ObjectAnimation";
+import { ObjectAnimation } from "../animation/ObjectAnimation";
 import { HitEventHandler } from "../hitdetection/HitSprite";
 import { RoomPosition } from "../../types/RoomPosition";
-import { IMoveable } from "../IMoveable";
+import { IMoveable } from "../interfaces/IMoveable";
 import { FurnitureFetchInfo } from "./FurnitureFetchInfo";
 import { getFurnitureFetch } from "./util/getFurnitureFetch";
 import { FurnitureId } from "../../interfaces/IFurnitureData";
@@ -16,6 +16,7 @@ export class FloorFurniture
   extends RoomObject
   implements IFurniture, IMoveable {
   private _baseFurniture: BaseFurniture;
+
   private _moveAnimation: ObjectAnimation<undefined> | undefined;
 
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
@@ -32,48 +33,13 @@ export class FloorFurniture
   private _animation?: string;
   private _highlight: boolean = false;
 
-  public readonly placementType = "wall";
+  public readonly placementType = "floor";
 
   private _onClick: HitEventHandler | undefined;
   private _onDoubleClick: HitEventHandler | undefined;
 
-  public get highlight() {
-    return this._highlight;
-  }
-
-  public set highlight(value) {
-    this._highlight = value;
-    this._updateHighlight();
-  }
-
-  public get type() {
-    return this._type;
-  }
-
-  public get onClick() {
-    return this._onClick;
-  }
-
-  public set onClick(value) {
-    this._onClick = value;
-    this._baseFurniture.onClick = this.onClick;
-  }
-
-  public get onDoubleClick() {
-    return this._onDoubleClick;
-  }
-
-  public set onDoubleClick(value) {
-    this._onDoubleClick = value;
-    this._baseFurniture.onDoubleClick = this.onDoubleClick;
-  }
-
-  public get id() {
-    return this._id;
-  }
-
   constructor(
-    options: {
+    private options: {
       roomX: number;
       roomY: number;
       roomZ: number;
@@ -97,15 +63,95 @@ export class FloorFurniture
       this._type = options.type;
     }
 
-    this._baseFurniture = new BaseFurniture(
-      getFurnitureFetch(options, "floor"),
-      options.direction,
-      options.animation
-    );
+    this._baseFurniture = new BaseFurniture({
+      animation: this.animation,
+      direction: this.direction,
+      type: getFurnitureFetch(this.options, "floor"),
+    });
 
     options.behaviors?.forEach((behavior) => behavior.setParent(this));
   }
 
+  /**
+   * If set to true, displays the furniture in the highlight state.
+   */
+  public get highlight() {
+    return this._highlight;
+  }
+
+  public set highlight(value) {
+    this._highlight = value;
+    this._updateHighlight();
+  }
+
+  /**
+   * Alpha value of the furniture
+   */
+  public get alpha() {
+    return this._baseFurniture.alpha;
+  }
+
+  public set alpha(value: number) {
+    this._baseFurniture.alpha = value;
+  }
+
+  /**
+   * Type of the furniture
+   */
+  public get type() {
+    return this._type;
+  }
+
+  /**
+   * Callback triggered when the furniture has been clicked on.
+   */
+  public get onClick() {
+    return this._onClick;
+  }
+
+  public set onClick(value) {
+    this._onClick = value;
+    this._baseFurniture.onClick = this.onClick;
+  }
+
+  /**
+   * Callback triggered when the furniture has been double clicked on.
+   */
+  public get onDoubleClick() {
+    return this._onDoubleClick;
+  }
+
+  public set onDoubleClick(value) {
+    this._onDoubleClick = value;
+    this._baseFurniture.onDoubleClick = this.onDoubleClick;
+  }
+
+  /**
+   * ID of the furniture
+   */
+  public get id() {
+    return this._id;
+  }
+
+  /**
+   * The extra data provided through the `index.bin` file of the furniture.
+   * This contains the `logic` and `visualization` stings which specify some
+   * furniture behavior.
+   */
+  public get extradata() {
+    return this._baseFurniture.extradata;
+  }
+
+  /**
+   * Valid directions of the furniture.
+   */
+  public get validDirections() {
+    return this._baseFurniture.validDirections;
+  }
+
+  /**
+   * Animation of the furniture
+   */
   get animation() {
     return this._animation;
   }
@@ -115,6 +161,9 @@ export class FloorFurniture
     this._updateAnimation();
   }
 
+  /**
+   * Direction of the furniture
+   */
   get direction() {
     return this._direction;
   }
@@ -124,6 +173,19 @@ export class FloorFurniture
     this._updateDirection();
   }
 
+  /**
+   * The x position of the avatar in the room.
+   * The y-Axis is marked in the following graphic:
+   *
+   * ```
+   *    |
+   *    |
+   *    |
+   *   / \
+   *  /   \   <- x-Axis
+   * /     \
+   * ```
+   */
   get roomX() {
     return this._roomX;
   }
@@ -133,6 +195,19 @@ export class FloorFurniture
     this._updatePosition();
   }
 
+  /**
+   * The y position of the avatar in the room.
+   * The y-Axis is marked in the following graphic:
+   *
+   * ```
+   *              |
+   *              |
+   *              |
+   *             / \
+   * y-Axis ->  /   \
+   *           /     \
+   * ```
+   */
   get roomY() {
     return this._roomY;
   }
@@ -142,6 +217,19 @@ export class FloorFurniture
     this._updatePosition();
   }
 
+  /**
+   * The z position of the avatar in the room.
+   * The z-Axis is marked in the following graphic:
+   *
+   * ```
+   *              |
+   *   z-Axis ->  |
+   *              |
+   *             / \
+   *            /   \
+   *           /     \
+   * ```
+   */
   get roomZ() {
     return this._roomZ;
   }
@@ -192,6 +280,13 @@ export class FloorFurniture
     this._baseFurniture.highlight = this.highlight;
   }
 
+  /**
+   * Moves and animates the furniture to a new position.
+   *
+   * @param roomX New x-Position
+   * @param roomY New y-Position
+   * @param roomZ New z-Position
+   */
   move(roomX: number, roomY: number, roomZ: number) {
     this._moveAnimation?.move(
       { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
@@ -204,6 +299,9 @@ export class FloorFurniture
     this._roomZ = roomZ;
   }
 
+  /**
+   * Clears the enqueued movement animations of the furniture
+   */
   clearMovement() {
     const current = this._moveAnimation?.clear();
 
@@ -219,7 +317,14 @@ export class FloorFurniture
   }
 
   registered(): void {
-    this.roomObjectContainer.addRoomObject(this._baseFurniture);
+    this._baseFurniture.dependencies = {
+      animationTicker: this.animationTicker,
+      furnitureLoader: this.furnitureLoader,
+      hitDetection: this.hitDetection,
+      placeholder: this.configuration.placeholder,
+      visualization: this.visualization,
+    };
+
     this._moveAnimation = new ObjectAnimation(
       this.animationTicker,
       {

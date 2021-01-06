@@ -1,6 +1,9 @@
+import { Wall } from "../objects/room/Wall";
 import { TileType, TileTypeNumber } from "../types/TileType";
 import { getNumberOfTileType, getTileInfo } from "./getTileInfo";
 import { isTile } from "./isTile";
+import { ColumnWall, getColumnWalls } from "./tilemap/getColumnWalls";
+import { getRowWalls, RowWall } from "./tilemap/getRowWalls";
 
 export type ParsedTileType =
   | {
@@ -30,16 +33,13 @@ export function parseTileMap(
   positionOffsets: { x: number; y: number };
   maskOffsets: { x: number; y: number };
 } {
+  const wallInfo = new Walls(getRowWalls(tilemap), getColumnWalls(tilemap));
+
   assertTileMapHasPadding(tilemap);
 
   const result: ParsedTileType[][] = tilemap.map((row) =>
     row.map(() => ({ type: "hidden" as const }))
   );
-
-  const rowWallMinimum = new RowWall();
-
-  let colWallMinimumY = -1;
-  let globalWallStartX = -1;
 
   let lowestTile: number | undefined;
   let highestTile: number | undefined;
@@ -56,76 +56,65 @@ export function parseTileMap(
   }
 
   for (let y = 0; y < tilemap.length; y++) {
-    let rowWallStartX = -1;
-
     for (let x = 0; x < tilemap[y].length; x++) {
       const resultX = x;
       const resultY = y;
 
-      const wallPositionX = resultX - 1;
-      const wallPositionY = resultY - 1;
-
       const tileInfo = getTileInfo(tilemap, x, y);
+      const tileInfoBelow = getTileInfo(tilemap, x, y + 1);
+      const tileInfoRight = getTileInfo(tilemap, x + 1, y);
+
+      const wall = wallInfo.getWall(x, y);
+
+      if (wall != null) {
+        switch (wall.kind) {
+          case "column":
+            const colWallHeightDiff =
+              tileInfoBelow.height != null
+                ? Math.abs(tileInfoBelow.height - wall.height)
+                : 0;
+
+            result[resultY][resultX] = {
+              kind: "colWall",
+              type: "wall",
+              height: wall.height,
+              hideBorder: colWallHeightDiff > 0,
+            };
+            break;
+
+          case "row":
+            const rowWallHeightDiff =
+              tileInfoRight.height != null
+                ? Math.abs(tileInfoRight.height - wall.height)
+                : 0;
+
+            result[resultY][resultX] = {
+              kind: "rowWall",
+              type: "wall",
+              height: wall.height,
+              hideBorder: tileInfoBelow.rowDoor || rowWallHeightDiff > 0,
+            };
+            break;
+
+          case "innerCorner":
+            result[resultY][resultX] = {
+              kind: "innerCorner",
+              type: "wall",
+              height: wall.height,
+            };
+            break;
+
+          case "outerCorner":
+            result[resultY][resultX] = {
+              kind: "outerCorner",
+              type: "wall",
+              height: wall.height,
+            };
+            break;
+        }
+      }
 
       if (!tileInfo.rowDoor || hasDoor) {
-        const rowWallAllowed = rowWallMinimum.isWallAllowed(wallPositionX);
-        if (tileInfo.rowEdge && tileInfo.height != null && rowWallAllowed) {
-          const belowTileInfo = getTileInfo(tilemap, x - 1, y + 1);
-
-          result[resultY][wallPositionX] = {
-            type: "wall",
-            kind: "rowWall",
-            height: tileInfo.height,
-            hideBorder: belowTileInfo.rowDoor,
-          };
-
-          rowWallMinimum.setValueIfLower(wallPositionX);
-        }
-
-        const columnWallAllowed =
-          colWallMinimumY === -1 ||
-          colWallMinimumY >= wallPositionY ||
-          (globalWallStartX !== -1 && wallPositionX < globalWallStartX);
-
-        if (tileInfo.colEdge && tileInfo.height != null && columnWallAllowed) {
-          result[wallPositionY][resultX] = {
-            type: "wall",
-            kind: "colWall",
-            height: tileInfo.height,
-          };
-          colWallMinimumY = wallPositionY;
-
-          if (rowWallStartX === -1) {
-            rowWallStartX = wallPositionX;
-          }
-        }
-
-        if (
-          tileInfo.rowEdge &&
-          tileInfo.colEdge &&
-          tileInfo.height != null &&
-          rowWallAllowed &&
-          columnWallAllowed
-        ) {
-          result[wallPositionY][wallPositionX] = {
-            type: "wall",
-            kind: "outerCorner",
-            height: tileInfo.height,
-          };
-        }
-
-        if (
-          tileInfo.innerEdge &&
-          tileInfo.height != null &&
-          columnWallAllowed
-        ) {
-          result[wallPositionY][wallPositionX] = {
-            type: "wall",
-            kind: "innerCorner",
-            height: tileInfo.height,
-          };
-        }
-
         if (tileInfo.stairs != null && tileInfo.height != null) {
           result[resultY][resultX] = {
             type: "stairs",
@@ -141,13 +130,6 @@ export function parseTileMap(
       } else {
         hasDoor = true;
         result[resultY][resultX] = { type: "door", z: tileInfo.height ?? 0 };
-      }
-
-      if (
-        globalWallStartX === -1 ||
-        (rowWallStartX !== -1 && rowWallStartX < globalWallStartX)
-      ) {
-        globalWallStartX = rowWallStartX;
       }
     }
   }
@@ -175,17 +157,63 @@ export function parseTileMap(
   };
 }
 
-class RowWall {
-  private min: number = -1;
+class Walls {
+  private _rowWalls = new Map<string, RowWall>();
+  private _colWalls = new Map<string, ColumnWall>();
 
-  setValueIfLower(value: number) {
-    if (this.min === -1 || this.min > value) {
-      this.min = value;
-    }
+  constructor(rowWalls: RowWall[], colWalls: ColumnWall[]) {
+    rowWalls.forEach((info) => {
+      for (let y = info.startY; y <= info.endY; y++) {
+        this._rowWalls.set(`${info.x}_${y}`, info);
+      }
+    });
+
+    colWalls.forEach((info) => {
+      for (let x = info.startX; x <= info.endX; x++) {
+        this._colWalls.set(`${x}_${info.y}`, info);
+      }
+    });
   }
 
-  isWallAllowed(value: number) {
-    return this.min === -1 || this.min >= value;
+  private _getRowWall(x: number, y: number) {
+    return this._rowWalls.get(`${x}_${y}`);
+  }
+
+  private _getColWall(x: number, y: number) {
+    return this._colWalls.get(`${x}_${y}`);
+  }
+
+  getWall(x: number, y: number) {
+    const rightColWall = this._getColWall(x + 1, y);
+    const bottomRowWall = this._getRowWall(x, y + 1);
+
+    if (rightColWall != null && bottomRowWall != null) {
+      // This is a outer corner
+      return {
+        kind: "outerCorner" as const,
+        height: Math.min(rightColWall.height, bottomRowWall.height),
+      };
+    }
+
+    const leftColWall = this._getColWall(x, y);
+    const topRowWall = this._getRowWall(x, y);
+
+    if (leftColWall != null && topRowWall != null) {
+      return {
+        kind: "innerCorner" as const,
+        height: Math.min(leftColWall.height, topRowWall.height),
+      };
+    }
+
+    const rowWall = this._getRowWall(x, y);
+    if (rowWall != null)
+      return {
+        kind: "row" as const,
+        height: rowWall.height,
+      };
+
+    const colWall = this._getColWall(x, y);
+    if (colWall != null) return { kind: "column", height: colWall.height };
   }
 }
 
