@@ -55,7 +55,6 @@ export function getFurniDrawDefinition(
 
   if (shadow != null) {
     parts.push({
-      asset: undefined,
       assets: [shadow],
       frameRepeat: 1,
       shadow: true,
@@ -68,7 +67,6 @@ export function getFurniDrawDefinition(
 
   if (mask != null) {
     parts.push({
-      asset: undefined,
       assets: [mask],
       frameRepeat: 1,
       layer: undefined,
@@ -157,11 +155,14 @@ function getDrawPart({
     assets = [baseAsset];
   }
 
+  if (assets == null) {
+    assets = [];
+  }
+
   return {
     mask: false,
     shadow: false,
     frameRepeat: animation?.frameRepeat ?? 1,
-    asset: baseAsset,
     layer,
     z,
     tint: color,

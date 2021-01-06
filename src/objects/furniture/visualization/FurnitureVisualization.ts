@@ -27,6 +27,8 @@ export abstract class FurnitureVisualization
     this._view = view;
   }
 
+  update(): void {}
+
   abstract updateFrame(frame: number): void;
   abstract updateDirection(direction: number): void;
   abstract updateAnimation(animation: string): void;

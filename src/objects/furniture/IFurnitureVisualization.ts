@@ -1,3 +1,4 @@
+import { IFurniture } from "./IFurniture";
 import { IFurnitureVisualizationView } from "./IFurnitureVisualizationView";
 
 export interface IFurnitureVisualization {
@@ -5,5 +6,6 @@ export interface IFurnitureVisualization {
   updateFrame(frame: number): void;
   updateDirection(direction: number): void;
   updateAnimation(animation: string | undefined): void;
+  update(furniture: IFurniture): void;
   destroy(): void;
 }

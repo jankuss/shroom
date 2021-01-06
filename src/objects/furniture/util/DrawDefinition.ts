@@ -13,8 +13,7 @@ export type BaseFurniDrawPart = {
 };
 
 export type FurniDrawPart = {
-  asset: FurnitureAsset | undefined;
-  assets?: FurnitureAsset[];
+  assets: FurnitureAsset[];
 } & BaseFurniDrawPart;
 
 export interface FurniDrawDefinition {

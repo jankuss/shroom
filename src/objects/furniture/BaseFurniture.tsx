@@ -22,6 +22,8 @@ import { IFurnitureVisualization } from "./IFurnitureVisualization";
 import { FurnitureSprite } from "./FurnitureSprite";
 import { FurnitureGuildCustomizedVisualization } from "./visualization/FurnitureGuildCustomizedVisualization";
 import { AnimatedFurnitureVisualization } from "./visualization/AnimatedFurnitureVisualization";
+import { BaseFurnitureView } from "./BaseFurnitureView";
+import { BasicFurnitureVisualization } from "./visualization/BasicFurnitureVisualization";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -61,12 +63,13 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _animation: string | undefined;
   private _type: FurnitureFetch;
   private _unknownTexture: PIXI.Texture | undefined;
+  private _unknownSprite: FurnitureSprite | undefined;
   private _clickHandler = new ClickHandler();
   private _loadFurniResultPromise: Promise<LoadFurniResult>;
   private _resolveLoadFurniResult: (result: LoadFurniResult) => void = () => {};
 
   private _visualization: IFurnitureVisualization | undefined;
-  private _fallbackVisualization = new FurnitureGuildCustomizedVisualization();
+  private _fallbackVisualization = new BasicFurnitureVisualization();
 
   private _refreshPosition: boolean = false;
   private _refreshFurniture: boolean = false;
@@ -257,8 +260,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   }
 
   public set direction(value) {
+    if (value === this.direction) return;
+
     this._direction = value;
-    this._refreshFurniture = true;
+    this.visualization.updateDirection(this.direction);
   }
 
   public get animation() {
@@ -266,9 +271,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   }
 
   public set animation(value) {
-    this._animationOverride = undefined;
+    if (value === this.animation) return;
+
     this._animation = value;
-    this._refreshFurniture = true;
+    this.visualization.updateAnimation(this.animation);
   }
 
   private _runningAnimation: string | undefined;
@@ -306,6 +312,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   private _updateSprites(cb: (element: FurnitureSprite) => void) {
     this._sprites.forEach(cb);
+
+    if (this._unknownSprite != null) {
+      cb(this._unknownSprite);
+    }
   }
 
   private _updateZIndex() {
@@ -333,6 +343,25 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   _updateUnknown() {
     if (!this.mounted) return;
+
+    if (this._unknownSprite == null) {
+      this._unknownSprite = new FurnitureSprite({
+        hitDetection: this.dependencies.hitDetection,
+      });
+
+      this._unknownSprite.baseX = this.x;
+      this._unknownSprite.baseY = this.y;
+
+      this._unknownSprite.offsetY = -32;
+
+      if (this._unknownTexture != null) {
+        this._unknownSprite.texture = this._unknownTexture;
+      }
+
+      this._unknownSprite.zIndex = this.zIndex;
+      this.dependencies.visualization.container.addChild(this._unknownSprite);
+      this._updatePosition();
+    }
   }
 
   private _getAsset(part: FurniDrawPart, index: number) {
@@ -374,30 +403,33 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   _updateFurnitureSprites(loadFurniResult: LoadFurniResult) {
     if (!this.mounted) return;
 
+    this._unknownSprite?.destroy();
+    this._unknownSprite = undefined;
+
     this.visualization.setView({
       furniture: loadFurniResult,
       container: this.dependencies.visualization.container,
+      addMask: (maskId, object) => {
+        this.dependencies.visualization.addMask(maskId, object);
+      },
       createSprite: (part, assetIndex) => {
-        const assetName = getAssetFromPart(part, assetIndex);
-        if (assetName == null) return;
+        const asset = getAssetFromPart(part, assetIndex);
+        if (asset == null) return;
 
-        let cachedAsset = this._sprites.get(assetName);
+        let cachedAsset = this._sprites.get(asset.name);
         if (cachedAsset == null) {
-          const asset = this._createSimpleAsset(
+          const sprite = this._createSimpleAsset(
             loadFurniResult,
             part,
             assetIndex
           );
 
-          if (asset != null) {
-            this._sprites.set(assetName, asset);
-            cachedAsset = asset;
+          if (sprite != null) {
+            this._sprites.set(asset.name, sprite);
+            cachedAsset = sprite;
           }
         } else {
-          const asset = this._getAsset(part, assetIndex);
-          if (asset != null) {
-            this._applyLayerDataToSprite(cachedAsset, asset, part);
-          }
+          this._applyLayerDataToSprite(cachedAsset, asset, part);
         }
 
         return cachedAsset;
@@ -409,16 +441,12 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         sprite.destroy();
       },
     });
+
+    this.visualization.update();
+
     this.visualization.updateDirection(this.direction);
     this.visualization.updateAnimation(this.animation);
-
     this.visualization.updateFrame(this.dependencies.animationTicker.current());
-  }
-
-  private _getDisplayAnimation() {
-    if (this._animationOverride != null) return this._animationOverride;
-
-    return this.animation;
   }
 
   private _applyLayerDataToSprite(
@@ -474,6 +502,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     if (shadow) {
       if (this.highlight) {
         sprite.visible = false;
+        sprite.alpha = 0;
       } else {
         sprite.visible = true;
         sprite.alpha = alpha / 5;
@@ -558,7 +587,7 @@ function getAssetFromPart(part: FurniDrawPart, assetIndex: number) {
   const asset = part.assets != null ? part.assets[assetIndex] : undefined;
   if (asset == null) return;
 
-  return asset.name;
+  return asset;
 }
 
 export interface IFurnitureRoomVisualization {

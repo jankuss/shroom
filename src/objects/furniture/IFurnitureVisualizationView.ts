@@ -1,11 +1,14 @@
-import { SpriteWithStaticOffset } from "./BaseFurniture";
+import {
+  IFurnitureRoomVisualization,
+  SpriteWithStaticOffset,
+} from "./BaseFurniture";
 import { IFurnitureVisualizationData } from "./data/interfaces/IFurnitureVisualizationData";
 import { FurnitureSprite } from "./FurnitureSprite";
 import { FurniDrawPart } from "./util/DrawDefinition";
 import { LoadFurniResult } from "./util/loadFurni";
 
-export interface IFurnitureVisualizationView {
-  container: PIXI.Container;
+export interface IFurnitureVisualizationView
+  extends IFurnitureRoomVisualization {
   furniture: LoadFurniResult;
 
   createSprite(part: FurniDrawPart, index: number): FurnitureSprite | undefined;

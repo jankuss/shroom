@@ -1,9 +1,10 @@
+import { FurnitureSprite } from "../FurnitureSprite";
 import { IFurnitureVisualization } from "../IFurnitureVisualization";
 import { IFurnitureVisualizationView } from "../IFurnitureVisualizationView";
 import { FurnitureVisualization } from "./FurnitureVisualization";
 
 export class BasicFurnitureVisualization extends FurnitureVisualization {
-  private _sprites: PIXI.Sprite[] = [];
+  private _sprites: FurnitureSprite[] = [];
   private _refreshFurniture: boolean = false;
 
   private _currentDirection: number = 0;
@@ -26,7 +27,7 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
 
   private _update() {
     this._sprites.forEach((sprite) => {
-      sprite.destroy();
+      this.view.destroySprite(sprite);
     });
 
     this._sprites = [];
@@ -44,13 +45,19 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
   }
 
   updateFrame(frame: number): void {
-    if (!this._refreshFurniture) {
-      this._refreshFurniture = true;
+    if (!this.mounted) return;
+
+    if (this._refreshFurniture) {
+      this._refreshFurniture = false;
       this._update();
     }
   }
 
+  update() {
+    this._refreshFurniture = true;
+  }
+
   destroy(): void {
-    this._sprites.forEach((sprite) => sprite.destroy());
+    this._sprites.forEach((sprite) => this.view.destroySprite(sprite));
   }
 }
