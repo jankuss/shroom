@@ -38,7 +38,6 @@ export class FurnitureBottleVisualization extends FurnitureVisualization {
   }
 
   updateAnimation(animation: string): void {
-    console.log(animation);
     if (
       animation === FurnitureBottleVisualization.ANIMATION_ID_ROLL.toString()
     ) {
@@ -63,7 +62,10 @@ export class FurnitureBottleVisualization extends FurnitureVisualization {
             animationNumber
         );
         this._stateQueue.push(animationNumber);
+        return;
       }
+
+      this._base.updateAnimation(animation);
     }
   }
 }

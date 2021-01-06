@@ -211,16 +211,16 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
         part = this.modifier(part);
       }
 
-      let frameIndex = Math.floor(
-        (this._frame % frameCount) / part.frameRepeat
-      );
+      const frameProgress = this._frame % frameCount;
+
+      let frameIndex = Math.floor(frameProgress / part.frameRepeat);
       const assetCount = getAssetsCount(part) - 1;
 
       if (frameIndex > assetCount) {
         frameIndex = assetCount;
       }
 
-      if (this._frame >= frameCount - 1) {
+      if (frameProgress === frameCount - 1) {
         this._lastFramePlayedMap.set(part.layerIndex, true);
       } else {
         this._lastFramePlayedMap.set(part.layerIndex, false);
@@ -236,7 +236,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   }
 
   isLastFramePlayedForLayer(layerIndex: number) {
-    return this._lastFramePlayedMap.get(layerIndex) ?? true;
+    return this._lastFramePlayedMap.get(layerIndex) ?? false;
   }
 
   destroy(): void {
