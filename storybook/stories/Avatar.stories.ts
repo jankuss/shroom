@@ -1,6 +1,7 @@
-import { Room, Avatar, AvatarAction } from "@jankuss/shroom";
+import { Avatar, AvatarAction, Room } from "@jankuss/shroom";
 import { createShroom } from "./common/createShroom";
 import { action } from "@storybook/addon-actions";
+import { BaseAvatar } from "../../dist";
 
 export default {
   title: "Avatar",
@@ -296,5 +297,55 @@ export function EventHandling() {
     room.addRoomObject(avatar);
 
     application.stage.addChild(room);
+  });
+}
+
+export function BaseAvatarClothes() {
+  return createShroom(({ application, shroom }) => {
+    // const room = Room.create(shroom, {
+    //   tilemap: `
+    //        xxxxxxxx
+    //        x0000000
+    //        x0000000
+    //        x0000000
+    //        x0000000
+    //       `,
+    // });
+
+    const baseAvatar = BaseAvatar.fromShroom(shroom, {
+      look: {
+        look: 'ch-210-66',
+        direction: 2,
+        actions: new Set<AvatarAction>(),
+      },
+      zIndex: 1,
+      position: {
+        x: 0,
+        y: 32
+      },
+      onLoad: () => {
+        // console.log(baseAvatar.width, baseAvatar.height)
+      }
+    });
+
+    const baseAvatar2 = BaseAvatar.fromShroom(shroom, {
+      look: {
+        look: 'lg-280-110.ch-210-66',
+        direction: 2,
+        actions: new Set<AvatarAction>().add(AvatarAction.Sit)
+      },
+      zIndex: 1,
+      skipBodyParts: true,
+      position: {
+        x: 100,
+        y: 32
+      },
+      onLoad: () => {
+        console.log(baseAvatar2.width, baseAvatar2.height)
+      }
+    });
+
+    application.stage.addChild(baseAvatar);
+    application.stage.addChild(baseAvatar2);
   });
 }

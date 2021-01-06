@@ -17,10 +17,13 @@ import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { Shroom } from "../Shroom";
 
+const bodyPartTypes = [ 'hd', 'bd', 'lh', 'rh' ];
+
 export interface BaseAvatarOptions {
   look: LookOptions;
   position: { x: number; y: number };
   zIndex: number;
+  skipBodyParts?: boolean;
   onLoad?: () => void;
 }
 
@@ -37,6 +40,8 @@ export class BaseAvatar extends PIXI.Container {
 
   private _lookOptions: LookOptions | undefined;
   private _nextLookOptions: LookOptions | undefined;
+
+  private _skipBodyParts: boolean;
 
   private _currentFrame: number = 0;
   private _clickHandler: ClickHandler = new ClickHandler();
@@ -121,6 +126,7 @@ export class BaseAvatar extends PIXI.Container {
     this.zIndex = options.zIndex;
     this._nextLookOptions = options.look;
     this._onLoad = options.onLoad;
+    this._skipBodyParts = options.skipBodyParts || false;
   }
 
   private _updateLookOptions(
@@ -181,6 +187,10 @@ export class BaseAvatar extends PIXI.Container {
     this._container = new PIXI.Container();
 
     drawDefinition.parts.forEach((part) => {
+      if (this._skipBodyParts && bodyPartTypes.includes(part.type)) {
+        return;
+      }
+
       const frame = currentFrame % part.assets.length;
       const asset = part.assets[frame];
 
