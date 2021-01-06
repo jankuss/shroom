@@ -12,16 +12,15 @@ import {
   FurnitureFetch,
   IFurnitureLoader,
 } from "../../interfaces/IFurnitureLoader";
-import { getDirectionForFurniture } from "./util/getDirectionForFurniture";
 import { FurnitureAsset } from "./data/interfaces/IFurnitureAssetsData";
 import { FurnitureLayer } from "./data/interfaces/IFurnitureVisualizationData";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IRoomContext } from "../../interfaces/IRoomContext";
 import { Shroom } from "../Shroom";
-import { BasicFurnitureVisualization } from "./visualization/BasicFurnitureVisualization";
 import { IFurnitureVisualization } from "./IFurnitureVisualization";
 import { FurnitureSprite } from "./FurnitureSprite";
+import { FurnitureGuildCustomizedVisualization } from "./visualization/FurnitureGuildCustomizedVisualization";
 import { AnimatedFurnitureVisualization } from "./visualization/AnimatedFurnitureVisualization";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
@@ -66,7 +65,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _loadFurniResultPromise: Promise<LoadFurniResult>;
   private _resolveLoadFurniResult: (result: LoadFurniResult) => void = () => {};
 
-  private _visualization: IFurnitureVisualization = new AnimatedFurnitureVisualization();
+  private _visualization: IFurnitureVisualization | undefined;
+  private _fallbackVisualization = new FurnitureGuildCustomizedVisualization();
 
   private _refreshPosition: boolean = false;
   private _refreshFurniture: boolean = false;
@@ -92,6 +92,18 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     if (this._dependencies == null) throw new Error("Invalid dependencies");
 
     return this._dependencies;
+  }
+
+  public get visualization() {
+    if (this._visualization == null) return this._fallbackVisualization;
+
+    return this._visualization;
+  }
+
+  public set visualization(value) {
+    this._visualization?.destroy();
+    this._visualization = value;
+    this._updateFurniture();
   }
 
   public set dependencies(value) {
@@ -313,11 +325,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     if (!this.mounted) return;
 
     if (this.loadFurniResult != null) {
-      this._updateFurnitureSprites(
-        this.loadFurniResult,
-        this.direction,
-        this._getDisplayAnimation()
-      );
+      this._updateFurnitureSprites(this.loadFurniResult);
     } else {
       this._updateUnknown();
     }
@@ -327,11 +335,17 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     if (!this.mounted) return;
   }
 
+  private _getAsset(part: FurniDrawPart, index: number) {
+    return part.assets && part.assets[index];
+  }
+
   private _createSimpleAsset(
     loadFurniResult: LoadFurniResult,
-    { z, assets, layer, shadow, tint, mask, layerIndex }: FurniDrawPart,
+    part: FurniDrawPart,
     spriteIndex: number
   ) {
+    const { z, assets, layer, shadow, tint, mask, layerIndex } = part;
+
     const getAssetTextureName = (asset: FurnitureAsset) =>
       asset.source ?? asset.name;
 
@@ -350,30 +364,18 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     const texture = getTexture(actualAsset);
     if (texture == null) return;
 
-    const sprite = this._createSprite(actualAsset, layer, texture, {
-      x: this.x,
-      y: this.y,
-      zIndex,
-      shadow,
-      tint,
-      mask,
-    });
+    const sprite = this._createSprite(actualAsset, layer, texture, part);
 
     sprite.assetName = actualAsset.name;
 
     return sprite;
   }
 
-  _updateFurnitureSprites(
-    loadFurniResult: LoadFurniResult,
-    direction: number,
-    animation?: string
-  ) {
+  _updateFurnitureSprites(loadFurniResult: LoadFurniResult) {
     if (!this.mounted) return;
 
-    this._visualization.update({
+    this.visualization.setView({
       furniture: loadFurniResult,
-      animation: this.animation,
       container: this.dependencies.visualization.container,
       createSprite: (part, assetIndex) => {
         const assetName = getAssetFromPart(part, assetIndex);
@@ -391,6 +393,11 @@ export class BaseFurniture implements IFurnitureEventHandlers {
             this._sprites.set(assetName, asset);
             cachedAsset = asset;
           }
+        } else {
+          const asset = this._getAsset(part, assetIndex);
+          if (asset != null) {
+            this._applyLayerDataToSprite(cachedAsset, asset, part);
+          }
         }
 
         return cachedAsset;
@@ -401,8 +408,11 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         this._sprites.delete(sprite.assetName);
         sprite.destroy();
       },
-      direction,
     });
+    this.visualization.updateDirection(this.direction);
+    this.visualization.updateAnimation(this.animation);
+
+    this.visualization.updateFrame(this.dependencies.animationTicker.current());
   }
 
   private _getDisplayAnimation() {
@@ -411,40 +421,11 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     return this.animation;
   }
 
-  private _createSprite(
+  private _applyLayerDataToSprite(
+    sprite: FurnitureSprite,
     asset: FurnitureAsset,
-    layer: FurnitureLayer | undefined,
-    texture: HitTexture,
-    {
-      x,
-      y,
-      zIndex,
-      tint,
-      shadow = false,
-      mask = false,
-    }: {
-      x: number;
-      y: number;
-      zIndex: number;
-      tint?: string;
-      shadow?: boolean;
-      mask?: boolean;
-    }
-  ): FurnitureSprite {
-    const sprite = new FurnitureSprite({
-      hitDetection: this.dependencies.hitDetection,
-      mirrored: asset.flipH,
-      tag: layer?.tag,
-    });
-
-    sprite.hitTexture = texture;
-
-    if (layer?.ignoreMouse !== true) {
-      sprite.addEventListener("click", (event) =>
-        this._clickHandler.handleClick(event)
-      );
-    }
-
+    { layer, shadow = false, mask = false, z: zIndex = 0, tint }: FurniDrawPart
+  ) {
     const highlight = this.highlight && layer?.ink == null && !shadow && !mask;
 
     if (highlight) {
@@ -462,8 +443,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     sprite.offsetY = offsetY;
     sprite.offsetZIndex = zIndex;
 
-    sprite.baseX = x;
-    sprite.baseY = y;
+    sprite.baseX = this.x;
+    sprite.baseY = this.y;
     sprite.baseZIndex = this.zIndex;
 
     if (shadow) {
@@ -504,6 +485,29 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     if (mask) {
       sprite.tint = 0xffffff;
     }
+  }
+
+  private _createSprite(
+    asset: FurnitureAsset,
+    layer: FurnitureLayer | undefined,
+    texture: HitTexture,
+    part: FurniDrawPart
+  ): FurnitureSprite {
+    const sprite = new FurnitureSprite({
+      hitDetection: this.dependencies.hitDetection,
+      mirrored: asset.flipH,
+      tag: layer?.tag,
+    });
+
+    if (layer?.ignoreMouse !== true) {
+      sprite.addEventListener("click", (event) =>
+        this._clickHandler.handleClick(event)
+      );
+    }
+
+    sprite.hitTexture = texture;
+
+    this._applyLayerDataToSprite(sprite, asset, part);
 
     return sprite;
   }
@@ -521,11 +525,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       this._updateFurniture();
     });
 
-    this.dependencies.animationTicker.subscribe((frame) => {
-      this._visualization.updateFrame(frame);
-    });
-
     this._updateFurniture();
+    this.dependencies.animationTicker.subscribe((frame) => {
+      this.visualization.updateFrame(frame);
+    });
   }
 
   private _getAlpha({

@@ -6,8 +6,6 @@ import { LoadFurniResult } from "./util/loadFurni";
 
 export interface IFurnitureVisualizationView {
   container: PIXI.Container;
-  direction: number;
-  animation?: string;
   furniture: LoadFurniResult;
 
   createSprite(part: FurniDrawPart, index: number): FurnitureSprite | undefined;

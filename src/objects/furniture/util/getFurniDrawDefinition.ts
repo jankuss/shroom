@@ -111,8 +111,6 @@ export function getFurniDrawDefinition(
 
   return {
     parts,
-    frameCount,
-    transitionTo: animationData?.transitionTo,
   };
 }
 

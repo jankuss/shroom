@@ -181,7 +181,7 @@ export class Landscape extends RoomObject {
 
     this._container = container;
 
-    this.visualization.landscapeContainer.addChild(container);
+    this.roomVisualization.landscapeContainer.addChild(container);
   }
 
   destroyed(): void {
@@ -190,7 +190,7 @@ export class Landscape extends RoomObject {
   }
 
   registered(): void {
-    this._unsubscribe = this.visualization.subscribeRoomMeta(
+    this._unsubscribe = this.roomVisualization.subscribeRoomMeta(
       ({ masks, wallHeightWithZ, wallHeight }) => {
         this._masks = masks;
         this._wallHeight = wallHeight;

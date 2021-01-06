@@ -104,9 +104,9 @@ export class TileCursor extends RoomObject {
     this.graphics = this._createGraphics();
 
     if (this.door) {
-      this.visualization.behindWallContainer.addChild(this.graphics);
+      this.roomVisualization.behindWallContainer.addChild(this.graphics);
     } else {
-      this.visualization.container.addChild(this.graphics);
+      this.roomVisualization.container.addChild(this.graphics);
     }
     this.updateGraphics();
   }

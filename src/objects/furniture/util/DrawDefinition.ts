@@ -19,6 +19,4 @@ export type FurniDrawPart = {
 
 export interface FurniDrawDefinition {
   parts: FurniDrawPart[];
-  frameCount?: number;
-  transitionTo?: number;
 }

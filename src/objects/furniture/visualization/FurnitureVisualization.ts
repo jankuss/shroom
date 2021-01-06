@@ -16,10 +16,18 @@ export abstract class FurnitureVisualization
     return this._previousView;
   }
 
+  protected get mounted() {
+    return this._view != null;
+  }
+
   abstract destroy(): void;
-  update(view: IFurnitureVisualizationView): void {
+
+  setView(view: IFurnitureVisualizationView): void {
     this._previousView = this._view;
     this._view = view;
   }
+
   abstract updateFrame(frame: number): void;
+  abstract updateDirection(direction: number): void;
+  abstract updateAnimation(animation: string): void;
 }

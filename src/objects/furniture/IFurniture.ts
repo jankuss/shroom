@@ -1,5 +1,6 @@
 import { FurnitureId } from "../../interfaces/IFurnitureData";
 import { FurnitureExtraData } from "./FurnitureExtraData";
+import { IFurnitureVisualization } from "./IFurnitureVisualization";
 import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
 
 export interface IFurniture extends IFurnitureEventHandlers {
@@ -15,6 +16,7 @@ export interface IFurniture extends IFurnitureEventHandlers {
   alpha: number;
   extradata: Promise<FurnitureExtraData>;
   validDirections: Promise<number[]>;
+  visualization: IFurnitureVisualization;
 }
 
 export type IFurnitureBehavior<T extends IFurniture = IFurniture> = {

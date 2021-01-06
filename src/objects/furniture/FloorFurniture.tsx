@@ -239,6 +239,14 @@ export class FloorFurniture
     this._updatePosition();
   }
 
+  public get visualization() {
+    return this._baseFurniture.visualization;
+  }
+
+  public set visualization(value) {
+    this._baseFurniture.visualization = value;
+  }
+
   private _updateDirection() {
     this._baseFurniture.direction = this.direction;
   }
@@ -322,7 +330,7 @@ export class FloorFurniture
       furnitureLoader: this.furnitureLoader,
       hitDetection: this.hitDetection,
       placeholder: this.configuration.placeholder,
-      visualization: this.visualization,
+      visualization: this.roomVisualization,
     };
 
     this._moveAnimation = new ObjectAnimation(
