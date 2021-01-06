@@ -298,3 +298,49 @@ export function EventHandling() {
     application.stage.addChild(room);
   });
 }
+
+export function headRotation() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+           xxxxxxxx
+           x0000000
+           x0000000
+           x0000000
+           x0000000
+          `,
+    });
+
+    const avatar = new Avatar({
+      look: "hr-3163-39.hd-180-2.lg-3202-1322.ch-215-1331",
+      direction: 4,
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      headDirection: 3
+    });
+
+    const avatar2 = new Avatar({
+      look: "hr-3163-39.hd-180-2.lg-3202-1322.ch-215-1331",
+      direction: 3,
+      roomX: 2,
+      roomY: 2,
+      roomZ: 0,
+      headDirection: 3
+    });
+
+    avatar.onClick = action("Click");
+    avatar.onDoubleClick = action("Double Click");
+
+    setInterval(() => {
+      avatar.direction++;
+    }, 3000);
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    room.addRoomObject(avatar);
+    room.addRoomObject(avatar2);
+
+    application.stage.addChild(room);
+  });
+}

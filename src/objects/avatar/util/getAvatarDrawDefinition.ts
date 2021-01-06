@@ -32,16 +32,27 @@ const basePartSet = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.Head,
 ]);
 
+const headComponents = ["hd",
+  "fc",
+  "ey",
+  "hr",
+  "hrb",
+  "fa",
+  "ea",
+  "ha",
+  "he",];
+
 /**
  * Returns a definition of how the avatar should be drawn.
  * @param options Look options
- * @param dependencies External figure data, draw order and offsets
+ * @param deps External figure data, draw order and offsets
  */
 export function getAvatarDrawDefinition(
   {
     parsedLook,
     actions: initialActions,
     direction,
+    headDirection,
     item: itemId,
     effect,
   }: Options,
@@ -78,6 +89,36 @@ export function getAvatarDrawDefinition(
 
   // Since the draworder file has missing parts, we add them here.
   const drawOrderAdditional = addMissingDrawOrderItems(new Set(drawOrderRaw));
+
+  // if the head direction is different, there will be a different draw order for the components.
+  if (headDirection !== direction) {
+    const headDrawOrderRaw =
+      getDrawOrder(drawOrderId, direction) ?? getDrawOrder("std", headDirection);
+
+    // Since the draworder file has missing parts, we add them here.
+    const headDrawOrderAdditional = addMissingDrawOrderItems(new Set(headDrawOrderRaw));
+    let headComponentsIndex = 0;
+    for (let type of headDrawOrderAdditional) {
+      if (headComponents.includes(type)) {
+        let swapType = headComponents[headComponentsIndex];
+
+        // Check that we are not in the correct position already
+        if (type !== swapType) {
+          let index = headDrawOrderAdditional.indexOf(type);
+          let swapIndex = headDrawOrderAdditional.indexOf(swapType);
+
+          headComponents[index] = swapType;
+          headComponents[swapIndex] = type;
+        }
+
+        headComponentsIndex++;
+
+        if (headComponentsIndex >= headComponents.length) {
+          break;
+        }
+      }
+    }
+  }
 
   const bodyParts = geometry
     .getBodyParts("full")
@@ -145,6 +186,7 @@ export function getAvatarDrawDefinition(
         {
           actionData: action,
           direction,
+          headDirection,
           parts,
           itemId,
         },
@@ -187,11 +229,13 @@ function getBodyPart(
   {
     actionData,
     direction,
+    headDirection,
     parts,
   }: {
     parts: PartDataWithBodyPart[];
     actionData: AvatarActionInfo;
     direction: number;
+    headDirection: number,
     itemId?: string | number;
   },
   {
@@ -238,7 +282,7 @@ function getBodyPart(
     const assets = framesIndexed.map((animationFrame) =>
       getAssetForFrame({
         offsetsData,
-        direction,
+        direction: headComponents.includes(part.type) ? headDirection : direction,
         partTypeFlipped: partInfo?.flippedSetType as
           | AvatarFigurePartType
           | undefined,
@@ -307,7 +351,7 @@ function getAssetForFrame({
   const flippedMeta = getFlippedMetaData({
     assetPartDefinition,
     flippedPartType: partTypeFlipped,
-    direction,
+    direction: direction,
     partType: partType,
   });
 
@@ -453,6 +497,7 @@ interface Options {
   parsedLook: ParsedLook;
   actions: Set<string>;
   direction: number;
+  headDirection: number;
   frame: number;
   item?: string | number;
   effect?: IAvatarEffectData;
