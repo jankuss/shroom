@@ -1,6 +1,6 @@
-import { IFurnitureVisualization } from "./BaseFurniture";
+import { IFurnitureRoomVisualization } from "./BaseFurniture";
 
-export class FurnitureVisualization implements IFurnitureVisualization {
+export class FurnitureVisualization implements IFurnitureRoomVisualization {
   constructor(private _container: PIXI.Container) {}
 
   public get container() {

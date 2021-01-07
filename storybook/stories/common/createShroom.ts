@@ -9,6 +9,9 @@ export function createShroom(
   const shroom = Shroom.create({
     resourcePath: "./resources",
     application: application,
+    configuration: {
+      placeholder: PIXI.Texture.from("./images/placeholder.png"),
+    },
   });
 
   cb({ application, shroom });

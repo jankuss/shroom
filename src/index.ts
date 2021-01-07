@@ -20,3 +20,8 @@ export { AvatarAction } from "./objects/avatar/enum/AvatarAction";
 export { FurnitureVisualization } from "./objects/furniture/FurnitureVisualization";
 export { BaseFurniture } from "./objects/furniture/BaseFurniture";
 export { BaseAvatar } from "./objects/avatar/BaseAvatar";
+
+export { AnimatedFurnitureVisualization } from "./objects/furniture/visualization/AnimatedFurnitureVisualization";
+export { FurnitureGuildCustomizedVisualization } from "./objects/furniture/visualization/FurnitureGuildCustomizedVisualization";
+export { BasicFurnitureVisualization } from "./objects/furniture/visualization/BasicFurnitureVisualization";
+export { FurnitureBottleVisualization } from "./objects/furniture/visualization/FurnitureBottleVisualization";

@@ -25,7 +25,7 @@ export abstract class RoomObject implements IRoomObject {
     return this.getRoomContext().animationTicker;
   }
 
-  protected get visualization() {
+  protected get roomVisualization() {
     return this.getRoomContext().visualization;
   }
 

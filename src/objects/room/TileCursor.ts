@@ -89,7 +89,7 @@ export class TileCursor extends RoomObject {
 
     graphics.zIndex = this.door
       ? 0
-      : getZOrder(this._roomX, this._roomY, this._roomZ) - 1;
+      : getZOrder(this._roomX, this._roomY, this._roomZ) - 1000;
     graphics.x = x;
     graphics.y = y;
 
@@ -104,9 +104,9 @@ export class TileCursor extends RoomObject {
     this.graphics = this._createGraphics();
 
     if (this.door) {
-      this.visualization.behindWallContainer.addChild(this.graphics);
+      this.roomVisualization.behindWallContainer.addChild(this.graphics);
     } else {
-      this.visualization.container.addChild(this.graphics);
+      this.roomVisualization.container.addChild(this.graphics);
     }
     this.updateGraphics();
   }

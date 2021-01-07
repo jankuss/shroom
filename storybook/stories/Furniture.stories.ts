@@ -2,7 +2,11 @@ import * as PIXI from "pixi.js";
 
 import {
   BaseFurniture,
+  BasicFurnitureVisualization,
   FloorFurniture,
+  FurnitureBottleVisualization,
+  FurnitureGuildCustomizedVisualization,
+  IFurniture,
   Room,
   WallFurniture,
 } from "@jankuss/shroom";
@@ -371,12 +375,12 @@ export function GldGate() {
     });
 
     const floorFurniture2 = new FloorFurniture({
-      type: "gld_gate",
-      direction: 2,
+      type: "bottle",
+      direction: 0,
       roomX: 1,
       roomY: 3,
       roomZ: 0,
-      animation: "1",
+      animation: "0",
     });
 
     let b = false;
@@ -390,13 +394,50 @@ export function GldGate() {
       animation: "0",
     });
 
+    const handleVisualization = (
+      furniture: IFurniture,
+      visualization: string | undefined
+    ) => {
+      switch (visualization) {
+        case "furniture_guild_customized":
+          furniture.visualization = new FurnitureGuildCustomizedVisualization({
+            primaryColor: "ff0000",
+            secondaryColor: "ffff00",
+          });
+          break;
+
+        case "furniture_bottle":
+          furniture.visualization = new FurnitureBottleVisualization();
+          break;
+      }
+    };
+
+    floorFurniture3.extradata.then(({ visualization }) =>
+      handleVisualization(floorFurniture3, visualization)
+    );
+
+    floorFurniture2.extradata.then(({ visualization }) => {
+      handleVisualization(floorFurniture2, visualization);
+    });
+
+    let spinning = false;
+    floorFurniture2.onClick = (event) => {
+      if (spinning) {
+        floorFurniture2.animation = "3";
+        spinning = false;
+      } else {
+        spinning = true;
+        floorFurniture2.animation = "-1";
+      }
+    };
+
     floorFurniture3.onClick = () => {
       b = !b;
 
       if (b) {
-        floorFurniture3.animation = "100";
+        floorFurniture3.animation = "1";
       } else {
-        floorFurniture3.animation = "101";
+        floorFurniture3.animation = "0";
       }
     };
 
@@ -410,7 +451,7 @@ export function GldGate() {
     });
 
     //room.addRoomObject(floorFurniture);
-    //room.addRoomObject(floorFurniture2);
+    room.addRoomObject(floorFurniture2);
     room.addRoomObject(floorFurniture3);
     //room.addRoomObject(floorFurniture4);
 

@@ -58,6 +58,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
         this._updateAvatarSprites();
       },
     });
+
     this._placeholderSprites.alpha = 0.5;
 
     this._avatarSprites = this._placeholderSprites;
@@ -482,22 +483,28 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     if (this._avatarSprites != null) {
       this._avatarSprites.x = Math.round(x);
       this._avatarSprites.y = Math.round(y);
-      this._avatarSprites.zIndex = this._getZIndexAtPosition(
+
+      const zIndex = this._getZIndexAtPosition(
         roomXrounded,
         roomYrounded,
         this.roomZ
       );
+
+      this._avatarSprites.zIndex = zIndex;
+      this._avatarSprites.spritesZIndex = zIndex;
     }
 
     const item = this.tilemap.getTileAtPosition(roomXrounded, roomYrounded);
     if (item?.type === "door") {
-      this.visualization.container.removeChild(this._avatarSprites);
-      this.visualization.behindWallContainer.addChild(this._avatarSprites);
+      this.roomVisualization.container.removeChild(this._avatarSprites);
+      this.roomVisualization.behindWallContainer.addChild(this._avatarSprites);
     }
 
     if (item == null || item.type !== "door") {
-      this.visualization.behindWallContainer.removeChild(this._avatarSprites);
-      this.visualization.container.addChild(this._avatarSprites);
+      this.roomVisualization.behindWallContainer.removeChild(
+        this._avatarSprites
+      );
+      this.roomVisualization.container.addChild(this._avatarSprites);
     }
   }
 

@@ -93,7 +93,7 @@ export class Stair extends RoomObject implements ITexturable {
       }
     }
 
-    this.visualization.floorContainer.addChild(this.container);
+    this.roomVisualization.floorContainer.addChild(this.container);
   }
 
   destroySprites() {
