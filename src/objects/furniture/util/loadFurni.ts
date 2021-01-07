@@ -1,6 +1,5 @@
 import { HitTexture } from "../../hitdetection/HitTexture";
 import { FurnitureAssetsData } from "../data/FurnitureAssetsData";
-import { FurnitureIndexData } from "../data/FurnitureIndexData";
 import { FurnitureVisualizationData } from "../data/FurnitureVisualizationData";
 import { FurnitureExtraData } from "../FurnitureExtraData";
 import { FurniDrawDefinition } from "./DrawDefinition";
@@ -80,6 +79,8 @@ export async function loadFurni(
   };
   const textures = await loadTextures();
 
+  const sortedDirections = [...visualization.directions].sort((a, b) => a - b);
+
   return {
     getDrawDefinition: (direction: number, animation?: string) =>
       getFurniDrawDefinition(
@@ -100,6 +101,6 @@ export async function loadFurni(
     getExtraData: () => {
       return indexData;
     },
-    directions: visualization.directions,
+    directions: sortedDirections,
   };
 }
