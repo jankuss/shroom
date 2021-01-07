@@ -503,3 +503,68 @@ export function TileCursorFloorItems() {
     application.stage.addChild(room);
   });
 }
+
+export function ValidDirections() {
+  return createShroom(({ application, shroom }) => {
+    const container = new PIXI.Container();
+    application.stage.addChild(container);
+
+    const room = Room.create(shroom, {
+      tilemap: `
+       xxxxxxxxxxx
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+      `,
+    });
+
+    const furniture1 = new FloorFurniture({
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      animation: "0",
+      direction: 2,
+      id: 8434,
+    });
+
+    const furniture2 = new FloorFurniture({
+      roomX: 1,
+      roomY: 3,
+      roomZ: 0,
+      animation: "0",
+      direction: 4,
+      id: 8434,
+    });
+
+    const furniture3 = new FloorFurniture({
+      roomX: 1,
+      roomY: 5,
+      roomZ: 0,
+      animation: "0",
+      direction: 6,
+      id: 8434,
+    });
+
+    const furniture4 = new FloorFurniture({
+      roomX: 1,
+      roomY: 7,
+      roomZ: 0,
+      animation: "0",
+      direction: 0,
+      id: 8434,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    room.addRoomObject(furniture1);
+    room.addRoomObject(furniture2);
+    room.addRoomObject(furniture3);
+    room.addRoomObject(furniture4);
+    application.stage.addChild(room);
+  });
+}

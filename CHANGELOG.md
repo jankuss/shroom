@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Change default wall color to use the original
+- Improve asset dumping behavior (thanks @thereis)
 
 ### Fixed
 
