@@ -369,7 +369,8 @@ export function headRotation() {
     // room.addRoomObject(avatar4);
 
     application.stage.addChild(room);
-  }
+  });
+}
                       
 export function BaseAvatarClothes() {
   return createShroom(({ application, shroom }) => {
