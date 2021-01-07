@@ -94,6 +94,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   ) {
     this._currentTargetAnimationId = newAnimation;
     if (newAnimation == null) {
+      this.setCurrentAnimation(0);
     } else if (oldAnimation == newAnimation) {
     } else if (oldAnimation != newAnimation) {
       this.setCurrentAnimation(Number(newAnimation));

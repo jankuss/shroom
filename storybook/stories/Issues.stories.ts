@@ -200,7 +200,13 @@ export function IssueWithAvatarEventsNotHandled() {
     });
 
     avatar.onClick = (event) => console.log(event);
-    furniture.onClick = (event) => console.log(event);
+    furniture.onClick = (event) => {
+      furniture.animation = "-1";
+
+      setTimeout(() => {
+        furniture.animation = undefined;
+      }, 500);
+    };
 
     room.onTileClick = action("Position");
 
