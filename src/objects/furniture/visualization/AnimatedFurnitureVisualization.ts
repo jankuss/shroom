@@ -118,6 +118,8 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   }
 
   updateDirection(direction: number): void {
+    if (this._currentDirection === direction) return;
+
     this._currentDirection = direction;
     this._refreshFurniture = true;
   }
@@ -132,6 +134,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
 
   updateFrame(frame: number): void {
     if (this._refreshFurniture) {
+      this._refreshFurniture = false;
       this._updateFurniture();
     }
 
