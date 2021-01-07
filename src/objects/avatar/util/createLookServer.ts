@@ -12,7 +12,7 @@ export interface LookOptions {
   look: string;
   actions: Set<AvatarAction>;
   direction: number;
-  headDirection: number;
+  headDirection?: number;
   item?: string | number;
   effect?: { type: "dance" | "fx"; id: string };
   initial?: boolean;
