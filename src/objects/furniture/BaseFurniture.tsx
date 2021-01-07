@@ -266,18 +266,9 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   }
 
   public set animation(value) {
-    console.log("SET ANIMATION", value);
     this._animation = value;
     this.visualization.updateAnimation(this.animation);
   }
-
-  private _runningAnimation: string | undefined;
-
-  private _animationOverride: string | undefined;
-
-  private _startFrame: number | undefined;
-
-  private cancelTicker: (() => void) | undefined = undefined;
 
   public get maskId() {
     return this._getMaskId;
@@ -358,10 +349,6 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     }
   }
 
-  private _getAsset(part: FurniDrawPart, index: number) {
-    return part.assets && part.assets[index];
-  }
-
   private _createSimpleAsset(
     loadFurniResult: LoadFurniResult,
     part: FurniDrawPart,
@@ -419,7 +406,6 @@ export class BaseFurniture implements IFurnitureEventHandlers {
           if (sprite != null) {
             this._sprites.set(asset.name, sprite);
             cachedAsset = sprite;
-            console.log("CREATED NEW SPRITE", asset.name);
           }
         }
 
@@ -512,6 +498,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     }
 
     if (!mask) {
+      // TODO: Figure out why this is needed. If we don't do this the alpha value of the sprite isn't correct for some reason.
       sprite.setParent(this.dependencies.visualization.container);
     }
   }
@@ -541,7 +528,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     return sprite;
   }
 
-  destroySprites() {}
+  destroySprites() {
+    this._sprites.forEach((sprite) => sprite.destroy());
+    this._sprites = new Map();
+  }
 
   private _loadFurniture() {
     if (!this.mounted) return;
@@ -574,10 +564,6 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   destroy() {
     this.destroySprites();
-
-    if (this._cancelTicker != null) {
-      this._cancelTicker();
-    }
 
     PIXI.Ticker.shared.remove(this._onTicker);
   }
