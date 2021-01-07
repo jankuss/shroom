@@ -1,26 +1,39 @@
-import { RoomObject } from "../RoomObject";
 import * as PIXI from "pixi.js";
-import {
-  AvatarAsset,
-  AvatarDrawDefinition,
-  AvatarDrawPart,
-} from "./util/getAvatarDrawDefinition";
+import { AvatarAsset, AvatarDrawDefinition, AvatarDrawPart } from "./util/getAvatarDrawDefinition";
 import { LookOptions } from "./util/createLookServer";
-import {
-  AvatarLoaderResult,
-  IAvatarLoader,
-} from "../../interfaces/IAvatarLoader";
+import { AvatarLoaderResult, IAvatarLoader } from "../../interfaces/IAvatarLoader";
 import { ClickHandler } from "../hitdetection/ClickHandler";
 import { HitSprite } from "../hitdetection/HitSprite";
 import { isSetEqual } from "../../util/isSetEqual";
 import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { Shroom } from "../Shroom";
+import { AvatarFigurePartType } from "./enum/AvatarFigurePartType";
+
+const bodyPartTypes: Set<AvatarFigurePartType> = new Set<AvatarFigurePartType>([
+  AvatarFigurePartType.Head,
+  AvatarFigurePartType.Body,
+  AvatarFigurePartType.LeftHand,
+  AvatarFigurePartType.RightHand
+]);
+const headPartTypes: Set<AvatarFigurePartType> = new Set([
+  AvatarFigurePartType.Head,
+  AvatarFigurePartType.Face,
+  AvatarFigurePartType.Eyes,
+  AvatarFigurePartType.EyeAccessory,
+  AvatarFigurePartType.Hair,
+  AvatarFigurePartType.HairBig,
+  AvatarFigurePartType.FaceAccessory,
+  AvatarFigurePartType.HeadAccessory,
+  AvatarFigurePartType.HeadAccessoryExtra
+]);
 
 export interface BaseAvatarOptions {
   look: LookOptions;
   position: { x: number; y: number };
   zIndex: number;
+  skipBodyParts?: boolean;
+  headOnly?: boolean;
   onLoad?: () => void;
 }
 
@@ -37,6 +50,9 @@ export class BaseAvatar extends PIXI.Container {
 
   private _lookOptions: LookOptions | undefined;
   private _nextLookOptions: LookOptions | undefined;
+
+  private _skipBodyParts: boolean;
+  private _headOnly: boolean;
 
   private _currentFrame: number = 0;
   private _clickHandler: ClickHandler = new ClickHandler();
@@ -121,6 +137,8 @@ export class BaseAvatar extends PIXI.Container {
     this.zIndex = options.zIndex;
     this._nextLookOptions = options.look;
     this._onLoad = options.onLoad;
+    this._skipBodyParts = options.skipBodyParts ?? false;
+    this._headOnly = options.headOnly ?? false;
   }
 
   private _updateLookOptions(
@@ -182,6 +200,15 @@ export class BaseAvatar extends PIXI.Container {
     this._container = new PIXI.Container();
 
     drawDefinition.parts.forEach((part) => {
+      let figurePart = part.type as AvatarFigurePartType;
+      if (this._skipBodyParts && bodyPartTypes.has(figurePart)) {
+        return;
+      }
+
+      if (this._headOnly && !headPartTypes.has(figurePart)) {
+        return;
+      }
+
       const frame = currentFrame % part.assets.length;
       const asset = part.assets[frame];
 
