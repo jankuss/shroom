@@ -18,12 +18,14 @@ import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { Shroom } from "../Shroom";
 
 const bodyPartTypes = [ 'hd', 'bd', 'lh', 'rh' ];
+const headPartTypes = [ "hd", "fc", "ey", "hr", "hrb", "fa", "ea", "ha", "he" ];
 
 export interface BaseAvatarOptions {
   look: LookOptions;
   position: { x: number; y: number };
   zIndex: number;
   skipBodyParts?: boolean;
+  headOnly?: boolean;
   onLoad?: () => void;
 }
 
@@ -42,6 +44,7 @@ export class BaseAvatar extends PIXI.Container {
   private _nextLookOptions: LookOptions | undefined;
 
   private _skipBodyParts: boolean;
+  private _headOnly: boolean;
 
   private _currentFrame: number = 0;
   private _clickHandler: ClickHandler = new ClickHandler();
@@ -127,6 +130,7 @@ export class BaseAvatar extends PIXI.Container {
     this._nextLookOptions = options.look;
     this._onLoad = options.onLoad;
     this._skipBodyParts = options.skipBodyParts || false;
+    this._headOnly = options.headOnly || false;
   }
 
   private _updateLookOptions(
@@ -188,6 +192,10 @@ export class BaseAvatar extends PIXI.Container {
 
     drawDefinition.parts.forEach((part) => {
       if (this._skipBodyParts && bodyPartTypes.includes(part.type)) {
+        return;
+      }
+
+      if (this._headOnly && !headPartTypes.includes(part.type)) {
         return;
       }
 

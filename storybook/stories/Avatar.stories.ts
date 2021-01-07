@@ -318,6 +318,7 @@ export function BaseAvatarClothes() {
         actions: new Set<AvatarAction>(),
       },
       zIndex: 1,
+      skipBodyParts: true,
       position: {
         x: 0,
         y: 32
@@ -329,15 +330,15 @@ export function BaseAvatarClothes() {
 
     const baseAvatar2 = BaseAvatar.fromShroom(shroom, {
       look: {
-        look: 'lg-280-110.ch-210-66',
-        direction: 2,
-        actions: new Set<AvatarAction>().add(AvatarAction.Sit)
+        look: 'hr-3163-39.hd-180-2.lg-3202-1322.ch-215-1331',
+        direction: 3,
+        actions: new Set<AvatarAction>()
       },
       zIndex: 1,
-      skipBodyParts: true,
+      headOnly: true,
       position: {
         x: 100,
-        y: 32
+        y: 200
       },
       onLoad: () => {
         console.log(baseAvatar2.width, baseAvatar2.height)
