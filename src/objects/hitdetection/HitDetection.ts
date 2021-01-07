@@ -109,6 +109,8 @@ export class HitDetection implements IHitDetection {
 
     const ordered = entries.sort((a, b) => b.hitBox.zIndex - a.hitBox.zIndex);
 
+    console.log(ordered);
+
     const hit = ordered.filter(({ element, hitBox }) => {
       const inBoundsX = hitBox.x <= x && x <= hitBox.x + hitBox.width;
       const inBoundsY = hitBox.y <= y && y <= hitBox.y + hitBox.height;
