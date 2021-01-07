@@ -14,8 +14,6 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   private _animationQueue: InProgressAnimation[] = [];
 
   private _animationQueueStartFrame: number | undefined;
-  private _currentAnimationStartFrame: number | undefined;
-  private _animationFrame: number | undefined;
   private _animationFrameCount: number | undefined;
 
   private _currentAnimationId: number | undefined;
@@ -177,7 +175,6 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   private _setAnimation(animation: number, frame: number) {
     if (this._currentAnimationId === animation) return;
 
-    this._currentAnimationStartFrame = frame;
     this._currentAnimationId = animation;
     this._updateFurniture();
   }
@@ -229,7 +226,6 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
       const sprite = this.view.createSprite(part, frameIndex);
       if (sprite != null) {
         this._sprites.add(sprite);
-        this.view.container.addChild(sprite);
         sprite.visible = true;
       }
     });

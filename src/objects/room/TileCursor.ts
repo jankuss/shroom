@@ -89,7 +89,7 @@ export class TileCursor extends RoomObject {
 
     graphics.zIndex = this.door
       ? 0
-      : getZOrder(this._roomX, this._roomY, this._roomZ) - 1;
+      : getZOrder(this._roomX, this._roomY, this._roomZ) - 1000;
     graphics.x = x;
     graphics.y = y;
 

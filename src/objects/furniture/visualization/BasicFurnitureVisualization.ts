@@ -1,5 +1,4 @@
 import { FurnitureSprite } from "../FurnitureSprite";
-import { IFurnitureVisualization } from "../IFurnitureVisualization";
 import { IFurnitureVisualizationView } from "../IFurnitureVisualizationView";
 import { FurnitureVisualization } from "./FurnitureVisualization";
 
@@ -23,6 +22,7 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
 
   updateAnimation(animation: string): void {
     this._animationId = animation;
+    this._refreshFurniture = true;
   }
 
   private _update() {
@@ -39,7 +39,6 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
 
         if (sprite != null) {
           this._sprites.push(sprite);
-          this.view.container.addChild(sprite);
         }
       });
   }

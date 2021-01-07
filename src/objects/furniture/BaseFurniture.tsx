@@ -20,10 +20,7 @@ import { IRoomContext } from "../../interfaces/IRoomContext";
 import { Shroom } from "../Shroom";
 import { IFurnitureVisualization } from "./IFurnitureVisualization";
 import { FurnitureSprite } from "./FurnitureSprite";
-import { FurnitureGuildCustomizedVisualization } from "./visualization/FurnitureGuildCustomizedVisualization";
 import { AnimatedFurnitureVisualization } from "./visualization/AnimatedFurnitureVisualization";
-import { BaseFurnitureView } from "./BaseFurnitureView";
-import { BasicFurnitureVisualization } from "./visualization/BasicFurnitureVisualization";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -69,7 +66,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _resolveLoadFurniResult: (result: LoadFurniResult) => void = () => {};
 
   private _visualization: IFurnitureVisualization | undefined;
-  private _fallbackVisualization = new BasicFurnitureVisualization();
+  private _fallbackVisualization = new AnimatedFurnitureVisualization();
 
   private _refreshPosition: boolean = false;
   private _refreshFurniture: boolean = false;
@@ -260,8 +257,6 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   }
 
   public set direction(value) {
-    if (value === this.direction) return;
-
     this._direction = value;
     this.visualization.updateDirection(this.direction);
   }
@@ -271,8 +266,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   }
 
   public set animation(value) {
-    if (value === this.animation) return;
-
+    console.log("SET ANIMATION", value);
     this._animation = value;
     this.visualization.updateAnimation(this.animation);
   }
@@ -397,6 +391,19 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
     sprite.assetName = actualAsset.name;
 
+    this.dependencies.visualization.container.removeChild(sprite);
+
+    if (!mask) {
+      this.dependencies.visualization.container.addChild(sprite);
+    } else {
+      const maskId = this._getMaskId(this.direction);
+      if (maskId != null) {
+        this.dependencies.visualization.addMask(maskId, sprite);
+      } else {
+        this.dependencies.visualization.container.addChild(sprite);
+      }
+    }
+
     return sprite;
   }
 
@@ -408,10 +415,6 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
     this.visualization.setView({
       furniture: loadFurniResult,
-      container: this.dependencies.visualization.container,
-      addMask: (maskId, object) => {
-        this.dependencies.visualization.addMask(maskId, object);
-      },
       createSprite: (part, assetIndex) => {
         const asset = getAssetFromPart(part, assetIndex);
         if (asset == null) return;
@@ -442,7 +445,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       },
     });
 
-    this.visualization.update();
+    this.visualization.update(this);
 
     this.visualization.updateDirection(this.direction);
     this.visualization.updateAnimation(this.animation);
@@ -476,8 +479,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     sprite.baseZIndex = this.zIndex;
 
     if (shadow) {
-      sprite.baseZIndex = 0;
-      sprite.offsetZIndex = 0;
+      sprite.baseZIndex = this.zIndex;
+      sprite.offsetZIndex = -this.zIndex;
     }
 
     if (tint != null) {

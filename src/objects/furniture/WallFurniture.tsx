@@ -198,7 +198,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
       animationTicker: this.animationTicker,
       furnitureLoader: this.furnitureLoader,
       hitDetection: this.hitDetection,
-      placeholder: this.configuration.placeholder,
+      placeholder: undefined,
       visualization: this.roomVisualization,
     };
 
