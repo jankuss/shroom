@@ -349,10 +349,10 @@ export function headRotation() {
     avatar.onDoubleClick = action("Double Click");
 
     setInterval(() => {
-      if (avatar.headDirection) {
+      if (avatar.headDirection !== undefined) {
         avatar.headDirection = undefined;
       } else {
-        avatar.headDirection = 2;
+        avatar.headDirection = 0;
       }
       // avatar.headDirection++;
       // if (avatar.headDirection > 7) {

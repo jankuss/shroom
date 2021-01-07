@@ -255,7 +255,7 @@ function getBodyPart(
     const assets = framesIndexed.map((animationFrame) =>
       getAssetForFrame({
         offsetsData,
-        direction: headComponents.has(part.type as AvatarFigurePartType) && headDirection ? headDirection : direction,
+        direction: headComponents.has(part.type as AvatarFigurePartType) && headDirection != null ? headDirection : direction,
         partTypeFlipped: partInfo?.flippedSetType as
           | AvatarFigurePartType
           | undefined,
