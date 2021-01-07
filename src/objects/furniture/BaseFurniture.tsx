@@ -365,7 +365,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _createSimpleAsset(
     loadFurniResult: LoadFurniResult,
     part: FurniDrawPart,
-    spriteIndex: number
+    asset: FurnitureAsset
   ) {
     const { z, assets, layer, shadow, tint, mask, layerIndex } = part;
 
@@ -381,26 +381,19 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       throw new Error("invalid zindex");
     }
 
-    const actualAsset = assets && assets[spriteIndex];
-    if (actualAsset == null) return;
-
-    const texture = getTexture(actualAsset);
+    const texture = getTexture(asset);
     if (texture == null) return;
 
-    const sprite = this._createSprite(actualAsset, layer, texture, part);
+    const sprite = this._createSprite(asset, layer, texture, part);
 
-    sprite.assetName = actualAsset.name;
+    sprite.assetName = asset.name;
 
-    this.dependencies.visualization.container.removeChild(sprite);
-
-    if (!mask) {
+    if (mask == null || !mask) {
       this.dependencies.visualization.container.addChild(sprite);
     } else {
       const maskId = this._getMaskId(this.direction);
       if (maskId != null) {
         this.dependencies.visualization.addMask(maskId, sprite);
-      } else {
-        this.dependencies.visualization.container.addChild(sprite);
       }
     }
 
@@ -421,17 +414,16 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
         let cachedAsset = this._sprites.get(asset.name);
         if (cachedAsset == null) {
-          const sprite = this._createSimpleAsset(
-            loadFurniResult,
-            part,
-            assetIndex
-          );
+          const sprite = this._createSimpleAsset(loadFurniResult, part, asset);
 
           if (sprite != null) {
             this._sprites.set(asset.name, sprite);
             cachedAsset = sprite;
+            console.log("CREATED NEW SPRITE", asset.name);
           }
-        } else {
+        }
+
+        if (cachedAsset != null) {
           this._applyLayerDataToSprite(cachedAsset, asset, part);
         }
 
@@ -511,11 +503,16 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         sprite.alpha = alpha / 5;
       }
     } else {
+      sprite.visible = true;
       sprite.alpha = alpha;
     }
 
     if (mask) {
       sprite.tint = 0xffffff;
+    }
+
+    if (!mask) {
+      sprite.setParent(this.dependencies.visualization.container);
     }
   }
 

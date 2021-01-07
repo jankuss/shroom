@@ -58,7 +58,10 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this._updateFurniture();
   }
 
-  private _getAnimationList(data: IFurnitureVisualizationData, target: number) {
+  private _getAnimationList(
+    data: IFurnitureVisualizationData,
+    target: number
+  ): InProgressAnimation[] {
     const animations: InProgressAnimation[] = [];
 
     const handleAnimation = (id: number) => {
@@ -77,6 +80,10 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     };
 
     handleAnimation(target);
+
+    if (animations.length === 0) {
+      return [{ id: 0, frameCount: 1 }];
+    }
 
     return animations;
   }
@@ -197,6 +204,8 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
         parts: drawDefintion.parts.map((part) => modifier(part)),
       };
     }
+
+    this._update();
   }
 
   private _update() {
