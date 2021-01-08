@@ -143,7 +143,11 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         placeholder: shroom.dependencies.configuration.placeholder,
         visualization: {
           container,
-          addMask: () => {},
+          addMask: () => {
+            return {
+              remove: () => {},
+            };
+          },
         },
       },
       ...props,
@@ -382,7 +386,9 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     } else {
       const maskId = this._getMaskId(this.direction);
       if (maskId != null) {
-        this.dependencies.visualization.addMask(maskId, sprite);
+        this._maskNodes.push(
+          this.dependencies.visualization.addMask(maskId, sprite)
+        );
       }
     }
 
@@ -532,6 +538,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   destroySprites() {
     this._sprites.forEach((sprite) => sprite.destroy());
+    this._maskNodes.forEach((node) => node.remove());
     this._unknownSprite?.destroy();
     this._sprites = new Map();
   }
@@ -590,5 +597,5 @@ function getAssetFromPart(part: FurniDrawPart, assetIndex: number) {
 
 export interface IFurnitureRoomVisualization {
   container: PIXI.Container;
-  addMask(maskId: string, element: PIXI.DisplayObject): void;
+  addMask(maskId: string, element: PIXI.DisplayObject): MaskNode;
 }
