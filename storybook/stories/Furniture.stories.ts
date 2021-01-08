@@ -6,6 +6,7 @@ import {
   FloorFurniture,
   FurnitureBottleVisualization,
   FurnitureGuildCustomizedVisualization,
+  FurnitureLoader,
   IFurniture,
   Room,
   WallFurniture,
@@ -565,6 +566,92 @@ export function ValidDirections() {
     room.addRoomObject(furniture2);
     room.addRoomObject(furniture3);
     room.addRoomObject(furniture4);
+    application.stage.addChild(room);
+  });
+}
+
+export function DestroyFurniture() {
+  return createShroom(({ application, shroom }) => {
+    const container = new PIXI.Container();
+    application.stage.addChild(container);
+
+    const furnitureLoader = shroom.dependencies
+      .furnitureLoader as FurnitureLoader;
+
+    const room = Room.create(shroom, {
+      tilemap: `
+       xxxxxxxxxxx
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+      `,
+    });
+
+    const furniture = new FloorFurniture({
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      animation: "0",
+      direction: 4,
+      type: "club_sofa",
+    });
+
+    setTimeout(() => {
+      room.removeRoomObject(furniture);
+    }, 5000);
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    room.addRoomObject(furniture);
+    application.stage.addChild(room);
+  });
+}
+
+export function DestroyFurnitureWhileLoading() {
+  return createShroom(({ application, shroom }) => {
+    const container = new PIXI.Container();
+    application.stage.addChild(container);
+
+    const furnitureLoader = shroom.dependencies
+      .furnitureLoader as FurnitureLoader;
+
+    furnitureLoader.delay = 5000;
+
+    const room = Room.create(shroom, {
+      tilemap: `
+       xxxxxxxxxxx
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+      `,
+    });
+
+    const furniture = new FloorFurniture({
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      animation: "0",
+      direction: 4,
+      type: "club_sofa",
+    });
+
+    setTimeout(() => {
+      room.removeRoomObject(furniture);
+    }, 2500);
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    room.addRoomObject(furniture);
     application.stage.addChild(room);
   });
 }

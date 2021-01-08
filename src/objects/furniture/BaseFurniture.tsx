@@ -532,6 +532,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   destroySprites() {
     this._sprites.forEach((sprite) => sprite.destroy());
+    this._unknownSprite?.destroy();
     this._sprites = new Map();
   }
 

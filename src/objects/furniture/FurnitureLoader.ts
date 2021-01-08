@@ -8,6 +8,15 @@ import { loadFurni, LoadFurniResult } from "./util/loadFurni";
 
 export class FurnitureLoader implements IFurnitureLoader {
   private furnitureCache: Map<string, Promise<LoadFurniResult>> = new Map();
+  private _artificalDelay: number | undefined;
+
+  public get delay() {
+    return this._artificalDelay;
+  }
+
+  public set delay(value) {
+    this._artificalDelay = value;
+  }
 
   constructor(
     private options: {
@@ -65,6 +74,10 @@ export class FurnitureLoader implements IFurnitureLoader {
   }
 
   async loadFurni(fetch: FurnitureFetch): Promise<LoadFurniResult> {
+    if (this.delay != null) {
+      await new Promise((resolve) => setTimeout(resolve, this.delay));
+    }
+
     let typeWithColor: string;
 
     if (fetch.kind === "id") {
