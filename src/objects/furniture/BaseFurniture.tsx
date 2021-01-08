@@ -74,6 +74,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   private _highlight: boolean = false;
   private _alpha: number = 1;
+  private _destroyed: boolean = false;
+
   private _frameCount: number | undefined;
 
   private _maskNodes: MaskNode[] = [];
@@ -539,15 +541,21 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this._unknownTexture = this.dependencies.placeholder ?? undefined;
 
     this.dependencies.furnitureLoader.loadFurni(this._type).then((result) => {
+      if (this._destroyed) return;
+
       this.loadFurniResult = result;
       this._resolveLoadFurniResult(result);
       this._updateFurniture();
     });
 
     this._updateFurniture();
-    this.dependencies.animationTicker.subscribe((frame) => {
-      this.visualization.updateFrame(frame);
-    });
+
+    this._cancelTicker && this._cancelTicker();
+    this._cancelTicker = this.dependencies.animationTicker.subscribe(
+      (frame) => {
+        this.visualization.updateFrame(frame);
+      }
+    );
   }
 
   private _getAlpha({
@@ -565,7 +573,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   destroy() {
     this.destroySprites();
 
+    this._destroyed = true;
     PIXI.Ticker.shared.remove(this._onTicker);
+    this._cancelTicker && this._cancelTicker();
+    this._cancelTicker = undefined;
   }
 }
 
