@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Avatar zIndex not respected for HitDetection
 - Fix directions for furniture with out of order directions in `visualization.bin`
 - Fix behaviors called before `BaseFurniture` initialized
+- Fix tile cursor displaying above furniture
 
 ## [0.3.1] - 2020-01-04
 
