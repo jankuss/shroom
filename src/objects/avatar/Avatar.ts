@@ -26,6 +26,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
 
   private _waving: boolean = false;
   private _direction: number = 0;
+  private _headDirection?: number;
   private _item: string | number | undefined;
   private _look: string;
   private _roomX: number = 0;
@@ -41,7 +42,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _onClick: HitEventHandler | undefined = undefined;
   private _onDoubleClick: HitEventHandler | undefined = undefined;
 
-  constructor({ look, roomX, roomY, roomZ, direction }: Options) {
+  constructor({ look, roomX, roomY, roomZ, direction, headDirection }: Options) {
     super();
 
     this._direction = direction;
@@ -49,6 +50,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._roomX = roomX;
     this._roomY = roomY;
     this._roomZ = roomZ;
+    this._headDirection = headDirection;
 
     this._placeholderSprites = new BaseAvatar({
       look: this._getPlaceholderLookOptions(),
@@ -220,6 +222,15 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updateAvatarSprites();
   }
 
+  get headDirection() {
+    return this._headDirection;
+  }
+
+  set headDirection(value) {
+    this._headDirection = value;
+    this._updateAvatarSprites();
+  }
+
   /**
    * If set to true, the avatar will be waving. You can
    * achieve the same behavior by adding the wave action manually
@@ -287,6 +298,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     return {
       actions: new Set(),
       direction: this.direction,
+      headDirection: this.direction,
       look: "hd-99999-99999",
       effect: undefined,
       initial: false,
@@ -314,6 +326,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     return {
       actions: combinedActions,
       direction: this.direction,
+      headDirection: this.headDirection,
       look: this._look,
       item: this.item,
       effect: this._fx,
@@ -607,4 +620,5 @@ interface Options extends RoomPosition {
    * ```
    */
   direction: number;
+  headDirection?: number;
 }

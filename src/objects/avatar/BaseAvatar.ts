@@ -171,7 +171,8 @@ export class BaseAvatar extends PIXI.Container {
       oldLookOptions.look != newLookOptions.look ||
       oldLookOptions.item != newLookOptions.item ||
       oldLookOptions.effect != newLookOptions.effect ||
-      oldLookOptions.direction != newLookOptions.direction
+      oldLookOptions.direction != newLookOptions.direction ||
+      oldLookOptions.headDirection != newLookOptions.headDirection
     ) {
       this._nextLookOptions = newLookOptions;
       this._refreshLook = true;
