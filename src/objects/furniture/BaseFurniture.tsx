@@ -21,6 +21,7 @@ import { Shroom } from "../Shroom";
 import { IFurnitureVisualization } from "./IFurnitureVisualization";
 import { FurnitureSprite } from "./FurnitureSprite";
 import { AnimatedFurnitureVisualization } from "./visualization/AnimatedFurnitureVisualization";
+import { getDirectionForFurniture } from "./util/getDirectionForFurniture";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -63,6 +64,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _unknownSprite: FurnitureSprite | undefined;
   private _clickHandler = new ClickHandler();
   private _loadFurniResultPromise: Promise<LoadFurniResult>;
+  private _validDirections: number[] | undefined;
   private _resolveLoadFurniResult: (result: LoadFurniResult) => void = () => {};
 
   private _visualization: IFurnitureVisualization | undefined;
@@ -75,8 +77,6 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _highlight: boolean = false;
   private _alpha: number = 1;
   private _destroyed: boolean = false;
-
-  private _frameCount: number | undefined;
 
   private _maskNodes: MaskNode[] = [];
   private _cancelTicker: (() => void) | undefined = undefined;
@@ -264,7 +264,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   public set direction(value) {
     this._direction = value;
-    this.visualization.updateDirection(this.direction);
+    this._updateDirection();
   }
 
   public get animation() {
@@ -300,6 +300,14 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       this._updateZIndex();
     }
   };
+
+  private _updateDirection() {
+    if (this._validDirections != null) {
+      this.visualization.updateDirection(
+        getDirectionForFurniture(this.direction, this._validDirections)
+      );
+    }
+  }
 
   private _updateSprites(cb: (element: FurnitureSprite) => void) {
     this._sprites.forEach(cb);
@@ -432,8 +440,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     });
 
     this.visualization.update(this);
+    this._validDirections = loadFurniResult.directions;
 
-    this.visualization.updateDirection(this.direction);
+    this._updateDirection();
+
     this.visualization.updateAnimation(this.animation);
     this.visualization.updateFrame(this.dependencies.animationTicker.current());
   }
