@@ -5,9 +5,13 @@ function toTileType(str: string) {
 }
 
 export function parseTileMapString(str: string): TileType[][] {
+  // Thanks @Fusion for this code
+  str = str.replace(/\r/g, "\n");
+  str = str.replace(/ /g, "");
+
   return str
     .split("\n")
-    .map((row) => row.trimStart())
+    .map((row) => row.trim())
     .filter((row) => row.length > 0)
     .map((row) => row.split("").map(toTileType));
 }
