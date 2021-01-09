@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option to not render body when using `BaseAvatar` (thanks @somekindadude)
 - Option to specify `headRotation` for avatars (thanks @somekindadude)
 
-### Change
+### Changed
 
 - Improve tilemap parsing to handle carriage return in string
 
