@@ -5,7 +5,7 @@ function toTileType(str: string) {
 }
 
 export function parseTileMapString(str: string): TileType[][] {
-  // Thanks @Fusion for this code
+  // Thanks @Fusion for this code to sanitize the tilemap string into a readable format.
   str = str.replace(/\r/g, "\n");
   str = str.replace(/ /g, "");
 
