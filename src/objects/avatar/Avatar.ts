@@ -26,6 +26,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
 
   private _waving: boolean = false;
   private _direction: number = 0;
+  private _headDirection?: number;
   private _item: string | number | undefined;
   private _look: string;
   private _roomX: number = 0;
@@ -41,7 +42,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _onClick: HitEventHandler | undefined = undefined;
   private _onDoubleClick: HitEventHandler | undefined = undefined;
 
-  constructor({ look, roomX, roomY, roomZ, direction }: Options) {
+  constructor({ look, roomX, roomY, roomZ, direction, headDirection }: Options) {
     super();
 
     this._direction = direction;
@@ -49,6 +50,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._roomX = roomX;
     this._roomY = roomY;
     this._roomZ = roomZ;
+    this._headDirection = headDirection;
 
     this._placeholderSprites = new BaseAvatar({
       look: this._getPlaceholderLookOptions(),
@@ -58,6 +60,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
         this._updateAvatarSprites();
       },
     });
+
     this._placeholderSprites.alpha = 0.5;
 
     this._avatarSprites = this._placeholderSprites;
@@ -219,6 +222,15 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updateAvatarSprites();
   }
 
+  get headDirection() {
+    return this._headDirection;
+  }
+
+  set headDirection(value) {
+    this._headDirection = value;
+    this._updateAvatarSprites();
+  }
+
   /**
    * If set to true, the avatar will be waving. You can
    * achieve the same behavior by adding the wave action manually
@@ -286,6 +298,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     return {
       actions: new Set(),
       direction: this.direction,
+      headDirection: this.direction,
       look: "hd-99999-99999",
       effect: undefined,
       initial: false,
@@ -313,6 +326,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     return {
       actions: combinedActions,
       direction: this.direction,
+      headDirection: this.headDirection,
       look: this._look,
       item: this.item,
       effect: this._fx,
@@ -482,22 +496,28 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     if (this._avatarSprites != null) {
       this._avatarSprites.x = Math.round(x);
       this._avatarSprites.y = Math.round(y);
-      this._avatarSprites.zIndex = this._getZIndexAtPosition(
+
+      const zIndex = this._getZIndexAtPosition(
         roomXrounded,
         roomYrounded,
         this.roomZ
       );
+
+      this._avatarSprites.zIndex = zIndex;
+      this._avatarSprites.spritesZIndex = zIndex;
     }
 
     const item = this.tilemap.getTileAtPosition(roomXrounded, roomYrounded);
     if (item?.type === "door") {
-      this.visualization.container.removeChild(this._avatarSprites);
-      this.visualization.behindWallContainer.addChild(this._avatarSprites);
+      this.roomVisualization.container.removeChild(this._avatarSprites);
+      this.roomVisualization.behindWallContainer.addChild(this._avatarSprites);
     }
 
     if (item == null || item.type !== "door") {
-      this.visualization.behindWallContainer.removeChild(this._avatarSprites);
-      this.visualization.container.addChild(this._avatarSprites);
+      this.roomVisualization.behindWallContainer.removeChild(
+        this._avatarSprites
+      );
+      this.roomVisualization.container.addChild(this._avatarSprites);
     }
   }
 
@@ -600,4 +620,5 @@ interface Options extends RoomPosition {
    * ```
    */
   direction: number;
+  headDirection?: number;
 }

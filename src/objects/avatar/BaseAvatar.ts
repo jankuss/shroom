@@ -65,11 +65,24 @@ export class BaseAvatar extends PIXI.Container {
 
   private _layer: "door" | "tile" = "tile";
   private _updateId = 0;
+  private _spritesZIndex: number = 0;
 
   private _dependencies?: BaseAvatarDependencies;
   private _onLoad: (() => void) | undefined;
 
   private _cancelTicker: (() => void) | undefined;
+
+  /**
+   * Sprite Z-Index for hit detection
+   */
+  public get spritesZIndex() {
+    return this._spritesZIndex;
+  }
+
+  public set spritesZIndex(value) {
+    this._spritesZIndex = value;
+    this._updateSpritesZIndex();
+  }
 
   public get dependencies() {
     if (this._dependencies == null)
@@ -135,10 +148,17 @@ export class BaseAvatar extends PIXI.Container {
     this.x = options.position.x;
     this.y = options.position.y;
     this.zIndex = options.zIndex;
+    this.spritesZIndex = options.zIndex;
     this._nextLookOptions = options.look;
     this._onLoad = options.onLoad;
     this._skipBodyParts = options.skipBodyParts ?? false;
     this._headOnly = options.headOnly ?? false;
+  }
+
+  private _updateSpritesZIndex() {
+    this._sprites.forEach((sprite) => {
+      sprite.zIndex = this.spritesZIndex;
+    });
   }
 
   private _updateLookOptions(
@@ -151,7 +171,8 @@ export class BaseAvatar extends PIXI.Container {
       oldLookOptions.look != newLookOptions.look ||
       oldLookOptions.item != newLookOptions.item ||
       oldLookOptions.effect != newLookOptions.effect ||
-      oldLookOptions.direction != newLookOptions.direction
+      oldLookOptions.direction != newLookOptions.direction ||
+      oldLookOptions.headDirection != newLookOptions.headDirection
     ) {
       this._nextLookOptions = newLookOptions;
       this._refreshLook = true;
@@ -228,6 +249,7 @@ export class BaseAvatar extends PIXI.Container {
       sprite.visible = true;
       sprite.mirrored = asset.mirror;
       sprite.ignore = false;
+      sprite.zIndex = this.spritesZIndex;
 
       this._sprites.set(asset.fileId, sprite);
       this._container?.addChild(sprite);

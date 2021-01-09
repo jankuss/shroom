@@ -32,16 +32,29 @@ const basePartSet = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.Head,
 ]);
 
+const headComponents: Set<AvatarFigurePartType> = new Set([
+  AvatarFigurePartType.Head,
+  AvatarFigurePartType.Face,
+  AvatarFigurePartType.Eyes,
+  AvatarFigurePartType.EyeAccessory,
+  AvatarFigurePartType.Hair,
+  AvatarFigurePartType.HairBig,
+  AvatarFigurePartType.FaceAccessory,
+  AvatarFigurePartType.HeadAccessory,
+  AvatarFigurePartType.HeadAccessoryExtra
+]);
+
 /**
  * Returns a definition of how the avatar should be drawn.
  * @param options Look options
- * @param dependencies External figure data, draw order and offsets
+ * @param deps External figure data, draw order and offsets
  */
 export function getAvatarDrawDefinition(
   {
     parsedLook,
     actions: initialActions,
     direction,
+    headDirection,
     item: itemId,
     effect,
   }: Options,
@@ -78,6 +91,7 @@ export function getAvatarDrawDefinition(
 
   // Since the draworder file has missing parts, we add them here.
   const drawOrderAdditional = addMissingDrawOrderItems(new Set(drawOrderRaw));
+
 
   const bodyParts = geometry
     .getBodyParts("full")
@@ -145,6 +159,7 @@ export function getAvatarDrawDefinition(
         {
           actionData: action,
           direction,
+          headDirection,
           parts,
           itemId,
         },
@@ -187,11 +202,13 @@ function getBodyPart(
   {
     actionData,
     direction,
+    headDirection,
     parts,
   }: {
     parts: PartDataWithBodyPart[];
     actionData: AvatarActionInfo;
     direction: number;
+    headDirection?: number,
     itemId?: string | number;
   },
   {
@@ -238,7 +255,7 @@ function getBodyPart(
     const assets = framesIndexed.map((animationFrame) =>
       getAssetForFrame({
         offsetsData,
-        direction,
+        direction: headComponents.has(part.type as AvatarFigurePartType) && headDirection != null ? headDirection : direction,
         partTypeFlipped: partInfo?.flippedSetType as
           | AvatarFigurePartType
           | undefined,
@@ -307,7 +324,7 @@ function getAssetForFrame({
   const flippedMeta = getFlippedMetaData({
     assetPartDefinition,
     flippedPartType: partTypeFlipped,
-    direction,
+    direction: direction,
     partType: partType,
   });
 
@@ -453,6 +470,7 @@ interface Options {
   parsedLook: ParsedLook;
   actions: Set<string>;
   direction: number;
+  headDirection?: number;
   frame: number;
   item?: string | number;
   effect?: IAvatarEffectData;

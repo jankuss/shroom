@@ -15,9 +15,14 @@ export interface IFurnitureVisualizationData {
   getFrameCount(size: number, animationId: number): number | undefined;
   getColor(size: number, colorId: number, layerId: number): string | undefined;
   getAnimation(size: number, animationId: number): Animation | undefined;
+  getTransitionForAnimation(
+    size: number,
+    animationId: number
+  ): Animation | undefined;
 }
 
 export interface Animation {
+  id: number;
   transitionTo?: number;
 }
 

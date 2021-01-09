@@ -131,6 +131,14 @@ export class WallFurniture extends RoomObject implements IFurniture {
     this.updatePosition();
   }
 
+  public get visualization() {
+    return this._baseFurniture.visualization;
+  }
+
+  public set visualization(value) {
+    this._baseFurniture.visualization = value;
+  }
+
   public get onClick() {
     return this._baseFurniture.onClick;
   }
@@ -190,8 +198,8 @@ export class WallFurniture extends RoomObject implements IFurniture {
       animationTicker: this.animationTicker,
       furnitureLoader: this.furnitureLoader,
       hitDetection: this.hitDetection,
-      placeholder: this.configuration.placeholder,
-      visualization: this.visualization,
+      placeholder: undefined,
+      visualization: this.roomVisualization,
     };
 
     this.updatePosition();

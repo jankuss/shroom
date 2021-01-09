@@ -30,7 +30,7 @@ export function ImplementingFurnitureLogic() {
       roomZ: 0,
       direction: 0,
       animation: "0",
-      type: "edice",
+      type: "edicehc",
     });
 
     const handleDice = (furniture: IFurniture) => {
@@ -70,6 +70,9 @@ export function ImplementingFurnitureLogic() {
 
       const deactivate = () => {
         updateState({ ...state, rolling: false, active: !state.active });
+        if (state.active) {
+          roll();
+        }
       };
 
       furniture.onDoubleClick = (event) => {

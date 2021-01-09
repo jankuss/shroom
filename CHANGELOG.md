@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Customizable furniture visualizations through `furniture.visualization = /*...*/`
+- Option to not render body when using `BaseAvatar` (thanks @somekindadude)
+- Option to specify `headRotation` for avatars (thanks @somekindadude)
+
+### Fixed
+
+- Furniture animations getting stuck
+- Avatar zIndex not respected for HitDetection
+- Fix directions for furniture with out of order directions in `visualization.bin`
+- Fix behaviors called before `BaseFurniture` initialized
+- Fix tile cursor displaying above furniture
+
 ## [0.3.1] - 2020-01-04
 
 ### Fixed

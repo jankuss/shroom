@@ -41,6 +41,7 @@ function _getLookOptionsString(lookOptions: LookOptions) {
   }
 
   parts.push(`direction(${lookOptions.direction})`);
+  parts.push(`headdirection(${lookOptions.headDirection})`);
 
   if (lookOptions.item != null) {
     parts.push(`item(${lookOptions.item})`);
@@ -64,6 +65,7 @@ export class AvatarLoader implements IAvatarLoader {
       // Wait for the placeholder model to load
       await this._getAvatarDrawDefinition(server, {
         direction: 0,
+        headDirection: 0,
         actions: new Set(),
         look: "hd-99999-99999",
       });
@@ -190,22 +192,26 @@ export class AvatarLoader implements IAvatarLoader {
       });
 
     directions.forEach((direction) => {
-      loadResources({
-        actions: new Set(actions),
-        direction,
-        look,
-        item,
-      });
-
-      if (initial != null) {
-        preloadActions.forEach((action) => {
-          loadResources({
-            actions: new Set([action]),
-            direction,
-            look,
-          });
+      directions.forEach(headDirection => {
+        loadResources({
+          actions: new Set(actions),
+          direction,
+          headDirection,
+          look,
+          item,
         });
-      }
+
+        if (initial != null) {
+          preloadActions.forEach((action) => {
+            loadResources({
+              actions: new Set([action]),
+              direction,
+              headDirection,
+              look,
+            });
+          });
+        }
+      })
     });
 
     const awaitedEntries = await Promise.all(

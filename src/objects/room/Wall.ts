@@ -437,6 +437,6 @@ export class Wall extends RoomObject {
       }
     }
 
-    this.visualization.wallContainer.addChild(this._container);
+    this.roomVisualization.wallContainer.addChild(this._container);
   }
 }
