@@ -33,6 +33,7 @@ export interface BaseAvatarOptions {
   position: { x: number; y: number };
   zIndex: number;
   skipBodyParts?: boolean;
+  skipCaching?: boolean;
   headOnly?: boolean;
   onLoad?: () => void;
 }
@@ -53,6 +54,7 @@ export class BaseAvatar extends PIXI.Container {
 
   private _skipBodyParts: boolean;
   private _headOnly: boolean;
+  private _skipCaching: boolean;
 
   private _currentFrame: number = 0;
   private _clickHandler: ClickHandler = new ClickHandler();
@@ -153,6 +155,7 @@ export class BaseAvatar extends PIXI.Container {
     this._onLoad = options.onLoad;
     this._skipBodyParts = options.skipBodyParts ?? false;
     this._headOnly = options.headOnly ?? false;
+    this._skipCaching = options.skipCaching ?? false;
   }
 
   private _updateSpritesZIndex() {
@@ -298,7 +301,7 @@ export class BaseAvatar extends PIXI.Container {
       const requestId = ++this._updateId;
 
       this.dependencies.avatarLoader
-        .getAvatarDrawDefinition({ ...lookOptions, initial: true })
+        .getAvatarDrawDefinition({ ...lookOptions, initial: true, skipCaching: this._skipCaching })
         .then((result) => {
           if (requestId !== this._updateId) return;
 
