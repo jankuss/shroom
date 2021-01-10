@@ -28,7 +28,9 @@ export function getFurniDrawDefinition(
 ): FurniDrawDefinition {
   const typeSplitted = typeWithColor.split("*");
   const type = typeSplitted[0];
-  const color = typeSplitted[1];
+
+  // If color is not  set, we fallback to the `0` color for the item.
+  const color = typeSplitted[1] ?? "0";
 
   const size = 64;
   const parts: FurniDrawPart[] = [];

@@ -78,7 +78,9 @@ export class FurnitureLoader implements IFurnitureLoader {
       typeWithColor = fetch.type;
     }
 
-    const type = typeWithColor.split("*")[0];
+    const typeSplitted = typeWithColor.split("*");
+    const type = typeSplitted[0];
+
     const revision = await this._options.furnitureData.getRevisionForType(
       typeWithColor
     );
