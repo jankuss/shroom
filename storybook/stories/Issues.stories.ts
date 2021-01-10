@@ -246,7 +246,7 @@ export function IssueWithItemNotRenderingProperly() {
 }
 
 export function Issue56() {
-  return createShroom(({ application, shroom }) => {
+  return createShroom(({ application, shroom, container: storyContainer }) => {
     const room = Room.create(shroom, {
       tilemap: `
             xxxxxxxxxxxx
@@ -281,6 +281,6 @@ export function Issue56() {
     child.style.left = "200px";
     child.style.top = "50px";
 
-    document.body.appendChild(child);
+    storyContainer.appendChild(child);
   });
 }

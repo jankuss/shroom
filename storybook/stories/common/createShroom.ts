@@ -1,10 +1,20 @@
 import * as PIXI from "pixi.js";
 import { Shroom } from "@jankuss/shroom";
 
+type CleanupFn = () => void;
+type CallbackOptions = {
+  application: PIXI.Application;
+  shroom: Shroom;
+  container: HTMLDivElement;
+};
+
 export function createShroom(
-  cb: (options: { application: PIXI.Application; shroom: Shroom }) => void
-): HTMLCanvasElement {
+  cb: (options: CallbackOptions) => CleanupFn | void
+): HTMLElement {
+  const container = document.createElement("div");
   const element = document.createElement("canvas");
+  container.appendChild(element);
+
   const application = new PIXI.Application({ view: element });
   const shroom = Shroom.create({
     resourcePath: "./resources",
@@ -14,7 +24,16 @@ export function createShroom(
     },
   });
 
-  cb({ application, shroom });
+  const cleanup = cb({ application, shroom, container });
 
-  return element;
+  document.addEventListener("DOMNodeRemoved", (e) => {
+    if (e.target === element) {
+      application.destroy();
+      if (cleanup != null && typeof cleanup === "function") {
+        cleanup();
+      }
+    }
+  });
+
+  return container;
 }
