@@ -41,7 +41,7 @@ export function ImplementingFurnitureLogic() {
       }
 
       let state: State = { rolling: false, value: 1, active: false };
-      let timeout: any;
+      let timeout: number;
 
       const updateState = (newState: State) => {
         state = newState;
@@ -59,7 +59,7 @@ export function ImplementingFurnitureLogic() {
         updateState({ ...state, rolling: true, active: true });
 
         clearTimeout(timeout);
-        timeout = setTimeout(() => {
+        timeout = window.setTimeout(() => {
           updateState({
             ...state,
             rolling: false,

@@ -35,14 +35,18 @@ export async function dumpFigureLibraries(
       try {
         await fs.stat(swfLocation);
         return downloadSuccess();
-      } catch (e) {}
+      } catch (e) {
+        // File doesn't exist, continue
+      }
 
       try {
         const buffer = await tryFetchBuffer(file);
         await fs.writeFile(swfLocation, buffer);
 
         downloadSuccess();
-      } catch (e) {}
+      } catch (e) {
+        // Do nothing
+      }
     },
     { concurrency: 30 } // We can use this limit because if the download get stucked, we will retry it after a short time ;)
   );
@@ -65,7 +69,9 @@ export async function dumpFigureLibraries(
       try {
         await fs.stat(manifestFileLocation);
         return success();
-      } catch (e) {}
+      } catch (e) {
+        // Do nothing
+      }
 
       await extractSwf({
         out: resolvedOutPath,

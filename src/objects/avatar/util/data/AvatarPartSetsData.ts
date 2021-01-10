@@ -9,6 +9,17 @@ export class AvatarPartSetsData
     super(xml);
   }
 
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new AvatarPartSetsData(text);
+  }
+
+  static default() {
+    return new AvatarPartSetsData(atob(partsetsXml));
+  }
+
   getPartInfo(
     id: string
   ):
@@ -40,16 +51,5 @@ export class AvatarPartSetsData
         return setType;
       })
     );
-  }
-
-  static async fromUrl(url: string) {
-    const response = await fetch(url);
-    const text = await response.text();
-
-    return new AvatarPartSetsData(text);
-  }
-
-  static default() {
-    return new AvatarPartSetsData(atob(partsetsXml));
   }
 }

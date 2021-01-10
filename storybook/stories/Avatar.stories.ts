@@ -299,7 +299,6 @@ export function EventHandling() {
   });
 }
 
-
 export function headRotation() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
@@ -313,12 +312,13 @@ export function headRotation() {
     });
 
     const avatar = new Avatar({
-      look: "hd-180-1.hr-828-61.ha-1012-110.he-1604-62.ea-1404-62.fa-1204-62.ch-255-66.lg-280-110.sh-305-62",
+      look:
+        "hd-180-1.hr-828-61.ha-1012-110.he-1604-62.ea-1404-62.fa-1204-62.ch-255-66.lg-280-110.sh-305-62",
       direction: 5,
       roomX: 1,
       roomY: 1,
       roomZ: 0,
-      headDirection: 5
+      headDirection: 5,
     });
 
     // const avatar2 = new Avatar({
@@ -371,7 +371,7 @@ export function headRotation() {
     application.stage.addChild(room);
   });
 }
-                      
+
 export function BaseAvatarClothes() {
   return createShroom(({ application, shroom }) => {
     // const room = Room.create(shroom, {
@@ -386,7 +386,7 @@ export function BaseAvatarClothes() {
 
     const baseAvatar = BaseAvatar.fromShroom(shroom, {
       look: {
-        look: 'ch-210-66',
+        look: "ch-210-66",
         direction: 2,
         actions: new Set<AvatarAction>(),
       },
@@ -394,28 +394,28 @@ export function BaseAvatarClothes() {
       skipBodyParts: true,
       position: {
         x: 0,
-        y: 32
+        y: 32,
       },
       onLoad: () => {
         // console.log(baseAvatar.width, baseAvatar.height)
-      }
+      },
     });
 
     const baseAvatar2 = BaseAvatar.fromShroom(shroom, {
       look: {
-        look: 'hr-3163-39.hd-180-2.lg-3202-1322.ch-215-1331',
+        look: "hr-3163-39.hd-180-2.lg-3202-1322.ch-215-1331",
         direction: 3,
-        actions: new Set<AvatarAction>()
+        actions: new Set<AvatarAction>(),
       },
       zIndex: 1,
       headOnly: true,
       position: {
         x: 100,
-        y: 200
+        y: 200,
       },
       onLoad: () => {
-        console.log(baseAvatar2.width, baseAvatar2.height)
-      }
+        console.log(baseAvatar2.width, baseAvatar2.height);
+      },
     });
 
     application.stage.addChild(baseAvatar);

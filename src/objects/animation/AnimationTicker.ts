@@ -4,10 +4,10 @@ const ANIM_FPS = 24;
 const TARGET_FPS = 60;
 
 export class AnimationTicker implements IAnimationTicker {
-  private frame: number = 0;
+  private _frame = 0;
 
-  private idCounter: number = 0;
-  private subscriptions = new Map<
+  private _idCounter = 0;
+  private _subscriptions = new Map<
     number,
     (frame: number, accurateFrame: number) => void
   >();
@@ -15,35 +15,35 @@ export class AnimationTicker implements IAnimationTicker {
   constructor(application: PIXI.Application) {
     application.ticker.maxFPS = TARGET_FPS;
     application.ticker.minFPS = TARGET_FPS;
-    application.ticker.add(() => this.increment());
+    application.ticker.add(() => this._increment());
   }
 
   static create(application: PIXI.Application) {
     return new AnimationTicker(application);
   }
 
-  private getNormalizedFrame(frame: number) {
+  subscribe(cb: (frame: number, accurateFrame: number) => void): () => void {
+    const id = this._idCounter++;
+
+    this._subscriptions.set(id, cb);
+    return () => this._subscriptions.delete(id);
+  }
+
+  current(): number {
+    return this._getNormalizedFrame(this._frame).rounded;
+  }
+
+  private _getNormalizedFrame(frame: number) {
     const factor = ANIM_FPS / TARGET_FPS;
     const calculatedFrame = frame * factor;
 
     return { rounded: Math.floor(calculatedFrame), pure: calculatedFrame };
   }
 
-  private increment() {
-    this.frame += 1;
-    const data = this.getNormalizedFrame(this.frame);
+  private _increment() {
+    this._frame += 1;
+    const data = this._getNormalizedFrame(this._frame);
 
-    this.subscriptions.forEach((cb) => cb(data.rounded, data.pure));
-  }
-
-  subscribe(cb: (frame: number, accurateFrame: number) => void): () => void {
-    const id = this.idCounter++;
-
-    this.subscriptions.set(id, cb);
-    return () => this.subscriptions.delete(id);
-  }
-
-  current(): number {
-    return this.getNormalizedFrame(this.frame).rounded;
+    this._subscriptions.forEach((cb) => cb(data.rounded, data.pure));
   }
 }

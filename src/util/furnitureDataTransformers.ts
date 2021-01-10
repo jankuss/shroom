@@ -1,4 +1,3 @@
-import { FurnitureData } from "../objects/furniture/FurnitureData";
 import { FurnitureInfo } from "../interfaces/IFurnitureData";
 
 export function transformFirst<T>(
@@ -29,14 +28,15 @@ export function formatFurnitureData(data: {
   [key: string]: unknown;
 }): FurnitureInfo | undefined {
   const keys = Object.keys(data);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const obj: any = {};
 
-  keys.forEach((key: any) => {
+  keys.forEach((key) => {
     const castedKey = key as keyof typeof furnitureDataTransformers;
     const transformer = furnitureDataTransformers[castedKey];
 
     if (transformer != null) {
-      const value = data[key] as any;
+      const value = data[key] as string[];
 
       obj[castedKey] = transformer(value);
     }

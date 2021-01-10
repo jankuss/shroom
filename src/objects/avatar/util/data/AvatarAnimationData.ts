@@ -15,6 +15,17 @@ export class AvatarAnimationData
     super(xml);
   }
 
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new AvatarAnimationData(text);
+  }
+
+  static default() {
+    return new AvatarAnimationData(atob(animationXml));
+  }
+
   getAnimationFrames(id: string, type: string) {
     const key = `${id}_${type};`;
     const current = this._animationFrames.get(key);
@@ -98,16 +109,5 @@ export class AvatarAnimationData
       x: dx,
       y: dy,
     };
-  }
-
-  static async fromUrl(url: string) {
-    const response = await fetch(url);
-    const text = await response.text();
-
-    return new AvatarAnimationData(text);
-  }
-
-  static default() {
-    return new AvatarAnimationData(atob(animationXml));
   }
 }

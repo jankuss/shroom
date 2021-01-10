@@ -354,7 +354,7 @@ export class Wall extends RoomObject {
     const offset = roomZ * 32;
 
     switch (direction) {
-      case "left":
+      case "left": {
         const left = createWallLeft({
           baseX,
           baseY,
@@ -376,8 +376,9 @@ export class Wall extends RoomObject {
         this._primary = left.primary;
         this._top = left.top;
         break;
+      }
 
-      case "right":
+      case "right": {
         const right = createWallRight({
           baseX,
           baseY,
@@ -399,8 +400,9 @@ export class Wall extends RoomObject {
         this._primary = right.primary;
         this._top = right.top;
         break;
+      }
 
-      case "corner":
+      case "corner": {
         const corner = createTopCorner(
           new PIXI.Matrix(
             1,
@@ -421,6 +423,7 @@ export class Wall extends RoomObject {
 
         this._top = corner;
         break;
+      }
     }
 
     if (this._container != null) {

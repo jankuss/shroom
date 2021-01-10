@@ -3,16 +3,18 @@ import { AnimatedFurnitureVisualization } from "./AnimatedFurnitureVisualization
 import { FurnitureVisualization } from "./FurnitureVisualization";
 
 export class FurnitureBottleVisualization extends FurnitureVisualization {
-  private _base: AnimatedFurnitureVisualization = new AnimatedFurnitureVisualization();
+  private static readonly ANIMATION_ID_OFFSET_SLOW1 = 20;
+  private static readonly ANIMATION_ID_OFFSET_SLOW2 = 9;
+  private static readonly ANIMATION_ID_ROLL = -1;
 
-  private static ANIMATION_ID_OFFSET_SLOW1 = 20;
-  private static ANIMATION_ID_OFFSET_SLOW2 = 9;
-  private static ANIMATION_ID_ROLL = -1;
+  private _base: AnimatedFurnitureVisualization = new AnimatedFurnitureVisualization();
 
   private _stateQueue: number[] = [];
   private _running = false;
 
-  destroy(): void {}
+  destroy(): void {
+    this._base.destroy();
+  }
 
   setView(view: IFurnitureVisualizationView) {
     super.setView(view);

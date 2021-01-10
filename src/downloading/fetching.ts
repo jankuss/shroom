@@ -30,9 +30,9 @@ export async function tryFetch(
 
   const cancelToken: CancelTokenStatic = axios.CancelToken;
   let cancel: Canceler | undefined = undefined;
-  let attempts: number = 0;
+  let attempts = 0;
 
-  let watcher = (url: string) =>
+  const watcher = (url: string) =>
     setInterval(() => {
       attempts++;
 

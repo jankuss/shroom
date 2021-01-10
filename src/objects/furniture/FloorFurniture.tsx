@@ -1,5 +1,3 @@
-import * as PIXI from "pixi.js";
-
 import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
@@ -15,13 +13,11 @@ import { FurnitureId } from "../../interfaces/IFurnitureData";
 export class FloorFurniture
   extends RoomObject
   implements IFurniture, IMoveable {
+  public readonly placementType = "floor";
   private _baseFurniture: BaseFurniture;
-
   private _moveAnimation: ObjectAnimation<undefined> | undefined;
-
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
-
-  private _moving: boolean = false;
+  private _moving = false;
 
   private readonly _id: FurnitureId | undefined;
   private readonly _type: string | undefined;
@@ -31,15 +27,13 @@ export class FloorFurniture
   private _roomZ: number;
   private _direction: number;
   private _animation?: string;
-  private _highlight: boolean = false;
-
-  public readonly placementType = "floor";
+  private _highlight = false;
 
   private _onClick: HitEventHandler | undefined;
   private _onDoubleClick: HitEventHandler | undefined;
 
   constructor(
-    private options: {
+    options: {
       roomX: number;
       roomY: number;
       roomZ: number;
@@ -66,10 +60,75 @@ export class FloorFurniture
     this._baseFurniture = new BaseFurniture({
       animation: this.animation,
       direction: this.direction,
-      type: getFurnitureFetch(this.options, "floor"),
+      type: getFurnitureFetch(options, "floor"),
     });
 
     options.behaviors?.forEach((behavior) => behavior.setParent(this));
+  }
+
+  /**
+   * Moves and animates the furniture to a new position.
+   *
+   * @param roomX New x-Position
+   * @param roomY New y-Position
+   * @param roomZ New z-Position
+   */
+  move(roomX: number, roomY: number, roomZ: number) {
+    this._moveAnimation?.move(
+      { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
+      { roomX, roomY, roomZ },
+      undefined
+    );
+
+    this._roomX = roomX;
+    this._roomY = roomY;
+    this._roomZ = roomZ;
+  }
+
+  /**
+   * Clears the enqueued movement animations of the furniture
+   */
+  clearMovement() {
+    const current = this._moveAnimation?.clear();
+
+    if (current != null) {
+      this.roomX = current.roomX;
+      this.roomY = current.roomY;
+      this.roomZ = current.roomZ;
+    }
+  }
+
+  destroyed(): void {
+    this._baseFurniture.destroy();
+  }
+
+  registered(): void {
+    this._baseFurniture.dependencies = {
+      animationTicker: this.animationTicker,
+      furnitureLoader: this.furnitureLoader,
+      hitDetection: this.hitDetection,
+      placeholder: this.configuration.placeholder,
+      visualization: this.roomVisualization,
+    };
+
+    this._moveAnimation = new ObjectAnimation(
+      this.animationTicker,
+      {
+        onStart: () => {
+          this._moving = true;
+        },
+        onStop: () => {
+          this._moving = false;
+        },
+        onUpdatePosition: (position) => {
+          this._animatedPosition = position;
+          this._updatePosition();
+        },
+      },
+      this.configuration.furnitureMovementDuration
+    );
+
+    this._updatePosition();
   }
 
   /**
@@ -286,70 +345,5 @@ export class FloorFurniture
 
   private _updateHighlight() {
     this._baseFurniture.highlight = this.highlight;
-  }
-
-  /**
-   * Moves and animates the furniture to a new position.
-   *
-   * @param roomX New x-Position
-   * @param roomY New y-Position
-   * @param roomZ New z-Position
-   */
-  move(roomX: number, roomY: number, roomZ: number) {
-    this._moveAnimation?.move(
-      { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
-      { roomX, roomY, roomZ },
-      undefined
-    );
-
-    this._roomX = roomX;
-    this._roomY = roomY;
-    this._roomZ = roomZ;
-  }
-
-  /**
-   * Clears the enqueued movement animations of the furniture
-   */
-  clearMovement() {
-    const current = this._moveAnimation?.clear();
-
-    if (current != null) {
-      this.roomX = current.roomX;
-      this.roomY = current.roomY;
-      this.roomZ = current.roomZ;
-    }
-  }
-
-  destroyed(): void {
-    this._baseFurniture.destroy();
-  }
-
-  registered(): void {
-    this._baseFurniture.dependencies = {
-      animationTicker: this.animationTicker,
-      furnitureLoader: this.furnitureLoader,
-      hitDetection: this.hitDetection,
-      placeholder: this.configuration.placeholder,
-      visualization: this.roomVisualization,
-    };
-
-    this._moveAnimation = new ObjectAnimation(
-      this.animationTicker,
-      {
-        onStart: () => {
-          this._moving = true;
-        },
-        onStop: () => {
-          this._moving = false;
-        },
-        onUpdatePosition: (position, data) => {
-          this._animatedPosition = position;
-          this._updatePosition();
-        },
-      },
-      this.configuration.furnitureMovementDuration
-    );
-
-    this._updatePosition();
   }
 }

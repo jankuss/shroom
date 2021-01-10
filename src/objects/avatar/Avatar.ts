@@ -1,5 +1,3 @@
-import * as PIXI from "pixi.js";
-
 import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseAvatar } from "./BaseAvatar";
@@ -17,21 +15,21 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _moveAnimation:
     | ObjectAnimation<{ type: "walk"; direction: number } | { type: "move" }>
     | undefined;
-  private _walking: boolean = false;
-  private _moving: boolean = false;
+  private _walking = false;
+  private _moving = false;
 
-  private _frame: number = 0;
+  private _frame = 0;
 
   private _cancelAnimation: (() => void) | undefined;
 
-  private _waving: boolean = false;
-  private _direction: number = 0;
+  private _waving = false;
+  private _direction = 0;
   private _headDirection?: number;
   private _item: string | number | undefined;
   private _look: string;
-  private _roomX: number = 0;
-  private _roomY: number = 0;
-  private _roomZ: number = 0;
+  private _roomX = 0;
+  private _roomY = 0;
+  private _roomZ = 0;
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
   private _actions: Set<AvatarAction> = new Set();
   private _fx: { type: "dance"; id: string } | undefined;
@@ -42,7 +40,14 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _onClick: HitEventHandler | undefined = undefined;
   private _onDoubleClick: HitEventHandler | undefined = undefined;
 
-  constructor({ look, roomX, roomY, roomZ, direction, headDirection }: Options) {
+  constructor({
+    look,
+    roomX,
+    roomY,
+    roomZ,
+    direction,
+    headDirection,
+  }: Options) {
     super();
 
     this._direction = direction;
@@ -284,6 +289,143 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     }
   }
 
+  /**
+   * Walk the user to a position. This will trigger the walking animation, change the direction
+   * and smoothly move the user to its new position. Note that you have to implement
+   * your own pathfinding logic on top of it.
+   *
+   * @param roomX New x-Position
+   * @param roomY New y-Position
+   * @param roomZ New z-Position
+   * @param options Optionally specify the direction of user movement
+   */
+  walk(
+    roomX: number,
+    roomY: number,
+    roomZ: number,
+    options?: { direction?: number }
+  ) {
+    this._moveAnimation?.move(
+      { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
+      { roomX, roomY, roomZ },
+      {
+        direction: options?.direction ?? this.direction,
+        type: "walk",
+      }
+    );
+
+    this._roomX = roomX;
+    this._roomY = roomY;
+    this._roomZ = roomZ;
+  }
+
+  /**
+   * Move the user to a new position. This will smoothly animate the user to the
+   * specified position.
+   *
+   * @param roomX New x-Position
+   * @param roomY New y-Position
+   * @param roomZ New z-Position
+   */
+  move(roomX: number, roomY: number, roomZ: number) {
+    this._moveAnimation?.move(
+      { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
+      { roomX, roomY, roomZ },
+      { type: "move" }
+    );
+
+    this._roomX = roomX;
+    this._roomY = roomY;
+    this._roomZ = roomZ;
+  }
+
+  /**
+   * @deprecated Use `screenPosition` instead. This will be the actual position on the screen.
+   */
+  getScreenPosition() {
+    return {
+      x: this._avatarSprites.x,
+      y: this._avatarSprites.y,
+    };
+  }
+
+  registered(): void {
+    if (this._placeholderSprites != null) {
+      this._placeholderSprites.dependencies = {
+        animationTicker: this.animationTicker,
+        avatarLoader: this.avatarLoader,
+        hitDetection: this.hitDetection,
+      };
+    }
+
+    this._loadingAvatarSprites.dependencies = {
+      animationTicker: this.animationTicker,
+      avatarLoader: this.avatarLoader,
+      hitDetection: this.hitDetection,
+    };
+
+    this._updateAvatarSprites();
+
+    this._moveAnimation = new ObjectAnimation(
+      this.animationTicker,
+      {
+        onUpdatePosition: (position) => {
+          this._animatedPosition = position;
+          this._updatePosition();
+        },
+        onStart: (data) => {
+          if (data.type === "walk") {
+            this._startWalking(data.direction);
+            this._moving = false;
+          } else if (data.type === "move") {
+            this._stopWalking();
+            this._moving = true;
+          }
+        },
+        onStop: () => {
+          this._stopWalking();
+          this._moving = false;
+        },
+      },
+      this.configuration.avatarMovementDuration
+    );
+  }
+
+  /**
+   * Make an action active.
+   * @param action The action to add
+   */
+  addAction(action: AvatarAction) {
+    this.actions = new Set(this._actions).add(action);
+  }
+
+  /**
+   * Remove an action from the active actions.
+   * @param action The action to remove
+   */
+  removeAction(action: AvatarAction) {
+    const newSet = new Set(this._actions);
+    newSet.delete(action);
+
+    this.actions = newSet;
+  }
+
+  /**
+   * Check if an action is active.
+   * @param action The action to check
+   */
+  hasAction(action: AvatarAction) {
+    return this.actions.has(action);
+  }
+
+  destroyed(): void {
+    this._avatarSprites?.destroy();
+
+    if (this._cancelAnimation != null) {
+      this._cancelAnimation();
+    }
+  }
+
   private _updateEventHandlers() {
     if (this._placeholderSprites != null) {
       this._placeholderSprites.onClick = this._onClick;
@@ -402,56 +544,6 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updateAvatarSprites();
   }
 
-  /**
-   * Walk the user to a position. This will trigger the walking animation, change the direction
-   * and smoothly move the user to its new position. Note that you have to implement
-   * your own pathfinding logic on top of it.
-   *
-   * @param roomX New x-Position
-   * @param roomY New y-Position
-   * @param roomZ New z-Position
-   * @param options Optionally specify the direction of user movement
-   */
-  walk(
-    roomX: number,
-    roomY: number,
-    roomZ: number,
-    options?: { direction?: number }
-  ) {
-    this._moveAnimation?.move(
-      { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
-      { roomX, roomY, roomZ },
-      {
-        direction: options?.direction ?? this.direction,
-        type: "walk",
-      }
-    );
-
-    this._roomX = roomX;
-    this._roomY = roomY;
-    this._roomZ = roomZ;
-  }
-
-  /**
-   * Move the user to a new position. This will smoothly animate the user to the
-   * specified position.
-   *
-   * @param roomX New x-Position
-   * @param roomY New y-Position
-   * @param roomZ New z-Position
-   */
-  move(roomX: number, roomY: number, roomZ: number) {
-    this._moveAnimation?.move(
-      { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
-      { roomX, roomY, roomZ },
-      { type: "move" }
-    );
-
-    this._roomX = roomX;
-    this._roomY = roomY;
-    this._roomZ = roomZ;
-  }
-
   private _calculateZIndex() {
     return this._getZIndexAtPosition(this.roomX, this.roomY, this.roomZ);
   }
@@ -472,16 +564,6 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     return getZOrder(roomX, roomY, roomZ) + 1;
   }
 
-  /**
-   * @deprecated Use `screenPosition` instead. This will be the actual position on the screen.
-   */
-  getScreenPosition() {
-    return {
-      x: this._avatarSprites.x,
-      y: this._avatarSprites.y,
-    };
-  }
-
   private _updatePosition() {
     if (!this.mounted) return;
 
@@ -491,7 +573,6 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
 
     const roomXrounded = Math.round(roomX);
     const roomYrounded = Math.round(roomY);
-    const roomZrounded = Math.round(roomZ);
 
     if (this._avatarSprites != null) {
       this._avatarSprites.x = Math.round(x);
@@ -518,83 +599,6 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
         this._avatarSprites
       );
       this.roomVisualization.container.addChild(this._avatarSprites);
-    }
-  }
-
-  registered(): void {
-    if (this._placeholderSprites != null) {
-      this._placeholderSprites.dependencies = {
-        animationTicker: this.animationTicker,
-        avatarLoader: this.avatarLoader,
-        hitDetection: this.hitDetection,
-      };
-    }
-
-    this._loadingAvatarSprites.dependencies = {
-      animationTicker: this.animationTicker,
-      avatarLoader: this.avatarLoader,
-      hitDetection: this.hitDetection,
-    };
-
-    this._updateAvatarSprites();
-
-    this._moveAnimation = new ObjectAnimation(
-      this.animationTicker,
-      {
-        onUpdatePosition: (position, data) => {
-          this._animatedPosition = position;
-          this._updatePosition();
-        },
-        onStart: (data) => {
-          if (data.type === "walk") {
-            this._startWalking(data.direction);
-            this._moving = false;
-          } else if (data.type === "move") {
-            this._stopWalking();
-            this._moving = true;
-          }
-        },
-        onStop: () => {
-          this._stopWalking();
-          this._moving = false;
-        },
-      },
-      this.configuration.avatarMovementDuration
-    );
-  }
-
-  /**
-   * Make an action active.
-   * @param action The action to add
-   */
-  addAction(action: AvatarAction) {
-    this.actions = new Set(this._actions).add(action);
-  }
-
-  /**
-   * Remove an action from the active actions.
-   * @param action The action to remove
-   */
-  removeAction(action: AvatarAction) {
-    const newSet = new Set(this._actions);
-    newSet.delete(action);
-
-    this.actions = newSet;
-  }
-
-  /**
-   * Check if an action is active.
-   * @param action The action to check
-   */
-  hasAction(action: AvatarAction) {
-    return this.actions.has(action);
-  }
-
-  destroyed(): void {
-    this._avatarSprites?.destroy();
-
-    if (this._cancelAnimation != null) {
-      this._cancelAnimation();
     }
   }
 }

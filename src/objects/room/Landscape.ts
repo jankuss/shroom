@@ -10,12 +10,14 @@ interface WallCollectionMeta {
   level: number;
 }
 
+type Unsubscribe = () => void;
+
 export class Landscape extends RoomObject {
   private _container: PIXI.Container | undefined;
   private _leftTexture: PIXI.Texture | undefined;
   private _rightTexture: PIXI.Texture | undefined;
-  private _wallHeight: number = 0;
-  private _wallHeightWithZ: number = 0;
+  private _wallHeight = 0;
+  private _wallHeightWithZ = 0;
 
   private _leftTexturePromise: PIXI.Texture | Promise<PIXI.Texture> | undefined;
   private _rightTexturePromise:
@@ -25,8 +27,11 @@ export class Landscape extends RoomObject {
 
   private _masks: Map<string, PIXI.Sprite> = new Map();
   private _color: string | undefined;
+  private _unsubscribe: Unsubscribe | undefined = undefined;
 
-  private _unsubscribe = () => {};
+  constructor() {
+    super();
+  }
 
   public get color() {
     return this._color;
@@ -61,8 +66,22 @@ export class Landscape extends RoomObject {
     });
   }
 
-  constructor() {
-    super();
+  destroyed(): void {
+    this._unsubscribe && this._unsubscribe();
+    this._container?.destroy();
+  }
+
+  registered(): void {
+    this._unsubscribe = this.roomVisualization.subscribeRoomMeta(
+      ({ masks, wallHeightWithZ, wallHeight }) => {
+        this._masks = masks;
+        this._wallHeight = wallHeight;
+        this._wallHeightWithZ = wallHeightWithZ;
+        this._updateLandscapeImages();
+      }
+    ).unsubscribe;
+
+    this._updateLandscapeImages();
   }
 
   private _createDefaultMask() {
@@ -183,24 +202,6 @@ export class Landscape extends RoomObject {
 
     this.roomVisualization.landscapeContainer.addChild(container);
   }
-
-  destroyed(): void {
-    this._unsubscribe();
-    this._container?.destroy();
-  }
-
-  registered(): void {
-    this._unsubscribe = this.roomVisualization.subscribeRoomMeta(
-      ({ masks, wallHeightWithZ, wallHeight }) => {
-        this._masks = masks;
-        this._wallHeight = wallHeight;
-        this._wallHeightWithZ = wallHeightWithZ;
-        this._updateLandscapeImages();
-      }
-    ).unsubscribe;
-
-    this._updateLandscapeImages();
-  }
 }
 
 const getTile = (parsedTileMap: ParsedTileType[][], x: number, y: number) => {
@@ -216,10 +217,10 @@ function getWallCollectionMeta(parsedTileMap: ParsedTileType[][]) {
   let x = startX;
   let y = startY;
   let done = false;
-  let door = false;
   let meta: WallCollectionMeta | undefined = undefined;
   const arr: WallCollectionMeta[] = [];
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const currentWall = getTile(parsedTileMap, x, y);
 
@@ -281,7 +282,6 @@ function getWallCollectionMeta(parsedTileMap: ParsedTileType[][]) {
       }
     } else if (currentWall.type === "door") {
       updateMeta({ type: "rowWall", start: y, end: y - 1, level: x });
-      door = true;
     }
 
     if (done) {
@@ -313,6 +313,7 @@ function getStartingWall(parsedTileMap: ParsedTileType[][]) {
   let y = startY;
   let x = 0;
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const current = getTile(parsedTileMap, x, y);
 

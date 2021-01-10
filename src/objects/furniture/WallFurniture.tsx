@@ -1,16 +1,15 @@
-import * as PIXI from "pixi.js";
-
 import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
 import { IFurniture, IFurnitureBehavior } from "./IFurniture";
-import { HitEvent } from "../../interfaces/IHitDetection";
 import { getMaskId } from "../room/util/getMaskId";
 import { FurnitureFetchInfo } from "./FurnitureFetchInfo";
 import { getFurnitureFetch } from "./util/getFurnitureFetch";
 import { FurnitureId } from "../../interfaces/IFurnitureData";
 
 export class WallFurniture extends RoomObject implements IFurniture {
+  public readonly placementType = "wall";
+
   private _baseFurniture: BaseFurniture;
   private readonly _type: string | undefined;
   private readonly _id: FurnitureId | undefined;
@@ -19,9 +18,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
   private _roomZ: number;
   private _animation: string | undefined;
   private _direction: number;
-  private _highlight: boolean = false;
-
-  public readonly placementType = "wall";
+  private _highlight = false;
 
   constructor(
     options: {
@@ -71,7 +68,8 @@ export class WallFurniture extends RoomObject implements IFurniture {
   }
 
   public set highlight(value) {
-    this._highlight = this._highlight;
+    this._highlight = value;
+    this._updateHighlight();
   }
 
   public get alpha() {
@@ -92,7 +90,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
 
   public set animation(value) {
     this._animation = value;
-    this.updateAnimation();
+    this._updateAnimation();
   }
 
   public get direction() {
@@ -101,7 +99,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
 
   public set direction(value) {
     this._direction = value;
-    this.updateDirection();
+    this._updateDirection();
   }
 
   public get roomX() {
@@ -110,7 +108,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
 
   public set roomX(value) {
     this._roomX = value;
-    this.updatePosition();
+    this._updatePosition();
   }
 
   public get roomY() {
@@ -119,7 +117,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
 
   public set roomY(value) {
     this._roomY = value;
-    this.updatePosition();
+    this._updatePosition();
   }
 
   public get roomZ() {
@@ -128,7 +126,7 @@ export class WallFurniture extends RoomObject implements IFurniture {
 
   public set roomZ(value) {
     this._roomZ = value;
-    this.updatePosition();
+    this._updatePosition();
   }
 
   public get visualization() {
@@ -155,42 +153,8 @@ export class WallFurniture extends RoomObject implements IFurniture {
     this._baseFurniture.onDoubleClick = value;
   }
 
-  private updateAnimation() {
-    this._baseFurniture.animation = this.animation;
-  }
-
-  private updateDirection() {
-    this._baseFurniture.direction = this.direction;
-  }
-
-  private updateHighlight() {
-    this._baseFurniture.highlight = this.highlight;
-  }
-
-  private getOffsets(direction: number) {
-    if (direction === 2 || direction === 6) return { x: -16, y: -64 };
-    if (direction === 4 || direction === 0) return { x: 16, y: -64 };
-
-    throw new Error("Invalid direction for wall item");
-  }
-
   destroyed(): void {
     this._baseFurniture.destroy();
-  }
-
-  private updatePosition() {
-    const offsets = this.getOffsets(this.direction);
-    if (offsets == null) return;
-
-    const base = this.geometry.getPosition(this.roomX, this.roomY, this.roomZ);
-
-    this._baseFurniture.x = base.x + offsets.x;
-    this._baseFurniture.y = base.y + offsets.y;
-    this._baseFurniture.maskId = (direction) =>
-      getMaskId(direction, this.roomX, this.roomY);
-
-    this._baseFurniture.zIndex =
-      getZOrder(this.roomX, this.roomZ, this.roomY) - 1;
   }
 
   registered(): void {
@@ -202,6 +166,40 @@ export class WallFurniture extends RoomObject implements IFurniture {
       visualization: this.roomVisualization,
     };
 
-    this.updatePosition();
+    this._updatePosition();
+  }
+
+  private _updateAnimation() {
+    this._baseFurniture.animation = this.animation;
+  }
+
+  private _updateDirection() {
+    this._baseFurniture.direction = this.direction;
+  }
+
+  private _updateHighlight() {
+    this._baseFurniture.highlight = this.highlight;
+  }
+
+  private _getOffsets(direction: number) {
+    if (direction === 2 || direction === 6) return { x: -16, y: -64 };
+    if (direction === 4 || direction === 0) return { x: 16, y: -64 };
+
+    throw new Error("Invalid direction for wall item");
+  }
+
+  private _updatePosition() {
+    const offsets = this._getOffsets(this.direction);
+    if (offsets == null) return;
+
+    const base = this.geometry.getPosition(this.roomX, this.roomY, this.roomZ);
+
+    this._baseFurniture.x = base.x + offsets.x;
+    this._baseFurniture.y = base.y + offsets.y;
+    this._baseFurniture.maskId = (direction) =>
+      getMaskId(direction, this.roomX, this.roomY);
+
+    this._baseFurniture.zIndex =
+      getZOrder(this.roomX, this.roomZ, this.roomY) - 1;
   }
 }

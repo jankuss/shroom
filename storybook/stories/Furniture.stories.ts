@@ -2,7 +2,6 @@ import * as PIXI from "pixi.js";
 
 import {
   BaseFurniture,
-  BasicFurnitureVisualization,
   FloorFurniture,
   FurnitureBottleVisualization,
   FurnitureGuildCustomizedVisualization,
@@ -95,7 +94,7 @@ export function Animated() {
       });
 
       furniture.onClick = action(`Furniture ${i} clicked`);
-      furniture.onDoubleClick = (value) => {
+      furniture.onDoubleClick = () => {
         if (furniture.animation === "0") {
           furniture.animation = "1";
         } else {
@@ -366,15 +365,6 @@ export function GldGate() {
     room.x = application.screen.width / 2 - room.roomWidth / 2;
     room.y = application.screen.height / 2 - room.roomHeight / 2;
 
-    const floorFurniture = new FloorFurniture({
-      type: "gld_gate",
-      direction: 2,
-      roomX: 1,
-      roomY: 1,
-      roomZ: 0,
-      animation: "0",
-    });
-
     const floorFurniture2 = new FloorFurniture({
       type: "bottle",
       direction: 0,
@@ -422,7 +412,7 @@ export function GldGate() {
     });
 
     let spinning = false;
-    floorFurniture2.onClick = (event) => {
+    floorFurniture2.onClick = () => {
       if (spinning) {
         floorFurniture2.animation = "3";
         spinning = false;
@@ -442,19 +432,8 @@ export function GldGate() {
       }
     };
 
-    const floorFurniture4 = new FloorFurniture({
-      type: "gld_gate",
-      direction: 2,
-      roomX: 1,
-      roomY: 7,
-      roomZ: 0,
-      animation: "101",
-    });
-
-    //room.addRoomObject(floorFurniture);
     room.addRoomObject(floorFurniture2);
     room.addRoomObject(floorFurniture3);
-    //room.addRoomObject(floorFurniture4);
 
     application.stage.addChild(room);
   });
@@ -575,9 +554,6 @@ export function DestroyFurniture() {
     const container = new PIXI.Container();
     application.stage.addChild(container);
 
-    const furnitureLoader = shroom.dependencies
-      .furnitureLoader as FurnitureLoader;
-
     const room = Room.create(shroom, {
       tilemap: `
        xxxxxxxxxxx
@@ -660,9 +636,6 @@ export function WallWindowDestroy() {
   return createShroom(({ application, shroom }) => {
     const container = new PIXI.Container();
     application.stage.addChild(container);
-
-    const furnitureLoader = shroom.dependencies
-      .furnitureLoader as FurnitureLoader;
 
     const room = Room.create(shroom, {
       tilemap: `

@@ -1,16 +1,16 @@
 import { RoomLandscapeMaskSprite } from "../objects/room/RoomLandscapeMaskSprite";
 
 export interface IRoomVisualization {
-  addMask(id: string, element: PIXI.Sprite): MaskNode;
-  subscribeRoomMeta(
-    listener: (value: RoomVisualizationMeta) => void
-  ): { unsubscribe: () => void };
-
   container: PIXI.Container;
   behindWallContainer: PIXI.Container;
   landscapeContainer: PIXI.Container;
   floorContainer: PIXI.Container;
   wallContainer: PIXI.Container;
+
+  addMask(id: string, element: PIXI.Sprite): MaskNode;
+  subscribeRoomMeta(
+    listener: (value: RoomVisualizationMeta) => void
+  ): { unsubscribe: () => void };
 }
 
 export type MaskNode = {

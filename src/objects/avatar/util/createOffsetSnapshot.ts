@@ -1,5 +1,4 @@
 import { loadOffsetMap } from "./loadOffsetMap";
-import * as fs from "fs";
 import { parseStringAsync } from "./parseStringAsync";
 import { parseFigureMap } from "./parseFigureMap";
 

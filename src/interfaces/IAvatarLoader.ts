@@ -1,4 +1,3 @@
-import { AvatarAction } from "../objects/avatar/enum/AvatarAction";
 import { LookOptions } from "../objects/avatar/util/createLookServer";
 import { AvatarDrawDefinition } from "../objects/avatar/util/getAvatarDrawDefinition";
 import { HitTexture } from "../objects/hitdetection/HitTexture";
@@ -10,6 +9,6 @@ export interface IAvatarLoader {
 }
 
 export type AvatarLoaderResult = {
+  getTexture(id: string): HitTexture;
   getDrawDefinition(options: LookOptions): AvatarDrawDefinition;
-  getTexture: (id: string) => HitTexture;
 };
