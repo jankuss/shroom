@@ -119,6 +119,8 @@ test("accessing context before setParent is called throws error", () => {
   class TestObject extends RoomObject {
     constructor() {
       super();
+
+      this.geometry;
     }
 
     destroyed(): void {
