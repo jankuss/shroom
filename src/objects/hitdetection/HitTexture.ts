@@ -1,4 +1,3 @@
-import { reject } from "bluebird";
 import * as PIXI from "pixi.js";
 import { applyTextureProperties } from "../../util/applyTextureProperties";
 
@@ -34,7 +33,7 @@ export class HitTexture {
     await new Promise<{
       width: number;
       height: number;
-    }>((resolve) => {
+    }>((resolve, reject) => {
       image.onload = () => {
         resolve({ width: image.width, height: image.height });
       };

@@ -1,3 +1,4 @@
+import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import { HitTexture } from "../../hitdetection/HitTexture";
 import { FurnitureAssetsData } from "../data/FurnitureAssetsData";
 import { FurnitureVisualizationData } from "../data/FurnitureVisualizationData";
@@ -66,18 +67,21 @@ export async function loadFurni(
       (asset) => asset.source == null || asset.source === asset.name
     );
 
-    const textures = new Map(
-      await Promise.all(
-        assetsToLoad.map(async (asset) => {
+    const loadedTextures = await Promise.all(
+      assetsToLoad.map(async (asset) => {
+        try {
           const imageUrl = await options.getAsset(type, asset.name, revision);
           const image = await HitTexture.fromUrl(imageUrl);
 
           return [asset.name, image] as const;
-        })
-      )
+        } catch (e) {
+          console.warn(`Failed to load furniture asset: ${asset.name}`, e);
+          return null;
+        }
+      })
     );
 
-    return textures;
+    return new Map(loadedTextures.filter(notNullOrUndefined));
   };
   const textures = await loadTextures();
 

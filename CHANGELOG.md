@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Furniture default coloring not being applied
 - Fix some furniture layers not showing
+- Fix furniture not displaying at all when one asset fails to load
 
 ## [0.4.0] - 2021-01-09
 
