@@ -217,6 +217,34 @@ export function IssueWithAvatarEventsNotHandled() {
   });
 }
 
+export function IssueWithItemNotRenderingProperly() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+            xxxxx
+            x0000
+            x0000
+            x0000
+            x0000
+            `,
+    });
+
+    const furniture = new FloorFurniture({
+      type: "hc21_2",
+      direction: 0,
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+    });
+
+    room.onTileClick = action("Position");
+
+    room.addRoomObject(furniture);
+
+    application.stage.addChild(room);
+  });
+}
+
 export function Issue56() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {

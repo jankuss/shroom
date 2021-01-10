@@ -1,7 +1,4 @@
-import { Visualization } from "./visualization/parseVisualization";
-import { AssetMap } from "./parseAssets";
 import { FurniDrawDefinition, FurniDrawPart } from "./DrawDefinition";
-import { layerToChar } from "./index";
 import {
   FurnitureAnimationLayer,
   FurnitureDirectionLayer,
@@ -12,6 +9,7 @@ import {
   FurnitureAsset,
   IFurnitureAssetsData,
 } from "../data/interfaces/IFurnitureAssetsData";
+import { getCharFromLayerIndex } from ".";
 
 interface FurniDrawDefinitionOptions {
   type: string;
@@ -83,7 +81,7 @@ export function getFurniDrawDefinition(
       layerIndex
     );
     const layer = visualizationData.getLayer(size, layerIndex);
-    const char = layerToChar[layerIndex];
+    const char = getCharFromLayerIndex(layerIndex);
     const animationLayer =
       animationNumber != null
         ? visualizationData.getAnimationLayer(size, animationNumber, layerIndex)
