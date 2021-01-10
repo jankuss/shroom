@@ -1,7 +1,6 @@
 import * as PIXI from "pixi.js";
 
 import { ClickHandler } from "../hitdetection/ClickHandler";
-import { HitSprite } from "../hitdetection/HitSprite";
 import { FurniDrawPart } from "./util/DrawDefinition";
 import { IFurnitureEventHandlers } from "./util/IFurnitureEventHandlers";
 import { LoadFurniResult } from "./util/loadFurni";
@@ -49,15 +48,16 @@ export interface BaseFurnitureProps {
   getMaskId?: MaskIdGetter;
 }
 
+type ResolveLoadFurniResult = (result: LoadFurniResult) => void;
+
 export class BaseFurniture implements IFurnitureEventHandlers {
   private _sprites: Map<string, FurnitureSprite> = new Map();
-  private loadFurniResult: LoadFurniResult | undefined;
-  private unknownSprite: FurnitureSprite | undefined;
+  private _loadFurniResult: LoadFurniResult | undefined;
 
-  private _x: number = 0;
-  private _y: number = 0;
-  private _zIndex: number = 0;
-  private _direction: number = 0;
+  private _x = 0;
+  private _y = 0;
+  private _zIndex = 0;
+  private _direction = 0;
   private _animation: string | undefined;
   private _type: FurnitureFetch;
   private _unknownTexture: PIXI.Texture | undefined;
@@ -65,18 +65,18 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _clickHandler = new ClickHandler();
   private _loadFurniResultPromise: Promise<LoadFurniResult>;
   private _validDirections: number[] | undefined;
-  private _resolveLoadFurniResult: (result: LoadFurniResult) => void = () => {};
+  private _resolveLoadFurniResult: ResolveLoadFurniResult | undefined;
 
   private _visualization: IFurnitureVisualization | undefined;
   private _fallbackVisualization = new AnimatedFurnitureVisualization();
 
-  private _refreshPosition: boolean = false;
-  private _refreshFurniture: boolean = false;
-  private _refreshZIndex: boolean = false;
+  private _refreshPosition = false;
+  private _refreshFurniture = false;
+  private _refreshZIndex = false;
 
-  private _highlight: boolean = false;
-  private _alpha: number = 1;
-  private _destroyed: boolean = false;
+  private _highlight = false;
+  private _alpha = 1;
+  private _destroyed = false;
 
   private _maskNodes: MaskNode[] = [];
   private _cancelTicker: (() => void) | undefined = undefined;
@@ -90,31 +90,29 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     hitDetection: IHitDetection;
   };
 
-  public get dependencies() {
-    if (this._dependencies == null) throw new Error("Invalid dependencies");
+  constructor({
+    type,
+    direction,
+    animation = "0",
+    getMaskId = () => undefined,
+    dependencies,
+  }: {
+    dependencies?: BaseFurnitureDependencies;
+  } & BaseFurnitureProps) {
+    this._direction = direction;
+    this._animation = animation;
+    this._type = type;
+    this._getMaskId = getMaskId;
 
-    return this._dependencies;
-  }
+    if (dependencies != null) {
+      this.dependencies = dependencies;
+    }
 
-  public get visualization() {
-    if (this._visualization == null) return this._fallbackVisualization;
+    PIXI.Ticker.shared.add(this._onTicker);
 
-    return this._visualization;
-  }
-
-  public set visualization(value) {
-    this._visualization?.destroy();
-    this._visualization = value;
-    this._updateFurniture();
-  }
-
-  public set dependencies(value) {
-    this._dependencies = value;
-    this._loadFurniture();
-  }
-
-  public get mounted() {
-    return this._dependencies != null;
+    this._loadFurniResultPromise = new Promise<LoadFurniResult>((resolve) => {
+      this._resolveLoadFurniResult = resolve;
+    });
   }
 
   static fromRoomContext(context: IRoomContext, props: BaseFurnitureProps) {
@@ -145,7 +143,9 @@ export class BaseFurniture implements IFurnitureEventHandlers {
           container,
           addMask: () => {
             return {
-              remove: () => {},
+              remove: () => {
+                // Do nothing
+              },
             };
           },
         },
@@ -154,29 +154,31 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     });
   }
 
-  constructor({
-    type,
-    direction,
-    animation = "0",
-    getMaskId = () => undefined,
-    dependencies,
-  }: {
-    dependencies?: BaseFurnitureDependencies;
-  } & BaseFurnitureProps) {
-    this._direction = direction;
-    this._animation = animation;
-    this._type = type;
-    this._getMaskId = getMaskId;
+  public get dependencies() {
+    if (this._dependencies == null) throw new Error("Invalid dependencies");
 
-    if (dependencies != null) {
-      this.dependencies = dependencies;
-    }
+    return this._dependencies;
+  }
 
-    PIXI.Ticker.shared.add(this._onTicker);
+  public set dependencies(value) {
+    this._dependencies = value;
+    this._loadFurniture();
+  }
 
-    this._loadFurniResultPromise = new Promise<LoadFurniResult>((resolve) => {
-      this._resolveLoadFurniResult = resolve;
-    });
+  public get visualization() {
+    if (this._visualization == null) return this._fallbackVisualization;
+
+    return this._visualization;
+  }
+
+  public set visualization(value) {
+    this._visualization?.destroy();
+    this._visualization = value;
+    this._updateFurniture();
+  }
+
+  public get mounted() {
+    return this._dependencies != null;
   }
 
   public get extradata() {
@@ -284,6 +286,15 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this._getMaskId = value;
   }
 
+  destroy() {
+    this._destroySprites();
+
+    this._destroyed = true;
+    PIXI.Ticker.shared.remove(this._onTicker);
+    this._cancelTicker && this._cancelTicker();
+    this._cancelTicker = undefined;
+  }
+
   private _onTicker = () => {
     if (this._refreshFurniture) {
       this._refreshFurniture = false;
@@ -330,17 +341,17 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     });
   }
 
-  _updateFurniture() {
+  private _updateFurniture() {
     if (!this.mounted) return;
 
-    if (this.loadFurniResult != null) {
-      this._updateFurnitureSprites(this.loadFurniResult);
+    if (this._loadFurniResult != null) {
+      this._updateFurnitureSprites(this._loadFurniResult);
     } else {
       this._updateUnknown();
     }
   }
 
-  _updateUnknown() {
+  private _updateUnknown() {
     if (!this.mounted) return;
 
     if (this._unknownSprite == null) {
@@ -368,7 +379,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     part: FurniDrawPart,
     asset: FurnitureAsset
   ) {
-    const { z, assets, layer, shadow, tint, mask, layerIndex } = part;
+    const { z, layer, mask, layerIndex } = part;
 
     const getAssetTextureName = (asset: FurnitureAsset) =>
       asset.source ?? asset.name;
@@ -403,7 +414,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     return sprite;
   }
 
-  _updateFurnitureSprites(loadFurniResult: LoadFurniResult) {
+  private _updateFurnitureSprites(loadFurniResult: LoadFurniResult) {
     if (!this.mounted) return;
 
     this._unknownSprite?.destroy();
@@ -483,7 +494,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       sprite.tint = parseInt(tint, 16);
     }
 
-    let alpha = this._getAlpha({
+    const alpha = this._getAlpha({
       baseAlpha: this.alpha,
       layerAlpha: layer?.alpha,
     });
@@ -546,7 +557,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     return sprite;
   }
 
-  destroySprites() {
+  private _destroySprites() {
     this._sprites.forEach((sprite) => sprite.destroy());
     this._maskNodes.forEach((node) => node.remove());
     this._unknownSprite?.destroy();
@@ -561,8 +572,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this.dependencies.furnitureLoader.loadFurni(this._type).then((result) => {
       if (this._destroyed) return;
 
-      this.loadFurniResult = result;
-      this._resolveLoadFurniResult(result);
+      this._loadFurniResult = result;
+      this._resolveLoadFurniResult && this._resolveLoadFurniResult(result);
       this._updateFurniture();
     });
 
@@ -586,15 +597,6 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     if (layerAlpha != null) return (layerAlpha / 255) * baseAlpha;
 
     return baseAlpha;
-  }
-
-  destroy() {
-    this.destroySprites();
-
-    this._destroyed = true;
-    PIXI.Ticker.shared.remove(this._onTicker);
-    this._cancelTicker && this._cancelTicker();
-    this._cancelTicker = undefined;
   }
 }
 

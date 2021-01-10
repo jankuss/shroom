@@ -5,6 +5,7 @@ import { Layer, parseLayers } from "./parseLayers";
 import { VisualizationXml } from "./VisualizationXml";
 
 export type Visualization = {
+  directions: number[];
   layerCount: number;
   getColor: (colorId: string, layer: string) => string | undefined;
   getLayer: (layerId: string) => Layer | undefined;
@@ -18,7 +19,6 @@ export type Visualization = {
     layerId: string
   ) => Layer | undefined;
   getAnimationDatas(): { id: string; data: AnimationData }[];
-  directions: number[];
 };
 
 export function parseVisualization(xml: VisualizationXml): Visualization {

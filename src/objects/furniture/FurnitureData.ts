@@ -16,18 +16,65 @@ type IdToTypeMap = {
 };
 
 export class FurnitureData implements IFurnitureData {
-  private data: Promise<{
+  private _data: Promise<{
     typeToInfo: FurnitureMap;
     floorIdToType: IdToTypeMap;
     wallIdToType: IdToTypeMap;
   }>;
 
-  constructor(private getFurniData: () => Promise<string>) {
-    this.data = this.prepareData();
+  constructor(private _getFurniData: () => Promise<string>) {
+    this._data = this._prepareData();
   }
 
-  private async prepareData() {
-    const furniDataString = await this.getFurniData();
+  static create(resourcePath = "") {
+    return new FurnitureData(async () =>
+      fetch(`${resourcePath}/furnidata.xml`).then((response) => response.text())
+    );
+  }
+
+  async getRevisionForType(type: string): Promise<number | undefined> {
+    const info = await this.getInfo(type);
+
+    return info?.revision;
+  }
+
+  async getInfo(type: string): Promise<FurnitureInfo | undefined> {
+    const data = await this._data;
+    return data.typeToInfo[type];
+  }
+
+  async getTypeById(
+    id: FurnitureId,
+    placementType: "wall" | "floor"
+  ): Promise<string | undefined> {
+    const data = await this._data;
+    const type =
+      placementType != "floor" ? data.floorIdToType[id] : data.wallIdToType[id];
+
+    if (type == null) return;
+
+    return type;
+  }
+
+  async getInfoForFurniture(furniture: IFurniture) {
+    if (furniture.id != null) {
+      const type = await this.getTypeById(
+        furniture.id,
+        furniture.placementType
+      );
+
+      if (type != null) {
+        return this.getInfo(type);
+      }
+    }
+
+    if (furniture.type != null) {
+      return this.getInfo(furniture.type);
+    }
+  }
+
+  private async _prepareData() {
+    const furniDataString = await this._getFurniData();
     const parsed = await parseStringPromise(furniDataString);
 
     const typeToInfo: FurnitureMap = {};
@@ -59,52 +106,5 @@ export class FurnitureData implements IFurnitureData {
     register(parsed.furnidata.wallitemtypes[0].furnitype, "floor");
 
     return { typeToInfo, floorIdToType, wallIdToType };
-  }
-
-  static create(resourcePath: string = "") {
-    return new FurnitureData(async () =>
-      fetch(`${resourcePath}/furnidata.xml`).then((response) => response.text())
-    );
-  }
-
-  async getRevisionForType(type: string): Promise<number | undefined> {
-    const info = await this.getInfo(type);
-
-    return info?.revision;
-  }
-
-  async getInfo(type: string): Promise<FurnitureInfo | undefined> {
-    const data = await this.data;
-    return data.typeToInfo[type];
-  }
-
-  async getTypeById(
-    id: FurnitureId,
-    placementType: "wall" | "floor"
-  ): Promise<string | undefined> {
-    const data = await this.data;
-    const type =
-      placementType != "floor" ? data.floorIdToType[id] : data.wallIdToType[id];
-
-    if (type == null) return;
-
-    return type;
-  }
-
-  async getInfoForFurniture(furniture: IFurniture) {
-    if (furniture.id != null) {
-      const type = await this.getTypeById(
-        furniture.id,
-        furniture.placementType
-      );
-
-      if (type != null) {
-        return this.getInfo(type);
-      }
-    }
-
-    if (furniture.type != null) {
-      return this.getInfo(furniture.type);
-    }
   }
 }

@@ -4,6 +4,8 @@ import { render } from "ink";
 import React from "react";
 import yargs from "yargs";
 import { App } from "./App";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { hideBin } = require("yargs/helpers");
 
 yargs(hideBin(process.argv)).command(

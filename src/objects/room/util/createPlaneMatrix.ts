@@ -16,33 +16,33 @@ export function createPlaneMatrix(
     y,
   }: { width: number; height: number; x: number; y: number }
 ) {
-  let _local_3 = points.d.x - points.c.x;
-  let _local_4 = points.d.y - points.c.y;
-  let _local_5 = points.b.x - points.c.x;
-  let _local_6 = points.b.y - points.c.y;
+  let diffDxCx = points.d.x - points.c.x;
+  let diffDyCy = points.d.y - points.c.y;
+  let diffBxCx = points.b.x - points.c.x;
+  let diffByCy = points.b.y - points.c.y;
 
-  if (Math.abs(_local_5 - width) <= 1) {
-    _local_5 = width;
+  if (Math.abs(diffBxCx - width) <= 1) {
+    diffBxCx = width;
   }
-  if (Math.abs(_local_6 - width) <= 1) {
-    _local_6 = width;
+  if (Math.abs(diffByCy - width) <= 1) {
+    diffByCy = width;
   }
-  if (Math.abs(_local_3 - height) <= 1) {
-    _local_3 = height;
+  if (Math.abs(diffDxCx - height) <= 1) {
+    diffDxCx = height;
   }
-  if (Math.abs(_local_4 - height) <= 1) {
-    _local_4 = height;
+  if (Math.abs(diffDyCy - height) <= 1) {
+    diffDyCy = height;
   }
 
-  var a = _local_5 / width;
-  var b = _local_6 / width;
-  var c = _local_3 / height;
-  var d = _local_4 / height;
+  const a = diffBxCx / width;
+  const b = diffByCy / width;
+  const c = diffDxCx / height;
+  const d = diffDyCy / height;
 
   const baseX = x + points.c.x;
   const baseY = y + points.c.y;
 
-  var matrix: PIXI.Matrix = new PIXI.Matrix(a, b, c, d, baseX, baseY);
+  const matrix: PIXI.Matrix = new PIXI.Matrix(a, b, c, d, baseX, baseY);
 
   return matrix;
 }

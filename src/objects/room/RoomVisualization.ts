@@ -25,18 +25,6 @@ export class RoomVisualization
 
   private _roomVisualizationMetaSubject: BehaviorSubject<RoomVisualizationMeta>;
 
-  subscribeRoomMeta(
-    listener: (value: RoomVisualizationMeta) => void
-  ): { unsubscribe: () => void } {
-    const subscription = this._roomVisualizationMetaSubject.subscribe((value) =>
-      listener(value)
-    );
-
-    return {
-      unsubscribe: () => subscription.unsubscribe(),
-    };
-  }
-
   constructor(private room: Room, private renderer: PIXI.Renderer) {
     super();
     this._roomVisualizationMetaSubject = new BehaviorSubject({
@@ -87,13 +75,16 @@ export class RoomVisualization
     return this._wallPlane;
   }
 
-  private _updateRoomVisualizationMeta(meta: Partial<RoomVisualizationMeta>) {
-    this._roomVisualizationMetaSubject.next({
-      masks: this.masks,
-      wallHeight: this.room.wallHeight,
-      wallHeightWithZ: this.room.wallHeightWithZ,
-      ...meta,
-    });
+  subscribeRoomMeta(
+    listener: (value: RoomVisualizationMeta) => void
+  ): { unsubscribe: () => void } {
+    const subscription = this._roomVisualizationMetaSubject.subscribe((value) =>
+      listener(value)
+    );
+
+    return {
+      unsubscribe: () => subscription.unsubscribe(),
+    };
   }
 
   addMask(id: string, element: PIXI.Sprite): MaskNode {
@@ -136,5 +127,14 @@ export class RoomVisualization
 
   enableCache() {
     this._plane.cacheAsBitmap = true;
+  }
+
+  private _updateRoomVisualizationMeta(meta: Partial<RoomVisualizationMeta>) {
+    this._roomVisualizationMetaSubject.next({
+      masks: this.masks,
+      wallHeight: this.room.wallHeight,
+      wallHeightWithZ: this.room.wallHeightWithZ,
+      ...meta,
+    });
   }
 }

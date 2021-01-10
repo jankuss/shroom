@@ -200,7 +200,7 @@ export function IssueWithAvatarEventsNotHandled() {
     });
 
     avatar.onClick = (event) => console.log(event);
-    furniture.onClick = (event) => {
+    furniture.onClick = () => {
       furniture.animation = "-1";
 
       setTimeout(() => {

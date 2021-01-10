@@ -44,7 +44,9 @@ export async function dumpFurniFromFurniData(
         await downloadFurni(dcrUrl, revision?.toString(), name, folder);
 
         dispatch({ type: "FURNI_ASSETS_DOWNLOAD_COUNT" });
-      } catch (e) {}
+      } catch (e) {
+        // Do nothing
+      }
     },
     { concurrency: 30 } // We can use this limit because if the download get stucked, we will retry it after a short time ;)
   );

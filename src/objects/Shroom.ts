@@ -1,4 +1,3 @@
-import { IConfiguration } from "../interfaces/IConfiguration";
 import { AnimationTicker } from "./animation/AnimationTicker";
 import { AvatarLoader } from "./avatar/AvatarLoader";
 import { FurnitureLoader } from "./furniture/FurnitureLoader";

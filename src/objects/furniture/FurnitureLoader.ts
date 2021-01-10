@@ -7,7 +7,7 @@ import { FurnitureIndexData } from "./data/FurnitureIndexData";
 import { loadFurni, LoadFurniResult } from "./util/loadFurni";
 
 export class FurnitureLoader implements IFurnitureLoader {
-  private furnitureCache: Map<string, Promise<LoadFurniResult>> = new Map();
+  private _furnitureCache: Map<string, Promise<LoadFurniResult>> = new Map();
   private _artificalDelay: number | undefined;
 
   public get delay() {
@@ -18,24 +18,9 @@ export class FurnitureLoader implements IFurnitureLoader {
     this._artificalDelay = value;
   }
 
-  constructor(
-    private options: {
-      furnitureData: IFurnitureData;
-      getAssets: (type: string, revision?: number) => Promise<string>;
-      getVisualization: (type: string, revision?: number) => Promise<string>;
-      getAsset: (
-        type: string,
-        name: string,
-        revision?: number
-      ) => Promise<string>;
-      getIndex: (
-        type: string,
-        revision?: number
-      ) => Promise<{ logic?: string; visualization?: string }>;
-    }
-  ) {}
+  constructor(private _options: Options) {}
 
-  static create(furnitureData: IFurnitureData, resourcePath: string = "") {
+  static create(furnitureData: IFurnitureData, resourcePath = "") {
     const normalizePath = (revision: number | undefined, type: string) => {
       if (revision == null) return type;
 
@@ -81,7 +66,7 @@ export class FurnitureLoader implements IFurnitureLoader {
     let typeWithColor: string;
 
     if (fetch.kind === "id") {
-      const type = await this.options.furnitureData.getTypeById(
+      const type = await this._options.furnitureData.getTypeById(
         fetch.id,
         fetch.placementType
       );
@@ -93,24 +78,37 @@ export class FurnitureLoader implements IFurnitureLoader {
       typeWithColor = fetch.type;
     }
 
-    const type = typeWithColor.split("*")[0];
-    const revision = await this.options.furnitureData.getRevisionForType(
+    const typeSplitted = typeWithColor.split("*");
+    const type = typeSplitted[0];
+
+    const revision = await this._options.furnitureData.getRevisionForType(
       typeWithColor
     );
 
-    let furniture = this.furnitureCache.get(typeWithColor);
+    let furniture = this._furnitureCache.get(typeWithColor);
     if (furniture != null) {
       return furniture;
     }
 
     furniture = loadFurni(typeWithColor, revision, {
-      getAssets: this.options.getAssets,
-      getVisualization: this.options.getVisualization,
-      getAsset: this.options.getAsset,
-      getIndex: this.options.getIndex,
+      getAssets: this._options.getAssets,
+      getVisualization: this._options.getVisualization,
+      getAsset: this._options.getAsset,
+      getIndex: this._options.getIndex,
     });
-    this.furnitureCache.set(type, furniture);
+    this._furnitureCache.set(type, furniture);
 
     return furniture;
   }
+}
+
+interface Options {
+  furnitureData: IFurnitureData;
+  getAssets: (type: string, revision?: number) => Promise<string>;
+  getVisualization: (type: string, revision?: number) => Promise<string>;
+  getAsset: (type: string, name: string, revision?: number) => Promise<string>;
+  getIndex: (
+    type: string,
+    revision?: number
+  ) => Promise<{ logic?: string; visualization?: string }>;
 }

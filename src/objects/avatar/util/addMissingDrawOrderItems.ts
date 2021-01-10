@@ -1,5 +1,3 @@
-type DrawOrderItem = string | { original: string; override: string };
-
 export function addMissingDrawOrderItems(drawOrder: Set<string>): string[] {
   const drawOrderArray = [...drawOrder];
 

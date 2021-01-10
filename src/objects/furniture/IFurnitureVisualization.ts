@@ -1,5 +1,4 @@
 import { BaseFurniture } from "./BaseFurniture";
-import { IFurniture } from "./IFurniture";
 import { IFurnitureVisualizationView } from "./IFurnitureVisualizationView";
 
 export interface IFurnitureVisualization {
