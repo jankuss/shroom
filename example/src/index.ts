@@ -30,9 +30,10 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 const shroom = Shroom.create({ application, resourcePath: "./resources" });
 const room = Room.create(shroom, {
   tilemap: `
-    0000
-    0000
-    0000
+   xxxxx
+   x0000
+   x0000
+   x0000
    `,
 });
 
