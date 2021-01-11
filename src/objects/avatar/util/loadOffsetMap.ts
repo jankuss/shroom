@@ -1,8 +1,8 @@
+import { parseStringPromise } from "xml2js";
 import {
   OffsetMap,
   parseOffsetsFromManifest,
 } from "./parseOffsetsFromManifest";
-import { parseStringAsync } from "./parseStringAsync";
 
 export type GetOffset = (
   fileName: string
@@ -21,8 +21,7 @@ export async function loadOffsetMap(
 
     try {
       const manifestStr = await getManifest(fileName);
-
-      const manifestXml = await parseStringAsync(manifestStr);
+      const manifestXml = await parseStringPromise(manifestStr);
 
       const offsets = parseOffsetsFromManifest(manifestXml);
       offsets.forEach((offset, key) => offsetMap.set(key, offset));

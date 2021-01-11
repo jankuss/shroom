@@ -34,7 +34,18 @@ export class FurnitureAssetsData
     });
   }
 
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new FurnitureAssetsData(text);
+  }
+
   getAsset(name: string): FurnitureAsset | undefined {
     return this._assets.get(name);
+  }
+
+  getAssets() {
+    return Array.from(this._assets.values());
   }
 }

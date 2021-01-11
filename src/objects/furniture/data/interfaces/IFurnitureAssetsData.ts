@@ -1,5 +1,6 @@
 export interface IFurnitureAssetsData {
   getAsset(name: string): FurnitureAsset | undefined;
+  getAssets(): FurnitureAsset[];
 }
 
 export interface FurnitureAsset {

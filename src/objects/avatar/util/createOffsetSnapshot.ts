@@ -1,12 +1,12 @@
+import { parseStringPromise } from "xml2js";
 import { loadOffsetMap } from "./loadOffsetMap";
-import { parseStringAsync } from "./parseStringAsync";
 import { parseFigureMap } from "./parseFigureMap";
 
 export async function createOffsetSnapshot(
   figureMapStr: string,
   getManifest: (fileName: string) => Promise<string>
 ) {
-  const figureMapXml = await parseStringAsync(figureMapStr);
+  const figureMapXml = await parseStringPromise(figureMapStr);
   const figureMap = parseFigureMap(figureMapXml);
 
   const { offsetMap } = await loadOffsetMap(figureMap.libraries, getManifest);

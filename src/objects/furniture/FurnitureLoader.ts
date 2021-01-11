@@ -3,12 +3,19 @@ import {
   FurnitureFetch,
   IFurnitureLoader,
 } from "../../interfaces/IFurnitureLoader";
+import { FurnitureAssetsData } from "./data/FurnitureAssetsData";
 import { FurnitureIndexData } from "./data/FurnitureIndexData";
+import { FurnitureVisualizationData } from "./data/FurnitureVisualizationData";
+import { IFurnitureAssetsData } from "./data/interfaces/IFurnitureAssetsData";
+import { IFurnitureIndexData } from "./data/interfaces/IFurnitureIndexData";
+import { IFurnitureVisualizationData } from "./data/interfaces/IFurnitureVisualizationData";
 import { loadFurni, LoadFurniResult } from "./util/loadFurni";
 
 export class FurnitureLoader implements IFurnitureLoader {
   private _furnitureCache: Map<string, Promise<LoadFurniResult>> = new Map();
   private _artificalDelay: number | undefined;
+
+  constructor(private _options: Options) {}
 
   public get delay() {
     return this._artificalDelay;
@@ -17,8 +24,6 @@ export class FurnitureLoader implements IFurnitureLoader {
   public set delay(value) {
     this._artificalDelay = value;
   }
-
-  constructor(private _options: Options) {}
 
   static create(furnitureData: IFurnitureData, resourcePath = "") {
     const normalizePath = (revision: number | undefined, type: string) => {
@@ -29,31 +34,35 @@ export class FurnitureLoader implements IFurnitureLoader {
 
     return new FurnitureLoader({
       furnitureData,
-      getAssets: (type, revision) =>
-        fetch(
-          `${resourcePath}/hof_furni/${normalizePath(
-            revision,
-            type
-          )}/${type}_assets.bin`
-        ).then((response) => response.text()),
-      getVisualization: (type, revision) =>
-        fetch(
-          `${resourcePath}/hof_furni/${normalizePath(
-            revision,
-            type
-          )}/${type}_visualization.bin`
-        ).then((response) => response.text()),
-      getAsset: async (type, name, revision) =>
-        `${resourcePath}/hof_furni/${normalizePath(
+      getAssets: (type, revision) => {
+        const assetsPath = `${resourcePath}/hof_furni/${normalizePath(
           revision,
           type
-        )}/${name}.png`,
-      getIndex: async (type, revision) => {
-        const result = await FurnitureIndexData.fromUrl(
-          `${resourcePath}/hof_furni/${normalizePath(revision, type)}/index.bin`
-        );
+        )}/${type}_assets.bin`;
 
-        return result?.toObject();
+        return FurnitureAssetsData.fromUrl(assetsPath);
+      },
+      getVisualization: (type, revision) => {
+        const visualizationPath = `${resourcePath}/hof_furni/${normalizePath(
+          revision,
+          type
+        )}/${type}_visualization.bin`;
+
+        return FurnitureVisualizationData.fromUrl(visualizationPath);
+      },
+      getTextureUrl: async (type, name, revision) => {
+        return `${resourcePath}/hof_furni/${normalizePath(
+          revision,
+          type
+        )}/${name}.png`;
+      },
+      getIndex: async (type, revision) => {
+        const indexPath = `${resourcePath}/hof_furni/${normalizePath(
+          revision,
+          type
+        )}/index.bin`;
+
+        return FurnitureIndexData.fromUrl(indexPath);
       },
     });
   }
@@ -93,7 +102,7 @@ export class FurnitureLoader implements IFurnitureLoader {
     furniture = loadFurni(typeWithColor, revision, {
       getAssets: this._options.getAssets,
       getVisualization: this._options.getVisualization,
-      getAsset: this._options.getAsset,
+      getTextureUrl: this._options.getTextureUrl,
       getIndex: this._options.getIndex,
     });
     this._furnitureCache.set(type, furniture);
@@ -104,11 +113,15 @@ export class FurnitureLoader implements IFurnitureLoader {
 
 interface Options {
   furnitureData: IFurnitureData;
-  getAssets: (type: string, revision?: number) => Promise<string>;
-  getVisualization: (type: string, revision?: number) => Promise<string>;
-  getAsset: (type: string, name: string, revision?: number) => Promise<string>;
-  getIndex: (
+  getAssets: (type: string, revision?: number) => Promise<IFurnitureAssetsData>;
+  getVisualization: (
     type: string,
     revision?: number
-  ) => Promise<{ logic?: string; visualization?: string }>;
+  ) => Promise<IFurnitureVisualizationData>;
+  getTextureUrl: (
+    type: string,
+    name: string,
+    revision?: number
+  ) => Promise<string>;
+  getIndex: (type: string, revision?: number) => Promise<IFurnitureIndexData>;
 }

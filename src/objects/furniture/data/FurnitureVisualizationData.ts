@@ -13,6 +13,14 @@ export class FurnitureVisualizationData
   constructor(xml: string) {
     super(xml);
   }
+
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new FurnitureVisualizationData(text);
+  }
+
   getTransitionForAnimation(
     size: number,
     transitionTo: number
