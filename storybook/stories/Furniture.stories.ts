@@ -756,3 +756,35 @@ export function FurnitureColoring() {
     application.stage.addChild(room);
   });
 }
+
+export function FurnitureFlip() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+       xxxxxxxxxxx
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+      `,
+    });
+
+    const furniture1 = new FloorFurniture({
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      animation: "0",
+      direction: 0,
+      type: "rare_fan*1",
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    room.addRoomObject(furniture1);
+    application.stage.addChild(room);
+  });
+}
