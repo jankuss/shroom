@@ -1,4 +1,3 @@
-import { reject } from "bluebird";
 import * as PIXI from "pixi.js";
 import { applyTextureProperties } from "../../util/applyTextureProperties";
 
@@ -19,12 +18,30 @@ export class HitTexture {
     applyTextureProperties(this._texture);
   }
 
-  private getHitMap() {
-    if (this._cachedHitmap == null) {
-      this._cachedHitmap = generateHitMap(this._image);
-    }
+  static async fromUrl(imageUrl: string) {
+    const image = new Image();
 
-    return this._cachedHitmap;
+    // We set the crossOrigin here so the image element
+    // can fetch and display images hosted on another origin.
+    // Thanks to @danielsolartech for reporting.
+
+    // TODO: Add option to configure this somewhere?
+    image.crossOrigin = "anonymous";
+
+    image.src = imageUrl;
+
+    await new Promise<{
+      width: number;
+      height: number;
+    }>((resolve, reject) => {
+      image.onload = () => {
+        resolve({ width: image.width, height: image.height });
+      };
+
+      image.onerror = (value) => reject(value);
+    });
+
+    return new HitTexture(image);
   }
 
   hits(
@@ -41,40 +58,22 @@ export class HitTexture {
     y = y - transform.y;
 
     const baseTexture = this._texture.baseTexture;
-    const hitmap = this.getHitMap();
+    const hitmap = this._getHitMap();
 
-    let dx = Math.round(x * baseTexture.resolution);
-    let dy = Math.round(y * baseTexture.resolution);
-    let ind = dx + dy * baseTexture.realWidth;
-    let ind1 = ind % 32;
-    let ind2 = (ind / 32) | 0;
+    const dx = Math.round(x * baseTexture.resolution);
+    const dy = Math.round(y * baseTexture.resolution);
+    const ind = dx + dy * baseTexture.realWidth;
+    const ind1 = ind % 32;
+    const ind2 = (ind / 32) | 0;
     return (hitmap[ind2] & (1 << ind1)) !== 0;
   }
 
-  static async fromUrl(imageUrl: string) {
-    const image = new Image();
+  private _getHitMap() {
+    if (this._cachedHitmap == null) {
+      this._cachedHitmap = generateHitMap(this._image);
+    }
 
-    // We set the crossOrigin here so the image element
-    // can fetch and display images hosted on another origin.
-    // Thanks to @danielsolartech for reporting.
-
-    // TODO: Add option to configure this somewhere?
-    image.crossOrigin = "anonymous";
-
-    image.src = imageUrl;
-
-    await new Promise<{
-      width: number;
-      height: number;
-    }>((resolve) => {
-      image.onload = (value) => {
-        resolve({ width: image.width, height: image.height });
-      };
-
-      image.onerror = (value) => reject(value);
-    });
-
-    return new HitTexture(image);
+    return this._cachedHitmap;
   }
 }
 
@@ -92,12 +91,12 @@ function generateHitMap(image: HTMLImageElement) {
   const h = canvas.height;
   context.drawImage(image, 0, 0);
 
-  let imageData = context.getImageData(0, 0, w, h);
+  const imageData = context.getImageData(0, 0, w, h);
 
-  let hitmap = new Uint32Array(Math.ceil((w * h) / 32));
+  const hitmap = new Uint32Array(Math.ceil((w * h) / 32));
   for (let i = 0; i < w * h; i++) {
-    let ind1 = i % 32;
-    let ind2 = (i / 32) | 0;
+    const ind1 = i % 32;
+    const ind2 = (i / 32) | 0;
     if (imageData.data[i * 4 + 3] >= threshold) {
       hitmap[ind2] = hitmap[ind2] | (1 << ind1);
     }

@@ -1,8 +1,4 @@
-import { Visualization } from "./visualization/parseVisualization";
-import { AssetMap } from "./parseAssets";
 import { FurniDrawDefinition, FurniDrawPart } from "./DrawDefinition";
-import { layerToChar } from "./index";
-import { FramesData } from "./visualization/parseAnimations";
 import {
   FurnitureAnimationLayer,
   FurnitureDirectionLayer,
@@ -13,6 +9,7 @@ import {
   FurnitureAsset,
   IFurnitureAssetsData,
 } from "../data/interfaces/IFurnitureAssetsData";
+import { getCharFromLayerIndex } from ".";
 
 interface FurniDrawDefinitionOptions {
   type: string;
@@ -31,26 +28,42 @@ export function getFurniDrawDefinition(
 ): FurniDrawDefinition {
   const typeSplitted = typeWithColor.split("*");
   const type = typeSplitted[0];
-  const color = typeSplitted[1];
+
+  // If color is not  set, we fallback to the `0` color for the item.
+  const color = typeSplitted[1] ?? "0";
 
   const size = 64;
   const parts: FurniDrawPart[] = [];
   const animationNumber = animation != null ? Number(animation) : undefined;
-
-  const frameCount =
-    animationNumber != null
-      ? visualizationData.getFrameCount(size, animationNumber)
-      : 1;
-
   const layerCount = visualizationData.getLayerCount(size);
-
-  const animationData =
-    animationNumber != null
-      ? visualizationData.getAnimation(size, animationNumber)
-      : undefined;
 
   const getAssetName = (char: string, frame: number) =>
     `${type}_${size}_${char}_${direction}_${frame}`;
+
+  const shadow = assetsData.getAsset(getAssetName("sd", 0));
+
+  if (shadow != null) {
+    parts.push({
+      assets: [shadow],
+      frameRepeat: 1,
+      shadow: true,
+      layer: undefined,
+      layerIndex: -1,
+    });
+  }
+
+  const mask = assetsData.getAsset(`${type}_${size}_${direction}_mask`);
+
+  if (mask != null) {
+    parts.push({
+      assets: [mask],
+      frameRepeat: 1,
+      layer: undefined,
+      shadow: false,
+      mask: true,
+      layerIndex: -2,
+    });
+  }
 
   for (let layerIndex = 0; layerIndex < layerCount; layerIndex++) {
     const directionLayer = visualizationData.getDirectionLayer(
@@ -59,7 +72,7 @@ export function getFurniDrawDefinition(
       layerIndex
     );
     const layer = visualizationData.getLayer(size, layerIndex);
-    const char = layerToChar[layerIndex];
+    const char = getCharFromLayerIndex(layerIndex);
     const animationLayer =
       animationNumber != null
         ? visualizationData.getAnimationLayer(size, animationNumber, layerIndex)
@@ -78,37 +91,18 @@ export function getFurniDrawDefinition(
         assetsData: assetsData,
         color: colorLayer,
         getAssetName: (frame) => getAssetName(char, frame),
+        layerIndex,
       })
     );
   }
 
-  parts.push({
-    asset: assetsData.getAsset(getAssetName("sd", 0)),
-    frameRepeat: 1,
-    shadow: true,
-    layer: undefined,
-  });
-
-  const mask = assetsData.getAsset(`${type}_${size}_${direction}_mask`);
-
-  if (mask != null) {
-    parts.push({
-      asset: mask,
-      frameRepeat: 1,
-      layer: undefined,
-      shadow: false,
-      mask: true,
-    });
-  }
-
   return {
     parts,
-    frameCount,
-    transitionTo: animationData?.transitionTo,
   };
 }
 
 function getDrawPart({
+  layerIndex,
   layer,
   animation,
   directionLayer,
@@ -116,6 +110,7 @@ function getDrawPart({
   color,
   getAssetName,
 }: {
+  layerIndex: number;
   layer: FurnitureLayer | undefined;
   animation: FurnitureAnimationLayer | undefined;
   directionLayer: FurnitureDirectionLayer | undefined;
@@ -129,7 +124,7 @@ function getDrawPart({
 
   let assets: FurnitureAsset[] | undefined = undefined;
   if (animation != null) {
-    const repeat = animation.frameRepeat ?? 1;
+    const repeat = 1;
 
     assets = animation.frames
       .flatMap((frameNumber) => new Array<number>(repeat).fill(frameNumber))
@@ -149,15 +144,19 @@ function getDrawPart({
     assets = [baseAsset];
   }
 
+  if (assets == null) {
+    assets = [];
+  }
+
   return {
     mask: false,
     shadow: false,
     frameRepeat: animation?.frameRepeat ?? 1,
-    asset: baseAsset,
     layer,
     z,
     tint: color,
     assets,
     loopCount: animation?.loopCount,
+    layerIndex,
   };
 }

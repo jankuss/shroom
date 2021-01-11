@@ -21,6 +21,34 @@ export class FigureData extends AvatarData implements IFigureData {
     this._cacheData();
   }
 
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new FigureData(text);
+  }
+
+  getColor(setType: string, colorId: string): string | undefined {
+    const paletteId = this._paletteIdForSetType.get(setType);
+    if (paletteId == null) return;
+
+    return this._colors.get(_getColorKey(paletteId, colorId));
+  }
+
+  getParts(setType: string, id: string): FigureDataPart[] | undefined {
+    return this._parts.get(_getPartsKey(setType, id));
+  }
+
+  getHiddenLayers(setType: string, id: string): string[] {
+    const hiddenLayers = this.querySelectorAll(
+      `sets settype[type="${setType}"] set[id="${id}"] hiddenlayers layer`
+    )
+      .map((element) => element.getAttribute("parttype"))
+      .filter(notNullOrUndefined);
+
+    return hiddenLayers;
+  }
+
   private _cacheData() {
     const setTypes = this.querySelectorAll("sets settype");
     const palettes = this.querySelectorAll("colors palette");
@@ -80,33 +108,5 @@ export class FigureData extends AvatarData implements IFigureData {
         this._parts.set(_getPartsKey(setType, setId), partArr);
       });
     });
-  }
-
-  getColor(setType: string, colorId: string): string | undefined {
-    const paletteId = this._paletteIdForSetType.get(setType);
-    if (paletteId == null) return;
-
-    return this._colors.get(_getColorKey(paletteId, colorId));
-  }
-
-  getParts(setType: string, id: string): FigureDataPart[] | undefined {
-    return this._parts.get(_getPartsKey(setType, id));
-  }
-
-  getHiddenLayers(setType: string, id: string): string[] {
-    const hiddenLayers = this.querySelectorAll(
-      `sets settype[type="${setType}"] set[id="${id}"] hiddenlayers layer`
-    )
-      .map((element) => element.getAttribute("parttype"))
-      .filter(notNullOrUndefined);
-
-    return hiddenLayers;
-  }
-
-  static async fromUrl(url: string) {
-    const response = await fetch(url);
-    const text = await response.text();
-
-    return new FigureData(text);
   }
 }

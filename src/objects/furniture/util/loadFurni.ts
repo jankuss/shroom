@@ -1,7 +1,8 @@
+import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import { HitTexture } from "../../hitdetection/HitTexture";
 import { FurnitureAssetsData } from "../data/FurnitureAssetsData";
-import { FurnitureIndexData } from "../data/FurnitureIndexData";
 import { FurnitureVisualizationData } from "../data/FurnitureVisualizationData";
+import { IFurnitureVisualizationData } from "../data/interfaces/IFurnitureVisualizationData";
 import { FurnitureExtraData } from "../FurnitureExtraData";
 import { FurniDrawDefinition } from "./DrawDefinition";
 import { getFurniDrawDefinition } from "./getFurniDrawDefinition";
@@ -25,6 +26,7 @@ export type LoadFurniResult = {
   getTexture: (name: string) => HitTexture | undefined;
   getExtraData: () => FurnitureExtraData;
   directions: number[];
+  visualizationData: IFurnitureVisualizationData;
 };
 
 export async function loadFurni(
@@ -65,20 +67,25 @@ export async function loadFurni(
       (asset) => asset.source == null || asset.source === asset.name
     );
 
-    const textures = new Map(
-      await Promise.all(
-        assetsToLoad.map(async (asset) => {
+    const loadedTextures = await Promise.all(
+      assetsToLoad.map(async (asset) => {
+        try {
           const imageUrl = await options.getAsset(type, asset.name, revision);
           const image = await HitTexture.fromUrl(imageUrl);
 
           return [asset.name, image] as const;
-        })
-      )
+        } catch (e) {
+          console.warn(`Failed to load furniture asset: ${asset.name}`, e);
+          return null;
+        }
+      })
     );
 
-    return textures;
+    return new Map(loadedTextures.filter(notNullOrUndefined));
   };
   const textures = await loadTextures();
+
+  const sortedDirections = [...visualization.directions].sort((a, b) => a - b);
 
   return {
     getDrawDefinition: (direction: number, animation?: string) =>
@@ -100,6 +107,7 @@ export async function loadFurni(
     getExtraData: () => {
       return indexData;
     },
-    directions: visualization.directions,
+    visualizationData,
+    directions: sortedDirections,
   };
 }

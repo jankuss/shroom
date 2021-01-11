@@ -22,9 +22,7 @@ interface Props {
 }
 
 export class Stair extends RoomObject implements ITexturable {
-  private sprites: PIXI.DisplayObject[] = [];
-  private container: PIXI.Container | undefined;
-
+  private _container: PIXI.Container | undefined;
   private _texture: PIXI.Texture | undefined;
   private _color: string | undefined;
 
@@ -39,11 +37,11 @@ export class Stair extends RoomObject implements ITexturable {
     this.updateSprites();
   }
 
-  constructor(private props: Props) {
+  constructor(private _props: Props) {
     super();
 
-    this._texture = props.texture;
-    this._tileHeight = props.tileHeight;
+    this._texture = _props.texture;
+    this._tileHeight = _props.tileHeight;
   }
 
   get texture() {
@@ -67,11 +65,11 @@ export class Stair extends RoomObject implements ITexturable {
   updateSprites() {
     if (!this.mounted) return;
 
-    this.container?.destroy();
-    this.container = new PIXI.Container();
+    this._container?.destroy();
+    this._container = new PIXI.Container();
 
-    const { roomX, roomY, roomZ, color, direction } = this.props;
-    this.container.zIndex = getZOrder(roomX, roomY, roomZ);
+    const { roomX, roomY, roomZ, color, direction } = this._props;
+    this._container.zIndex = getZOrder(roomX, roomY, roomZ);
 
     const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
 
@@ -87,17 +85,17 @@ export class Stair extends RoomObject implements ITexturable {
       };
 
       if (direction === 0) {
-        this.container.addChild(...createStairBoxDirection0(props));
+        this._container.addChild(...createStairBoxDirection0(props));
       } else if (direction === 2) {
-        this.container.addChild(...createStairBoxDirection2(props));
+        this._container.addChild(...createStairBoxDirection2(props));
       }
     }
 
-    this.visualization.floorContainer.addChild(this.container);
+    this.roomVisualization.floorContainer.addChild(this._container);
   }
 
   destroySprites() {
-    this.container?.destroy();
+    this._container?.destroy();
   }
 
   destroyed(): void {

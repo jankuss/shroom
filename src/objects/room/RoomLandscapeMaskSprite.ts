@@ -52,6 +52,16 @@ export class RoomLandscapeMaskSprite extends PIXI.Sprite {
     this._wallHeight = room.wallHeight;
   }
 
+  addSprite(element: PIXI.Sprite) {
+    this._sprites.add(element);
+    this._updateTexture();
+  }
+
+  removeSprite(element: PIXI.Sprite) {
+    this._sprites.delete(element);
+    this._updateTexture();
+  }
+
   private _updateTexture() {
     const texture = PIXI.RenderTexture.create({
       width: this._roomWidth,
@@ -73,15 +83,5 @@ export class RoomLandscapeMaskSprite extends PIXI.Sprite {
     this._renderer.render(container, texture);
 
     this.texture = texture;
-  }
-
-  addSprite(element: PIXI.Sprite) {
-    this._sprites.add(element);
-    this._updateTexture();
-  }
-
-  removeSprite(element: PIXI.Sprite) {
-    this._sprites.delete(element);
-    this._updateTexture();
   }
 }

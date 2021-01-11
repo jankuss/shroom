@@ -32,18 +32,30 @@ const basePartSet = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.Head,
 ]);
 
+const headComponents: Set<AvatarFigurePartType> = new Set([
+  AvatarFigurePartType.Head,
+  AvatarFigurePartType.Face,
+  AvatarFigurePartType.Eyes,
+  AvatarFigurePartType.EyeAccessory,
+  AvatarFigurePartType.Hair,
+  AvatarFigurePartType.HairBig,
+  AvatarFigurePartType.FaceAccessory,
+  AvatarFigurePartType.HeadAccessory,
+  AvatarFigurePartType.HeadAccessoryExtra,
+]);
+
 /**
  * Returns a definition of how the avatar should be drawn.
  * @param options Look options
- * @param dependencies External figure data, draw order and offsets
+ * @param deps External figure data, draw order and offsets
  */
 export function getAvatarDrawDefinition(
   {
     parsedLook,
     actions: initialActions,
     direction,
+    headDirection,
     item: itemId,
-    effect,
   }: Options,
   deps: AvatarDependencies
 ): AvatarDrawDefinition | undefined {
@@ -145,6 +157,7 @@ export function getAvatarDrawDefinition(
         {
           actionData: action,
           direction,
+          headDirection,
           parts,
           itemId,
         },
@@ -187,22 +200,16 @@ function getBodyPart(
   {
     actionData,
     direction,
+    headDirection,
     parts,
   }: {
     parts: PartDataWithBodyPart[];
     actionData: AvatarActionInfo;
     direction: number;
+    headDirection?: number;
     itemId?: string | number;
   },
-  {
-    offsetsData,
-    animationData,
-    partSetsData,
-    actionsData,
-    figureData,
-    figureMap,
-    geometry,
-  }: AvatarDependencies
+  { offsetsData, animationData, partSetsData, figureMap }: AvatarDependencies
 ): {
   resolvedParts: AvatarDrawPart[];
   removeSetTypes: Set<AvatarFigurePartType>;
@@ -210,7 +217,6 @@ function getBodyPart(
   if (actionData == null) throw new Error("Invalid action data");
 
   let remainingPartCount = parts.length - 1;
-  let assetPartDefinition = actionData.assetpartdefinition;
 
   const resolvedParts: AvatarDrawPart[] = [];
   const removeSetTypes = new Set<AvatarFigurePartType>();
@@ -238,7 +244,11 @@ function getBodyPart(
     const assets = framesIndexed.map((animationFrame) =>
       getAssetForFrame({
         offsetsData,
-        direction,
+        direction:
+          headComponents.has(part.type as AvatarFigurePartType) &&
+          headDirection != null
+            ? headDirection
+            : direction,
         partTypeFlipped: partInfo?.flippedSetType as
           | AvatarFigurePartType
           | undefined,
@@ -307,7 +317,7 @@ function getAssetForFrame({
   const flippedMeta = getFlippedMetaData({
     assetPartDefinition,
     flippedPartType: partTypeFlipped,
-    direction,
+    direction: direction,
     partType: partType,
   });
 
@@ -354,11 +364,8 @@ function getAssetForFrame({
 
       if (asset != null) {
         return asset;
-      } else {
       }
-    } else {
     }
-  } else {
   }
 }
 
@@ -453,6 +460,7 @@ interface Options {
   parsedLook: ParsedLook;
   actions: Set<string>;
   direction: number;
+  headDirection?: number;
   frame: number;
   item?: string | number;
   effect?: IAvatarEffectData;

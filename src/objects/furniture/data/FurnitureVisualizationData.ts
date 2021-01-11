@@ -13,6 +13,25 @@ export class FurnitureVisualizationData
   constructor(xml: string) {
     super(xml);
   }
+  getTransitionForAnimation(
+    size: number,
+    transitionTo: number
+  ): Animation | undefined {
+    const animation = this.querySelector(
+      `visualization[size="${size}"] animations animation[transitionTo="${transitionTo}"]`
+    );
+
+    const animationId = Number(animation?.getAttribute("id") ?? undefined);
+
+    if (isNaN(animationId)) {
+      return;
+    }
+
+    return {
+      id: animationId,
+      transitionTo,
+    };
+  }
 
   getAnimation(size: number, animationId: number): Animation | undefined {
     const animation = this.querySelector(
@@ -26,6 +45,7 @@ export class FurnitureVisualizationData
     );
 
     return {
+      id: animationId,
       transitionTo: isNaN(transitionAnimationId)
         ? undefined
         : transitionAnimationId,
@@ -47,8 +67,13 @@ export class FurnitureVisualizationData
 
     let count: number | undefined;
     frameSequences.forEach((element) => {
-      if (count == null || element.children.length > count) {
-        count = element.children.length;
+      const parent = element.parentElement;
+      const multiplier = Number(parent?.getAttribute("frameRepeat") ?? "1");
+
+      const value = element.children.length * multiplier;
+
+      if (count == null || value > count) {
+        count = value;
       }
     });
 

@@ -3,8 +3,12 @@ import { RoomObjectContainer } from "./RoomObjectContainer";
 
 test("adds & removes room objects", () => {
   class TestObject extends RoomObject {
-    destroyed(): void {}
-    registered(): void {}
+    destroyed(): void {
+      // Do nothing
+    }
+    registered(): void {
+      // Do nothing
+    }
   }
 
   const roomObjectContainer = new RoomObjectContainer();
@@ -22,8 +26,12 @@ test("adds & removes room objects", () => {
 
 test("destroy on RoomObject removes room object from RoomObjectContainer", () => {
   class TestObject extends RoomObject {
-    destroyed(): void {}
-    registered(): void {}
+    destroyed(): void {
+      // Do nothing
+    }
+    registered(): void {
+      // Do nothing
+    }
   }
 
   const roomObjectContainer = new RoomObjectContainer();

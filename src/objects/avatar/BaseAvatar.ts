@@ -1,4 +1,3 @@
-import { RoomObject } from "../RoomObject";
 import * as PIXI from "pixi.js";
 import {
   AvatarAsset,
@@ -16,11 +15,32 @@ import { isSetEqual } from "../../util/isSetEqual";
 import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { Shroom } from "../Shroom";
+import { AvatarFigurePartType } from "./enum/AvatarFigurePartType";
+
+const bodyPartTypes: Set<AvatarFigurePartType> = new Set<AvatarFigurePartType>([
+  AvatarFigurePartType.Head,
+  AvatarFigurePartType.Body,
+  AvatarFigurePartType.LeftHand,
+  AvatarFigurePartType.RightHand,
+]);
+const headPartTypes: Set<AvatarFigurePartType> = new Set([
+  AvatarFigurePartType.Head,
+  AvatarFigurePartType.Face,
+  AvatarFigurePartType.Eyes,
+  AvatarFigurePartType.EyeAccessory,
+  AvatarFigurePartType.Hair,
+  AvatarFigurePartType.HairBig,
+  AvatarFigurePartType.FaceAccessory,
+  AvatarFigurePartType.HeadAccessory,
+  AvatarFigurePartType.HeadAccessoryExtra,
+]);
 
 export interface BaseAvatarOptions {
   look: LookOptions;
   position: { x: number; y: number };
   zIndex: number;
+  skipBodyParts?: boolean;
+  headOnly?: boolean;
   onLoad?: () => void;
 }
 
@@ -38,7 +58,10 @@ export class BaseAvatar extends PIXI.Container {
   private _lookOptions: LookOptions | undefined;
   private _nextLookOptions: LookOptions | undefined;
 
-  private _currentFrame: number = 0;
+  private _skipBodyParts: boolean;
+  private _headOnly: boolean;
+
+  private _currentFrame = 0;
   private _clickHandler: ClickHandler = new ClickHandler();
   private _assets: HitSprite[] = [];
 
@@ -47,13 +70,25 @@ export class BaseAvatar extends PIXI.Container {
 
   private _sprites: Map<string, HitSprite> = new Map();
 
-  private _layer: "door" | "tile" = "tile";
   private _updateId = 0;
+  private _spritesZIndex = 0;
 
   private _dependencies?: BaseAvatarDependencies;
   private _onLoad: (() => void) | undefined;
 
   private _cancelTicker: (() => void) | undefined;
+
+  /**
+   * Sprite Z-Index for hit detection
+   */
+  public get spritesZIndex() {
+    return this._spritesZIndex;
+  }
+
+  public set spritesZIndex(value) {
+    this._spritesZIndex = value;
+    this._updateSpritesZIndex();
+  }
 
   public get dependencies() {
     if (this._dependencies == null)
@@ -119,8 +154,33 @@ export class BaseAvatar extends PIXI.Container {
     this.x = options.position.x;
     this.y = options.position.y;
     this.zIndex = options.zIndex;
+    this.spritesZIndex = options.zIndex;
     this._nextLookOptions = options.look;
     this._onLoad = options.onLoad;
+    this._skipBodyParts = options.skipBodyParts ?? false;
+    this._headOnly = options.headOnly ?? false;
+  }
+
+  static fromShroom(shroom: Shroom, options: BaseAvatarOptions) {
+    const avatar = new BaseAvatar({ ...options });
+    avatar.dependencies = shroom.dependencies;
+    return avatar;
+  }
+
+  destroy(): void {
+    super.destroy();
+    this._assets.forEach((asset) => asset.destroy());
+    this._container?.destroy();
+
+    if (this._cancelTicker != null) {
+      this._cancelTicker();
+    }
+  }
+
+  private _updateSpritesZIndex() {
+    this._sprites.forEach((sprite) => {
+      sprite.zIndex = this.spritesZIndex;
+    });
   }
 
   private _updateLookOptions(
@@ -133,16 +193,12 @@ export class BaseAvatar extends PIXI.Container {
       oldLookOptions.look != newLookOptions.look ||
       oldLookOptions.item != newLookOptions.item ||
       oldLookOptions.effect != newLookOptions.effect ||
-      oldLookOptions.direction != newLookOptions.direction
+      oldLookOptions.direction != newLookOptions.direction ||
+      oldLookOptions.headDirection != newLookOptions.headDirection
     ) {
       this._nextLookOptions = newLookOptions;
       this._refreshLook = true;
     }
-  }
-
-  private _positionChanged() {
-    if (this._avatarDrawDefinition == null) return;
-    this._updatePosition(this._avatarDrawDefinition);
   }
 
   private _updatePosition(definition: AvatarDrawDefinition) {
@@ -181,13 +237,22 @@ export class BaseAvatar extends PIXI.Container {
     this._container = new PIXI.Container();
 
     drawDefinition.parts.forEach((part) => {
+      const figurePart = part.type as AvatarFigurePartType;
+      if (this._skipBodyParts && bodyPartTypes.has(figurePart)) {
+        return;
+      }
+
+      if (this._headOnly && !headPartTypes.has(figurePart)) {
+        return;
+      }
+
       const frame = currentFrame % part.assets.length;
       const asset = part.assets[frame];
 
       let sprite = this._sprites.get(asset.fileId);
 
       if (sprite == null) {
-        sprite = this.createAsset(part, asset);
+        sprite = this._createAsset(part, asset);
 
         if (sprite != null) {
           this._assets.push(sprite);
@@ -201,6 +266,7 @@ export class BaseAvatar extends PIXI.Container {
       sprite.visible = true;
       sprite.mirrored = asset.mirror;
       sprite.ignore = false;
+      sprite.zIndex = this.spritesZIndex;
 
       this._sprites.set(asset.fileId, sprite);
       this._container?.addChild(sprite);
@@ -209,7 +275,7 @@ export class BaseAvatar extends PIXI.Container {
     this.addChild(this._container);
   }
 
-  private createAsset(part: AvatarDrawPart, asset: AvatarAsset) {
+  private _createAsset(part: AvatarDrawPart, asset: AvatarAsset) {
     if (this._avatarLoaderResult == null)
       throw new Error(
         "Cant create asset when avatar loader result not present"
@@ -292,21 +358,5 @@ export class BaseAvatar extends PIXI.Container {
         this._updateFrame();
       }
     });
-  }
-
-  static fromShroom(shroom: Shroom, options: BaseAvatarOptions) {
-    const avatar = new BaseAvatar({ ...options });
-    avatar.dependencies = shroom.dependencies;
-    return avatar;
-  }
-
-  destroy(): void {
-    super.destroy();
-    this._assets.forEach((asset) => asset.destroy());
-    this._container?.destroy();
-
-    if (this._cancelTicker != null) {
-      this._cancelTicker();
-    }
   }
 }

@@ -1,4 +1,3 @@
-import { notNullOrUndefined } from "../../../../util/notNullOrUndefined";
 import { AvatarData } from "./AvatarData";
 import { IFigureMapData } from "./interfaces/IFigureMapData";
 
@@ -13,6 +12,25 @@ export class FigureMapData extends AvatarData implements IFigureMapData {
   constructor(xml: string) {
     super(xml);
     this._cacheData();
+  }
+
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new FigureMapData(text);
+  }
+
+  getLibraryOfPart(id: string, type: string): string | undefined {
+    const typeProcessed = type === "hrb" ? "hr" : type;
+
+    return this._libraryForPartMap.get(
+      _getLibraryForPartKey(id, typeProcessed)
+    );
+  }
+
+  getLibraries(): string[] {
+    return this._allLibraries;
   }
 
   private _cacheData() {
@@ -39,24 +57,5 @@ export class FigureMapData extends AvatarData implements IFigureMapData {
         );
       });
     });
-  }
-
-  getLibraryOfPart(id: string, type: string): string | undefined {
-    const typeProcessed = type === "hrb" ? "hr" : type;
-
-    return this._libraryForPartMap.get(
-      _getLibraryForPartKey(id, typeProcessed)
-    );
-  }
-
-  getLibraries(): string[] {
-    return this._allLibraries;
-  }
-
-  static async fromUrl(url: string) {
-    const response = await fetch(url);
-    const text = await response.text();
-
-    return new FigureMapData(text);
   }
 }

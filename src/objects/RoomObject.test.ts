@@ -4,7 +4,9 @@ test("setParent calls registered", () => {
   let registered = false;
 
   class TestObject extends RoomObject {
-    destroyed(): void {}
+    destroyed(): void {
+      // Do nothing
+    }
 
     registered(): void {
       registered = true;
@@ -21,7 +23,9 @@ test("setParent sets the context", () => {
   const context = { geometry: "geometry" } as any;
 
   class TestObject extends RoomObject {
-    destroyed(): void {}
+    destroyed(): void {
+      // Do nothing
+    }
 
     registered(): void {
       expect(this.geometry).toEqual("geometry");
@@ -36,7 +40,11 @@ test("setParent sets the context", () => {
 test("destroy calls destroyed", () => {
   const context = {
     geometry: "geometry",
-    roomObjectContainer: { removeRoomObject: () => {} },
+    roomObjectContainer: {
+      removeRoomObject: () => {
+        // Do nothing
+      },
+    },
   } as any;
   let destroyed = false;
 
@@ -45,7 +53,9 @@ test("destroy calls destroyed", () => {
       destroyed = true;
     }
 
-    registered(): void {}
+    registered(): void {
+      // Do nothing
+    }
   }
 
   const obj = new TestObject();
@@ -63,8 +73,12 @@ test("destroy removes element from roomObjectContainer", () => {
     roomObjectContainer: { removeRoomObject },
   } as any;
   class TestObject extends RoomObject {
-    destroyed(): void {}
-    registered(): void {}
+    destroyed(): void {
+      // Do nothing
+    }
+    registered(): void {
+      // Do nothing
+    }
   }
 
   const obj = new TestObject();
@@ -82,8 +96,12 @@ test("multiple destroy calls ignores after one", () => {
     roomObjectContainer: { removeRoomObject },
   } as any;
   class TestObject extends RoomObject {
-    destroyed(): void {}
-    registered(): void {}
+    destroyed(): void {
+      // Do nothing
+    }
+    registered(): void {
+      // Do nothing
+    }
   }
 
   const obj = new TestObject();
@@ -102,11 +120,15 @@ test("accessing context before setParent is called throws error", () => {
     constructor() {
       super();
 
-      const a = this.geometry;
+      this.geometry;
     }
 
-    destroyed(): void {}
-    registered(): void {}
+    destroyed(): void {
+      // Do nothing
+    }
+    registered(): void {
+      // Do nothing
+    }
   }
 
   expect(() => new TestObject()).toThrowError("Invalid context");

@@ -1,7 +1,5 @@
-import { Wall } from "../objects/room/Wall";
-import { TileType, TileTypeNumber } from "../types/TileType";
-import { getNumberOfTileType, getTileInfo } from "./getTileInfo";
-import { isTile } from "./isTile";
+import { TileType } from "../types/TileType";
+import { getTileInfo } from "./getTileInfo";
 import { ColumnWall, getColumnWalls } from "./tilemap/getColumnWalls";
 import { getRowWalls, RowWall } from "./tilemap/getRowWalls";
 
@@ -44,7 +42,7 @@ export function parseTileMap(
 
   let lowestTile: number | undefined;
   let highestTile: number | undefined;
-  let hasDoor: boolean = false;
+  let hasDoor = false;
 
   function applyHighLowTile(current: number) {
     if (highestTile == null || current > highestTile) {
@@ -69,7 +67,7 @@ export function parseTileMap(
 
       if (wall != null) {
         switch (wall.kind) {
-          case "column":
+          case "column": {
             const colWallHeightDiff =
               tileInfoBelow.height != null
                 ? Math.abs(tileInfoBelow.height - wall.height)
@@ -82,8 +80,9 @@ export function parseTileMap(
               hideBorder: colWallHeightDiff > 0,
             };
             break;
+          }
 
-          case "row":
+          case "row": {
             const rowWallHeightDiff =
               tileInfoRight.height != null
                 ? Math.abs(tileInfoRight.height - wall.height)
@@ -96,22 +95,25 @@ export function parseTileMap(
               hideBorder: tileInfoBelow.rowDoor || rowWallHeightDiff > 0,
             };
             break;
+          }
 
-          case "innerCorner":
+          case "innerCorner": {
             result[resultY][resultX] = {
               kind: "innerCorner",
               type: "wall",
               height: wall.height,
             };
             break;
+          }
 
-          case "outerCorner":
+          case "outerCorner": {
             result[resultY][resultX] = {
               kind: "outerCorner",
               type: "wall",
               height: wall.height,
             };
             break;
+          }
         }
       }
 
@@ -185,14 +187,6 @@ class Walls {
     });
   }
 
-  private _getRowWall(x: number, y: number) {
-    return this._rowWalls.get(`${x}_${y}`);
-  }
-
-  private _getColWall(x: number, y: number) {
-    return this._colWalls.get(`${x}_${y}`);
-  }
-
   getWall(x: number, y: number) {
     const rightColWall = this._getColWall(x + 1, y);
     const bottomRowWall = this._getRowWall(x, y + 1);
@@ -224,6 +218,14 @@ class Walls {
 
     const colWall = this._getColWall(x, y);
     if (colWall != null) return { kind: "column", height: colWall.height };
+  }
+
+  private _getRowWall(x: number, y: number) {
+    return this._rowWalls.get(`${x}_${y}`);
+  }
+
+  private _getColWall(x: number, y: number) {
+    return this._colWalls.get(`${x}_${y}`);
   }
 }
 

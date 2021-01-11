@@ -9,10 +9,11 @@ export interface Rect {
 export type HitEventType = "click";
 
 export interface HitEvent {
-  stopPropagation(): void;
-  absorb(): void;
   mouseEvent: MouseEvent;
   tag?: string;
+
+  stopPropagation(): void;
+  absorb(): void;
 }
 
 export interface HitDetectionElement {

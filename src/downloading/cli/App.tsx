@@ -90,7 +90,6 @@ export const App = ({
 }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const keys = Object.keys(steps) as (keyof Steps)[];
   const options = React.useRef({
     externalVariablesUrl,
     location,

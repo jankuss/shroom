@@ -3,7 +3,38 @@ import { IRoomObject } from "../interfaces/IRoomObject";
 
 export abstract class RoomObject implements IRoomObject {
   private _context: IRoomContext | undefined;
-  private _isDestroyed: boolean = false;
+  private _isDestroyed = false;
+
+  setParent(room: IRoomContext): void {
+    if (this._context != null)
+      throw new Error("RoomObject already provided with a context.");
+
+    this._isDestroyed = false;
+    this._context = room;
+
+    this.registered();
+  }
+
+  destroy() {
+    if (this._isDestroyed) return;
+
+    // Important: set isDestroyed to true so this doesn't infinite loop.
+    this._isDestroyed = true;
+
+    this.roomObjectContainer.removeRoomObject(this);
+
+    this._context = undefined;
+    this.destroyed();
+  }
+
+  protected getRoomContext(): IRoomContext {
+    if (this._context == null) throw new Error("Invalid context");
+
+    return this._context;
+  }
+
+  abstract destroyed(): void;
+  abstract registered(): void;
 
   protected get mounted() {
     return this._context != null;
@@ -25,7 +56,7 @@ export abstract class RoomObject implements IRoomObject {
     return this.getRoomContext().animationTicker;
   }
 
-  protected get visualization() {
+  protected get roomVisualization() {
     return this.getRoomContext().visualization;
   }
 
@@ -56,35 +87,4 @@ export abstract class RoomObject implements IRoomObject {
   protected get application() {
     return this.getRoomContext().application;
   }
-
-  protected getRoomContext(): IRoomContext {
-    if (this._context == null) throw new Error("Invalid context");
-
-    return this._context;
-  }
-
-  setParent(room: IRoomContext): void {
-    if (this._context != null)
-      throw new Error("RoomObject already provided with a context.");
-
-    this._isDestroyed = false;
-    this._context = room;
-
-    this.registered();
-  }
-
-  destroy() {
-    if (this._isDestroyed) return;
-
-    // Important: set isDestroyed to true so this doesn't infinite loop.
-    this._isDestroyed = true;
-
-    this.roomObjectContainer.removeRoomObject(this);
-
-    this._context = undefined;
-    this.destroyed();
-  }
-
-  abstract destroyed(): void;
-  abstract registered(): void;
 }

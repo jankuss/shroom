@@ -5,14 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.1] - 2020-01-04
+## [0.4.1] - 2021-01-10
+
+### Fixed
+
+- Furniture default coloring not being applied
+- Fix some furniture layers not showing
+- Fix furniture not displaying at all when one asset fails to load
+
+## [0.4.0] - 2021-01-09
+
+### Added
+
+- Customizable furniture visualizations through `furniture.visualization = /*...*/`
+- Option to not render body when using `BaseAvatar` (thanks @somekindadude)
+- Option to specify `headRotation` for avatars (thanks @somekindadude)
+
+### Changed
+
+- Improve tilemap parsing to handle carriage return in string
+
+### Fixed
+
+- Furniture animations getting stuck
+- Avatar zIndex not respected for HitDetection
+- Fix directions for furniture with out of order directions in `visualization.bin`
+- Fix behaviors called before `BaseFurniture` initialized
+- Fix tile cursor displaying above furniture
+
+## [0.3.1] - 2021-01-04
 
 ### Fixed
 
 - Avatar `onClick` and `onDoubleClick` not firing
 - Wall border hiding for some room models where they shouldn't
 
-## [0.3.0] - 2020-01-04
+## [0.3.0] - 2021-01-04
 
 ### Added
 
@@ -28,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Change default wall color to use the original
+- Improve asset dumping behavior (thanks @thereis)
 
 ### Fixed
 

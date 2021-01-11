@@ -41,6 +41,7 @@ function _getLookOptionsString(lookOptions: LookOptions) {
   }
 
   parts.push(`direction(${lookOptions.direction})`);
+  parts.push(`headdirection(${lookOptions.headDirection})`);
 
   if (lookOptions.item != null) {
     parts.push(`item(${lookOptions.item})`);
@@ -54,16 +55,17 @@ function _getLookOptionsString(lookOptions: LookOptions) {
 }
 
 export class AvatarLoader implements IAvatarLoader {
-  private globalCache: Map<string, Promise<HitTexture>> = new Map();
-  private lookServer: Promise<LookServer>;
-  private effectCache: Map<string, Promise<IAvatarEffectData>> = new Map();
-  private lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
+  private _globalCache: Map<string, Promise<HitTexture>> = new Map();
+  private _lookServer: Promise<LookServer>;
+  private _effectCache: Map<string, Promise<IAvatarEffectData>> = new Map();
+  private _lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
 
-  constructor(private options: Options) {
-    this.lookServer = this.options.createLookServer().then(async (server) => {
+  constructor(private _options: Options) {
+    this._lookServer = this._options.createLookServer().then(async (server) => {
       // Wait for the placeholder model to load
       await this._getAvatarDrawDefinition(server, {
         direction: 0,
+        headDirection: 0,
         actions: new Set(),
         look: "hd-99999-99999",
       });
@@ -72,21 +74,7 @@ export class AvatarLoader implements IAvatarLoader {
     });
   }
 
-  private _loadEffect(type: string, id: string) {
-    const key = `${type}_${id}`;
-    let current = this.effectCache.get(key);
-
-    if (current == null) {
-      current = AvatarEffectData.fromUrl(
-        `./resources/figure/hh_human_fx/hh_human_fx_${type}${id}.bin`
-      );
-      this.effectCache.set(key, current);
-    }
-
-    return current;
-  }
-
-  static create(resourcePath: string = "") {
+  static create(resourcePath = "") {
     return new AvatarLoader({
       createLookServer: async () => {
         const {
@@ -127,31 +115,10 @@ export class AvatarLoader implements IAvatarLoader {
     });
   }
 
-  private _getDrawDefinitionCached(
-    getAvatarDrawDefinition: LookServer,
-    lookOptions: LookOptions,
-    effect: IAvatarEffectData | undefined
-  ) {
-    const key = _getLookOptionsString(lookOptions);
-
-    const existing = this.lookOptionsCache.get(key);
-
-    if (existing != null) {
-      return existing;
-    }
-
-    const drawDefinition = getAvatarDrawDefinition(lookOptions, effect);
-    if (drawDefinition == null) return;
-
-    this.lookOptionsCache.set(key, drawDefinition);
-
-    return drawDefinition;
-  }
-
   async getAvatarDrawDefinition(
     options: LookOptions
   ): Promise<AvatarLoaderResult> {
-    const getDrawDefinition = await this.lookServer;
+    const getDrawDefinition = await this._lookServer;
 
     return this._getAvatarDrawDefinition(getDrawDefinition, options);
   }
@@ -177,35 +144,39 @@ export class AvatarLoader implements IAvatarLoader {
       )?.parts.forEach((parts) => {
         parts.assets.forEach((item) => {
           if (loadedFiles.has(item.fileId)) return;
-          const globalFile = this.globalCache.get(item.fileId);
+          const globalFile = this._globalCache.get(item.fileId);
 
           if (globalFile != null) {
             loadedFiles.set(item.fileId, globalFile);
           } else {
-            const file = this.options.resolveImage(item.fileId, item.library);
-            this.globalCache.set(item.fileId, file);
+            const file = this._options.resolveImage(item.fileId, item.library);
+            this._globalCache.set(item.fileId, file);
             loadedFiles.set(item.fileId, file);
           }
         });
       });
 
     directions.forEach((direction) => {
-      loadResources({
-        actions: new Set(actions),
-        direction,
-        look,
-        item,
-      });
-
-      if (initial != null) {
-        preloadActions.forEach((action) => {
-          loadResources({
-            actions: new Set([action]),
-            direction,
-            look,
-          });
+      directions.forEach((headDirection) => {
+        loadResources({
+          actions: new Set(actions),
+          direction,
+          headDirection,
+          look,
+          item,
         });
-      }
+
+        if (initial != null) {
+          preloadActions.forEach((action) => {
+            loadResources({
+              actions: new Set([action]),
+              direction,
+              headDirection,
+              look,
+            });
+          });
+        }
+      });
     });
 
     const awaitedEntries = await Promise.all(
@@ -236,5 +207,40 @@ export class AvatarLoader implements IAvatarLoader {
     };
 
     return obj;
+  }
+
+  private _loadEffect(type: string, id: string) {
+    const key = `${type}_${id}`;
+    let current = this._effectCache.get(key);
+
+    if (current == null) {
+      current = AvatarEffectData.fromUrl(
+        `./resources/figure/hh_human_fx/hh_human_fx_${type}${id}.bin`
+      );
+      this._effectCache.set(key, current);
+    }
+
+    return current;
+  }
+
+  private _getDrawDefinitionCached(
+    getAvatarDrawDefinition: LookServer,
+    lookOptions: LookOptions,
+    effect: IAvatarEffectData | undefined
+  ) {
+    const key = _getLookOptionsString(lookOptions);
+
+    const existing = this._lookOptionsCache.get(key);
+
+    if (existing != null) {
+      return existing;
+    }
+
+    const drawDefinition = getAvatarDrawDefinition(lookOptions, effect);
+    if (drawDefinition == null) return;
+
+    this._lookOptionsCache.set(key, drawDefinition);
+
+    return drawDefinition;
   }
 }
