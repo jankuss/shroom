@@ -19,49 +19,65 @@ export default {
 
 export function Default() {
   return createShroom(({ application, shroom }) => {
-    const room = Room.create(shroom, {
-      tilemap: `
-       xxxxxxxxxxx
-       x0000000000
-       x0000000000
-       x0000000000
-       x0000000000
-      `,
-    });
-
-    room.x = application.screen.width / 2 - room.roomWidth / 2;
-    room.y = application.screen.height / 2 - room.roomHeight / 2;
-
-    for (let i = 0; i < 4; i++) {
-      const furniture = new FloorFurniture({
-        roomX: 1 + i * 3,
-        roomY: 1,
-        roomZ: 0,
-        type: "club_sofa",
-        direction: i * 2,
+    const create = () => {
+      const room = Room.create(shroom, {
+        tilemap: `
+         xxxxxxxxxxx
+         x0000000000
+         x0000000000
+         x0000000000
+         x0000000000
+        `,
       });
 
-      furniture.onClick = action(`Furniture ${i} clicked`);
-      furniture.validDirections.then(action(`Furniture ${i} valid directions`));
+      room.x = application.screen.width / 2 - room.roomWidth / 2;
+      room.y = application.screen.height / 2 - room.roomHeight / 2;
 
-      room.addRoomObject(furniture);
-    }
+      for (let i = 0; i < 4; i++) {
+        const furniture = new FloorFurniture({
+          roomX: 1 + i * 3,
+          roomY: 1,
+          roomZ: 0,
+          type: "club_sofa",
+          direction: i * 2,
+        });
 
-    const dice = new FloorFurniture({
-      roomX: 1,
-      roomY: 3,
-      roomZ: 0,
-      type: "edice",
-      direction: 0,
-      animation: "0",
-    });
+        furniture.onClick = action(`Furniture ${i} clicked`);
+        furniture.validDirections.then(
+          action(`Furniture ${i} valid directions`)
+        );
 
-    dice.extradata.then(action("Extra Data"));
-    dice.validDirections.then(action(`Dice valid directions`));
+        room.addRoomObject(furniture);
+      }
 
-    room.addRoomObject(dice);
+      const dice = new FloorFurniture({
+        roomX: 1,
+        roomY: 3,
+        roomZ: 0,
+        type: "edice",
+        direction: 0,
+        animation: "0",
+      });
 
-    application.stage.addChild(room);
+      dice.extradata.then(action("Extra Data"));
+      dice.validDirections.then(action(`Dice valid directions`));
+
+      room.addRoomObject(dice);
+
+      application.stage.addChild(room);
+
+      return () => room.destroy();
+    };
+
+    const a = create();
+
+    setTimeout(() => {
+      a();
+
+      setTimeout(() => {
+        create();
+      }, 5000);
+    }, 5000);
   });
 }
 
