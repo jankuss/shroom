@@ -22,9 +22,7 @@ interface Props {
 }
 
 export class StairCorner extends RoomObject implements ITexturable {
-    private sprites: PIXI.DisplayObject[] = [];
-    private container: PIXI.Container | undefined;
-
+    private _container: PIXI.Container | undefined;
     private _texture: PIXI.Texture | undefined;
     private _color: string | undefined;
 
@@ -39,11 +37,11 @@ export class StairCorner extends RoomObject implements ITexturable {
         this.updateSprites();
     }
 
-    constructor(private props: Props) {
+    constructor(private _props: Props) {
         super();
 
-        this._texture = props.texture;
-        this._tileHeight = props.tileHeight;
+        this._texture = _props.texture;
+        this._tileHeight = _props.tileHeight;
     }
 
     get texture() {
@@ -67,12 +65,12 @@ export class StairCorner extends RoomObject implements ITexturable {
     updateSprites() {
         if (!this.mounted) return;
 
-        this.container?.destroy();
-        this.container = new PIXI.Container();
+        this._container?.destroy();
+        this._container = new PIXI.Container();
 
-        const { roomX, roomY, roomZ, color, type } = this.props;
-        this.container.zIndex = getZOrder(roomX, roomY, roomZ);
-        this.container.sortableChildren = true
+        const { roomX, roomY, roomZ, color, type } = this._props;
+        this._container.zIndex = getZOrder(roomX, roomY, roomZ);
+        this._container.sortableChildren = true
 
         const { x, y } = this.geometry.getPosition(roomX, roomY, roomZ);
 
@@ -88,19 +86,19 @@ export class StairCorner extends RoomObject implements ITexturable {
             };
 
             if (type === 'front') {
-                this.container.addChild(...createStairBoxFront(props));
+                this._container.addChild(...createStairBoxFront(props));
             } else if (type === 'left') {
-                this.container.addChild(...createStairBoxLeft(props));
+                this._container.addChild(...createStairBoxLeft(props));
             } else if (type === 'right') {
-                this.container.addChild(...createStairBoxRight(props));
+                this._container.addChild(...createStairBoxRight(props));
             }
         }
 
-        this.visualization.floorContainer.addChild(this.container);
+        this.roomVisualization.floorContainer.addChild(this._container);
     }
 
     destroySprites() {
-        this.container?.destroy();
+        this._container?.destroy();
     }
 
     destroyed(): void {
@@ -338,56 +336,4 @@ function createStairBoxRight({
     } else {
         return [tile, borderLeft]
     }
-}
-
-export function createStairBoxDirection2({
-    x,
-    y,
-    tileHeight,
-    index,
-    color,
-    texture,
-}: StairBoxProps) {
-    const baseX = x - stairBase * index;
-    const baseY = y - stairBase * index * 1.5;
-
-    const { tileTint, borderRightTint, borderLeftTint } = getTileColors(color);
-
-    function createSprite(matrix: PIXI.Matrix, tint: number) {
-        const tile = new PIXI.TilingSprite(texture);
-        tile.tilePosition = new PIXI.Point(0, 0);
-        tile.transform.setFromMatrix(matrix);
-
-        tile.tint = tint;
-
-        return tile;
-    }
-
-    const tile = createSprite(
-        getFloorMatrix(baseX + 32 - stairBase, baseY + stairBase * 1.5),
-        tileTint
-    );
-    tile.width = stairBase;
-    tile.height = 32;
-
-
-    const borderLeft = createSprite(
-        getLeftMatrix(baseX + 32 - stairBase, baseY + stairBase * 1.5, {
-            width: stairBase,
-            height: tileHeight,
-        }),
-        borderLeftTint
-    );
-    borderLeft.width = stairBase;
-    borderLeft.height = tileHeight;
-
-    const borderRight = createSprite(
-        getRightMatrix(baseX, baseY, { width: 32, height: tileHeight }),
-        borderRightTint
-    );
-
-    borderRight.width = 32;
-    borderRight.height = tileHeight;
-
-    return [borderLeft, borderRight, tile];
 }

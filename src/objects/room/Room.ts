@@ -701,7 +701,7 @@ export class Room
               roomY: y,
               roomZ: tile.z,
               tileHeight: this.tileHeight,
-              color: this.tileColor,
+              color: this._tileColor,
               type: tile.kind,
             })
           );

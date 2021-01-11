@@ -98,15 +98,7 @@ function getStairs(tiles: TileType[][], x: number, y: number) {
     const diff = Number(topType) - Number(type);
 
     if (diff === 1) {
-      const destinationStairs = getStairs(
-        tiles,
-        x + offsets.top.x,
-        y + offsets.top.y
-      );
-
-      if (destinationStairs == null || destinationStairs.direction === 0) {
-        return { direction: 0 as const };
-      }
+      return { direction: 0 as const };
     }
   }
 
@@ -114,23 +106,7 @@ function getStairs(tiles: TileType[][], x: number, y: number) {
     const diff = Number(leftType) - Number(type);
 
     if (diff === 1) {
-      const destinationStairs = getStairs(
-        tiles,
-        x + offsets.left.x,
-        y + offsets.left.y
-      );
-
-      if (destinationStairs == null || destinationStairs.direction === 2) {
-        return { direction: 2 as const };
-      }
-    }
-  }
-
-  if (isTile(topLeftType) && isTile(type) && (leftType === 'x' || Number(leftType) <= Number(type))) 
-  {
-    const diff = Number(topLeftType) - Number(type);
-    if (diff === 1) {
-      return { cornerType: 'front' as const, isCorner: true};
+      return { direction: 2 as const };
     }
   }
 
@@ -147,6 +123,14 @@ function getStairs(tiles: TileType[][], x: number, y: number) {
     const diff = Number(topRightType) - Number(type);
     if (diff === 1) {
       return { cornerType: 'right' as const, isCorner: true};
+    }
+  }
+
+  if (isTile(topLeftType) && isTile(type) && (leftType === 'x' || Number(leftType) <= Number(type))) 
+  {
+    const diff = Number(topLeftType) - Number(type);
+    if (diff === 1) {
+      return { cornerType: 'front' as const, isCorner: true};
     }
   }
 }
