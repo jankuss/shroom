@@ -119,6 +119,8 @@ function getDrawPart({
   getAssetName: (frame: number) => string;
 }): FurniDrawPart {
   const z = directionLayer?.z ?? layer?.z ?? 0;
+  const x = directionLayer?.x ?? 0;
+  const y = directionLayer?.y ?? 0;
 
   const baseAsset = assetsData.getAsset(getAssetName(0));
 
@@ -135,7 +137,11 @@ function getDrawPart({
           if (asset == null)
             return { x: 0, y: 0, flipH: false, name: "unknown", valid: true };
 
-          return asset;
+          return {
+            ...asset,
+            x: asset.x + (asset.flipH ? x : -x),
+            y: asset.y - y,
+          };
         }
       );
   }
