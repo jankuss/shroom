@@ -749,10 +749,20 @@ export function FurnitureColoring() {
       type: "rare_elephant_statue",
     });
 
+    const furniture3 = new FloorFurniture({
+      roomX: 1,
+      roomY: 4,
+      roomZ: 0,
+      animation: "0",
+      direction: 2,
+      id: 290,
+    });
+
     room.x = application.screen.width / 2 - room.roomWidth / 2;
     room.y = application.screen.height / 2 - room.roomHeight / 2;
     room.addRoomObject(furniture1);
     room.addRoomObject(furniture2);
+    room.addRoomObject(furniture3);
     application.stage.addChild(room);
   });
 }
@@ -782,9 +792,19 @@ export function FurnitureFlip() {
       type: "rare_fan*1",
     });
 
+    const furniture2 = new FloorFurniture({
+      roomX: 3,
+      roomY: 1,
+      roomZ: 0,
+      animation: "0",
+      direction: 6,
+      type: "rare_fan*2",
+    });
+
     room.x = application.screen.width / 2 - room.roomWidth / 2;
     room.y = application.screen.height / 2 - room.roomHeight / 2;
     room.addRoomObject(furniture1);
+    room.addRoomObject(furniture2);
     application.stage.addChild(room);
   });
 }

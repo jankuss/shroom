@@ -36,7 +36,9 @@ export interface FurnitureLayer {
 }
 
 export interface FurnitureDirectionLayer {
-  z: number;
+  x?: number;
+  y?: number;
+  z?: number;
 }
 
 export interface FurnitureAnimationLayer {
