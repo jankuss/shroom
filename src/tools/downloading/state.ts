@@ -4,7 +4,7 @@ import { tryFetchString } from "./fetching";
 import * as path from "path";
 import { dumpFigureLibraries } from "./dumpFigureLibraries";
 import { dumpFurniFromFurniData } from "./dumpFurniFromFurniData";
-import { createOffsetSnapshot } from "../objects/avatar/util";
+import { createOffsetSnapshot } from "../../objects/avatar/util";
 import Bluebird from "bluebird";
 
 export type Steps = {
