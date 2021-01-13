@@ -492,3 +492,39 @@ export function BaseAvatarBroke() {
     application.stage.addChild(avatar4);
   });
 }
+
+export function AvatarDestroy() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+           xxxxxxxx
+           x0000000
+           x0000000
+           x0000000
+           x0000000
+          `,
+    });
+
+    const avatar = new Avatar({
+      look:
+        "hd-180-1.hr-828-61.ha-1012-110.he-1604-62.ea-1404-62.fa-1204-62.ch-255-66.lg-280-110.sh-305-62",
+      direction: 3,
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      headDirection: 5,
+    });
+
+    setTimeout(() => {
+      avatar.addAction(AvatarAction.Respect);
+    }, 3000);
+
+    setTimeout(() => {
+      avatar.destroy();
+    }, 6000);
+
+    room.addRoomObject(avatar);
+
+    application.stage.addChild(room);
+  });
+}

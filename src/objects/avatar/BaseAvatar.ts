@@ -65,7 +65,6 @@ export class BaseAvatar extends PIXI.Container {
 
   private _currentFrame = 0;
   private _clickHandler: ClickHandler = new ClickHandler();
-  private _assets: HitSprite[] = [];
 
   private _refreshFrame = false;
   private _refreshLook = false;
@@ -172,12 +171,17 @@ export class BaseAvatar extends PIXI.Container {
 
   destroy(): void {
     super.destroy();
-    this._assets.forEach((asset) => asset.destroy());
-    this._container?.destroy();
+    this._destroyAssets();
 
     if (this._cancelTicker != null) {
       this._cancelTicker();
     }
+  }
+
+  private _destroyAssets() {
+    this._sprites.forEach((sprite) => sprite.destroy());
+    this._sprites = new Map();
+    this._container?.destroy();
   }
 
   private _updateSpritesZIndex() {
@@ -231,7 +235,7 @@ export class BaseAvatar extends PIXI.Container {
   ) {
     if (!this.mounted) return;
 
-    this._assets.forEach((value) => {
+    this._sprites.forEach((value) => {
       value.visible = false;
       value.ignore = true;
     });
@@ -256,10 +260,6 @@ export class BaseAvatar extends PIXI.Container {
 
       if (sprite == null) {
         sprite = this._createAsset(part, asset);
-
-        if (sprite != null) {
-          this._assets.push(sprite);
-        }
       }
 
       if (sprite == null) return;
@@ -332,17 +332,12 @@ export class BaseAvatar extends PIXI.Container {
           this._nextLookOptions = undefined;
 
           // Clear sprite cache, since colors could have changed
-          this._clearSpriteCache();
+          this._destroyAssets();
 
           this._updateSprites();
           this._onLoad && this._onLoad();
         });
     }
-  }
-
-  private _clearSpriteCache() {
-    this._sprites.forEach((item) => item.destroy());
-    this._sprites = new Map();
   }
 
   private _updateFrame() {
