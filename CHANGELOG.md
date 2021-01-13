@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Option to hide tile cursor in a room with `room.hideTileCursor`
+
 ### Fixed
 
 - Display of furniture with special layer offsets for a direction
