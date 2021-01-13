@@ -4,9 +4,8 @@ import { FurnitureVisualization } from "./FurnitureVisualization";
 
 export class BasicFurnitureVisualization extends FurnitureVisualization {
   private _sprites: FurnitureSprite[] = [];
-  private _refreshFurniture: boolean = false;
-
-  private _currentDirection: number = 0;
+  private _refreshFurniture = false;
+  private _currentDirection = 0;
   private _animationId: string | undefined;
 
   setView(view: IFurnitureVisualizationView): void {
@@ -25,6 +24,24 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
     this._refreshFurniture = true;
   }
 
+  updateFrame(): void {
+    if (!this.mounted) return;
+
+    if (this._refreshFurniture) {
+      this._refreshFurniture = false;
+      this._update();
+    }
+  }
+
+  update() {
+    this._refreshFurniture = true;
+    this._update();
+  }
+
+  destroy(): void {
+    this._sprites.forEach((sprite) => this.view.destroySprite(sprite));
+  }
+
   private _update() {
     this._sprites.forEach((sprite) => {
       this.view.destroySprite(sprite);
@@ -41,22 +58,5 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
           this._sprites.push(sprite);
         }
       });
-  }
-
-  updateFrame(frame: number): void {
-    if (!this.mounted) return;
-
-    if (this._refreshFurniture) {
-      this._refreshFurniture = false;
-      this._update();
-    }
-  }
-
-  update() {
-    this._refreshFurniture = true;
-  }
-
-  destroy(): void {
-    this._sprites.forEach((sprite) => this.view.destroySprite(sprite));
   }
 }

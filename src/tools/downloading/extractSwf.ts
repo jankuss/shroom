@@ -6,7 +6,7 @@ function execute(command: string) {
     exec(
       command,
       { maxBuffer: 1024 * 1024 },
-      (error: ExecException | null, stdout: string, stderr: string) =>
+      (error: ExecException | null, stdout: string) =>
         error ? reject(error) : resolve(stdout)
     )
   );
@@ -85,7 +85,9 @@ export async function extractSwf({
               path.join(out, `${realFileName}.${fileName[1]}`)
             )} ${path.resolve(swf)}`
           );
-        } catch (e) {}
+        } catch (e) {
+          // Do nothing
+        }
       }
     }
   }

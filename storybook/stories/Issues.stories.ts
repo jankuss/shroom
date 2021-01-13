@@ -200,7 +200,7 @@ export function IssueWithAvatarEventsNotHandled() {
     });
 
     avatar.onClick = (event) => console.log(event);
-    furniture.onClick = (event) => {
+    furniture.onClick = () => {
       furniture.animation = "-1";
 
       setTimeout(() => {
@@ -217,8 +217,36 @@ export function IssueWithAvatarEventsNotHandled() {
   });
 }
 
-export function Issue56() {
+export function IssueWithItemNotRenderingProperly() {
   return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+            xxxxx
+            x0000
+            x0000
+            x0000
+            x0000
+            `,
+    });
+
+    const furniture = new FloorFurniture({
+      type: "hc21_2",
+      direction: 0,
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+    });
+
+    room.onTileClick = action("Position");
+
+    room.addRoomObject(furniture);
+
+    application.stage.addChild(room);
+  });
+}
+
+export function Issue56() {
+  return createShroom(({ application, shroom, container: storyContainer }) => {
     const room = Room.create(shroom, {
       tilemap: `
             xxxxxxxxxxxx
@@ -253,6 +281,6 @@ export function Issue56() {
     child.style.left = "200px";
     child.style.top = "50px";
 
-    document.body.appendChild(child);
+    storyContainer.appendChild(child);
   });
 }

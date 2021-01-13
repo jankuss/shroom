@@ -8,6 +8,13 @@ export class AvatarEffectData extends AvatarData implements IAvatarEffectData {
   private _frameParts: Map<number, AvatarEffectFrame[]> = new Map();
   private _frameCount: number | undefined;
 
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new AvatarEffectData(text);
+  }
+
   getFrameParts(frame: number): AvatarEffectFrame[] {
     let current = this._frameParts.get(frame);
     if (current == null) {
@@ -53,12 +60,5 @@ export class AvatarEffectData extends AvatarData implements IAvatarEffectData {
     }
 
     return this._frameCount;
-  }
-
-  static async fromUrl(url: string) {
-    const response = await fetch(url);
-    const text = await response.text();
-
-    return new AvatarEffectData(text);
   }
 }

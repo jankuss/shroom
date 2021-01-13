@@ -5,7 +5,6 @@ import {
 } from "./getAvatarDrawDefinition";
 import { parseLookString } from "./parseLookString";
 import { AvatarAction } from "../enum/AvatarAction";
-import { AvatarEffectData } from "./data/AvatarEffectData";
 import { IAvatarEffectData } from "./data/interfaces/IAvatarEffectData";
 
 export interface LookOptions {

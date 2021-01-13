@@ -17,7 +17,7 @@ export { AnimationTicker } from "./objects/animation/AnimationTicker";
 export { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
 export { AvatarLoader } from "./objects/avatar/AvatarLoader";
 export { AvatarAction } from "./objects/avatar/enum/AvatarAction";
-export { FurnitureVisualization } from "./objects/furniture/FurnitureVisualization";
+export { FurnitureRoomVisualization } from "./objects/furniture/FurnitureRoomVisualization";
 export { BaseFurniture } from "./objects/furniture/BaseFurniture";
 export { BaseAvatar } from "./objects/avatar/BaseAvatar";
 
@@ -25,3 +25,5 @@ export { AnimatedFurnitureVisualization } from "./objects/furniture/visualizatio
 export { FurnitureGuildCustomizedVisualization } from "./objects/furniture/visualization/FurnitureGuildCustomizedVisualization";
 export { BasicFurnitureVisualization } from "./objects/furniture/visualization/BasicFurnitureVisualization";
 export { FurnitureBottleVisualization } from "./objects/furniture/visualization/FurnitureBottleVisualization";
+export { FurnitureVisualization } from "./objects/furniture/visualization/FurnitureVisualization";
+export { IFurnitureVisualization } from "./objects/furniture/IFurnitureVisualization";

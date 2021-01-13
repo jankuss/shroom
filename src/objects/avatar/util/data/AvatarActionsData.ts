@@ -9,6 +9,17 @@ import { actionsXml } from "./static/actions.xml";
 export class AvatarActionsData
   extends AvatarData
   implements IAvatarActionsData {
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new AvatarActionsData(text);
+  }
+
+  static default() {
+    return new AvatarActionsData(atob(actionsXml));
+  }
+
   getHandItemId(actionId: string, id: string): number | undefined {
     const actionParam = this.querySelector(
       `action[id="${actionId}"] param[id="${id}"]`
@@ -33,17 +44,6 @@ export class AvatarActionsData
     if (action == null) return;
 
     return getAvatarActionInfoFromElement(action);
-  }
-
-  static async fromUrl(url: string) {
-    const response = await fetch(url);
-    const text = await response.text();
-
-    return new AvatarActionsData(text);
-  }
-
-  static default() {
-    return new AvatarActionsData(atob(actionsXml));
   }
 }
 

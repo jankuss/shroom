@@ -41,7 +41,7 @@ const headComponents: Set<AvatarFigurePartType> = new Set([
   AvatarFigurePartType.HairBig,
   AvatarFigurePartType.FaceAccessory,
   AvatarFigurePartType.HeadAccessory,
-  AvatarFigurePartType.HeadAccessoryExtra
+  AvatarFigurePartType.HeadAccessoryExtra,
 ]);
 
 /**
@@ -56,7 +56,6 @@ export function getAvatarDrawDefinition(
     direction,
     headDirection,
     item: itemId,
-    effect,
   }: Options,
   deps: AvatarDependencies
 ): AvatarDrawDefinition | undefined {
@@ -91,7 +90,6 @@ export function getAvatarDrawDefinition(
 
   // Since the draworder file has missing parts, we add them here.
   const drawOrderAdditional = addMissingDrawOrderItems(new Set(drawOrderRaw));
-
 
   const bodyParts = geometry
     .getBodyParts("full")
@@ -208,18 +206,10 @@ function getBodyPart(
     parts: PartDataWithBodyPart[];
     actionData: AvatarActionInfo;
     direction: number;
-    headDirection?: number,
+    headDirection?: number;
     itemId?: string | number;
   },
-  {
-    offsetsData,
-    animationData,
-    partSetsData,
-    actionsData,
-    figureData,
-    figureMap,
-    geometry,
-  }: AvatarDependencies
+  { offsetsData, animationData, partSetsData, figureMap }: AvatarDependencies
 ): {
   resolvedParts: AvatarDrawPart[];
   removeSetTypes: Set<AvatarFigurePartType>;
@@ -227,7 +217,6 @@ function getBodyPart(
   if (actionData == null) throw new Error("Invalid action data");
 
   let remainingPartCount = parts.length - 1;
-  let assetPartDefinition = actionData.assetpartdefinition;
 
   const resolvedParts: AvatarDrawPart[] = [];
   const removeSetTypes = new Set<AvatarFigurePartType>();
@@ -255,7 +244,11 @@ function getBodyPart(
     const assets = framesIndexed.map((animationFrame) =>
       getAssetForFrame({
         offsetsData,
-        direction: headComponents.has(part.type as AvatarFigurePartType) && headDirection != null ? headDirection : direction,
+        direction:
+          headComponents.has(part.type as AvatarFigurePartType) &&
+          headDirection != null
+            ? headDirection
+            : direction,
         partTypeFlipped: partInfo?.flippedSetType as
           | AvatarFigurePartType
           | undefined,
@@ -371,11 +364,8 @@ function getAssetForFrame({
 
       if (asset != null) {
         return asset;
-      } else {
       }
-    } else {
     }
-  } else {
   }
 }
 

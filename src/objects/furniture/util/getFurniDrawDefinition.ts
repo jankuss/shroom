@@ -1,7 +1,4 @@
-import { Visualization } from "./visualization/parseVisualization";
-import { AssetMap } from "./parseAssets";
 import { FurniDrawDefinition, FurniDrawPart } from "./DrawDefinition";
-import { layerToChar } from "./index";
 import {
   FurnitureAnimationLayer,
   FurnitureDirectionLayer,
@@ -12,6 +9,7 @@ import {
   FurnitureAsset,
   IFurnitureAssetsData,
 } from "../data/interfaces/IFurnitureAssetsData";
+import { getCharFromLayerIndex } from ".";
 
 interface FurniDrawDefinitionOptions {
   type: string;
@@ -30,23 +28,14 @@ export function getFurniDrawDefinition(
 ): FurniDrawDefinition {
   const typeSplitted = typeWithColor.split("*");
   const type = typeSplitted[0];
-  const color = typeSplitted[1];
+
+  // If color is not  set, we fallback to the `0` color for the item.
+  const color = typeSplitted[1] ?? "0";
 
   const size = 64;
   const parts: FurniDrawPart[] = [];
   const animationNumber = animation != null ? Number(animation) : undefined;
-
-  const frameCount =
-    animationNumber != null
-      ? visualizationData.getFrameCount(size, animationNumber)
-      : 1;
-
   const layerCount = visualizationData.getLayerCount(size);
-
-  const animationData =
-    animationNumber != null
-      ? visualizationData.getAnimation(size, animationNumber)
-      : undefined;
 
   const getAssetName = (char: string, frame: number) =>
     `${type}_${size}_${char}_${direction}_${frame}`;
@@ -83,7 +72,7 @@ export function getFurniDrawDefinition(
       layerIndex
     );
     const layer = visualizationData.getLayer(size, layerIndex);
-    const char = layerToChar[layerIndex];
+    const char = getCharFromLayerIndex(layerIndex);
     const animationLayer =
       animationNumber != null
         ? visualizationData.getAnimationLayer(size, animationNumber, layerIndex)
@@ -130,6 +119,8 @@ function getDrawPart({
   getAssetName: (frame: number) => string;
 }): FurniDrawPart {
   const z = directionLayer?.z ?? layer?.z ?? 0;
+  const x = directionLayer?.x ?? 0;
+  const y = directionLayer?.y ?? 0;
 
   const baseAsset = assetsData.getAsset(getAssetName(0));
 
@@ -146,7 +137,11 @@ function getDrawPart({
           if (asset == null)
             return { x: 0, y: 0, flipH: false, name: "unknown", valid: true };
 
-          return asset;
+          return {
+            ...asset,
+            x: asset.x + (asset.flipH ? x : -x),
+            y: asset.y - y,
+          };
         }
       );
   }

@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 
 import { Room } from "./Room";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const TWEEN = require("tween.js");
 
 export class RoomCamera extends PIXI.Container {
@@ -15,10 +16,6 @@ export class RoomCamera extends PIXI.Container {
 
   private _tween: any;
   private _target: EventTarget;
-
-  static forScreen(room: Room, options?: RoomCameraOptions) {
-    return new RoomCamera(room, () => room.application.screen, options);
-  }
 
   constructor(
     private readonly _room: Room,
@@ -55,6 +52,22 @@ export class RoomCamera extends PIXI.Container {
 
       TWEEN.update(value);
     });
+  }
+
+  static forScreen(room: Room, options?: RoomCameraOptions) {
+    return new RoomCamera(room, () => room.application.screen, options);
+  }
+
+  destroy() {
+    this._parentContainer.removeListener(
+      "pointerdown",
+      this._handlePointerDown
+    );
+    this._target.removeEventListener(
+      "pointermove",
+      this._handlePointerMove as any
+    );
+    this._target.removeEventListener("pointerup", this._handlePointerUp as any);
   }
 
   private _handlePointerUp = (event: PointerEvent) => {
@@ -105,7 +118,7 @@ export class RoomCamera extends PIXI.Container {
 
   private _updatePosition() {
     switch (this._state.type) {
-      case "DRAGGING":
+      case "DRAGGING": {
         // When dragging, the current position consists of the current offset of the camera
         // and the drag difference.
 
@@ -115,19 +128,22 @@ export class RoomCamera extends PIXI.Container {
         this._container.x = this._offsets.x + diffX;
         this._container.y = this._offsets.y + diffY;
         break;
+      }
 
-      case "ANIMATE_ZERO":
+      case "ANIMATE_ZERO": {
         // When animating back to the zero point, we use the animatedOffsets of the camera.
 
         this._container.x = this._animatedOffsets.x;
         this._container.y = this._animatedOffsets.y;
         break;
+      }
 
-      default:
+      default: {
         // Default behavior: Use the set offsets of the camera.
 
         this._container.x = this._offsets.x;
         this._container.y = this._offsets.y;
+      }
     }
   }
 
@@ -285,17 +301,6 @@ export class RoomCamera extends PIXI.Container {
     };
 
     this._updatePosition();
-  }
-  destroy() {
-    this._parentContainer.removeListener(
-      "pointerdown",
-      this._handlePointerDown
-    );
-    this._target.removeEventListener(
-      "pointermove",
-      this._handlePointerMove as any
-    );
-    this._target.removeEventListener("pointerup", this._handlePointerUp as any);
   }
 }
 

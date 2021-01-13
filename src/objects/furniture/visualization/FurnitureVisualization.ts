@@ -20,14 +20,13 @@ export abstract class FurnitureVisualization
     return this._view != null;
   }
 
-  abstract destroy(): void;
-
   setView(view: IFurnitureVisualizationView): void {
     this._previousView = this._view;
     this._view = view;
   }
 
-  update(): void {}
+  abstract update(): void;
+  abstract destroy(): void;
 
   abstract updateFrame(frame: number): void;
   abstract updateDirection(direction: number): void;

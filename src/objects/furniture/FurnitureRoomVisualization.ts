@@ -1,7 +1,7 @@
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 import { IFurnitureRoomVisualization } from "./BaseFurniture";
 
-export class FurnitureVisualization implements IFurnitureRoomVisualization {
+export class FurnitureRoomVisualization implements IFurnitureRoomVisualization {
   constructor(private _container: PIXI.Container) {}
 
   public get container() {
@@ -9,12 +9,14 @@ export class FurnitureVisualization implements IFurnitureRoomVisualization {
   }
 
   static fromContainer(container: PIXI.Container) {
-    return new FurnitureVisualization(container);
+    return new FurnitureRoomVisualization(container);
   }
 
-  addMask(maskId: string, element: PIXI.DisplayObject): MaskNode {
+  addMask(): MaskNode {
     return {
-      remove: () => {},
+      remove: () => {
+        // Do nothing
+      },
     };
   }
 }

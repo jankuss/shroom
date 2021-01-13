@@ -4,7 +4,7 @@ import { tryFetchString } from "./fetching";
 import * as path from "path";
 import { dumpFigureLibraries } from "./dumpFigureLibraries";
 import { dumpFurniFromFurniData } from "./dumpFurniFromFurniData";
-import { createOffsetSnapshot } from "../objects/avatar/util";
+import { createOffsetSnapshot } from "../../objects/avatar/util";
 import Bluebird from "bluebird";
 
 export type Steps = {
@@ -127,7 +127,8 @@ export async function run({
   }
 
   const figureAssetsJob = () =>
-    new Promise(async (resolve, reject) => {
+    // eslint-disable-next-line no-async-promise-executor
+    new Promise(async (resolve) => {
       if (steps.figureAssets) {
         dispatch({ type: "FIGURE_ASSETS_LOADING" });
 
@@ -164,7 +165,8 @@ export async function run({
     });
 
   const furniAssetsJob = () =>
-    new Promise(async (resolve, reject) => {
+    // eslint-disable-next-line no-async-promise-executor
+    new Promise(async (resolve) => {
       if (steps.furniAssets) {
         dispatch({ type: "FURNI_ASSETS_LOADING" });
 
@@ -272,12 +274,6 @@ export function reducer(state: State, action: Action): State {
       return {
         ...state,
         lastFurniAsset: action.payload,
-        furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
-      };
-
-    case "FURNI_ASSETS_PROGRESS_ERROR":
-      return {
-        ...state,
         furniAssetsCompletedCount: (state?.furniAssetsCompletedCount ?? 0) + 1,
       };
 

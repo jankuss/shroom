@@ -1,10 +1,5 @@
-import {
-  Animation,
-  IFurnitureVisualizationData,
-} from "../data/interfaces/IFurnitureVisualizationData";
+import { IFurnitureVisualizationData } from "../data/interfaces/IFurnitureVisualizationData";
 import { FurnitureSprite } from "../FurnitureSprite";
-import { IFurnitureVisualization } from "../IFurnitureVisualization";
-import { IFurnitureVisualizationView } from "../IFurnitureVisualizationView";
 import { FurniDrawDefinition, FurniDrawPart } from "../util/DrawDefinition";
 import { FurnitureVisualization } from "./FurnitureVisualization";
 
@@ -20,13 +15,13 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   private _furnitureDrawDefintion: FurniDrawDefinition | undefined;
   private _sprites: Set<FurnitureSprite> = new Set();
   private _disableTransitions = false;
-  private _frame: number = 0;
+  private _frame = 0;
   private _overrideAnimation: number | undefined;
   private _modifier: ((part: FurniDrawPart) => FurniDrawPart) | undefined;
 
   private _currentDirection: number | undefined;
   private _currentTargetAnimationId: string | undefined;
-  private _changeAnimationCount: number = 0;
+  private _changeAnimationCount = 0;
   private _lastFramePlayedMap: Map<number, boolean> = new Map();
 
   private _refreshFurniture = false;
@@ -58,49 +53,6 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this._updateFurniture();
   }
 
-  private _getAnimationList(
-    data: IFurnitureVisualizationData,
-    target: number
-  ): InProgressAnimation[] {
-    const animations: InProgressAnimation[] = [];
-
-    const handleAnimation = (id: number) => {
-      const transition = data.getTransitionForAnimation(64, id);
-
-      if (transition != null) {
-        handleAnimation(transition.id);
-      }
-
-      const animation = data.getAnimation(64, id);
-      const frameCount = data.getFrameCount(64, id) ?? 1;
-
-      if (animation != null) {
-        animations.push({ id: animation.id, frameCount });
-      }
-    };
-
-    handleAnimation(target);
-
-    if (animations.length === 0) {
-      return [{ id: 0, frameCount: 1 }];
-    }
-
-    return animations;
-  }
-
-  private _updateAnimation(
-    oldAnimation: string | undefined,
-    newAnimation: string | undefined
-  ) {
-    this._currentTargetAnimationId = newAnimation;
-    if (newAnimation == null) {
-      this.setCurrentAnimation(0);
-    } else if (oldAnimation == newAnimation) {
-    } else if (oldAnimation != newAnimation) {
-      this.setCurrentAnimation(Number(newAnimation));
-    }
-  }
-
   setCurrentAnimation(newAnimation: number) {
     this._animationQueueStartFrame = undefined;
     // Skip the transitions of the initial animation change.
@@ -124,12 +76,16 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this._refreshFurniture = true;
   }
 
-  private _getCurrentProgress(frame: number) {
-    if (this._animationQueueStartFrame == null) {
-      return 0;
-    }
+  isLastFramePlayedForLayer(layerIndex: number) {
+    return this._lastFramePlayedMap.get(layerIndex) ?? false;
+  }
 
-    return frame - this._animationQueueStartFrame;
+  destroy(): void {
+    this._sprites.forEach((sprite) => this.view.destroySprite(sprite));
+  }
+
+  update() {
+    this._update();
   }
 
   updateFrame(frame: number): void {
@@ -175,7 +131,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
       animationFrameCount = animation.frameCount;
     }
 
-    this._setAnimation(animationId, progress);
+    this._setAnimation(animationId);
 
     this._animationFrameCount = animationFrameCount;
     this._frame = progress;
@@ -183,7 +139,15 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this._update();
   }
 
-  private _setAnimation(animation: number, frame: number) {
+  private _getCurrentProgress(frame: number) {
+    if (this._animationQueueStartFrame == null) {
+      return 0;
+    }
+
+    return frame - this._animationQueueStartFrame;
+  }
+
+  private _setAnimation(animation: number) {
     if (this._currentAnimationId === animation) return;
 
     this._currentAnimationId = animation;
@@ -244,12 +208,48 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     });
   }
 
-  isLastFramePlayedForLayer(layerIndex: number) {
-    return this._lastFramePlayedMap.get(layerIndex) ?? false;
+  private _getAnimationList(
+    data: IFurnitureVisualizationData,
+    target: number
+  ): InProgressAnimation[] {
+    const animations: InProgressAnimation[] = [];
+
+    const handleAnimation = (id: number) => {
+      const transition = data.getTransitionForAnimation(64, id);
+
+      if (transition != null) {
+        handleAnimation(transition.id);
+      }
+
+      const animation = data.getAnimation(64, id);
+      const frameCount = data.getFrameCount(64, id) ?? 1;
+
+      if (animation != null) {
+        animations.push({ id: animation.id, frameCount });
+      }
+    };
+
+    handleAnimation(target);
+
+    if (animations.length === 0) {
+      return [{ id: 0, frameCount: 1 }];
+    }
+
+    return animations;
   }
 
-  destroy(): void {
-    this._sprites.forEach((sprite) => this.view.destroySprite(sprite));
+  private _updateAnimation(
+    oldAnimation: string | undefined,
+    newAnimation: string | undefined
+  ) {
+    this._currentTargetAnimationId = newAnimation;
+    if (newAnimation == null) {
+      this.setCurrentAnimation(0);
+    } else if (oldAnimation == newAnimation) {
+      // Do nothing
+    } else if (oldAnimation != newAnimation) {
+      this.setCurrentAnimation(Number(newAnimation));
+    }
   }
 }
 

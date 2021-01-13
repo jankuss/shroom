@@ -19,7 +19,7 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
   private _tag: string | undefined;
   private _mirrored: boolean;
   private _mirrorNotVisually: boolean;
-  private _ignore: boolean = false;
+  private _ignore = false;
 
   public get ignore() {
     return this._ignore;

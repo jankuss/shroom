@@ -2,7 +2,9 @@ import { HitDetection } from "./HitDetection";
 
 const view = {
   getBoundingClientRect: () => ({ x: 0, y: 0 }),
-  addEventListener: () => {},
+  addEventListener: () => {
+    // Do nothing
+  },
 };
 
 test("detects hits on multiple elements", () => {
@@ -16,7 +18,7 @@ test("detects hits on multiple elements", () => {
   hitDetection.register({
     getHitBox: () => ({ x: 0, y: 0, width: 10, height: 10, zIndex: 10 }),
     hits: () => true,
-    trigger: (type, event) => {
+    trigger: () => {
       firstClicked = true;
     },
   });
@@ -24,7 +26,7 @@ test("detects hits on multiple elements", () => {
   hitDetection.register({
     getHitBox: () => ({ x: 0, y: 0, width: 5, height: 5, zIndex: 5 }),
     hits: () => true,
-    trigger: (type, event) => {
+    trigger: () => {
       secondClicked = true;
     },
   });
@@ -46,7 +48,7 @@ test("doesn't detect if element out of bounds", () => {
   hitDetection.register({
     getHitBox: () => ({ x: 0, y: 0, width: 10, height: 10, zIndex: 10 }),
     hits: () => true,
-    trigger: (type, event) => {
+    trigger: () => {
       firstClicked = true;
     },
   });
@@ -54,7 +56,7 @@ test("doesn't detect if element out of bounds", () => {
   hitDetection.register({
     getHitBox: () => ({ x: 0, y: 0, width: 5, height: 5, zIndex: 5 }),
     hits: () => true,
-    trigger: (type, event) => {
+    trigger: () => {
       secondClicked = true;
     },
   });
@@ -76,7 +78,7 @@ test("doesn't detect if element in bounds but doesn't hit", () => {
   hitDetection.register({
     getHitBox: () => ({ x: 0, y: 0, width: 10, height: 10, zIndex: 10 }),
     hits: () => true,
-    trigger: (type, event) => {
+    trigger: () => {
       firstClicked = true;
     },
   });
@@ -84,7 +86,7 @@ test("doesn't detect if element in bounds but doesn't hit", () => {
   hitDetection.register({
     getHitBox: () => ({ x: 0, y: 0, width: 5, height: 5, zIndex: 5 }),
     hits: () => false,
-    trigger: (type, event) => {
+    trigger: () => {
       secondClicked = true;
     },
   });
@@ -115,7 +117,7 @@ test("intercepts event if element stops propagating", () => {
   hitDetection.register({
     getHitBox: () => ({ x: 0, y: 0, width: 5, height: 5, zIndex: 5 }),
     hits: () => true,
-    trigger: (type, event) => {
+    trigger: () => {
       secondClicked = true;
     },
   });

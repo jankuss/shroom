@@ -9,9 +9,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `shroom proxy` command: Proxy & translate WebSocket messages to something the emulator will understand
+  This enables you to communicate with the emulator through websockets, without making any adjustments to
+  the emulator itself.
+- Option to hide tile cursor in a room with `room.hideTileCursor`
+- BaseFurniture now has a onLoad callback, which gets called after the furniture is fully loaded
+- Add `headDirection` option for `avatar.walk()`
+- Add corner stairs (thanks @tuttarealstep)
+
+### Changed
+
+- Providing no direction in `avatar.walk()` doesn't modify the avatars direction now
+
+### Fixed
+
+- Display of furniture with special layer offsets for a direction
+- Fix coloring of clothing when changing the look
+- Avatar displaying behind bed while laying
+
+## [0.4.1] - 2021-01-10
+
+### Fixed
+
+- Furniture default coloring not being applied
+- Fix some furniture layers not showing
+- Fix furniture not displaying at all when one asset fails to load
+
+## [0.4.0] - 2021-01-09
+
+### Added
+
 - Customizable furniture visualizations through `furniture.visualization = /*...*/`
 - Option to not render body when using `BaseAvatar` (thanks @somekindadude)
 - Option to specify `headRotation` for avatars (thanks @somekindadude)
+
+### Changed
+
+- Improve tilemap parsing to handle carriage return in string
 
 ### Fixed
 
@@ -21,14 +55,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix behaviors called before `BaseFurniture` initialized
 - Fix tile cursor displaying above furniture
 
-## [0.3.1] - 2020-01-04
+## [0.3.1] - 2021-01-04
 
 ### Fixed
 
 - Avatar `onClick` and `onDoubleClick` not firing
 - Wall border hiding for some room models where they shouldn't
 
-## [0.3.0] - 2020-01-04
+## [0.3.0] - 2021-01-04
 
 ### Added
 

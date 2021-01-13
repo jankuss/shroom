@@ -23,21 +23,19 @@ export const downloadFurni = async (
     const downloadedSwfFile = path.resolve(path.join(`${furniDirectory}.swf`));
     await fs.stat(downloadedSwfFile);
     return;
-  } catch (e) {}
-
-  try {
-    const furniture = await fetchFurni(dcrUrl, revision, name);
-
-    await fs.mkdir(furniDirectory, { recursive: true });
-
-    await fs.writeFile(
-      path.join(revisionDirectory, `${furniture.name}.swf`),
-      furniture.buffer,
-      "binary"
-    );
   } catch (e) {
-    throw e;
+    // Do nothing
   }
+
+  const furniture = await fetchFurni(dcrUrl, revision, name);
+
+  await fs.mkdir(furniDirectory, { recursive: true });
+
+  await fs.writeFile(
+    path.join(revisionDirectory, `${furniture.name}.swf`),
+    furniture.buffer,
+    "binary"
+  );
 };
 
 export async function dumpFurni(
@@ -59,7 +57,9 @@ export async function dumpFurni(
     const binPath = path.resolve(path.join(furniDirectory, binFileName));
     await fs.stat(binPath);
     return;
-  } catch (e) {}
+  } catch (e) {
+    // Do nothing
+  }
 
   await extractSwf({
     out: furniDirectory,

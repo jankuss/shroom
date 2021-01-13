@@ -1,6 +1,6 @@
 {
   "name": "@jankuss/shroom",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "main": "dist/index.js",
   "license": "LGPL-3.0-or-later",
   "repository": {
@@ -10,13 +10,24 @@
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/bluebird": "^3.5.33",
+    "@types/bytebuffer": "^5.0.42",
     "@types/jest": "^26.0.15",
     "@types/node": "^14.14.13",
     "@types/node-fetch": "^2.5.7",
     "@types/react": "^16.9.56",
     "@types/tween.js": "^18.6.1",
+    "@types/ws": "^7.4.0",
     "@types/xml2js": "^0.4.5",
+    "@typescript-eslint/eslint-plugin": "^4.12.0",
+    "@typescript-eslint/parser": "^4.12.0",
     "canvas": "^2.6.1",
+    "eslint": "^7.17.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.22.0",
     "jest": "^26.6.1",
     "pixi.js": "^5.3.3",
     "prettier": "2.2.1",
@@ -28,8 +39,10 @@
   "dependencies": {
     "axios": "^0.21.1",
     "bluebird": "^3.7.2",
+    "bytebuffer": "^5.0.1",
     "chalk": "^4.1.0",
     "events": "^3.2.0",
+    "frame-stream": "^2.0.3",
     "ink": "^3.0.8",
     "node-fetch": "^2.6.1",
     "react": "^16.14.0",
@@ -38,8 +51,9 @@
     "timers": "^0.1.1",
     "timers-browserify": "^2.0.11",
     "tween.js": "^16.6.0",
+    "ws": "^7.4.2",
     "xml2js": "^0.4.23",
-    "yargs": "^16.1.1"
+    "yargs": "^16.2.0"
   },
   "peerDependencies": {
     "pixi.js": "^5.3.3"
@@ -52,7 +66,7 @@
     "prepublishOnly": "yarn build"
   },
   "bin": {
-    "shroom": "dist/downloading/cli/index.js"
+    "shroom": "dist/cli/index.js"
   },
   "files": [
     "/dist"

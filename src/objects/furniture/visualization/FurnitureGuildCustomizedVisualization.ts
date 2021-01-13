@@ -4,9 +4,10 @@ import { AnimatedFurnitureVisualization } from "./AnimatedFurnitureVisualization
 import { FurnitureVisualization } from "./FurnitureVisualization";
 
 export class FurnitureGuildCustomizedVisualization extends FurnitureVisualization {
+  private static readonly PRIMARY_COLOR_TAG = "COLOR1";
+  private static readonly SECONDARY_COLOR_TAG = "COLOR2";
+
   private _base: AnimatedFurnitureVisualization = new AnimatedFurnitureVisualization();
-  private PRIMARY_COLOR_TAG = "COLOR1";
-  private SECONDARY_COLOR_TAG = "COLOR2";
 
   private _primaryColor: string | undefined;
   private _secondaryColor: string | undefined;
@@ -40,28 +41,8 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureVisualizatio
     this._refreshModifier = true;
   }
 
-  private _updateModifier() {
-    this._base.modifier = (part) => {
-      return this._modifyPart(part);
-    };
-  }
-
-  private _modifyPart(part: FurniDrawPart): FurniDrawPart {
-    switch (part.layer?.tag) {
-      case this.PRIMARY_COLOR_TAG:
-        return {
-          ...part,
-          tint: this._primaryColor,
-        };
-
-      case this.SECONDARY_COLOR_TAG:
-        return {
-          ...part,
-          tint: this._secondaryColor,
-        };
-    }
-
-    return part;
+  update(): void {
+    this._base.update();
   }
 
   setView(view: IFurnitureVisualizationView) {
@@ -88,5 +69,29 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureVisualizatio
 
   updateAnimation(animation: string): void {
     this._base.updateAnimation(animation);
+  }
+
+  private _updateModifier() {
+    this._base.modifier = (part) => {
+      return this._modifyPart(part);
+    };
+  }
+
+  private _modifyPart(part: FurniDrawPart): FurniDrawPart {
+    switch (part.layer?.tag) {
+      case FurnitureGuildCustomizedVisualization.PRIMARY_COLOR_TAG:
+        return {
+          ...part,
+          tint: this._primaryColor,
+        };
+
+      case FurnitureGuildCustomizedVisualization.SECONDARY_COLOR_TAG:
+        return {
+          ...part,
+          tint: this._secondaryColor,
+        };
+    }
+
+    return part;
   }
 }

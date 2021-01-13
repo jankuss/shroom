@@ -37,7 +37,7 @@ export class Tile extends RoomObject implements ITexturable {
 
   public set tileHeight(value) {
     this._tileHeight = value;
-    this.updateSprites();
+    this._updateSprites();
   }
 
   constructor(private props: Props) {
@@ -55,7 +55,7 @@ export class Tile extends RoomObject implements ITexturable {
 
   set texture(value) {
     this._texture = value;
-    this.updateSprites();
+    this._updateSprites();
   }
 
   get color() {
@@ -64,23 +64,31 @@ export class Tile extends RoomObject implements ITexturable {
 
   set color(value) {
     this._color = value;
-    this.updateSprites();
+    this._updateSprites();
   }
 
-  private destroySprites() {
+  destroyed(): void {
+    this._destroySprites();
+  }
+
+  registered(): void {
+    this._updateSprites();
+  }
+
+  private _destroySprites() {
     this._sprites.forEach((sprite) => sprite.destroy());
     this._sprites = [];
   }
 
-  private updateSprites() {
+  private _updateSprites() {
     if (!this.mounted) return;
 
     this._container?.destroy();
     this._container = new PIXI.Container();
 
-    this.destroySprites();
+    this._destroySprites();
 
-    const { geometry, roomX, roomY, roomZ, edge = false } = this.props;
+    const { geometry, roomX, roomY, roomZ } = this.props;
 
     const { x, y } = geometry.getPosition(roomX, roomY, roomZ);
     this._container.zIndex = getZOrder(roomX, roomY, roomZ);
@@ -141,13 +149,5 @@ export class Tile extends RoomObject implements ITexturable {
       this.roomVisualization.behindWallContainer.addChild(this._container);
       this._container.zIndex = -1;
     }
-  }
-
-  destroyed(): void {
-    this.destroySprites();
-  }
-
-  registered(): void {
-    this.updateSprites();
   }
 }

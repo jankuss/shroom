@@ -104,6 +104,8 @@ export function Walking() {
       avatar.walk(1, 2, 0, { direction: 4 });
       avatar.walk(2, 2, 0, { direction: 2 });
       avatar.walk(3, 2, 0, { direction: 2 });
+      avatar.walk(4, 2, 0);
+      avatar.walk(4, 3, 0, { direction: 4, headDirection: 5 });
     }, 3000);
 
     room.x = application.screen.width / 2 - room.roomWidth / 2;
@@ -299,7 +301,6 @@ export function EventHandling() {
   });
 }
 
-
 export function headRotation() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
@@ -313,12 +314,13 @@ export function headRotation() {
     });
 
     const avatar = new Avatar({
-      look: "hd-180-1.hr-828-61.ha-1012-110.he-1604-62.ea-1404-62.fa-1204-62.ch-255-66.lg-280-110.sh-305-62",
+      look:
+        "hd-180-1.hr-828-61.ha-1012-110.he-1604-62.ea-1404-62.fa-1204-62.ch-255-66.lg-280-110.sh-305-62",
       direction: 5,
       roomX: 1,
       roomY: 1,
       roomZ: 0,
-      headDirection: 5
+      headDirection: 5,
     });
 
     // const avatar2 = new Avatar({
@@ -371,12 +373,12 @@ export function headRotation() {
     application.stage.addChild(room);
   });
 }
-                      
+
 export function BaseAvatarClothes() {
   return createShroom(({ application, shroom }) => {
     const baseAvatar = BaseAvatar.fromShroom(shroom, {
       look: {
-        look: 'ch-210-66',
+        look: "ch-210-66",
         direction: 2,
         actions: new Set<AvatarAction>(),
       },
@@ -385,32 +387,108 @@ export function BaseAvatarClothes() {
       skipCaching: true,
       position: {
         x: 0,
-        y: 32
+        y: 32,
       },
       onLoad: () => {
         // console.log(baseAvatar.width, baseAvatar.height)
-      }
+      },
     });
 
     const baseAvatar2 = BaseAvatar.fromShroom(shroom, {
       look: {
-        look: 'hr-3163-39.hd-180-2.lg-3202-1322.ch-215-1331',
+        look: "hr-3163-39.hd-180-2.lg-3202-1322.ch-215-1331",
         direction: 3,
-        actions: new Set<AvatarAction>()
+        actions: new Set<AvatarAction>(),
       },
       zIndex: 1,
       headOnly: true,
       skipCaching: true,
       position: {
         x: 100,
-        y: 200
+        y: 200,
       },
       onLoad: () => {
-        console.log(baseAvatar2.width, baseAvatar2.height)
-      }
+        console.log(baseAvatar2.width, baseAvatar2.height);
+      },
     });
 
     application.stage.addChild(baseAvatar);
     application.stage.addChild(baseAvatar2);
+  });
+}
+
+export function BaseAvatarBroke() {
+  return createShroom(({ application, shroom }) => {
+    const avatar1 = BaseAvatar.fromShroom(shroom, {
+      look: {
+        look: "hr-3163-39.hd-180-2.lg-3202-1322-1329.ch-215-1331",
+        actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+        direction: 3,
+      },
+      position: {
+        x: 0,
+        y: 150,
+      },
+      zIndex: 0,
+      onLoad: () => {},
+    });
+    const avatar2 = BaseAvatar.fromShroom(shroom, {
+      look: {
+        look: "lg-3202-1322-1329.hr-3163-39.ch-215-93.ha-1009-93.hd-180-2",
+        actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+        direction: 3,
+      },
+      position: {
+        x: 100,
+        y: 150,
+      },
+      zIndex: 0,
+      onLoad: () => {
+        //
+      },
+    });
+    const avatar3 = BaseAvatar.fromShroom(shroom, {
+      look: {
+        look: "hr-3163-39.hd-180-2.lg-3202-1322-1329.ch-215-1331",
+        actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+        direction: 3,
+      },
+      position: {
+        x: 200,
+        y: 150,
+      },
+      zIndex: 0,
+      onLoad: () => {
+        avatar3.lookOptions = {
+          look: "lg-3202-1322-1329.hr-3163-39.ch-215-93.ha-1009-93.hd-180-2",
+          actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+          direction: 3,
+        };
+      },
+    });
+    const avatar4 = BaseAvatar.fromShroom(shroom, {
+      look: {
+        look: "lg-3202-1322-1329.hr-3163-39.ch-215-93.ha-1009-93.hd-180-2",
+        actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+        direction: 3,
+      },
+      position: {
+        x: 200,
+        y: 250,
+      },
+      zIndex: 0,
+      onLoad: () => {
+        avatar4.lookOptions = {
+          look: "hr-3163-39.hd-180-2.lg-3202-1322-1329.ch-215-1331",
+          actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+          direction: 3,
+        };
+      },
+    });
+
+    application.stage.addChild(avatar1);
+    application.stage.addChild(avatar2);
+    application.stage.addChild(avatar3);
+    application.stage.addChild(avatar4);
   });
 }

@@ -1,13 +1,13 @@
 import { HitSprite } from "../hitdetection/HitSprite";
 
 export class FurnitureSprite extends HitSprite {
-  private _baseX: number = 0;
-  private _baseY: number = 0;
-  private _baseZIndex: number = 0;
+  private _baseX = 0;
+  private _baseY = 0;
+  private _baseZIndex = 0;
 
-  private _offsetX: number = 0;
-  private _offsetY: number = 0;
-  private _offsetZIndex: number = 0;
+  private _offsetX = 0;
+  private _offsetY = 0;
+  private _offsetZIndex = 0;
 
   private _assetName: string | undefined;
 

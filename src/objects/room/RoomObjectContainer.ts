@@ -18,8 +18,6 @@ export class RoomObjectContainer implements IRoomObjectContainer {
     this._context = value;
   }
 
-  constructor() {}
-
   addRoomObject(object: IRoomObject) {
     if (this._context == null)
       throw new Error("Context wasn't supplied to RoomObjectContainer");

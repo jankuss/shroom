@@ -10,6 +10,17 @@ import { geometryXml } from "./static/geometry.xml";
 export class AvatarGeometryData
   extends AvatarData
   implements IAvatarGeometryData {
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new AvatarGeometryData(text);
+  }
+
+  static default() {
+    return new AvatarGeometryData(atob(geometryXml));
+  }
+
   getBodyPart(geometry: string, bodyPartId: string): Bodypart | undefined {
     const element = this.querySelector(
       `type[id="${geometry}"] bodypart[id="${bodyPartId}"]`
@@ -70,16 +81,5 @@ export class AvatarGeometryData
       dx,
       dy,
     };
-  }
-
-  static async fromUrl(url: string) {
-    const response = await fetch(url);
-    const text = await response.text();
-
-    return new AvatarGeometryData(text);
-  }
-
-  static default() {
-    return new AvatarGeometryData(atob(geometryXml));
   }
 }

@@ -13,6 +13,14 @@ export class FurnitureVisualizationData
   constructor(xml: string) {
     super(xml);
   }
+
+  static async fromUrl(url: string) {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    return new FurnitureVisualizationData(text);
+  }
+
   getTransitionForAnimation(
     size: number,
     transitionTo: number
@@ -132,12 +140,20 @@ export class FurnitureVisualizationData
     );
 
     if (directionLayer == null) return;
-    const directionZ = Number(directionLayer.getAttribute("z") ?? undefined);
-
-    if (isNaN(directionZ)) return;
+    const z = this._getNumberFromAttributeValue(
+      directionLayer.getAttribute("z")
+    );
+    const x = this._getNumberFromAttributeValue(
+      directionLayer.getAttribute("x")
+    );
+    const y = this._getNumberFromAttributeValue(
+      directionLayer.getAttribute("y")
+    );
 
     return {
-      z: directionZ,
+      z: z,
+      x: x,
+      y: y,
     };
   }
 
@@ -176,5 +192,14 @@ export class FurnitureVisualizationData
       ink: ink ?? undefined,
       ignoreMouse: ignoreMouse != null ? ignoreMouse === "1" : undefined,
     };
+  }
+
+  private _getNumberFromAttributeValue(value: string | null) {
+    if (value == null) return undefined;
+    const numberValue = Number(value);
+
+    if (isNaN(numberValue)) return undefined;
+
+    return numberValue;
   }
 }

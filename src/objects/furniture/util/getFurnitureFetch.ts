@@ -1,4 +1,3 @@
-import { FurnitureId } from "../../../interfaces/IFurnitureData";
 import { FurnitureFetch } from "../../../interfaces/IFurnitureLoader";
 import { FurnitureFetchInfo } from "../FurnitureFetchInfo";
 
