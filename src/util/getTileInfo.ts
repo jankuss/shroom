@@ -7,6 +7,8 @@ const offsets = {
   left: { x: -1, y: 0 },
 };
 
+export type NumberOfTile = number | "x";
+
 export function getNumberOfTileType(tileType: TileType): number | "x" {
   if (tileType === "x" || tileType == null) return "x";
 

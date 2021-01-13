@@ -440,6 +440,8 @@ export class Wall extends RoomObject {
       }
     }
 
+    this._container.interactive = true;
+
     this.roomVisualization.wallContainer.addChild(this._container);
   }
 }
