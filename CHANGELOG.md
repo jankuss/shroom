@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `shroom proxy` command: Proxy & translate WebSocket messages to something the emulator will understand
+  This enables you to communicate with the emulator through websockets, without making any adjustments to
+  the emulator itself.
 - Add `headDirection` option for `avatar.walk()`
 
 ### Changed
