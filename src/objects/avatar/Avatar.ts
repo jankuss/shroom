@@ -13,7 +13,10 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _avatarSprites: BaseAvatar;
 
   private _moveAnimation:
-    | ObjectAnimation<{ type: "walk"; direction: number } | { type: "move" }>
+    | ObjectAnimation<
+        | { type: "walk"; direction?: number; headDirection?: number }
+        | { type: "move" }
+      >
     | undefined;
   private _walking = false;
   private _moving = false;
@@ -297,19 +300,20 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
    * @param roomX New x-Position
    * @param roomY New y-Position
    * @param roomZ New z-Position
-   * @param options Optionally specify the direction of user movement
+   * @param options Optionally specify the direction/headDirection of user movement
    */
   walk(
     roomX: number,
     roomY: number,
     roomZ: number,
-    options?: { direction?: number }
+    options?: { direction?: number; headDirection?: number }
   ) {
     this._moveAnimation?.move(
       { roomX: this.roomX, roomY: this.roomY, roomZ: this.roomZ },
       { roomX, roomY, roomZ },
       {
-        direction: options?.direction ?? this.direction,
+        direction: options?.direction,
+        headDirection: options?.headDirection,
         type: "walk",
       }
     );
@@ -375,7 +379,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
         },
         onStart: (data) => {
           if (data.type === "walk") {
-            this._startWalking(data.direction);
+            this._startWalking(data.direction, data.headDirection);
             this._moving = false;
           } else if (data.type === "move") {
             this._stopWalking();
@@ -533,9 +537,17 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     }
   }
 
-  private _startWalking(direction: number) {
+  private _startWalking(direction?: number, headDirection?: number) {
     this._walking = true;
-    this.direction = direction;
+
+    if (direction != null) {
+      this.direction = direction;
+    }
+
+    if (headDirection != null) {
+      this.headDirection = headDirection;
+    }
+
     this._updateAvatarSprites();
   }
 

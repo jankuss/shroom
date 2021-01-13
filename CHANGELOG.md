@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the emulator itself.
 - Option to hide tile cursor in a room with `room.hideTileCursor`
 - BaseFurniture now has a onLoad callback, which gets called after the furniture is fully loaded
+- Add `headDirection` option for `avatar.walk()`
+
+### Changed
+
+- Providing no direction in `avatar.walk()` doesn't modify the avatars direction now
 
 ### Fixed
 
