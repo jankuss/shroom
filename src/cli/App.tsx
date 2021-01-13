@@ -1,6 +1,12 @@
 import React, { useReducer } from "react";
 import { Box, Newline, Text } from "ink";
-import { initialState, reducer, run, Steps, StepState } from "../state";
+import {
+  initialState,
+  reducer,
+  run,
+  Steps,
+  StepState,
+} from "../tools/downloading/state";
 
 const stepMap: {
   [k in keyof Steps]: string;

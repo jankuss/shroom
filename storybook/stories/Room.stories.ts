@@ -485,6 +485,23 @@ export function OtherRoomShape() {
   });
 }
 
+export function HideTileCursor() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxxxxxx
+        x000000
+        x000000
+        x000000
+      `,
+    });
+
+    room.hideTileCursor = true;
+
+    application.stage.addChild(room);
+  });
+}
+
 export default {
   title: "Room",
 };
