@@ -96,6 +96,7 @@ export class Room
 
   private _hideWalls = false;
   private _hideFloor = false;
+  private _hideTileCursor = false;
 
   private _onTileClick: ((position: RoomPosition) => void) | undefined;
 
@@ -240,6 +241,15 @@ export class Room
 
   public set hideFloor(value) {
     this._hideFloor = value;
+    this._updateTiles();
+  }
+
+  public get hideTileCursor() {
+    return this._hideTileCursor;
+  }
+
+  public set hideTileCursor(value) {
+    this._hideTileCursor = value;
     this._updateTiles();
   }
 
@@ -503,6 +513,8 @@ export class Room
   }
 
   private _registerTileCursor(position: RoomPosition, door = false) {
+    if (this._hideTileCursor) return;
+
     const cursor = new TileCursor(
       position,
       door,

@@ -84,6 +84,10 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this._sprites.forEach((sprite) => this.view.destroySprite(sprite));
   }
 
+  update() {
+    this._update();
+  }
+
   updateFrame(frame: number): void {
     if (this._refreshFurniture) {
       this._refreshFurniture = false;

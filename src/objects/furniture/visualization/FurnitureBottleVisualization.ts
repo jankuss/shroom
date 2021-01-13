@@ -16,6 +16,10 @@ export class FurnitureBottleVisualization extends FurnitureVisualization {
     this._base.destroy();
   }
 
+  update(): void {
+    this._base.update();
+  }
+
   setView(view: IFurnitureVisualizationView) {
     super.setView(view);
     this._base.setView(view);

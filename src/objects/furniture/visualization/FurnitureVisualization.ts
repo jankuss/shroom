@@ -25,10 +25,7 @@ export abstract class FurnitureVisualization
     this._view = view;
   }
 
-  update(): void {
-    // Do nothing
-  }
-
+  abstract update(): void;
   abstract destroy(): void;
 
   abstract updateFrame(frame: number): void;
