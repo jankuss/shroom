@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BaseFurniture now has a onLoad callback, which gets called after the furniture is fully loaded
 - Add `headDirection` option for `avatar.walk()`
 - Add corner stairs (thanks @tuttarealstep)
+- Add `skipCaching` option to `BaseAvatar` to skip unnecessary caching from the AvatarLoader (thanks @somekindadude)
 
 ### Changed
 
