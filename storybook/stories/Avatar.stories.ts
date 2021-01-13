@@ -424,3 +424,79 @@ export function BaseAvatarClothes() {
     application.stage.addChild(baseAvatar2);
   });
 }
+
+export function BaseAvatarBroke() {
+  return createShroom(({ application, shroom }) => {
+    const avatar1 = BaseAvatar.fromShroom(shroom, {
+      look: {
+        look: "hr-3163-39.hd-180-2.lg-3202-1322-1329.ch-215-1331",
+        actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+        direction: 3,
+      },
+      position: {
+        x: 0,
+        y: 150,
+      },
+      zIndex: 0,
+      onLoad: () => {},
+    });
+    const avatar2 = BaseAvatar.fromShroom(shroom, {
+      look: {
+        look: "lg-3202-1322-1329.hr-3163-39.ch-215-93.ha-1009-93.hd-180-2",
+        actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+        direction: 3,
+      },
+      position: {
+        x: 100,
+        y: 150,
+      },
+      zIndex: 0,
+      onLoad: () => {
+        //
+      },
+    });
+    const avatar3 = BaseAvatar.fromShroom(shroom, {
+      look: {
+        look: "hr-3163-39.hd-180-2.lg-3202-1322-1329.ch-215-1331",
+        actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+        direction: 3,
+      },
+      position: {
+        x: 200,
+        y: 150,
+      },
+      zIndex: 0,
+      onLoad: () => {
+        avatar3.lookOptions = {
+          look: "lg-3202-1322-1329.hr-3163-39.ch-215-93.ha-1009-93.hd-180-2",
+          actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+          direction: 3,
+        };
+      },
+    });
+    const avatar4 = BaseAvatar.fromShroom(shroom, {
+      look: {
+        look: "lg-3202-1322-1329.hr-3163-39.ch-215-93.ha-1009-93.hd-180-2",
+        actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+        direction: 3,
+      },
+      position: {
+        x: 200,
+        y: 250,
+      },
+      zIndex: 0,
+      onLoad: () => {
+        avatar4.lookOptions = {
+          look: "hr-3163-39.hd-180-2.lg-3202-1322-1329.ch-215-1331",
+          actions: new Set<AvatarAction>().add(AvatarAction.GestureSmile),
+          direction: 3,
+        };
+      },
+    });
+
+    application.stage.addChild(avatar1);
+    application.stage.addChild(avatar2);
+    application.stage.addChild(avatar3);
+    application.stage.addChild(avatar4);
+  });
+}

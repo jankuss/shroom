@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Display of furniture with special layer offsets for a direction
+- Fix coloring of clothing when changing the look
 - Avatar displaying behind bed while laying
 
 ## [0.4.1] - 2021-01-10
