@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `headDirection` option for `avatar.walk()`
+
+### Changed
+
+- Providing no direction in `avatar.walk()` doesn't modify the avatars direction now
+
 ### Fixed
 
 - Display of furniture with special layer offsets for a direction
