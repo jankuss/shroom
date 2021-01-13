@@ -196,6 +196,12 @@ export class BaseAvatar extends PIXI.Container {
       oldLookOptions.direction != newLookOptions.direction ||
       oldLookOptions.headDirection != newLookOptions.headDirection
     ) {
+      console.log(
+        "PREVIOUS LOOK STRING",
+        oldLookOptions?.look,
+        newLookOptions.look
+      );
+
       this._nextLookOptions = newLookOptions;
       this._refreshLook = true;
     }
@@ -324,10 +330,18 @@ export class BaseAvatar extends PIXI.Container {
           this._lookOptions = lookOptions;
           this._nextLookOptions = undefined;
 
+          // Clear sprite cache, since colors could have changed
+          this._clearSpriteCache();
+
           this._updateSprites();
           this._onLoad && this._onLoad();
         });
     }
+  }
+
+  private _clearSpriteCache() {
+    this._sprites.forEach((item) => item.destroy());
+    this._sprites = new Map();
   }
 
   private _updateFrame() {
