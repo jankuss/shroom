@@ -376,16 +376,6 @@ export function headRotation() {
 
 export function BaseAvatarClothes() {
   return createShroom(({ application, shroom }) => {
-    // const room = Room.create(shroom, {
-    //   tilemap: `
-    //        xxxxxxxx
-    //        x0000000
-    //        x0000000
-    //        x0000000
-    //        x0000000
-    //       `,
-    // });
-
     const baseAvatar = BaseAvatar.fromShroom(shroom, {
       look: {
         look: "ch-210-66",
@@ -394,6 +384,7 @@ export function BaseAvatarClothes() {
       },
       zIndex: 1,
       skipBodyParts: true,
+      skipCaching: true,
       position: {
         x: 0,
         y: 32,
@@ -411,6 +402,7 @@ export function BaseAvatarClothes() {
       },
       zIndex: 1,
       headOnly: true,
+      skipCaching: true,
       position: {
         x: 100,
         y: 200,
