@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- BaseFurniture now has a onLoad callback, which gets called after the furniture is fully loaded
+
 ### Fixed
 
 - Display of furniture with special layer offsets for a direction
