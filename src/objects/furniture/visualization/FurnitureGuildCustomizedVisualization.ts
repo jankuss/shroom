@@ -41,6 +41,10 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureVisualizatio
     this._refreshModifier = true;
   }
 
+  update(): void {
+    this._base.update();
+  }
+
   setView(view: IFurnitureVisualizationView) {
     super.setView(view);
     this._base.setView(view);

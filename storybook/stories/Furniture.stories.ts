@@ -336,6 +336,9 @@ export function DetachedFurniture() {
       animation: "0",
       direction: 2,
       type: { type: "club_sofa", kind: "type" },
+      onLoad: () => {
+        console.log("Club Sofa Loaded");
+      },
     });
 
     furniture.x = 100;
