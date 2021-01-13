@@ -465,6 +465,10 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
       combinedActions.add(AvatarAction.Wave);
     }
 
+    if (combinedActions.has(AvatarAction.Lay) && this._walking) {
+      combinedActions.delete(AvatarAction.Lay);
+    }
+
     return {
       actions: combinedActions,
       direction: this.direction,
@@ -561,7 +565,12 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   }
 
   private _getZIndexAtPosition(roomX: number, roomY: number, roomZ: number) {
-    return getZOrder(roomX, roomY, roomZ) + 1;
+    let zOffset = 1;
+    if (this._getCurrentLookOptions().actions.has(AvatarAction.Lay)) {
+      zOffset += 2000;
+    }
+
+    return getZOrder(roomX, roomY, roomZ) + zOffset;
   }
 
   private _updatePosition() {
