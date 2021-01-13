@@ -199,12 +199,6 @@ export class BaseAvatar extends PIXI.Container {
       oldLookOptions.direction != newLookOptions.direction ||
       oldLookOptions.headDirection != newLookOptions.headDirection
     ) {
-      console.log(
-        "PREVIOUS LOOK STRING",
-        oldLookOptions?.look,
-        newLookOptions.look
-      );
-
       this._nextLookOptions = newLookOptions;
       this._refreshLook = true;
     }
@@ -324,7 +318,11 @@ export class BaseAvatar extends PIXI.Container {
       const requestId = ++this._updateId;
 
       this.dependencies.avatarLoader
-        .getAvatarDrawDefinition({ ...lookOptions, initial: true, skipCaching: this._skipCaching })
+        .getAvatarDrawDefinition({
+          ...lookOptions,
+          initial: true,
+          skipCaching: this._skipCaching,
+        })
         .then((result) => {
           if (requestId !== this._updateId) return;
 
