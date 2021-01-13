@@ -35,6 +35,7 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
 
   update() {
     this._refreshFurniture = true;
+    this._update();
   }
 
   destroy(): void {
