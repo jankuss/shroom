@@ -805,6 +805,8 @@ export function WallFurniturePosition() {
       furniture1.roomY = value.roomY;
       furniture1.offsetX = value.offsetX;
       furniture1.offsetY = value.offsetY;
+
+      console.log(value.offsetX, value.offsetY);
     });
 
     const furniture2 = new WallFurniture({

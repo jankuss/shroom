@@ -204,7 +204,7 @@ export class RoomModelVisualization
           roomX,
           roomY,
           offsetX: event.offsetX,
-          offsetY: event.offsetY / 2 + this._wallHeight / 2,
+          offsetY: event.offsetY / 2 + this._wallHeight / 2 - event.offsetX / 4,
         });
       },
     });
