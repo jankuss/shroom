@@ -73,6 +73,12 @@ export class FurnitureData implements IFurnitureData {
     }
   }
 
+  async getInfos(): Promise<[string, FurnitureInfo][]> {
+    const data = await this._data;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return Object.entries(data.typeToInfo).map(([key, info]) => [key, info!]);
+  }
+
   private async _prepareData() {
     const furniDataString = await this._getFurniData();
     const parsed = await parseStringPromise(furniDataString);

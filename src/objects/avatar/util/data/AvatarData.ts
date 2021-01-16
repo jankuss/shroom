@@ -1,3 +1,5 @@
+import { DOMParser } from "../../../../util/DOMParser";
+
 export class AvatarData {
   protected document: Document;
 

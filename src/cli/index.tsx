@@ -3,6 +3,7 @@
 import { render } from "ink";
 import React from "react";
 import yargs from "yargs";
+import { dump } from "../tools/dump/dump";
 import { runForwardingServer } from "../tools/proxy/runForwardingServer";
 import { App } from "./App";
 
@@ -30,19 +31,10 @@ yargs(hideBin(process.argv))
         );
     },
     (options: { url: string; location: string }) => {
-      render(
-        <App
-          externalVariablesUrl={options.url}
-          steps={{
-            figureData: true,
-            figureMap: true,
-            furniData: true,
-            figureAssets: true,
-            furniAssets: true,
-          }}
-          location={options.location}
-        />
-      );
+      dump({
+        externalVariables: options.url,
+        downloadPath: options.location,
+      }).catch(console.error);
     }
   )
   .command(

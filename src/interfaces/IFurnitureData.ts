@@ -11,6 +11,7 @@ export interface IFurnitureData {
   getInfoForFurniture(
     furniture: IFurniture
   ): Promise<FurnitureInfo | undefined>;
+  getInfos(): Promise<[string, FurnitureInfo][]>;
 }
 
 export type FurnitureId = string | number;
