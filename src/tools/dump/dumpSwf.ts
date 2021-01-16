@@ -1,5 +1,8 @@
 import { promises as fs } from "fs";
 import * as path from "path";
+import JSZip from "jszip";
+import { basename } from "path";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { readFromBufferP, extractImages } = require("swf-extract");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -18,8 +21,24 @@ export async function dumpSwf(swfPath: string) {
 
   await fs.mkdir(dumpLocation, { recursive: true });
 
-  await extractXml(swfObject, assetMap, dumpLocation, baseName);
-  await extractSwfImages(swf, assetMap, dirName, baseName);
+  const xmls = await extractXml(swfObject, assetMap, dumpLocation, baseName);
+  const imagePaths = await extractSwfImages(swf, assetMap, dirName, baseName);
+
+  const files = [...xmls, ...imagePaths];
+
+  const zip = new JSZip();
+
+  files.forEach(({ path, buffer }) => {
+    zip.file(basename(path), buffer);
+  });
+
+  const info = { version: 1 };
+  zip.file("info.json", JSON.stringify(info));
+
+  const zipPath = path.join(dirName, `${baseName}.zip`);
+
+  const buffer = await zip.generateAsync({ type: "uint8array" });
+  await fs.writeFile(zipPath, buffer);
 }
 
 function getAssetMapFromSWF(swf: SWF) {
@@ -42,6 +61,7 @@ async function extractSwfImages(
   basename: string
 ) {
   const images: any[] = await Promise.all(extractImages(swf.tags));
+  const imagePaths: { path: string; buffer: Buffer }[] = [];
 
   for (const image of images) {
     const assets = assetMap.get(image.characterId) ?? [];
@@ -51,8 +71,11 @@ async function extractSwfImages(
       const savePath = path.join(folderName, basename, fileName);
 
       await fs.writeFile(savePath, image.imgData, "binary");
+      imagePaths.push({ path: savePath, buffer: image.imgData });
     }
   }
+
+  return imagePaths;
 }
 
 async function extractXml(
@@ -61,6 +84,8 @@ async function extractXml(
   folderName: string,
   basename: string
 ) {
+  const xmlPaths: { path: string; buffer: Buffer }[] = [];
+
   for (const tag of swf.tags) {
     if (tag.header.code == 87) {
       const buffer = tag.data;
@@ -69,15 +94,17 @@ async function extractXml(
       const value = assetMap.get(characterId) ?? [];
       for (const rawName of value) {
         const fileName = rawName.substr(basename.length + 1) + ".bin";
+        const savePath = path.join(folderName, fileName);
 
-        await fs.writeFile(
-          path.join(folderName, fileName),
-          buffer.subarray(6),
-          "binary"
-        );
+        const data = buffer.subarray(6);
+        await fs.writeFile(savePath, data, "binary");
+
+        xmlPaths.push({ path: savePath, buffer: data });
       }
     }
   }
+
+  return xmlPaths;
 }
 
 interface SWFTag {

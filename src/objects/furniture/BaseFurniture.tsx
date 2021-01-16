@@ -427,7 +427,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
     this.visualization.setView({
       furniture: loadFurniResult,
-      createSprite: (part, assetIndex) => {
+      createSprite: (part, assetIndex, skipLayerUpdate) => {
         const asset = getAssetFromPart(part, assetIndex);
         if (asset == null) return;
 
@@ -441,7 +441,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
           }
         }
 
-        if (cachedAsset != null) {
+        if (cachedAsset != null && !skipLayerUpdate) {
           this._applyLayerDataToSprite(cachedAsset, asset, part);
         }
 

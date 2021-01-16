@@ -5,6 +5,10 @@ import { LoadFurniResult } from "./util/loadFurni";
 export interface IFurnitureVisualizationView {
   furniture: LoadFurniResult;
 
-  createSprite(part: FurniDrawPart, index: number): FurnitureSprite | undefined;
+  createSprite(
+    part: FurniDrawPart,
+    index: number,
+    skipLayerUpdate?: boolean
+  ): FurnitureSprite | undefined;
   destroySprite(sprite: FurnitureSprite): void;
 }

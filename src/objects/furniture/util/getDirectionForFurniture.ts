@@ -2,8 +2,7 @@ export function getDirectionForFurniture(
   direction: number,
   validDirections: number[]
 ) {
-  if (validDirections.length < 1)
-    throw new Error("No valid directions for furniture.");
+  if (validDirections.length < 1) return 0;
 
   let fallbackDirection = validDirections[0];
   for (let i = 0; i < validDirections.length; i++) {

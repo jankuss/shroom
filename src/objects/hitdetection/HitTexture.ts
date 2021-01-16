@@ -18,6 +18,18 @@ export class HitTexture {
     applyTextureProperties(this._texture);
   }
 
+  static async fromBlob(blob: Blob) {
+    const reader = new FileReader();
+    const url = await new Promise<string>((resolve) => {
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      };
+    });
+
+    return HitTexture.fromUrl(url);
+  }
+
   static async fromUrl(imageUrl: string) {
     const image = new Image();
 

@@ -98,45 +98,42 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
       this._animationQueueStartFrame = frame;
     }
 
-    if (this._animationQueue.length === 0) {
-      this._update();
-      return;
-    }
+    if (this._animationQueue.length > 0) {
+      const progress = this._getCurrentProgress(frame);
 
-    const progress = this._getCurrentProgress(frame);
+      let frameCounter = 0;
+      let animationId: number | undefined;
+      let animationFrameCount: number | undefined;
 
-    let frameCounter = 0;
-    let animationId: number | undefined;
-    let animationFrameCount: number | undefined;
+      for (let i = 0; i < this._animationQueue.length; i++) {
+        const animation = this._animationQueue[i];
 
-    for (let i = 0; i < this._animationQueue.length; i++) {
-      const animation = this._animationQueue[i];
+        frameCounter += animation.frameCount;
 
-      frameCounter += animation.frameCount;
+        if (progress < frameCounter) {
+          animationId = animation.id;
+          animationFrameCount = animation.frameCount;
+          break;
+        }
+      }
 
-      if (progress < frameCounter) {
+      if (
+        animationId == null ||
+        animationFrameCount == null ||
+        this._disableTransitions
+      ) {
+        const animation = this._animationQueue[this._animationQueue.length - 1];
         animationId = animation.id;
         animationFrameCount = animation.frameCount;
-        break;
       }
+
+      this._setAnimation(animationId);
+
+      this._animationFrameCount = animationFrameCount;
+      this._frame = progress;
     }
 
-    if (
-      animationId == null ||
-      animationFrameCount == null ||
-      this._disableTransitions
-    ) {
-      const animation = this._animationQueue[this._animationQueue.length - 1];
-      animationId = animation.id;
-      animationFrameCount = animation.frameCount;
-    }
-
-    this._setAnimation(animationId);
-
-    this._animationFrameCount = animationFrameCount;
-    this._frame = progress;
-
-    this._update();
+    this._update(true);
   }
 
   private _getCurrentProgress(frame: number) {
@@ -176,7 +173,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this._update();
   }
 
-  private _update() {
+  private _update(skipLayerUpdate = false) {
     const frameCount = this._animationFrameCount ?? 1;
 
     this._sprites.forEach((sprite) => (sprite.visible = false));
@@ -200,7 +197,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
         this._lastFramePlayedMap.set(part.layerIndex, false);
       }
 
-      const sprite = this.view.createSprite(part, frameIndex);
+      const sprite = this.view.createSprite(part, frameIndex, skipLayerUpdate);
       if (sprite != null) {
         this._sprites.add(sprite);
         sprite.visible = true;

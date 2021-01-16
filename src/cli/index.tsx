@@ -1,14 +1,17 @@
 #!/usr/bin/env node
 
-import { render } from "ink";
-import React from "react";
 import yargs from "yargs";
+import { JSDOM } from "jsdom";
+
 import { dump } from "../tools/dump/dump";
 import { runForwardingServer } from "../tools/proxy/runForwardingServer";
-import { App } from "./App";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { hideBin } = require("yargs/helpers");
+
+const jsdom = new JSDOM();
+
+global.DOMParser = jsdom.window.DOMParser;
 
 yargs(hideBin(process.argv))
   .command(

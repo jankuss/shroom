@@ -11,7 +11,7 @@ export async function createOffsetFile(
   logger: Logger
 ) {
   const assets = figureMap.getLibraries();
-  const object: { [key: string]: { x: number; y: number } } = {};
+  const object: { [key: string]: { offsetX: number; offsetY: number } } = {};
   const progress = new ProgressBar(
     logger,
     assets.length,
@@ -35,7 +35,7 @@ export async function createOffsetFile(
     const manifest = new AvatarManifestData(manifestFile);
 
     manifest.getAssets().forEach((asset) => {
-      object[asset.name] = { x: asset.x, y: asset.y };
+      object[asset.name] = { offsetX: asset.x, offsetY: asset.y };
     });
 
     progress.increment(asset);

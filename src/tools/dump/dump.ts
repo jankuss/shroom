@@ -1,5 +1,4 @@
 import { getExternalVariableUrls } from "./getExternalVariableUrls";
-import { version } from "../../../package.json";
 import { downloadAllFiles } from "./downloadAllFiles";
 import { Logger } from "./Logger";
 import { promisify } from "util";
@@ -13,20 +12,11 @@ export const glob = promisify(g);
 
 const separator = "=========================================";
 
-const doNothing = () => {
-  // Do nothing
-};
-
-const logger: Logger = {
-  debug: doNothing,
-  error: console.error.bind(console),
-  info: console.info.bind(console),
-  log: console.info.bind(console),
-};
+const logger: Logger = console;
 
 export async function dump({ externalVariables, downloadPath }: Options) {
   console.log(separator);
-  console.log("Shroom Asset Dumper for Version", version);
+  console.log("Shroom Asset Dumper");
   console.log(separator);
 
   let stepCounter = 0;

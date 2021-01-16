@@ -406,6 +406,9 @@ function getAssetFromPartMeta(
     }
   }
 
+  if (isNaN(offsetsX)) throw new Error("Invalid x offset");
+  if (isNaN(offsetsY)) throw new Error("Invalid y offset");
+
   return {
     fileId: assetInfoFrame.asset,
     library: libraryId,

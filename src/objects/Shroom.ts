@@ -36,9 +36,11 @@ export class Shroom {
     resourcePath?: string;
   } & Partial<Dependencies>) {
     const _furnitureData = furnitureData ?? FurnitureData.create(resourcePath);
-    const _avatarLoader = avatarLoader ?? AvatarLoader.create(resourcePath);
+    const _avatarLoader =
+      avatarLoader ?? AvatarLoader.createForZip(resourcePath);
     const _furnitureLoader =
-      furnitureLoader ?? FurnitureLoader.create(_furnitureData, resourcePath);
+      furnitureLoader ??
+      FurnitureLoader.createForZip(_furnitureData, resourcePath);
     const _configuration = configuration ?? {};
 
     return {
