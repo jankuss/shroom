@@ -7,7 +7,7 @@ import {
 } from "@jankuss/shroom";
 
 import { createShroom } from "./common/createShroom";
-import tile from "./assets/tile.png";
+import tile from "./assets/tile2.png";
 
 export function DefaultRoom() {
   return createShroom(({ application, shroom }) => {
@@ -264,8 +264,8 @@ export function CustomColor() {
     room.tileHeight = 4;
     room.wallDepth = 10;
 
-    room.wallColor = "#00ffff";
-    room.floorColor = "#f3f3f3";
+    room.wallColor = "#f5e4c1";
+    room.floorColor = "#eeeeee";
     room.wallTexture = tileTexture;
     room.floorTexture = tileTexture;
 

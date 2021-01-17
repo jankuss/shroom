@@ -77,8 +77,8 @@ export class RoomModelVisualization
     super();
 
     this._tileMapBounds = getTileMapBounds(this.parsedTileMap.parsedTileTypes, {
-      x: 1,
-      y: 1,
+      x: this.parsedTileMap.wallOffsets.x,
+      y: this.parsedTileMap.wallOffsets.y,
     });
 
     this._positionalContainer.addChild(this._behindWallLayer);

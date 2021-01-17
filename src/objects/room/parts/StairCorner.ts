@@ -7,7 +7,6 @@ import { RoomPartData } from "./RoomPartData";
 export class StairCorner extends PIXI.Container implements IRoomPart {
   private _container: PIXI.Container | undefined;
   private _texture: PIXI.Texture | undefined;
-  private _color: string | undefined;
 
   private _tileHeight = 0;
   private _tileLeftColor = 0;
@@ -25,6 +24,7 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
     this._tileLeftColor = data.tileLeftColor;
     this._tileRightColor = data.tileRightColor;
     this._tileTopColor = data.tileTopColor;
+    this._texture = data.tileTexture;
 
     this.updateSprites();
   }
@@ -64,12 +64,14 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
     const baseXRight = 0;
     const baseYRight = -stairBase * index * 2;
 
+    const texture = this._texture;
+
     function createSprite(
       matrix: PIXI.Matrix,
       tint: number,
       tilePosition: PIXI.Point
     ) {
-      const tile = new PIXI.TilingSprite(PIXI.Texture.WHITE);
+      const tile = new PIXI.TilingSprite(texture ?? PIXI.Texture.WHITE);
       tile.tilePosition = tilePosition;
       tile.transform.setFromMatrix(matrix);
 
@@ -125,13 +127,14 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
   private _createStairBoxLeft(index: number) {
     const baseX = -stairBase * index;
     const baseY = -stairBase * index * 1.5;
+    const texture = this._texture;
 
     function createSprite(
       matrix: PIXI.Matrix,
       tint: number,
       tilePosition: PIXI.Point
     ) {
-      const tile = new PIXI.TilingSprite(PIXI.Texture.WHITE);
+      const tile = new PIXI.TilingSprite(texture ?? PIXI.Texture.WHITE);
       tile.tilePosition = tilePosition;
       tile.transform.setFromMatrix(matrix);
 
@@ -192,13 +195,14 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
   private _createStairBoxRight(index: number) {
     const baseX = +stairBase * index;
     const baseY = -stairBase * index * 1.5;
+    const texture = this._texture;
 
     function createSprite(
       matrix: PIXI.Matrix,
       tint: number,
       tilePosition: PIXI.Point
     ) {
-      const tile = new PIXI.TilingSprite(PIXI.Texture.WHITE);
+      const tile = new PIXI.TilingSprite(texture ?? PIXI.Texture.WHITE);
       tile.tilePosition = tilePosition;
       tile.transform.setFromMatrix(matrix);
 

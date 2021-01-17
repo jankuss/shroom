@@ -21,10 +21,17 @@ export class Tile extends PIXI.Container implements IRoomPart {
   private _color: string | undefined;
 
   private _tileHeight: number;
-
-  private _door: boolean;
-
   private _roomPartData: RoomPartData | undefined;
+  private _tilePositions: PIXI.Point = new PIXI.Point(0, 0);
+
+  public get tilePositions() {
+    return this._tilePositions;
+  }
+
+  public set tilePositions(value) {
+    this._tilePositions = value;
+    this._updateSprites();
+  }
 
   public get tileHeight() {
     return this._tileHeight;
@@ -41,7 +48,6 @@ export class Tile extends PIXI.Container implements IRoomPart {
     this._texture = props.texture;
     this._color = props.color;
     this._tileHeight = props.tileHeight;
-    this._door = props.door ?? false;
 
     this._updateSprites();
   }
@@ -61,14 +67,6 @@ export class Tile extends PIXI.Container implements IRoomPart {
 
   set color(value) {
     this._color = value;
-    this._updateSprites();
-  }
-
-  destroyed(): void {
-    this._destroySprites();
-  }
-
-  registered(): void {
     this._updateSprites();
   }
 

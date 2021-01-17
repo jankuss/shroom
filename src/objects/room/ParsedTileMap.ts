@@ -12,6 +12,10 @@ export class ParsedTileMap {
     return this._data.tilemap;
   }
 
+  public get wallOffsets() {
+    return this._data.wallOffsets;
+  }
+
   constructor(private tilemap: TileType[][]) {
     this._data = parseTileMap(tilemap);
   }

@@ -12,6 +12,7 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
   protected _wallLeftColor = 0;
   protected _wallRightColor = 0;
   protected _wallTopColor = 0;
+  protected _wallTexture: PIXI.Texture | undefined;
 
   private _drawHitArea = false;
   private _hideBorder = false;
@@ -54,6 +55,7 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
     this._wallLeftColor = data.wallLeftColor;
     this._wallRightColor = data.wallRightColor;
     this._wallTopColor = data.wallTopColor;
+    this._wallTexture = data.wallTexture;
 
     this._update();
   }
@@ -126,7 +128,7 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
 
   private _createPrimarySprite() {
     const sprite = new PIXI.TilingSprite(
-      PIXI.Texture.WHITE,
+      this._wallTexture ?? PIXI.Texture.WHITE,
       this._wallWidth,
       this.wallHeight
     );
