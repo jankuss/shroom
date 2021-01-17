@@ -45,6 +45,26 @@ export function Stairs() {
   });
 }
 
+export function StairCorners() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxxxxxx
+        x000000
+        x000000
+        x001100
+        x001100
+        x000000
+      `,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+
+    application.stage.addChild(room);
+  });
+}
+
 export function StairWalls() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
@@ -204,7 +224,7 @@ export function CustomLook() {
         xxxx11100
         xxxx00000
         x00000000
-        x00000000
+        000000000
         x00000000
       `,
     });
@@ -239,14 +259,15 @@ export function CustomColor() {
     });
 
     const tileTexture = loadRoomTexture(tile);
-    room.wallTexture = tileTexture;
-    room.floorTexture = tileTexture;
 
     room.wallHeight = 128;
-    room.tileHeight = 2;
-    room.wallDepth = 2;
-    room.wallColor = "#cceeee";
+    room.tileHeight = 4;
+    room.wallDepth = 10;
+
+    room.wallColor = "#00ffff";
     room.floorColor = "#f3f3f3";
+    room.wallTexture = tileTexture;
+    room.floorTexture = tileTexture;
 
     room.x = application.screen.width / 2 - room.roomWidth / 2;
     room.y = application.screen.height / 2 - room.roomHeight / 2;

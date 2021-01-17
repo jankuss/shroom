@@ -6,7 +6,7 @@ export class WallRight extends WallLeft {
   }
 
   _update() {
-    this._offsets = { x: this._borderWidth + this._wallWidth, y: 0 };
+    this._offsets = { x: this._wallWidth, y: 0 };
     this.scale.x = -1;
 
     const left = this._wallLeftColor;

@@ -30,7 +30,7 @@ export class RoomVisualization
     this._roomVisualizationMetaSubject = new BehaviorSubject({
       masks: new Map(),
       wallHeight: room.wallHeight,
-      wallHeightWithZ: room.wallHeightWithZ,
+      wallHeightWithZ: 0,
     });
 
     this._container.sortableChildren = true;
@@ -117,7 +117,7 @@ export class RoomVisualization
     this._updateRoomVisualizationMeta({
       masks: this.masks,
       wallHeight: this.room.wallHeight,
-      wallHeightWithZ: this.room.wallHeightWithZ,
+      wallHeightWithZ: 0,
     });
   }
 
@@ -133,7 +133,7 @@ export class RoomVisualization
     this._roomVisualizationMetaSubject.next({
       masks: this.masks,
       wallHeight: this.room.wallHeight,
-      wallHeightWithZ: this.room.wallHeightWithZ,
+      wallHeightWithZ: 0,
       ...meta,
     });
   }

@@ -49,16 +49,10 @@ export class Tile extends PIXI.Container implements IRoomPart {
   update(data: RoomPartData): void {
     this.tileHeight = data.tileHeight;
     this._roomPartData = data;
+    this._texture = data.tileTexture;
     this._updateSprites();
-  }
 
-  get texture() {
-    return this._texture;
-  }
-
-  set texture(value) {
-    this._texture = value;
-    this._updateSprites();
+    console.log("TEXTURE UPDATE", this._texture);
   }
 
   get color() {
@@ -91,7 +85,7 @@ export class Tile extends PIXI.Container implements IRoomPart {
 
     const tileMatrix = getFloorMatrix(0, 0);
 
-    const tile = new PIXI.TilingSprite(this.texture ?? PIXI.Texture.WHITE);
+    const tile = new PIXI.TilingSprite(this._texture ?? PIXI.Texture.WHITE);
 
     tile.transform.setFromMatrix(tileMatrix);
     tile.width = 32;
@@ -109,7 +103,7 @@ export class Tile extends PIXI.Container implements IRoomPart {
     });
 
     const borderLeft = new PIXI.TilingSprite(
-      this.texture ?? PIXI.Texture.WHITE
+      this._texture ?? PIXI.Texture.WHITE
     );
     borderLeft.transform.setFromMatrix(borderLeftMatrix);
     borderLeft.width = 32;
@@ -117,7 +111,7 @@ export class Tile extends PIXI.Container implements IRoomPart {
     borderLeft.tint = this._roomPartData?.tileLeftColor ?? 0;
 
     const borderRight = new PIXI.TilingSprite(
-      this.texture ?? PIXI.Texture.WHITE
+      this._texture ?? PIXI.Texture.WHITE
     );
     borderRight.transform.setFromMatrix(borderRightMatrix);
     borderRight.width = 32;

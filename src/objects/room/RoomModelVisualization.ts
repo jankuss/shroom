@@ -1,27 +1,29 @@
 import * as PIXI from "pixi.js";
 import { Subject } from "rxjs";
-import { number } from "yargs";
 import {
   IRoomVisualization,
   MaskNode,
   RoomVisualizationMeta,
 } from "../../interfaces/IRoomVisualization";
 import { RoomPosition } from "../../types/RoomPosition";
+import { getZOrder } from "../../util/getZOrder";
 import { ParsedTileType, ParsedTileWall } from "../../util/parseTileMap";
+import { ILandscapeContainer } from "./ILandscapeContainer";
 import { IRoomRectangle, Rectangle } from "./IRoomRectangle";
 import { ParsedTileMap } from "./ParsedTileMap";
-import { IRoomPart } from "./parts/IRoomPart";
 import { RoomPartData } from "./parts/RoomPartData";
+import { Stair } from "./parts/Stair";
+import { StairCorner } from "./parts/StairCorner";
 import { Tile } from "./parts/Tile";
+import { TileCursor } from "./parts/TileCursor";
 import { WallLeft } from "./parts/WallLeft";
 import { WallOuterCorner } from "./parts/WallOuterCorner";
 import { WallRight } from "./parts/WallRight";
-import { TileCursor } from "./TileCursor";
 import { getTileMapBounds } from "./util/getTileMapBounds";
 
 export class RoomModelVisualization
   extends PIXI.Container
-  implements IRoomVisualization, IRoomRectangle {
+  implements IRoomVisualization, IRoomRectangle, ILandscapeContainer {
   private _wallLeftColor: number | undefined;
   private _wallRightColor: number | undefined;
   private _wallTopColor: number | undefined;
@@ -38,8 +40,11 @@ export class RoomModelVisualization
   private _landscapeLayer: PIXI.Container = new PIXI.Container();
   private _wallHitAreaLayer: PIXI.Container = new PIXI.Container();
 
+  private _wallTexture: PIXI.Texture | undefined;
+  private _floorTexture: PIXI.Texture | undefined;
+
   private _walls: (WallLeft | WallRight | WallOuterCorner)[] = [];
-  private _tiles: Tile[] = [];
+  private _tiles: (Tile | Stair | StairCorner)[] = [];
   private _tileCursors: TileCursor[] = [];
 
   private _borderWidth = 8;
@@ -54,6 +59,8 @@ export class RoomModelVisualization
     offsetY: number;
   }>();
 
+  private _onTileClick = new Subject<RoomPosition>();
+
   private _tileMapBounds: {
     minX: number;
     minY: number;
@@ -63,16 +70,16 @@ export class RoomModelVisualization
 
   private _refreshRoom = false;
 
-  constructor(private _parsedTileMap: ParsedTileMap) {
+  constructor(
+    private _application: PIXI.Application,
+    public readonly parsedTileMap: ParsedTileMap
+  ) {
     super();
 
-    this._tileMapBounds = getTileMapBounds(
-      this._parsedTileMap.parsedTileTypes,
-      {
-        x: 1,
-        y: 1,
-      }
-    );
+    this._tileMapBounds = getTileMapBounds(this.parsedTileMap.parsedTileTypes, {
+      x: 1,
+      y: 1,
+    });
 
     this._positionalContainer.addChild(this._behindWallLayer);
     this._positionalContainer.addChild(this._wallLayer);
@@ -84,10 +91,65 @@ export class RoomModelVisualization
     this._positionalContainer.x = -this.roomBounds.minX;
     this._positionalContainer.y = -this.roomBounds.minY;
     this._primaryLayer.sortableChildren = true;
+    this._tileLayer.sortableChildren = true;
 
     this.addChild(this._positionalContainer);
 
     this._updateHeightmap();
+
+    this._application.ticker.add(this._handleTick);
+  }
+
+  getMaskLevel(roomX: number, roomY: number): { roomX: number; roomY: number } {
+    return {
+      roomX,
+      roomY,
+    };
+  }
+
+  public get wallTexture() {
+    return this._wallTexture;
+  }
+
+  public set wallTexture(value) {
+    this._wallTexture = value;
+    this._refreshRoom = true;
+  }
+
+  public get floorTexture() {
+    return this._floorTexture;
+  }
+
+  public set floorTexture(value) {
+    this._floorTexture = value;
+    this._refreshRoom = true;
+  }
+
+  public get wallHeight() {
+    return this._wallHeight;
+  }
+
+  public set wallHeight(value) {
+    this._wallHeight = value;
+    this._refreshRoom = true;
+  }
+
+  public get tileHeight() {
+    return this._tileHeight;
+  }
+
+  public set tileHeight(value) {
+    this._tileHeight = value;
+    this._refreshRoom = true;
+  }
+
+  public get wallDepth() {
+    return this._borderWidth;
+  }
+
+  public set wallDepth(value) {
+    this._borderWidth = value;
+    this._refreshRoom = true;
   }
 
   public get roomBounds() {
@@ -127,11 +189,38 @@ export class RoomModelVisualization
   }
 
   public get wallTopColor() {
-    return this._wallLeftColor;
+    return this._wallTopColor;
   }
 
   public set wallTopColor(value) {
-    this._wallLeftColor = value;
+    this._wallTopColor = value;
+    this._refreshRoom = true;
+  }
+
+  public get tileLeftColor() {
+    return this._tileLeftColor;
+  }
+
+  public set tileLeftColor(value) {
+    this._tileLeftColor = value;
+    this._refreshRoom = true;
+  }
+
+  public get tileRightColor() {
+    return this._tileRightColor;
+  }
+
+  public set tileRightColor(value) {
+    this._tileRightColor = value;
+    this._refreshRoom = true;
+  }
+
+  public get tileTopColor() {
+    return this._tileTopColor;
+  }
+
+  public set tileTopColor(value) {
+    this._tileTopColor = value;
     this._refreshRoom = true;
   }
 
@@ -192,6 +281,8 @@ export class RoomModelVisualization
       tileLeftColor: this._tileLeftColor ?? 0x838357,
       tileRightColor: this._tileRightColor ?? 0x666644,
       tileTopColor: this._tileTopColor ?? 0x989865,
+      tileTexture: this._floorTexture ?? PIXI.Texture.WHITE,
+      wallTexture: this._wallTexture ?? PIXI.Texture.WHITE,
     };
   }
 
@@ -202,23 +293,34 @@ export class RoomModelVisualization
   }
 
   private _getLargestWallHeight() {
-    return this._parsedTileMap.largestDiff * 32 + this._wallHeight;
+    return this.parsedTileMap.largestDiff * 32 + this._wallHeight;
   }
 
   private _updateHeightmap() {
-    this._setCache(false);
-    for (let y = 0; y < this._parsedTileMap.parsedTileTypes.length; y++) {
-      for (let x = 0; x < this._parsedTileMap.parsedTileTypes[y].length; x++) {
-        const cell = this._parsedTileMap.parsedTileTypes[y][x];
+    [...this._tileCursors, ...this._tiles, ...this._walls].forEach((part) =>
+      part.destroy()
+    );
+
+    this._tileCursors = [];
+    this._tiles = [];
+    this._walls = [];
+
+    for (let y = 0; y < this.parsedTileMap.parsedTileTypes.length; y++) {
+      for (let x = 0; x < this.parsedTileMap.parsedTileTypes[y].length; x++) {
+        const cell = this.parsedTileMap.parsedTileTypes[y][x];
 
         this._createHeightmapElement(cell, x, y);
       }
     }
 
+    this._updateParts();
+  }
+
+  private _updateParts() {
+    this._setCache(false);
     [...this._tiles, ...this._walls].forEach((tile) =>
       tile.update(this._getCurrentRoomPartData())
     );
-
     this._setCache(true);
   }
 
@@ -239,7 +341,51 @@ export class RoomModelVisualization
       case "door":
         this._createDoor(x, y, element.z);
         break;
+
+      case "stairs":
+        this._createStair(x, y, element.z, element.kind);
+        break;
+
+      case "stairCorner":
+        this._createStairCorner(x, y, element.z, element.kind);
+        break;
     }
+  }
+
+  private _createStairCorner(
+    x: number,
+    y: number,
+    z: number,
+    kind: "left" | "front" | "right"
+  ) {
+    const stair = new StairCorner({ type: kind });
+    const position = this._getPosition(x, y, z);
+
+    stair.x = position.x;
+    stair.y = position.y;
+
+    this._tiles.push(stair);
+    this._tileLayer.addChild(stair);
+
+    this._createTileCursor(x, y, z);
+    this._createTileCursor(x, y, z + 1);
+  }
+
+  private _createStair(x: number, y: number, z: number, direction: 2 | 0) {
+    const stair = new Stair({
+      tileHeight: this._tileHeight,
+      direction,
+    });
+    const position = this._getPosition(x, y, z);
+
+    stair.x = position.x;
+    stair.y = position.y;
+
+    this._tiles.push(stair);
+    this._tileLayer.addChild(stair);
+
+    this._createTileCursor(x, y, z);
+    this._createTileCursor(x, y, z + 1);
   }
 
   private _createDoor(x: number, y: number, z: number) {
@@ -253,7 +399,7 @@ export class RoomModelVisualization
     z: number,
     container?: PIXI.Container
   ) {
-    const tile = new Tile({ color: "#eeeeee", tileHeight: 8 });
+    const tile = new Tile({ color: "#eeeeee", tileHeight: this._tileHeight });
     const position = this._getPosition(x, y, z);
 
     tile.x = position.x;
@@ -266,8 +412,38 @@ export class RoomModelVisualization
   }
 
   private _createTileCursor(x: number, y: number, z: number) {
-    // TODO: Create tile cursor
+    const position: RoomPosition = { roomX: x, roomY: y, roomZ: z };
+    const cursor = new TileCursor(
+      position,
+      () => {
+        this._onTileClick.next(position);
+      },
+      () => {
+        this._onActiveTileChange.next(position);
+      },
+      () => {
+        this._onActiveTileChange.next(undefined);
+      }
+    );
+
+    const { x: posX, y: posY } = this._getPosition(x, y, z);
+
+    cursor.x = posX;
+    cursor.y = posY;
+    cursor.zIndex = getZOrder(x, y, z) - 1000;
+
+    this._tileCursors.push(cursor);
+    this._primaryLayer.addChild(cursor);
   }
+
+  private _handleTick = () => {
+    if (this._refreshRoom) {
+      this._updateParts();
+      this._refreshRoom = false;
+
+      console.log("REFRESH ROOM");
+    }
+  };
 
   private _createRightWall(roomX: number, roomY: number, roomZ: number) {
     const wall = new WallRight({
@@ -311,7 +487,7 @@ export class RoomModelVisualization
     });
 
     const { x, y } = this._getPosition(roomX + 1, roomY, roomZ);
-    wall.x = x - this._borderWidth;
+    wall.x = x;
     wall.y = y;
     wall.roomZ = roomZ;
 
@@ -323,8 +499,8 @@ export class RoomModelVisualization
     const wall = new WallOuterCorner();
 
     const { x, y } = this._getPosition(roomX + 1, roomY, roomZ);
-    wall.x = x - this._borderWidth;
-    wall.y = y + (32 - this._borderWidth);
+    wall.x = x;
+    wall.y = y;
     wall.roomZ = roomZ;
 
     this._wallLayer.addChild(wall);

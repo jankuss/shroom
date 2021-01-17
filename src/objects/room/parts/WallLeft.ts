@@ -72,11 +72,11 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
         this._wallWidth / 2 - (this.props.cutawayHeight ?? 0)
       ),
       new PIXI.Point(
-        this._getOffsetX() + this._borderWidth + this._wallWidth,
+        this._getOffsetX() + this._wallWidth + this._borderWidth,
         -(this.props.cutawayHeight ?? 0)
       ),
       new PIXI.Point(
-        this._getOffsetX() + this._borderWidth + this._wallWidth,
+        this._getOffsetX() + this._wallWidth + this._borderWidth,
         -this._wallHeight
       ),
       new PIXI.Point(
@@ -100,7 +100,7 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
     this.addChild(top);
 
     const graphics = new PIXI.Graphics();
-    graphics.beginFill(0x111111);
+    graphics.beginFill(0xff00ff);
     graphics.drawPolygon(hitArea);
     graphics.alpha = this._drawHitArea ? 1 : 0;
     graphics.endFill();
@@ -121,7 +121,7 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
   }
 
   private _getOffsetX() {
-    return this.scale.x * this._offsets.x;
+    return this.scale.x * this._offsets.x - this._borderWidth;
   }
 
   private _createPrimarySprite() {
@@ -145,7 +145,6 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
       this._wallHeight + this._tileHeight
     );
     border.transform.setFromMatrix(new PIXI.Matrix(-1, -0.5, 0, 1));
-    border.tint = 0xcccccc;
     border.y = this.wallY + this._wallWidth / 2;
     border.x = this._getOffsetX() + this._borderWidth;
 
@@ -161,7 +160,6 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
       this._wallWidth
     );
     border.transform.setFromMatrix(new PIXI.Matrix(1, 0.5, 1, -0.5));
-    border.tint = 0x888888;
     border.x = this._getOffsetX() + 0;
     border.y = this.wallY + this._wallWidth / 2 - this._borderWidth / 2;
 

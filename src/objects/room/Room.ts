@@ -25,6 +25,7 @@ import { Subject } from "rxjs";
 import { RoomModelVisualization } from "./RoomModelVisualization";
 import { ParsedTileMap } from "./ParsedTileMap";
 import { StairCorner } from "./StairCorner";
+import { getTileColors, getWallColors } from "./util/getTileColors";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -59,26 +60,15 @@ export class Room
   extends PIXI.Container
   implements IRoomGeometry, IRoomObjectContainer, ITileMap {
   public readonly application: PIXI.Application;
-  public readonly parsedTileMap: ParsedTileType[][];
 
   private _roomObjectContainer: RoomObjectContainer;
-
-  private _wallOffsets = { x: 1, y: 1 };
-  private _positionOffsets = { x: 1, y: 1 };
-
   private _visualization: RoomModelVisualization;
-
-  private _tileColor = "#989865";
 
   private _animationTicker: IAnimationTicker;
   private _avatarLoader: IAvatarLoader;
   private _furnitureLoader: IFurnitureLoader;
   private _hitDetection: IHitDetection;
   private _configuration: IConfiguration;
-
-  private _walls: Wall[] = [];
-  private _floor: (Tile | Stair | StairCorner)[] = [];
-  private _cursors: TileCursor[] = [];
 
   private _wallTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
   private _floorTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
@@ -95,24 +85,8 @@ export class Room
 
   private _onTileClick: ((position: RoomPosition) => void) | undefined;
 
-  private _wallDepth = 8;
-  private _wallHeight = 116;
-  private _tileHeight = 8;
   private _application: PIXI.Application;
-  private _maskOffsets: { x: number; y: number } = { x: 0, y: 0 };
-
-  private _largestDiff: number;
-
   private _activeTileSubject = new Subject<RoomPosition | undefined>();
-
-  private _landscapeContainer: ILandscapeContainer = {
-    getMaskLevel: (roomX, roomY) => {
-      return {
-        roomX: roomX - this._maskOffsets.x,
-        roomY: roomY - this._maskOffsets.y,
-      };
-    },
-  };
 
   public get onActiveTileChange() {
     return this._activeTileSubject.asObservable();
@@ -137,22 +111,6 @@ export class Room
     const normalizedTileMap =
       typeof tilemap === "string" ? parseTileMapString(tilemap) : tilemap;
 
-    const {
-      largestDiff,
-      tilemap: parsedTileMap,
-      wallOffsets,
-      positionOffsets,
-      maskOffsets,
-    } = parseTileMap(normalizedTileMap);
-
-    this._wallOffsets = wallOffsets;
-    this._positionOffsets = positionOffsets;
-    this._maskOffsets = maskOffsets;
-
-    this._largestDiff = largestDiff;
-
-    this.parsedTileMap = parsedTileMap;
-
     this._application = application;
 
     this._animationTicker = animationTicker;
@@ -163,6 +121,7 @@ export class Room
     this.application = application;
 
     this._visualization = new RoomModelVisualization(
+      this.application,
       new ParsedTileMap(normalizedTileMap)
     );
 
@@ -177,7 +136,7 @@ export class Room
       hitDetection: this._hitDetection,
       configuration: this._configuration,
       tilemap: this,
-      landscapeContainer: this._landscapeContainer,
+      landscapeContainer: this._visualization,
       application: this._application,
       room: this,
     };
@@ -229,47 +188,39 @@ export class Room
 
   public set hideTileCursor(value) {
     this._hideTileCursor = value;
-    this._updateTiles();
   }
 
   /**
    * Height of the walls in the room.
    */
   public get wallHeight() {
-    return this._wallHeight;
+    return this._visualization.wallHeight;
   }
 
   public set wallHeight(value) {
-    this._wallHeight = value;
-    this._updateWallHeight();
-  }
-
-  public get wallHeightWithZ() {
-    return this.wallHeight + this._largestDiff * 32;
+    this._visualization.wallHeight = value;
   }
 
   /**
    * Height of the tile
    */
   public get tileHeight() {
-    return this._tileHeight;
+    return this._visualization.tileHeight;
   }
 
   public set tileHeight(value) {
-    this._tileHeight = value;
-    this._updateTileHeight();
+    this._visualization.tileHeight = value;
   }
 
   /**
    * Depth of the wall
    */
   public get wallDepth() {
-    return this._wallDepth;
+    return this._visualization.wallDepth;
   }
 
   public set wallDepth(value) {
-    this._wallDepth = value;
-    this._updateWallDepth();
+    this._visualization.wallDepth = value;
   }
 
   /**
@@ -316,7 +267,7 @@ export class Room
 
   set wallColor(value) {
     this._wallColor = value;
-    this._updateTextures();
+    this._updateWallColor();
   }
 
   /**
@@ -328,7 +279,7 @@ export class Room
 
   set floorColor(value) {
     this._floorColor = value;
-    this._updateTextures();
+    this._updateTileColor();
   }
 
   /**
@@ -346,7 +297,7 @@ export class Room
   }
 
   getParsedTileTypes(): ParsedTileType[][] {
-    return this.parsedTileMap;
+    return this._visualization.parsedTileMap.parsedTileTypes;
   }
 
   /**
@@ -376,7 +327,7 @@ export class Room
   getTileAtPosition(roomX: number, roomY: number) {
     const { x, y } = this._getObjectPositionWithOffset(roomX, roomY);
 
-    const row = this.parsedTileMap[y];
+    const row = this._visualization.parsedTileMap.parsedTileTypes[y];
     if (row == null) return;
     if (row[x] == null) return;
 
@@ -388,112 +339,47 @@ export class Room
     this.roomObjects.forEach((object) => this.removeRoomObject(object));
   }
 
-  private _updateWallDepth() {
-    //this._visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.wallDepth = this.wallDepth;
-    });
-    //this._visualization.enableCache();
-  }
-
-  private _updateWallHeight() {
-    //this._visualization.updateRoom(this);
-    //this._visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.wallHeight = this.wallHeightWithZ;
-    });
-    //this._visualization.enableCache();
-  }
-
-  private _updateTileHeight() {
-    //this._visualization.disableCache();
-    this._floor.forEach((floor) => {
-      floor.tileHeight = this.tileHeight;
-    });
-    this._walls.forEach((wall) => {
-      wall.tileHeight = this.tileHeight;
-    });
-    //this._visualization.enableCache();
-  }
-
   private _getObjectPositionWithOffset(roomX: number, roomY: number) {
     return {
-      x: roomX + this._positionOffsets.x,
-      y: roomY + this._positionOffsets.y,
+      x: roomX,
+      y: roomY,
     };
   }
 
   private _loadWallTextures() {
     Promise.resolve(this.wallTexture).then((texture) => {
       this._currentWallTexture = texture;
-      this._updateTextures();
+      this._visualization.wallTexture = texture;
     });
   }
 
   private _loadFloorTextures() {
     Promise.resolve(this.floorTexture).then((texture) => {
       this._currentFloorTexture = texture;
-      this._updateTextures();
+      this._visualization.floorTexture = texture;
     });
   }
 
-  private _updateTextures() {
-    //this._visualization.disableCache();
-    this._walls.forEach((wall) => {
-      wall.texture = this._currentWallTexture;
-      wall.color = this._wallColor;
-    });
-    this._floor.forEach((floor) => {
-      floor.texture = this._currentFloorTexture;
-      floor.color = this._floorColor;
-    });
-    //this._visualization.enableCache();
+  private _updateWallColor() {
+    const wallColors = getWallColors(this._getWallColor());
+
+    this._visualization.wallLeftColor = wallColors.rightTint;
+    this._visualization.wallRightColor = wallColors.leftTint;
+    this._visualization.wallTopColor = wallColors.topTint;
   }
 
-  private _registerWall(wall: Wall) {
-    if (this.hideWalls || this.hideFloor) return;
+  private _updateTileColor() {
+    if (this._floorColor != null) {
+      const tileColors = getTileColors(this._floorColor);
 
-    this._walls.push(wall);
-    this.addRoomObject(wall);
-  }
-
-  private _registerTile(tile: Stair | StairCorner | Tile) {
-    if (this.hideFloor) return;
-
-    this._floor.push(tile);
-    this.addRoomObject(tile);
-  }
-
-  private _registerTileCursor(position: RoomPosition, door = false) {
-    if (this._hideTileCursor) return;
-
-    const cursor = new TileCursor(
-      position,
-      door,
-      (position) => {
-        this.onTileClick && this.onTileClick(position);
-      },
-      (position) => {
-        this._activeTileSubject.next(position);
-      },
-      () => {
-        this._activeTileSubject.next(undefined);
-      }
-    );
-
-    this._cursors.push(cursor);
-
-    this.addRoomObject(cursor);
-  }
-
-  private _resetTiles() {
-    [...this._floor, ...this._walls, ...this._cursors].forEach((value) =>
-      value.destroy()
-    );
-
-    this._floor = [];
-    this._walls = [];
-    this._cursors = [];
+      this._visualization.tileTopColor = tileColors.tileTint;
+      this._visualization.tileLeftColor = tileColors.borderRightTint;
+      this._visualization.tileRightColor = tileColors.borderLeftTint;
+    } else {
+      this._visualization.tileTopColor = undefined;
+      this._visualization.tileLeftColor = undefined;
+      this._visualization.tileRightColor = undefined;
+    }
   }
 
   private _getWallColor() {
@@ -505,191 +391,6 @@ export class Room
       return "#b6b8c7";
     }
 
-    return "#ffffff";
-  }
-
-  private _updateTiles() {
-    this._resetTiles();
-
-    const tiles = this.parsedTileMap;
-
-    for (let y = 0; y < tiles.length; y++) {
-      for (let x = 0; x < tiles[y].length; x++) {
-        const tile = tiles[y][x];
-
-        if (tile.type === "door") {
-          this._registerTile(
-            new Tile({
-              geometry: this,
-              roomX: x,
-              roomY: y,
-              roomZ: tile.z,
-              edge: true,
-              tileHeight: this.tileHeight,
-              color: this.floorColor ?? this._tileColor,
-              door: true,
-            })
-          );
-
-          const wall = new Wall({
-            geometry: this,
-            roomX: x,
-            roomY: y,
-            direction: "left",
-            tileHeight: this.tileHeight,
-            wallHeight: this.wallHeightWithZ,
-            roomZ: tile.z,
-            color: this._getWallColor(),
-            texture: this._currentWallTexture,
-            wallDepth: this.wallDepth,
-            hideBorder: true,
-            doorHeight: 30,
-          });
-
-          this._registerWall(wall);
-
-          this._registerTileCursor(
-            {
-              roomX: x,
-              roomY: y,
-              roomZ: tile.z,
-            },
-            true
-          );
-        }
-
-        if (tile.type === "tile") {
-          this._registerTile(
-            new Tile({
-              geometry: this,
-              roomX: x,
-              roomY: y,
-              roomZ: tile.z,
-              edge: true,
-              tileHeight: this.tileHeight,
-              color: this.floorColor ?? this._tileColor,
-            })
-          );
-
-          this._registerTileCursor({
-            roomX: x,
-            roomY: y,
-            roomZ: tile.z,
-          });
-        }
-
-        const direction = getWallDirection(tile);
-
-        if (direction != null && tile.type === "wall") {
-          this._registerWall(
-            new Wall({
-              geometry: this,
-              roomX: x,
-              roomY: y,
-              direction: direction,
-              tileHeight: this.tileHeight,
-              wallHeight: this.wallHeightWithZ,
-              roomZ: tile.height,
-              color: this._getWallColor(),
-              texture: this._currentWallTexture,
-              wallDepth: this.wallDepth,
-              hideBorder: tile.hideBorder,
-            })
-          );
-        }
-
-        if (tile.type === "wall" && tile.kind === "innerCorner") {
-          this._registerWall(
-            new Wall({
-              geometry: this,
-              roomX: x,
-              roomY: y,
-              direction: "right",
-              tileHeight: this.tileHeight,
-              wallHeight: this.wallHeightWithZ,
-              side: false,
-              roomZ: tile.height,
-              color: this._getWallColor(),
-              wallDepth: this.wallDepth,
-            })
-          );
-
-          this._registerWall(
-            new Wall({
-              geometry: this,
-              roomX: x,
-              roomY: y,
-              direction: "left",
-              tileHeight: this.tileHeight,
-              wallHeight: this.wallHeightWithZ,
-              side: false,
-              roomZ: tile.height,
-              color: this._getWallColor(),
-              wallDepth: this.wallDepth,
-            })
-          );
-        }
-
-        if (tile.type === "stairs") {
-          this._registerTile(
-            new Stair({
-              geometry: this,
-              roomX: x,
-              roomY: y,
-              roomZ: tile.z,
-              tileHeight: this.tileHeight,
-              color: this._tileColor,
-              direction: tile.kind,
-            })
-          );
-
-          this._registerTileCursor({
-            roomX: x,
-            roomY: y,
-            roomZ: tile.z,
-          });
-
-          this._registerTileCursor({
-            roomX: x,
-            roomY: y,
-            roomZ: tile.z + 1,
-          });
-        }
-
-        if (tile.type === "stairCorner") {
-          this._registerTile(
-            new StairCorner({
-              geometry: this,
-              roomX: x,
-              roomY: y,
-              roomZ: tile.z,
-              tileHeight: this.tileHeight,
-              color: this._tileColor,
-              type: tile.kind,
-            })
-          );
-
-          this._registerTileCursor({
-            roomX: x,
-            roomY: y,
-            roomZ: tile.z,
-          });
-
-          this._registerTileCursor({
-            roomX: x,
-            roomY: y,
-            roomZ: tile.z + 1,
-          });
-        }
-      }
-    }
+    return this.wallColor ?? "#ffffff";
   }
 }
-
-const getWallDirection = (tile: ParsedTileType) => {
-  if (tile.type !== "wall") return;
-
-  if (tile.kind === "rowWall") return "left" as const;
-  if (tile.kind === "colWall") return "right" as const;
-  if (tile.kind === "outerCorner") return "corner" as const;
-};

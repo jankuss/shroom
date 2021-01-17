@@ -5,7 +5,9 @@ export interface RoomPartData {
   wallLeftColor: number;
   wallRightColor: number;
   wallTopColor: number;
+  wallTexture: PIXI.Texture;
   tileLeftColor: number;
   tileRightColor: number;
   tileTopColor: number;
+  tileTexture: PIXI.Texture;
 }
