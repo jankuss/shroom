@@ -9,17 +9,17 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
   protected _wallHeight = 0;
   protected _wallWidth = 32;
   protected _tileHeight = 0;
+  protected _wallLeftColor = 0;
+  protected _wallRightColor = 0;
+  protected _wallTopColor = 0;
 
-  private _drawHitArea = true;
+  private _drawHitArea = false;
   private _hideBorder = false;
   private _roomZ = 0;
 
-  constructor(
-    private props: {
-      hideBorder: boolean;
-      onMouseMove: (event: { offsetX: number; offsetY: number }) => void;
-    }
-  ) {
+  private _hitAreaElement: PIXI.DisplayObject | undefined;
+
+  constructor(private props: WallProps) {
     super();
 
     this._hideBorder = props.hideBorder;
@@ -35,25 +35,45 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
     this._update();
   }
 
+  private get wallY() {
+    return -this._wallHeight;
+  }
+
+  private get wallHeight() {
+    if (this.props.cutawayHeight != null) {
+      return this._wallHeight - this.props.cutawayHeight;
+    }
+
+    return this._wallHeight;
+  }
+
   update(data: RoomPartData): void {
     this._borderWidth = data.borderWidth;
     this._wallHeight = data.wallHeight - this.roomZ * 32;
     this._tileHeight = data.tileHeight;
+    this._wallLeftColor = data.wallLeftColor;
+    this._wallRightColor = data.wallRightColor;
+    this._wallTopColor = data.wallTopColor;
 
     this._update();
   }
 
   protected _update() {
+    if (this._hitAreaElement != null) {
+      this.props.hitAreaContainer.removeChild(this._hitAreaElement);
+      this._hitAreaElement = undefined;
+    }
+
     this.removeChildren();
 
     const hitArea = new PIXI.Polygon([
       new PIXI.Point(
         this._getOffsetX() + this._borderWidth,
-        this._wallWidth / 2
+        this._wallWidth / 2 - (this.props.cutawayHeight ?? 0)
       ),
       new PIXI.Point(
         this._getOffsetX() + this._borderWidth + this._wallWidth,
-        0
+        -(this.props.cutawayHeight ?? 0)
       ),
       new PIXI.Point(
         this._getOffsetX() + this._borderWidth + this._wallWidth,
@@ -93,7 +113,11 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
     });
     graphics.interactive = true;
 
-    this.addChild(graphics);
+    this._hitAreaElement = graphics;
+    this._hitAreaElement.x = this.x;
+    this._hitAreaElement.y = this.y;
+    this._hitAreaElement.scale = this.scale;
+    this.props.hitAreaContainer.addChild(this._hitAreaElement);
   }
 
   private _getOffsetX() {
@@ -104,11 +128,12 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
     const sprite = new PIXI.TilingSprite(
       PIXI.Texture.WHITE,
       this._wallWidth,
-      this._wallHeight
+      this.wallHeight
     );
     sprite.transform.setFromMatrix(new PIXI.Matrix(-1, 0.5, 0, 1));
     sprite.x = this._getOffsetX() + this._borderWidth + this._wallWidth;
-    sprite.y = -this._wallHeight;
+    sprite.y = this.wallY;
+    sprite.tint = this._wallLeftColor;
 
     return sprite;
   }
@@ -121,8 +146,10 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
     );
     border.transform.setFromMatrix(new PIXI.Matrix(-1, -0.5, 0, 1));
     border.tint = 0xcccccc;
-    border.y = -this._wallHeight + this._wallWidth / 2;
+    border.y = this.wallY + this._wallWidth / 2;
     border.x = this._getOffsetX() + this._borderWidth;
+
+    border.tint = this._wallRightColor;
 
     return border;
   }
@@ -136,8 +163,17 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
     border.transform.setFromMatrix(new PIXI.Matrix(1, 0.5, 1, -0.5));
     border.tint = 0x888888;
     border.x = this._getOffsetX() + 0;
-    border.y = -this._wallHeight + this._wallWidth / 2 - this._borderWidth / 2;
+    border.y = this.wallY + this._wallWidth / 2 - this._borderWidth / 2;
+
+    border.tint = this._wallTopColor;
 
     return border;
   }
+}
+
+export interface WallProps {
+  hideBorder: boolean;
+  hitAreaContainer: PIXI.Container;
+  onMouseMove: (event: { offsetX: number; offsetY: number }) => void;
+  cutawayHeight?: number;
 }

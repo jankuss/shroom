@@ -79,13 +79,6 @@ export class Room
   private _floor: (Tile | Stair)[] = [];
   private _cursors: TileCursor[] = [];
 
-  private _tileMapBounds: {
-    minX: number;
-    minY: number;
-    maxX: number;
-    maxY: number;
-  };
-
   private _wallTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
   private _floorTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
 
@@ -160,8 +153,6 @@ export class Room
 
     this._application = application;
 
-    this._tileMapBounds = getTileMapBounds(parsedTileMap, this._wallOffsets);
-
     this._animationTicker = animationTicker;
     this._furnitureLoader = furnitureLoader;
     this._avatarLoader = avatarLoader;
@@ -199,19 +190,6 @@ export class Room
    */
   static create(shroom: Shroom, { tilemap }: CreateOptions) {
     return new Room({ ...shroom.dependencies, tilemap });
-  }
-
-  /**
-   * Bounds of the room
-   */
-  public get roomBounds() {
-    return {
-      ...this._tileMapBounds,
-      minX: this._tileMapBounds.minX - this.wallDepth,
-      maxX: this._tileMapBounds.maxX + this.wallDepth,
-      minY: this._tileMapBounds.minY - this.wallHeight - this.wallDepth,
-      maxY: this._tileMapBounds.maxY + this.tileHeight,
-    };
   }
 
   /**
@@ -346,14 +324,14 @@ export class Room
    * Height of the room.
    */
   public get roomHeight() {
-    return this.roomBounds.maxY - this.roomBounds.minY;
+    return this._visualization.rectangle.height;
   }
 
   /**
    * Width of the room.
    */
   public get roomWidth() {
-    return this.roomBounds.maxX - this.roomBounds.minX;
+    return this._visualization.rectangle.width;
   }
 
   getParsedTileTypes(): ParsedTileType[][] {

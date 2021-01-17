@@ -24,6 +24,8 @@ export class Tile extends PIXI.Container implements IRoomPart {
 
   private _door: boolean;
 
+  private _roomPartData: RoomPartData | undefined;
+
   public get tileHeight() {
     return this._tileHeight;
   }
@@ -46,6 +48,8 @@ export class Tile extends PIXI.Container implements IRoomPart {
 
   update(data: RoomPartData): void {
     this.tileHeight = data.tileHeight;
+    this._roomPartData = data;
+    this._updateSprites();
   }
 
   get texture() {
@@ -85,10 +89,6 @@ export class Tile extends PIXI.Container implements IRoomPart {
 
     this._destroySprites();
 
-    const { borderLeftTint, borderRightTint, tileTint } = getTileColors(
-      this._color ?? this.props.color
-    );
-
     const tileMatrix = getFloorMatrix(0, 0);
 
     const tile = new PIXI.TilingSprite(this.texture ?? PIXI.Texture.WHITE);
@@ -96,7 +96,7 @@ export class Tile extends PIXI.Container implements IRoomPart {
     tile.transform.setFromMatrix(tileMatrix);
     tile.width = 32;
     tile.height = 32;
-    tile.tint = tileTint;
+    tile.tint = this._roomPartData?.tileTopColor ?? 0;
 
     const borderLeftMatrix = getLeftMatrix(0, 0, {
       width: 32,
@@ -114,7 +114,7 @@ export class Tile extends PIXI.Container implements IRoomPart {
     borderLeft.transform.setFromMatrix(borderLeftMatrix);
     borderLeft.width = 32;
     borderLeft.height = this.tileHeight;
-    borderLeft.tint = borderLeftTint;
+    borderLeft.tint = this._roomPartData?.tileLeftColor ?? 0;
 
     const borderRight = new PIXI.TilingSprite(
       this.texture ?? PIXI.Texture.WHITE
@@ -122,7 +122,7 @@ export class Tile extends PIXI.Container implements IRoomPart {
     borderRight.transform.setFromMatrix(borderRightMatrix);
     borderRight.width = 32;
     borderRight.height = this.tileHeight;
-    borderRight.tint = borderRightTint;
+    borderRight.tint = this._roomPartData?.tileRightColor ?? 0;
 
     this._sprites.push(this._container);
 
