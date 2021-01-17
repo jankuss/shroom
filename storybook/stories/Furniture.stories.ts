@@ -1,6 +1,8 @@
 import * as PIXI from "pixi.js";
 
 import {
+  Avatar,
+  AvatarAction,
   BaseFurniture,
   FloorFurniture,
   FurnitureBottleVisualization,
@@ -336,6 +338,9 @@ export function DetachedFurniture() {
       animation: "0",
       direction: 2,
       type: { type: "club_sofa", kind: "type" },
+      onLoad: () => {
+        console.log("Club Sofa Loaded");
+      },
     });
 
     furniture.x = 100;
@@ -876,6 +881,53 @@ export function FurnitureFlip() {
     room.y = application.screen.height / 2 - room.roomHeight / 2;
     room.addRoomObject(furniture1);
     room.addRoomObject(furniture2);
+    application.stage.addChild(room);
+  });
+}
+
+export function LayingAvatarsBehindBed() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+       xxxxxxxxxxx
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+       x0000000000
+      `,
+    });
+
+    const furniture1 = new FloorFurniture({
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      animation: "0",
+      direction: 2,
+      type: "bed_budget",
+    });
+
+    const avatar = new Avatar({
+      roomX: 1,
+      roomY: 1,
+      direction: 2,
+      look: "hr-3163-39.hd-180-2.lg-3202-1322-1329.ch-215-1331",
+      roomZ: 0,
+    });
+
+    avatar.addAction(AvatarAction.Lay);
+
+    setTimeout(() => {
+      avatar.walk(1, 2, 0);
+    }, 2500);
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    room.addRoomObject(furniture1);
+    room.addRoomObject(avatar);
     application.stage.addChild(room);
   });
 }

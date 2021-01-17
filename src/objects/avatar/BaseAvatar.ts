@@ -40,6 +40,7 @@ export interface BaseAvatarOptions {
   position: { x: number; y: number };
   zIndex: number;
   skipBodyParts?: boolean;
+  skipCaching?: boolean;
   headOnly?: boolean;
   onLoad?: () => void;
 }
@@ -60,10 +61,10 @@ export class BaseAvatar extends PIXI.Container {
 
   private _skipBodyParts: boolean;
   private _headOnly: boolean;
+  private _skipCaching: boolean;
 
   private _currentFrame = 0;
   private _clickHandler: ClickHandler = new ClickHandler();
-  private _assets: HitSprite[] = [];
 
   private _refreshFrame = false;
   private _refreshLook = false;
@@ -159,6 +160,7 @@ export class BaseAvatar extends PIXI.Container {
     this._onLoad = options.onLoad;
     this._skipBodyParts = options.skipBodyParts ?? false;
     this._headOnly = options.headOnly ?? false;
+    this._skipCaching = options.skipCaching ?? false;
   }
 
   static fromShroom(shroom: Shroom, options: BaseAvatarOptions) {
@@ -169,12 +171,17 @@ export class BaseAvatar extends PIXI.Container {
 
   destroy(): void {
     super.destroy();
-    this._assets.forEach((asset) => asset.destroy());
-    this._container?.destroy();
+    this._destroyAssets();
 
     if (this._cancelTicker != null) {
       this._cancelTicker();
     }
+  }
+
+  private _destroyAssets() {
+    this._sprites.forEach((sprite) => sprite.destroy());
+    this._sprites = new Map();
+    this._container?.destroy();
   }
 
   private _updateSpritesZIndex() {
@@ -228,7 +235,7 @@ export class BaseAvatar extends PIXI.Container {
   ) {
     if (!this.mounted) return;
 
-    this._assets.forEach((value) => {
+    this._sprites.forEach((value) => {
       value.visible = false;
       value.ignore = true;
     });
@@ -253,10 +260,6 @@ export class BaseAvatar extends PIXI.Container {
 
       if (sprite == null) {
         sprite = this._createAsset(part, asset);
-
-        if (sprite != null) {
-          this._assets.push(sprite);
-        }
       }
 
       if (sprite == null) return;
@@ -315,7 +318,11 @@ export class BaseAvatar extends PIXI.Container {
       const requestId = ++this._updateId;
 
       this.dependencies.avatarLoader
-        .getAvatarDrawDefinition({ ...lookOptions, initial: true })
+        .getAvatarDrawDefinition({
+          ...lookOptions,
+          initial: true,
+          skipCaching: this._skipCaching,
+        })
         .then((result) => {
           if (requestId !== this._updateId) return;
 
@@ -323,6 +330,9 @@ export class BaseAvatar extends PIXI.Container {
 
           this._lookOptions = lookOptions;
           this._nextLookOptions = undefined;
+
+          // Clear sprite cache, since colors could have changed
+          this._destroyAssets();
 
           this._updateSprites();
           this._onLoad && this._onLoad();

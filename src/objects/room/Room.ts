@@ -24,6 +24,7 @@ import { RoomObjectContainer } from "./RoomObjectContainer";
 import { Subject } from "rxjs";
 import { RoomModelVisualization } from "./RoomModelVisualization";
 import { ParsedTileMap } from "./ParsedTileMap";
+import { StairCorner } from "./StairCorner";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -76,7 +77,7 @@ export class Room
   private _configuration: IConfiguration;
 
   private _walls: Wall[] = [];
-  private _floor: (Tile | Stair)[] = [];
+  private _floor: (Tile | Stair | StairCorner)[] = [];
   private _cursors: TileCursor[] = [];
 
   private _wallTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
@@ -90,6 +91,7 @@ export class Room
 
   private _hideWalls = false;
   private _hideFloor = false;
+  private _hideTileCursor = false;
 
   private _onTileClick: ((position: RoomPosition) => void) | undefined;
 
@@ -219,6 +221,15 @@ export class Room
 
   public set hideFloor(value) {
     this._hideFloor = value;
+  }
+
+  public get hideTileCursor() {
+    return this._hideTileCursor;
+  }
+
+  public set hideTileCursor(value) {
+    this._hideTileCursor = value;
+    this._updateTiles();
   }
 
   /**
@@ -446,7 +457,7 @@ export class Room
     this.addRoomObject(wall);
   }
 
-  private _registerTile(tile: Stair | Tile) {
+  private _registerTile(tile: Stair | StairCorner | Tile) {
     if (this.hideFloor) return;
 
     this._floor.push(tile);
@@ -454,6 +465,8 @@ export class Room
   }
 
   private _registerTileCursor(position: RoomPosition, door = false) {
+    if (this._hideTileCursor) return;
+
     const cursor = new TileCursor(
       position,
       door,
@@ -493,6 +506,183 @@ export class Room
     }
 
     return "#ffffff";
+  }
+
+  private _updateTiles() {
+    this._resetTiles();
+
+    const tiles = this.parsedTileMap;
+
+    for (let y = 0; y < tiles.length; y++) {
+      for (let x = 0; x < tiles[y].length; x++) {
+        const tile = tiles[y][x];
+
+        if (tile.type === "door") {
+          this._registerTile(
+            new Tile({
+              geometry: this,
+              roomX: x,
+              roomY: y,
+              roomZ: tile.z,
+              edge: true,
+              tileHeight: this.tileHeight,
+              color: this.floorColor ?? this._tileColor,
+              door: true,
+            })
+          );
+
+          const wall = new Wall({
+            geometry: this,
+            roomX: x,
+            roomY: y,
+            direction: "left",
+            tileHeight: this.tileHeight,
+            wallHeight: this.wallHeightWithZ,
+            roomZ: tile.z,
+            color: this._getWallColor(),
+            texture: this._currentWallTexture,
+            wallDepth: this.wallDepth,
+            hideBorder: true,
+            doorHeight: 30,
+          });
+
+          this._registerWall(wall);
+
+          this._registerTileCursor(
+            {
+              roomX: x,
+              roomY: y,
+              roomZ: tile.z,
+            },
+            true
+          );
+        }
+
+        if (tile.type === "tile") {
+          this._registerTile(
+            new Tile({
+              geometry: this,
+              roomX: x,
+              roomY: y,
+              roomZ: tile.z,
+              edge: true,
+              tileHeight: this.tileHeight,
+              color: this.floorColor ?? this._tileColor,
+            })
+          );
+
+          this._registerTileCursor({
+            roomX: x,
+            roomY: y,
+            roomZ: tile.z,
+          });
+        }
+
+        const direction = getWallDirection(tile);
+
+        if (direction != null && tile.type === "wall") {
+          this._registerWall(
+            new Wall({
+              geometry: this,
+              roomX: x,
+              roomY: y,
+              direction: direction,
+              tileHeight: this.tileHeight,
+              wallHeight: this.wallHeightWithZ,
+              roomZ: tile.height,
+              color: this._getWallColor(),
+              texture: this._currentWallTexture,
+              wallDepth: this.wallDepth,
+              hideBorder: tile.hideBorder,
+            })
+          );
+        }
+
+        if (tile.type === "wall" && tile.kind === "innerCorner") {
+          this._registerWall(
+            new Wall({
+              geometry: this,
+              roomX: x,
+              roomY: y,
+              direction: "right",
+              tileHeight: this.tileHeight,
+              wallHeight: this.wallHeightWithZ,
+              side: false,
+              roomZ: tile.height,
+              color: this._getWallColor(),
+              wallDepth: this.wallDepth,
+            })
+          );
+
+          this._registerWall(
+            new Wall({
+              geometry: this,
+              roomX: x,
+              roomY: y,
+              direction: "left",
+              tileHeight: this.tileHeight,
+              wallHeight: this.wallHeightWithZ,
+              side: false,
+              roomZ: tile.height,
+              color: this._getWallColor(),
+              wallDepth: this.wallDepth,
+            })
+          );
+        }
+
+        if (tile.type === "stairs") {
+          this._registerTile(
+            new Stair({
+              geometry: this,
+              roomX: x,
+              roomY: y,
+              roomZ: tile.z,
+              tileHeight: this.tileHeight,
+              color: this._tileColor,
+              direction: tile.kind,
+            })
+          );
+
+          this._registerTileCursor({
+            roomX: x,
+            roomY: y,
+            roomZ: tile.z,
+          });
+
+          this._registerTileCursor({
+            roomX: x,
+            roomY: y,
+            roomZ: tile.z + 1,
+          });
+        }
+
+        if (tile.type === "stairCorner") {
+          this._registerTile(
+            new StairCorner({
+              geometry: this,
+              roomX: x,
+              roomY: y,
+              roomZ: tile.z,
+              tileHeight: this.tileHeight,
+              color: this._tileColor,
+              type: tile.kind,
+            })
+          );
+
+          this._registerTileCursor({
+            roomX: x,
+            roomY: y,
+            roomZ: tile.z,
+          });
+
+          this._registerTileCursor({
+            roomX: x,
+            roomY: y,
+            roomZ: tile.z + 1,
+          });
+        }
+      }
+    }
   }
 }
 

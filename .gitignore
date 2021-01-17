@@ -10,3 +10,4 @@ node_modules
 /storybook/public/resources
 /storybook/public/images
 yarn.lock
+/.idea

@@ -5,11 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.1] - 2021-01-13
+
+### Fixed
+
+- Fix exception in `avatar.destroy()`
+
+## [0.5.0] - 2021-01-13
+
+### Added
+
+- `shroom proxy` command: Proxy & translate WebSocket messages to something the emulator will understand
+  This enables you to communicate with the emulator through websockets, without making any adjustments to
+  the emulator itself.
+- Option to hide tile cursor in a room with `room.hideTileCursor`
+- BaseFurniture now has a onLoad callback, which gets called after the furniture is fully loaded
+- Add `headDirection` option for `avatar.walk()`
+- Add corner stairs (thanks @tuttarealstep)
+- Add `skipCaching` option to `BaseAvatar` to skip unnecessary caching from the AvatarLoader (thanks @somekindadude)
+
+### Changed
+
+- Providing no direction in `avatar.walk()` doesn't modify the avatars direction now
 
 ### Fixed
 
 - Display of furniture with special layer offsets for a direction
+- Fix coloring of clothing when changing the look
+- Avatar displaying behind bed while laying
 
 ## [0.4.1] - 2021-01-10
 

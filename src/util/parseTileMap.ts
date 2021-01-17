@@ -15,6 +15,7 @@ export type ParsedTileType =
   | { type: "tile"; z: number }
   | { type: "hidden" }
   | { type: "stairs"; kind: 0 | 2; z: number }
+  | { type: "stairCorner"; kind: "left" | "right" | "front"; z: number }
   | { type: "door"; z: number };
 
 /**
@@ -120,11 +121,19 @@ export function parseTileMap(
 
       if (!tileInfo.rowDoor || hasDoor) {
         if (tileInfo.stairs != null && tileInfo.height != null) {
-          result[resultY][resultX] = {
-            type: "stairs",
-            kind: tileInfo.stairs.direction,
-            z: tileInfo.height,
-          };
+          if (tileInfo.stairs.isCorner) {
+            result[resultY][resultX] = {
+              type: "stairCorner",
+              kind: tileInfo.stairs.cornerType,
+              z: tileInfo.height,
+            };
+          } else if (tileInfo.stairs.direction != null) {
+            result[resultY][resultX] = {
+              type: "stairs",
+              kind: tileInfo.stairs.direction,
+              z: tileInfo.height,
+            };
+          }
 
           applyHighLowTile(tileInfo.height);
         } else if (tileInfo.height != null) {

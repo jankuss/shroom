@@ -46,6 +46,7 @@ export interface BaseFurnitureProps {
   direction: number;
   animation: string | undefined;
   getMaskId?: MaskIdGetter;
+  onLoad?: () => void;
 }
 
 type ResolveLoadFurniResult = (result: LoadFurniResult) => void;
@@ -82,6 +83,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _cancelTicker: (() => void) | undefined = undefined;
   private _getMaskId: MaskIdGetter;
 
+  private _onLoad: (() => void) | undefined;
+
   private _dependencies?: {
     placeholder: PIXI.Texture | undefined;
     visualization: IFurnitureRoomVisualization;
@@ -96,6 +99,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     animation = "0",
     getMaskId = () => undefined,
     dependencies,
+    onLoad,
   }: {
     dependencies?: BaseFurnitureDependencies;
   } & BaseFurnitureProps) {
@@ -103,6 +107,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this._animation = animation;
     this._type = type;
     this._getMaskId = getMaskId;
+    this._onLoad = onLoad;
 
     if (dependencies != null) {
       this.dependencies = dependencies;
@@ -575,6 +580,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       this._loadFurniResult = result;
       this._resolveLoadFurniResult && this._resolveLoadFurniResult(result);
       this._updateFurniture();
+
+      this._onLoad && this._onLoad();
     });
 
     this._updateFurniture();

@@ -127,7 +127,7 @@ export class AvatarLoader implements IAvatarLoader {
     getDrawDefinition: LookServer,
     options: LookOptions
   ): Promise<AvatarLoaderResult> {
-    const { actions, look, item, effect, initial } = options;
+    const { actions, look, item, effect, initial, skipCaching } = options;
 
     const loadedFiles = new Map<string, Promise<HitTexture>>();
 
@@ -156,28 +156,39 @@ export class AvatarLoader implements IAvatarLoader {
         });
       });
 
-    directions.forEach((direction) => {
-      directions.forEach((headDirection) => {
-        loadResources({
-          actions: new Set(actions),
-          direction,
-          headDirection,
-          look,
-          item,
-        });
-
-        if (initial != null) {
-          preloadActions.forEach((action) => {
-            loadResources({
-              actions: new Set([action]),
-              direction,
-              headDirection,
-              look,
-            });
-          });
-        }
+    const loadDirection = (direction: number, headDirection: number) => {
+      loadResources({
+        actions: new Set(actions),
+        direction,
+        headDirection,
+        look,
+        item,
       });
-    });
+
+      if (initial != null) {
+        preloadActions.forEach((action) => {
+          loadResources({
+            actions: new Set([action]),
+            direction,
+            headDirection,
+            look,
+          });
+        });
+      }
+    };
+
+    if (skipCaching) {
+      loadDirection(
+        options.direction,
+        options.headDirection ?? options.direction
+      );
+    } else {
+      directions.forEach((direction) => {
+        directions.forEach((headDirection) => {
+          loadDirection(direction, headDirection);
+        });
+      });
+    }
 
     const awaitedEntries = await Promise.all(
       [...loadedFiles.entries()].map(
