@@ -53,10 +53,6 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this._updateFurniture();
   }
 
-  isAnimated(): boolean {
-    return true;
-  }
-
   setCurrentAnimation(newAnimation: number) {
     this._animationQueueStartFrame = undefined;
     // Skip the transitions of the initial animation change.

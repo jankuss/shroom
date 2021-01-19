@@ -39,6 +39,7 @@ interface BaseFurnitureDependencies {
   animationTicker: IAnimationTicker;
   furnitureLoader: IFurnitureLoader;
   hitDetection: IHitDetection;
+  application: PIXI.Application;
 }
 
 export interface BaseFurnitureProps {
@@ -128,6 +129,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         furnitureLoader: context.furnitureLoader,
         hitDetection: context.hitDetection,
         visualization: context.visualization,
+        application: context.application,
       },
       ...props,
     });
@@ -144,6 +146,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         furnitureLoader: shroom.dependencies.furnitureLoader,
         hitDetection: shroom.dependencies.hitDetection,
         placeholder: shroom.dependencies.configuration.placeholder,
+        application: shroom.dependencies.application,
         visualization: {
           container,
           addMask: () => {
@@ -281,6 +284,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   public set animation(value) {
     this._animation = value;
     this.visualization.updateAnimation(this.animation);
+    this._handleAnimationChange();
   }
 
   public get maskId() {
@@ -441,7 +445,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
           }
         }
 
-        if (cachedAsset != null && !skipLayerUpdate) {
+        if (cachedAsset != null) {
           this._applyLayerDataToSprite(cachedAsset, asset, part);
         }
 
@@ -463,7 +467,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this.visualization.updateAnimation(this.animation);
     this.visualization.updateFrame(this.dependencies.animationTicker.current());
 
-    this._handleVisualization();
+    this._handleAnimationChange();
   }
 
   private _applyLayerDataToSprite(
@@ -589,18 +593,30 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this._updateFurniture();
   }
 
-  private _handleVisualization() {
-    if (this.visualization.isAnimated() && this._cancelTicker == null) {
+  private _handleAnimationChange() {
+    if (
+      this.visualization.isAnimated(this.animation) &&
+      this._cancelTicker == null
+    ) {
       this._cancelTicker = this.dependencies.animationTicker.subscribe(
         (frame) => {
           this.visualization.updateFrame(frame);
         }
       );
+      this.visualization.updateFrame(
+        this.dependencies.animationTicker.current()
+      );
     }
 
-    if (!this.visualization.isAnimated() && this._cancelTicker != null) {
+    if (
+      !this.visualization.isAnimated(this.animation) &&
+      this._cancelTicker != null
+    ) {
       this._cancelTicker();
       this._cancelTicker = undefined;
+      this.visualization.updateFrame(
+        this.dependencies.animationTicker.current()
+      );
     }
   }
 

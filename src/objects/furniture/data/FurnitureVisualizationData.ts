@@ -29,6 +29,26 @@ export class FurnitureVisualizationData
     return new FurnitureVisualizationData(text);
   }
 
+  getFrameCountWithoutRepeat(
+    size: number,
+    animationId: number
+  ): number | undefined {
+    const frameSequences = this.querySelectorAll(
+      `visualization[size="${size}"] animation[id="${animationId}"] frameSequence`
+    );
+
+    let count: number | undefined;
+    frameSequences.forEach((element) => {
+      const value = element.children.length;
+
+      if (count == null || value > count) {
+        count = value;
+      }
+    });
+
+    return count;
+  }
+
   getTransitionForAnimation(
     size: number,
     transitionTo: number
@@ -287,11 +307,16 @@ export class FurnitureVisualizationData
           element.getAttribute("id")
         );
 
+        const transitionTo = this._getNumberFromAttributeValue(
+          element.getAttribute("transitionTo")
+        );
+
         if (animationId == null) return null;
 
         return {
           id: animationId,
           layers: this._toJsonMap(layers, (layer) => layer.id.toString()),
+          transitionTo,
         };
       })
       .filter(notNullOrUndefined);

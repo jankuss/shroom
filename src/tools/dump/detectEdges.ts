@@ -36,7 +36,6 @@ export const detectEdges = (
   } while (isTransparent(pixels));
 
   if (top === height) {
-    console.log(top, height);
     throw new Error("Can't detect edges.");
   }
 

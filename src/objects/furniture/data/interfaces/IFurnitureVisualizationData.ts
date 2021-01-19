@@ -12,6 +12,10 @@ export interface IFurnitureVisualizationData {
     animationId: number,
     id: number
   ): FurnitureAnimationLayer | undefined;
+  getFrameCountWithoutRepeat(
+    size: number,
+    animationId: number
+  ): number | undefined;
   getFrameCount(size: number, animationId: number): number | undefined;
   getColor(size: number, colorId: number, layerId: number): string | undefined;
   getAnimation(

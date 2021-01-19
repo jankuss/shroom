@@ -8,10 +8,6 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
   private _currentDirection = -1;
   private _animationId: string | undefined;
 
-  isAnimated(): boolean {
-    return false;
-  }
-
   setView(view: IFurnitureVisualizationView): void {
     super.setView(view);
 

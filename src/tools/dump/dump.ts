@@ -7,6 +7,7 @@ import { extractSwfs } from "./extractSwfs";
 import { promises as fs } from "fs";
 import { FigureMapData } from "../../objects/avatar/util/data/FigureMapData";
 import { createOffsetFile } from "./createOffsetFile";
+import { dumpFurniture } from "./dumpFurniture";
 
 export const glob = promisify(g);
 
@@ -50,14 +51,16 @@ export async function dump({ externalVariables, downloadPath }: Options) {
       `Found ${furnitureSwfs.length} furniture swfs. Starting the extraction process.`
     );
 
-    await extractSwfs(logger, "Furniture", furnitureSwfs);
+    await extractSwfs(logger, "Furniture", furnitureSwfs, dumpFurniture);
 
     const figureSwfs = await glob(`${downloadPath}/figure/**/*.swf`);
     console.log(
       `Found ${figureSwfs.length} figure swfs. Starting the extraction process.`
     );
 
-    await extractSwfs(logger, "Figure", figureSwfs);
+    await extractSwfs(logger, "Figure", figureSwfs, async () => {
+      // Do nothing
+    });
   });
 
   await step("Post Processing", async () => {

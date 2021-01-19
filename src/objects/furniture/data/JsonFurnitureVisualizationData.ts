@@ -43,6 +43,28 @@ export class JsonFurnitureVisualizationData
       ?.layers[id.toString()];
   }
 
+  getFrameCountWithoutRepeat(
+    size: number,
+    animationId: number
+  ): number | undefined {
+    let count = 1;
+
+    Object.values(
+      this._getVisualization(size).animations[animationId.toString()] ?? {}
+    ).forEach((layers) => {
+      Object.values(layers ?? {}).forEach((layer) => {
+        const frameCount = layer?.frames.length ?? 0;
+
+        const value = frameCount;
+        if (value > count) {
+          count = value;
+        }
+      });
+    });
+
+    return count;
+  }
+
   getFrameCount(size: number, animationId: number): number | undefined {
     let count = 1;
 
@@ -87,18 +109,20 @@ export class JsonFurnitureVisualizationData
 
   getTransitionForAnimation(
     size: number,
-    animationId: number
+    transitionTo: number
   ): FurnitureAnimation | undefined {
-    const animations = Object.values(this._getVisualization(size).animations);
+    const animations = Object.entries(this._getVisualization(size).animations);
 
     const animationTransitionTo = animations.find(
-      (animation) => animation?.transitionTo === animationId
+      ([id, animation]) => animation?.transitionTo === transitionTo
     );
 
     if (animationTransitionTo != null) {
+      const animationId = Number(animationTransitionTo[0]);
+
       return {
         id: animationId,
-        transitionTo: animationTransitionTo.transitionTo,
+        transitionTo,
       };
     }
   }

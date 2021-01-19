@@ -1,13 +1,14 @@
 import Bluebird from "bluebird";
 import { basename } from "path";
 import { ProgressBar } from "./ProgressBar";
-import { dumpSwf } from "./dumpSwf";
+import { dumpSwf, OnAfterCallback } from "./dumpSwf";
 import { Logger } from "./Logger";
 
 export async function extractSwfs(
   logger: Logger,
   name: string,
-  swfs: string[]
+  swfs: string[],
+  onAfter: OnAfterCallback
 ) {
   const dumpFurnitureProgress = new ProgressBar(
     logger,
@@ -24,7 +25,7 @@ export async function extractSwfs(
   await Bluebird.map(
     swfs,
     async (path) => {
-      await dumpSwf(path);
+      await dumpSwf(path, onAfter);
       dumpFurnitureProgress.increment(basename(path));
     },
     {

@@ -39,8 +39,6 @@ export class JsonFurnitureAssetBundle implements IFurnitureAssetBundle {
   async getTexture(name: string): Promise<HitTexture> {
     const { spritesheet } = await this._data;
 
-    console.log("SP", spritesheet);
-
     return HitTexture.fromSpriteSheet(spritesheet, name);
   }
 
