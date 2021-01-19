@@ -4,6 +4,7 @@ import { createSpritesheet } from "./createSpritesheet";
 import { FurnitureVisualizationData } from "../../objects/furniture/data/FurnitureVisualizationData";
 import { FurnitureIndexData } from "../../objects/furniture/data/FurnitureIndexData";
 import { FurnitureAssetsData } from "../../objects/furniture/data/FurnitureAssetsData";
+import { ShroomAssetBundle } from "../../assets/ShroomAssetBundle";
 
 export async function dumpFurniture(
   baseName: string,
@@ -45,4 +46,14 @@ export async function dumpFurniture(
     path.join(dumpLocation, "index.json"),
     JSON.stringify(data, null, 2)
   );
+
+  const indexJsonString = JSON.stringify(data, null, 2);
+  const encoder = new TextEncoder();
+
+  const furnitureFile = new ShroomAssetBundle([
+    { fileName: "index.json", buffer: encoder.encode(indexJsonString) },
+    { fileName: "spritesheet.png", buffer: image },
+  ]);
+
+  await fs.writeFile(`${dumpLocation}.shroom`, furnitureFile.toBuffer());
 }

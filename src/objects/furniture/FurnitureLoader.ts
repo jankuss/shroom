@@ -1,4 +1,5 @@
 import { LegacyAssetBundle } from "../../assets/LegacyAssetBundle";
+import { ShroomAssetBundle } from "../../assets/ShroomAssetBundle";
 import { ZipAssetBundle } from "../../assets/ZipAssetBundle";
 import { IFurnitureData } from "../../interfaces/IFurnitureData";
 import {
@@ -56,8 +57,8 @@ export class FurnitureLoader implements IFurnitureLoader {
     return new FurnitureLoader({
       furnitureData,
       getAssetBundle: async (type, revision) => {
-        const bundle = new LegacyAssetBundle(
-          `${resourcePath}/hof_furni/${normalizePath(revision, type)}`
+        const bundle = await ShroomAssetBundle.fromUrl(
+          `${resourcePath}/hof_furni/${normalizePath(revision, type)}.shroom`
         );
         return new JsonFurnitureAssetBundle(bundle);
       },
