@@ -3,7 +3,6 @@ import { basename } from "path";
 import { ProgressBar } from "./ProgressBar";
 import { dumpSwf } from "./dumpSwf";
 import { Logger } from "./Logger";
-import { cpus } from "os";
 
 export async function extractSwfs(
   logger: Logger,
@@ -29,7 +28,7 @@ export async function extractSwfs(
       dumpFurnitureProgress.increment(basename(path));
     },
     {
-      concurrency: cpus().length,
+      concurrency: 4,
     }
   );
 

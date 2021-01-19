@@ -1,31 +1,29 @@
 import * as PIXI from "pixi.js";
 import { applyTextureProperties } from "../../util/applyTextureProperties";
+import { loadImageFromBlob } from "../../util/loadImageFromBlob";
+import { HitSprite } from "./HitSprite";
 
 export class HitTexture {
   private _texture: PIXI.Texture;
-  private _image: HTMLImageElement;
   private _cachedHitmap: Uint32Array | undefined;
 
   public get texture() {
     return this._texture;
   }
 
-  constructor(image: HTMLImageElement) {
-    if (!image.complete) throw new Error("Image not loaded.");
-
-    this._image = image;
-    this._texture = PIXI.Texture.from(image);
+  constructor(texture: PIXI.Texture) {
+    this._texture = texture;
     applyTextureProperties(this._texture);
   }
 
+  static async fromSpriteSheet(spritesheet: PIXI.Spritesheet, name: string) {
+    const texture = spritesheet.textures[name];
+
+    return new HitTexture(texture);
+  }
+
   static async fromBlob(blob: Blob) {
-    const reader = new FileReader();
-    const url = await new Promise<string>((resolve) => {
-      reader.readAsDataURL(blob);
-      reader.onloadend = () => {
-        resolve(reader.result as string);
-      };
-    });
+    const url = await loadImageFromBlob(blob);
 
     return HitTexture.fromUrl(url);
   }
@@ -53,7 +51,9 @@ export class HitTexture {
       image.onerror = (value) => reject(value);
     });
 
-    return new HitTexture(image);
+    const texture = PIXI.Texture.from(image);
+
+    return new HitTexture(texture);
   }
 
   hits(
@@ -82,10 +82,12 @@ export class HitTexture {
 
   private _getHitMap() {
     if (this._cachedHitmap == null) {
-      this._cachedHitmap = generateHitMap(this._image);
+      this._cachedHitmap = generateHitMap(
+        (this._texture.baseTexture.resource as any).source
+      );
     }
 
-    return this._cachedHitmap;
+    return this._cachedHitmap ?? new Uint8ClampedArray();
   }
 }
 

@@ -47,8 +47,7 @@ export async function loadFurni(
     const loadedTextures = await Promise.all(
       assetsToLoad.map(async (asset) => {
         try {
-          const blob = await bundle.getTexture(asset.name);
-          const image = await HitTexture.fromBlob(blob);
+          const image = await bundle.getTexture(asset.name);
 
           return [asset.name, image] as const;
         } catch (e) {

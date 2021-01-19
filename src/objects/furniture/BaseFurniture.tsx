@@ -462,6 +462,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
     this.visualization.updateAnimation(this.animation);
     this.visualization.updateFrame(this.dependencies.animationTicker.current());
+
+    this._handleVisualization();
   }
 
   private _applyLayerDataToSprite(
@@ -585,13 +587,21 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     });
 
     this._updateFurniture();
+  }
 
-    this._cancelTicker && this._cancelTicker();
-    this._cancelTicker = this.dependencies.animationTicker.subscribe(
-      (frame) => {
-        this.visualization.updateFrame(frame);
-      }
-    );
+  private _handleVisualization() {
+    if (this.visualization.isAnimated() && this._cancelTicker == null) {
+      this._cancelTicker = this.dependencies.animationTicker.subscribe(
+        (frame) => {
+          this.visualization.updateFrame(frame);
+        }
+      );
+    }
+
+    if (!this.visualization.isAnimated() && this._cancelTicker != null) {
+      this._cancelTicker();
+      this._cancelTicker = undefined;
+    }
   }
 
   private _getAlpha({

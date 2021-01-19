@@ -14,7 +14,7 @@ export class AnimationTicker implements IAnimationTicker {
 
   constructor(application: PIXI.Application) {
     application.ticker.maxFPS = TARGET_FPS;
-    application.ticker.minFPS = TARGET_FPS;
+    application.ticker.minFPS = ANIM_FPS;
     application.ticker.add(() => this._increment());
   }
 

@@ -40,7 +40,7 @@ export class Shroom {
       avatarLoader ?? AvatarLoader.createForZip(resourcePath);
     const _furnitureLoader =
       furnitureLoader ??
-      FurnitureLoader.createForZip(_furnitureData, resourcePath);
+      FurnitureLoader.createForJson(_furnitureData, resourcePath);
     const _configuration = configuration ?? {};
 
     return {

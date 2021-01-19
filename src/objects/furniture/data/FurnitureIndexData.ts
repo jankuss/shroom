@@ -1,3 +1,5 @@
+import { FurnitureIndexJson } from "./FurnitureIndexJson";
+
 export class FurnitureIndexData {
   private _visualization: string | undefined;
   private _logic: string | undefined;
@@ -23,6 +25,10 @@ export class FurnitureIndexData {
     const text = await response.text();
 
     return new FurnitureIndexData(text);
+  }
+
+  toJson(): FurnitureIndexJson {
+    return this.toObject();
   }
 
   toObject() {

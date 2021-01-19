@@ -1,12 +1,14 @@
 import { IAssetBundle } from "../../assets/IAssetBundle";
+import { HitTexture } from "../hitdetection/HitTexture";
 import { FurnitureAssetsData } from "./data/FurnitureAssetsData";
 import { FurnitureIndexData } from "./data/FurnitureIndexData";
 import { FurnitureVisualizationData } from "./data/FurnitureVisualizationData";
 import { IFurnitureAssetsData } from "./data/interfaces/IFurnitureAssetsData";
 import { IFurnitureIndexData } from "./data/interfaces/IFurnitureIndexData";
 import { IFurnitureVisualizationData } from "./data/interfaces/IFurnitureVisualizationData";
+import { IFurnitureAssetBundle } from "./IFurnitureAssetBundle";
 
-export class XmlFurnitureAssetBundle {
+export class XmlFurnitureAssetBundle implements IFurnitureAssetBundle {
   constructor(private _type: string, private _assetBundle: IAssetBundle) {}
 
   async getAssets(): Promise<IFurnitureAssetsData> {
@@ -21,8 +23,10 @@ export class XmlFurnitureAssetBundle {
     return new FurnitureVisualizationData(data);
   }
 
-  async getTexture(name: string): Promise<Blob> {
-    return this._assetBundle.getBlob(`${name}.png`);
+  async getTexture(name: string): Promise<HitTexture> {
+    const blob = await this._assetBundle.getBlob(`${name}.png`);
+
+    return HitTexture.fromBlob(blob);
   }
 
   async getIndex(): Promise<IFurnitureIndexData> {

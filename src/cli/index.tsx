@@ -27,13 +27,12 @@ yargs(hideBin(process.argv))
           type: "string",
           describe: "Path to store the extracted resources",
         })
-        .demandOption(["url"], "Provide a url to the external variables")
         .demandOption(
           ["location"],
           "Provide a location to store the extracted resources"
         );
     },
-    (options: { url: string; location: string }) => {
+    (options: { url?: string; location: string }) => {
       dump({
         externalVariables: options.url,
         downloadPath: options.location,

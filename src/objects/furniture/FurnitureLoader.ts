@@ -6,6 +6,7 @@ import {
   IFurnitureLoader,
 } from "../../interfaces/IFurnitureLoader";
 import { IFurnitureAssetBundle } from "./IFurnitureAssetBundle";
+import { JsonFurnitureAssetBundle } from "./JsonFurnitureAssetBundle";
 import { loadFurni, LoadFurniResult } from "./util/loadFurni";
 import { XmlFurnitureAssetBundle } from "./XmlFurnitureAssetBundle";
 
@@ -47,6 +48,18 @@ export class FurnitureLoader implements IFurnitureLoader {
           `${resourcePath}/hof_furni/${normalizePath(revision, type)}.zip`
         );
         return new XmlFurnitureAssetBundle(type, bundle);
+      },
+    });
+  }
+
+  static createForJson(furnitureData: IFurnitureData, resourcePath = "") {
+    return new FurnitureLoader({
+      furnitureData,
+      getAssetBundle: async (type, revision) => {
+        const bundle = new LegacyAssetBundle(
+          `${resourcePath}/hof_furni/${normalizePath(revision, type)}`
+        );
+        return new JsonFurnitureAssetBundle(bundle);
       },
     });
   }

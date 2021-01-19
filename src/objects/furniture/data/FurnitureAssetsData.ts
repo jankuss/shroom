@@ -1,4 +1,5 @@
 import { XmlData } from "../../../data/XmlData";
+import { FurnitureAssetsJson } from "./FurnitureAssetsJson";
 import {
   FurnitureAsset,
   IFurnitureAssetsData,
@@ -39,6 +40,17 @@ export class FurnitureAssetsData
     const text = await response.text();
 
     return new FurnitureAssetsData(text);
+  }
+
+  toJson(): FurnitureAssetsJson {
+    const assets = this.getAssets();
+    const assetsObject: { [key: string]: FurnitureAsset } = {};
+
+    assets.forEach((asset) => {
+      assetsObject[asset.name] = asset;
+    });
+
+    return assetsObject;
   }
 
   getAsset(name: string): FurnitureAsset | undefined {

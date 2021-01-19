@@ -41,6 +41,10 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureVisualizatio
     this._refreshModifier = true;
   }
 
+  isAnimated(): boolean {
+    return true;
+  }
+
   update(): void {
     this._base.update();
   }

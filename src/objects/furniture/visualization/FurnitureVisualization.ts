@@ -31,4 +31,5 @@ export abstract class FurnitureVisualization
   abstract updateFrame(frame: number): void;
   abstract updateDirection(direction: number): void;
   abstract updateAnimation(animation: string): void;
+  abstract isAnimated(): boolean;
 }

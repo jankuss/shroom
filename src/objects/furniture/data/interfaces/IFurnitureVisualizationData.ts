@@ -14,14 +14,17 @@ export interface IFurnitureVisualizationData {
   ): FurnitureAnimationLayer | undefined;
   getFrameCount(size: number, animationId: number): number | undefined;
   getColor(size: number, colorId: number, layerId: number): string | undefined;
-  getAnimation(size: number, animationId: number): Animation | undefined;
+  getAnimation(
+    size: number,
+    animationId: number
+  ): FurnitureAnimation | undefined;
   getTransitionForAnimation(
     size: number,
     animationId: number
-  ): Animation | undefined;
+  ): FurnitureAnimation | undefined;
 }
 
-export interface Animation {
+export interface FurnitureAnimation {
   id: number;
   transitionTo?: number;
 }
@@ -42,6 +45,7 @@ export interface FurnitureDirectionLayer {
 }
 
 export interface FurnitureAnimationLayer {
+  id: number;
   frames: number[];
   frameRepeat?: number;
   random?: boolean;

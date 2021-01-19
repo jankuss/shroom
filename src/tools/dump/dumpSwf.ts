@@ -2,6 +2,11 @@ import { promises as fs } from "fs";
 import * as path from "path";
 import JSZip from "jszip";
 import { basename } from "path";
+import "./types";
+import { createSpritesheet } from "./createSpritesheet";
+import { FurnitureVisualizationData } from "../../objects/furniture/data/FurnitureVisualizationData";
+import { FurnitureIndexData } from "../../objects/furniture/data/FurnitureIndexData";
+import { FurnitureAssetsData } from "../../objects/furniture/data/FurnitureAssetsData";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { readFromBufferP, extractImages } = require("swf-extract");
@@ -39,6 +44,44 @@ export async function dumpSwf(swfPath: string) {
 
   const buffer = await zip.generateAsync({ type: "uint8array" });
   await fs.writeFile(zipPath, buffer);
+
+  const imagePathStrings = imagePaths.map(({ path }) => path);
+
+  const { json, image } = await createSpritesheet(imagePathStrings, {
+    outputFormat: "png",
+  });
+
+  await fs.writeFile(path.join(dumpLocation, "spritesheet.png"), image);
+
+  const visualizationData = await fs.readFile(
+    path.join(dumpLocation, `${baseName}_visualization.bin`),
+    "utf-8"
+  );
+
+  const indexData = await fs.readFile(
+    path.join(dumpLocation, `index.bin`),
+    "utf-8"
+  );
+  const assetsData = await fs.readFile(
+    path.join(dumpLocation, `${baseName}_assets.bin`),
+    "utf-8"
+  );
+
+  const visualization = new FurnitureVisualizationData(visualizationData);
+  const index = new FurnitureIndexData(indexData);
+  const assets = new FurnitureAssetsData(assetsData);
+
+  const data = {
+    spritesheet: json,
+    visualization: visualization.toJson(),
+    index: index.toJson(),
+    assets: assets.toJson(),
+  };
+
+  await fs.writeFile(
+    path.join(dumpLocation, "index.json"),
+    JSON.stringify(data, null, 2)
+  );
 }
 
 function getAssetMapFromSWF(swf: SWF) {

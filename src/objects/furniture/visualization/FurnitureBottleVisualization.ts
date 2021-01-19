@@ -12,6 +12,10 @@ export class FurnitureBottleVisualization extends FurnitureVisualization {
   private _stateQueue: number[] = [];
   private _running = false;
 
+  isAnimated(): boolean {
+    return true;
+  }
+
   destroy(): void {
     this._base.destroy();
   }

@@ -1,10 +1,18 @@
 import { XmlData } from "../../../data/XmlData";
+import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
+import {
+  FurnitureAnimationsJson,
+  FurnitureColorsJson,
+  FurnitureDirectionsJson,
+  FurnitureLayersJson,
+  FurnitureVisualizationJson,
+} from "./FurnitureVisualizationJson";
 import {
   FurnitureAnimationLayer,
   FurnitureDirectionLayer,
   IFurnitureVisualizationData,
   FurnitureLayer,
-  Animation,
+  FurnitureAnimation,
 } from "./interfaces/IFurnitureVisualizationData";
 
 export class FurnitureVisualizationData
@@ -24,7 +32,7 @@ export class FurnitureVisualizationData
   getTransitionForAnimation(
     size: number,
     transitionTo: number
-  ): Animation | undefined {
+  ): FurnitureAnimation | undefined {
     const animation = this.querySelector(
       `visualization[size="${size}"] animations animation[transitionTo="${transitionTo}"]`
     );
@@ -41,7 +49,10 @@ export class FurnitureVisualizationData
     };
   }
 
-  getAnimation(size: number, animationId: number): Animation | undefined {
+  getAnimation(
+    size: number,
+    animationId: number
+  ): FurnitureAnimation | undefined {
     const animation = this.querySelector(
       `visualization[size="${size}"] animations animation[id="${animationId}"]`
     );
@@ -88,6 +99,17 @@ export class FurnitureVisualizationData
     return count;
   }
 
+  getAnimationIds(size: number) {
+    const animations = this.querySelectorAll(
+      `visualization[size="${size}"] animations animation`
+    );
+
+    return animations
+      .map((element) => element.getAttribute("id"))
+      .filter(notNullOrUndefined)
+      .map((id) => Number(id));
+  }
+
   getAnimationLayer(
     size: number,
     animationId: number,
@@ -110,6 +132,7 @@ export class FurnitureVisualizationData
     );
 
     return {
+      id: animationId,
       frames: frames.map((element) =>
         Number(element.getAttribute("id") ?? undefined)
       ),
@@ -191,6 +214,205 @@ export class FurnitureVisualizationData
       tag: tag ?? undefined,
       ink: ink ?? undefined,
       ignoreMouse: ignoreMouse != null ? ignoreMouse === "1" : undefined,
+    };
+  }
+
+  toJson(): FurnitureVisualizationJson {
+    return {
+      ...this._getJsonForSize(64),
+    };
+  }
+
+  private _toJsonMap<T>(
+    arr: T[],
+    getKey: (value: T) => string | null
+  ): { [key: string]: T | undefined } {
+    const map: any = {};
+
+    arr.forEach((value) => {
+      const key = getKey(value);
+
+      if (key != null) {
+        map[key] = value;
+      }
+    });
+
+    return map;
+  }
+
+  private _getJsonAnimations(size: number): FurnitureAnimationsJson {
+    const arr = Array.from(
+      this.document.querySelectorAll(
+        `visualization[size="${size}"] animations animation`
+      )
+    )
+      .map((element) => {
+        const layers = Array.from(element.querySelectorAll(`animationLayer`))
+          .map((element): FurnitureAnimationLayer | undefined => {
+            const id = this._getNumberFromAttributeValue(
+              element.getAttribute("id")
+            );
+
+            const frames = Array.from(
+              element.querySelectorAll(`frame` as string)
+            )
+              .map((element) => element.getAttribute("id"))
+              .filter(notNullOrUndefined)
+              .map((id) => Number(id));
+
+            const frameRepeat = this._getNumberFromAttributeValue(
+              element.getAttribute("frameRepeat")
+            );
+            const loopCount = this._getNumberFromAttributeValue(
+              element.getAttribute("loopCount")
+            );
+            const random =
+              this._getNumberFromAttributeValue(
+                element.getAttribute("random")
+              ) === 1;
+
+            if (id == null) return;
+
+            return {
+              id,
+              frames,
+              frameRepeat,
+              loopCount,
+              random,
+            };
+          })
+          .filter(notNullOrUndefined);
+
+        const animationId = this._getNumberFromAttributeValue(
+          element.getAttribute("id")
+        );
+
+        if (animationId == null) return null;
+
+        return {
+          id: animationId,
+          layers: this._toJsonMap(layers, (layer) => layer.id.toString()),
+        };
+      })
+      .filter(notNullOrUndefined);
+
+    return this._toJsonMap(arr, (element) => element.id.toString());
+  }
+
+  private _getJsonColors(size: number): FurnitureColorsJson {
+    const arr = Array.from(
+      this.document.querySelectorAll(
+        `visualization[size="${size}"] colors color`
+      )
+    ).map((element) => {
+      const colorId = element.getAttribute("id");
+      const colorLayers = Array.from(
+        element.querySelectorAll("colorLayer")
+      ).map((element) => {
+        const layerId = element.getAttribute("id");
+        const color = element.getAttribute("color");
+
+        if (color == null) throw new Error("Invalid color");
+
+        return {
+          id: layerId,
+          color,
+        };
+      });
+
+      return {
+        id: colorId,
+        layers: this._toJsonMap(colorLayers, (layer) => layer.id),
+      };
+    });
+
+    return this._toJsonMap(arr, (value) => value.id);
+  }
+
+  private _getDirections(size: number): FurnitureDirectionsJson {
+    const arr = Array.from(
+      this.document.querySelectorAll(
+        `visualization[size="${size}"] directions direction`
+      )
+    ).map((element) => {
+      const id = element.getAttribute("id");
+      const layers = Array.from(element.querySelectorAll("layer")).map(
+        (element) => {
+          const id = element.getAttribute("id");
+          const x = this._getNumberFromAttributeValue(
+            element.getAttribute("x")
+          );
+          const y = this._getNumberFromAttributeValue(
+            element.getAttribute("y")
+          );
+          const z = this._getNumberFromAttributeValue(
+            element.getAttribute("z")
+          );
+
+          return {
+            id,
+            x,
+            y,
+            z,
+          };
+        }
+      );
+
+      return {
+        id,
+        layers: this._toJsonMap(layers, (layer) => layer.id),
+      };
+    });
+
+    return this._toJsonMap(arr, (direction) => direction.id);
+  }
+
+  private _getLayers(size: number): FurnitureLayersJson {
+    const arr = Array.from(
+      this.document.querySelectorAll(
+        `visualization[size="${size}"] layers layer`
+      )
+    ).map(
+      (element): FurnitureLayer => {
+        const id = this._getNumberFromAttributeValue(
+          element.getAttribute("id")
+        );
+        const ink = element.getAttribute("ink") ?? undefined;
+        const alpha = this._getNumberFromAttributeValue(
+          element.getAttribute("alpha")
+        );
+        const z = this._getNumberFromAttributeValue(element.getAttribute("z"));
+        const ignoreMouse =
+          this._getNumberFromAttributeValue(
+            element.getAttribute("ignoreMouse")
+          ) === 1;
+        const tag = element.getAttribute("tag") ?? undefined;
+
+        if (id == null) throw new Error("Invalid id");
+
+        return {
+          id,
+          z: z ?? 0,
+          alpha,
+          ignoreMouse,
+          ink,
+          tag,
+        };
+      }
+    );
+
+    return this._toJsonMap(arr, (layer) => layer.id.toString());
+  }
+
+  private _getJsonForSize(size: number): FurnitureVisualizationJson {
+    return {
+      [size.toString()]: {
+        layerCount: this.getLayerCount(size),
+        animations: this._getJsonAnimations(size),
+        colors: this._getJsonColors(size),
+        directions: this._getDirections(size),
+        layers: this._getLayers(size),
+      },
     };
   }
 
