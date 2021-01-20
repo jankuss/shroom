@@ -1,48 +1,42 @@
 import { ParsedTileType } from "../../../util/parseTileMap";
 
 export class LegacyWallGeometry {
-  private static readonly L: string = "l";
-  private static readonly R: string = "r";
+  private static readonly RIGHT_WALL: string = "l";
+  private static readonly LEFT_WALL: string = "r";
 
   private _width: number;
   private _height: number;
   private _scale: number;
 
-  constructor(
-    private _heightmap: ParsedTileType[][],
-    private _floorHeight: number
-  ) {
+  constructor(private _heightmap: ParsedTileType[][]) {
     this._width = _heightmap[0].length;
     this._height = _heightmap.length;
     this._scale = 64;
   }
 
   public getLocation(
-    k: number,
-    _arg_2: number,
-    _arg_3: number,
-    _arg_4: number,
-    _arg_5: string
+    roomX: number,
+    roomY: number,
+    offsetX: number,
+    offsetY: number,
+    wall: string
   ): { x: number; y: number; z: number } {
-    let _local_8: number = k;
-    let _local_9: number = _arg_2;
-    let _local_10: number = this.getHeight(k, _arg_2);
-    if (_arg_5 == LegacyWallGeometry.R) {
-      _local_8 = _local_8 + (_arg_3 / (this._scale / 2) - 0.5);
-      _local_9 = _local_9 + 0.5;
-      _local_10 = _local_10 - (_arg_4 - _arg_3 / 2) / (this._scale / 2);
+    let rX: number = roomX;
+    let rY: number = roomY;
+    let rZ: number = this.getHeight(roomX, roomY);
+    if (wall == LegacyWallGeometry.LEFT_WALL) {
+      rX = rX + (offsetX / (this._scale / 2) - 0.5);
+      rY = rY + 0.5;
+      rZ = rZ - (offsetY - offsetX / 2) / (this._scale / 2);
     } else {
-      _local_9 =
-        _local_9 + ((this._scale / 2 - _arg_3) / (this._scale / 2) - 0.5);
-      _local_8 = _local_8 + 0.5;
-      _local_10 =
-        _local_10 -
-        (_arg_4 - (this._scale / 2 - _arg_3) / 2) / (this._scale / 2);
+      rY = rY + ((this._scale / 2 - offsetX) / (this._scale / 2) - 0.5);
+      rX = rX + 0.5;
+      rZ = rZ - (offsetY - (this._scale / 2 - offsetX) / 2) / (this._scale / 2);
     }
     return {
-      x: _local_8,
-      y: _local_9,
-      z: _local_10,
+      x: rX,
+      y: rY,
+      z: rZ,
     };
   }
 
