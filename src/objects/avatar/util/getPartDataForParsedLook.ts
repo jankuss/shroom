@@ -20,7 +20,13 @@ export function getPartDataForParsedLook(
 
       partByType.set(part.type, [
         ...current,
-        { ...part, color: colorValue, hiddenLayers },
+        {
+          ...part,
+          color: colorValue,
+          hiddenLayers,
+          setId: setId.toString(),
+          setType: type,
+        },
       ]);
     });
 
@@ -37,7 +43,10 @@ export function getPartDataForParsedLook(
 export interface PartData {
   color: string | undefined;
   id: string;
+  setId?: string;
+  setType?: string;
   type: string;
   colorable: boolean;
   hiddenLayers: string[];
+  index: number;
 }
