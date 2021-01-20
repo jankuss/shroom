@@ -42,16 +42,14 @@ export async function dumpFurniture(
     assets: assets.toJson(),
   };
 
-  await fs.writeFile(
-    path.join(dumpLocation, "index.json"),
-    JSON.stringify(data, null, 2)
-  );
+  const jsonString = JSON.stringify(data);
 
-  const indexJsonString = JSON.stringify(data, null, 2);
+  await fs.writeFile(path.join(dumpLocation, "index.json"), jsonString);
+
   const encoder = new TextEncoder();
 
   const furnitureFile = new ShroomAssetBundle([
-    { fileName: "index.json", buffer: encoder.encode(indexJsonString) },
+    { fileName: "index.json", buffer: encoder.encode(jsonString) },
     { fileName: "spritesheet.png", buffer: image },
   ]);
 

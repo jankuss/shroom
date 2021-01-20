@@ -23,9 +23,9 @@ export class ShroomAssetBundle implements IAssetBundle {
     const byteBuffer = ByteBuffer.wrap(buffer);
 
     const readFile = () => {
-      const fileNameLength = byteBuffer.readInt();
+      const fileNameLength = byteBuffer.readUint16();
       const fileName = byteBuffer.readString(fileNameLength);
-      const fileLength = byteBuffer.readInt();
+      const fileLength = byteBuffer.readUint32();
       const buffer = byteBuffer.readBytes(fileLength);
 
       return {
@@ -34,8 +34,8 @@ export class ShroomAssetBundle implements IAssetBundle {
       };
     };
 
-    const version = byteBuffer.readInt();
-    const fileCount = byteBuffer.readInt();
+    const version = byteBuffer.readByte();
+    const fileCount = byteBuffer.readUint16();
     const files: { fileName: string; buffer: ArrayBuffer | Buffer }[] = [];
 
     for (let i = 0; i < fileCount; i++) {
@@ -48,13 +48,13 @@ export class ShroomAssetBundle implements IAssetBundle {
 
   toBuffer(): Buffer {
     const byteBuffer = new ByteBuffer();
-    byteBuffer.writeInt(ShroomAssetBundle.VERSION);
-    byteBuffer.writeInt(this._files.size);
+    byteBuffer.writeByte(ShroomAssetBundle.VERSION);
+    byteBuffer.writeUint16(this._files.size);
 
     this._files.forEach((buffer, key) => {
-      byteBuffer.writeInt(key.length);
+      byteBuffer.writeUint16(key.length);
       byteBuffer.writeString(key);
-      byteBuffer.writeInt(buffer.byteLength);
+      byteBuffer.writeUint32(buffer.byteLength);
       byteBuffer.append(buffer);
     });
 
