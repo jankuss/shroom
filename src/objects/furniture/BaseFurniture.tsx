@@ -80,6 +80,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _destroyed = false;
 
   private _maskNodes: MaskNode[] = [];
+  private _maskSprites: FurnitureSprite[] = [];
+
   private _cancelTicker: (() => void) | undefined = undefined;
   private _getMaskId: MaskIdGetter;
 
@@ -112,6 +114,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     if (dependencies != null) {
       this.dependencies = dependencies;
     }
+
+    setInterval(() => {
+      console.log(this._maskNodes.length, this._maskSprites.length);
+    }, 500);
 
     PIXI.Ticker.shared.add(this._onTicker);
 
@@ -351,7 +357,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
     const maskId = this._getMaskId(this.direction);
 
-    const maskSprites = this._maskNodes.map((maskNode) => maskNode.sprite);
+    const maskSprites = this._maskSprites;
     this._maskNodes.forEach((mask) => mask.remove());
     this._maskNodes = [];
 
@@ -431,6 +437,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         this._maskNodes.push(
           this.dependencies.visualization.addMask(maskId, sprite)
         );
+        this._maskSprites.push(sprite);
       }
     }
 
@@ -441,6 +448,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     if (!this.mounted) return;
 
     this._maskNodes.forEach((node) => node.remove());
+    this._maskNodes = [];
 
     this._unknownSprite?.destroy();
     this._unknownSprite = undefined;
@@ -482,6 +490,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
     this.visualization.updateAnimation(this.animation);
     this.visualization.updateFrame(this.dependencies.animationTicker.current());
+
+    this._updatePosition();
   }
 
   private _applyLayerDataToSprite(

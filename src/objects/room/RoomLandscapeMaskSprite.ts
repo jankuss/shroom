@@ -45,6 +45,10 @@ export class RoomLandscapeMaskSprite extends PIXI.Sprite {
     this._roomWidth = roomBounds.maxX - roomBounds.minX;
     this._roomHeight = roomBounds.maxY - roomBounds.minY;
     this._renderer = renderer;
+
+    setInterval(() => {
+      console.log("SPRITES", this._sprites.size);
+    }, 500);
   }
 
   addSprite(element: PIXI.Sprite) {

@@ -307,13 +307,15 @@ export function LandscapeColor() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        xxxxxx
-        xxxxx0
-        xxx000
-        xx0000
-        x00000
-        xx0000
-        xx0000
+        xxxxxxxxx
+        xxxxx1100
+        xxx111100
+        xx1111100
+        x11111100
+        xx1111100
+        xx1111000
+        xx0000000
+        xx0000000
       `,
     });
 

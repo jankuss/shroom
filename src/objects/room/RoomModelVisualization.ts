@@ -4,7 +4,6 @@ import {
   IRoomVisualization,
   MaskNode,
   PartNode,
-  RoomVisualizationMeta,
 } from "../../interfaces/IRoomVisualization";
 import { RoomPosition } from "../../types/RoomPosition";
 import { getZOrder } from "../../util/getZOrder";
@@ -255,12 +254,6 @@ export class RoomModelVisualization
     return this._onActiveWallChange.asObservable();
   }
 
-  subscribeRoomMeta(
-    listener: (value: RoomVisualizationMeta) => void
-  ): { unsubscribe: () => void } {
-    throw new Error("Method not implemented.");
-  }
-
   public get container() {
     return this._primaryLayer;
   }
@@ -282,6 +275,7 @@ export class RoomModelVisualization
   }
 
   addMask(id: string, element: PIXI.Sprite): MaskNode {
+    /*
     const existing = this._masks.get(id);
     const current =
       this._masks.get(id) ??
@@ -301,6 +295,16 @@ export class RoomModelVisualization
     return {
       update: () => current.updateSprite(element),
       remove: () => current.removeSprite(element),
+      sprite: element,
+    };*/
+
+    return {
+      update: () => {
+        // Nothing
+      },
+      remove: () => {
+        // Nothing
+      },
       sprite: element,
     };
   }
@@ -454,10 +458,15 @@ export class RoomModelVisualization
     (container ?? this._tileLayer).addChild(tile);
     this._tiles.push(tile);
 
-    this._createTileCursor(x, y, z);
+    this._createTileCursor(x, y, z, container);
   }
 
-  private _createTileCursor(x: number, y: number, z: number) {
+  private _createTileCursor(
+    x: number,
+    y: number,
+    z: number,
+    container?: PIXI.Container
+  ) {
     const position: RoomPosition = { roomX: x, roomY: y, roomZ: z };
     const cursor = new TileCursor(
       position,
@@ -479,7 +488,7 @@ export class RoomModelVisualization
     cursor.zIndex = getZOrder(x, y, z) - 1000;
 
     this._tileCursors.push(cursor);
-    this._primaryLayer.addChild(cursor);
+    (container ?? this._primaryLayer).addChild(cursor);
   }
 
   private _handleTick = () => {
@@ -496,8 +505,13 @@ export class RoomModelVisualization
         this._onActiveWallChange.next({
           roomX,
           roomY,
-          offsetX: -event.offsetX,
-          offsetY: event.offsetY / 2 + this._wallHeight / 2 - event.offsetX / 4,
+          offsetX: -event.offsetX - 16,
+          offsetY:
+            event.offsetY / 2 +
+            this._wallHeight / 2 -
+            event.offsetX / 4 +
+            roomZ * 16 -
+            8,
           wall: "r",
         });
       },
@@ -532,7 +546,11 @@ export class RoomModelVisualization
           roomX,
           roomY,
           offsetX: event.offsetX,
-          offsetY: event.offsetY / 2 + this._wallHeight / 2 - event.offsetX / 4,
+          offsetY:
+            event.offsetY / 2 +
+            this._wallHeight / 2 -
+            event.offsetX / 4 +
+            roomZ * 16,
           wall: "l",
         });
       },
