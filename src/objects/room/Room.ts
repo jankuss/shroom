@@ -77,11 +77,6 @@ export class Room
   private _floorColor: string | undefined;
 
   private _currentWallTexture: PIXI.Texture | undefined;
-  private _currentFloorTexture: PIXI.Texture | undefined;
-
-  private _hideWalls = false;
-  private _hideFloor = false;
-  private _hideTileCursor = false;
 
   private _onTileClick: ((position: RoomPosition) => void) | undefined;
 
@@ -164,30 +159,30 @@ export class Room
    * When set to true, hides the walls
    */
   public get hideWalls() {
-    return this._hideWalls;
+    return this._visualization.hideWalls;
   }
 
   public set hideWalls(value) {
-    this._hideWalls = value;
+    this._visualization.hideWalls = value;
   }
 
   /**
    * When set to true, hide the floor. This will also hide the walls.
    */
   public get hideFloor() {
-    return this._hideFloor;
+    return this._visualization.hideFloor;
   }
 
   public set hideFloor(value) {
-    this._hideFloor = value;
+    this._visualization.hideFloor = value;
   }
 
   public get hideTileCursor() {
-    return this._hideTileCursor;
+    return this._visualization.hideTileCursor;
   }
 
   public set hideTileCursor(value) {
-    this._hideTileCursor = value;
+    this._visualization.hideTileCursor = value;
   }
 
   /**
@@ -355,7 +350,6 @@ export class Room
 
   private _loadFloorTextures() {
     Promise.resolve(this.floorTexture).then((texture) => {
-      this._currentFloorTexture = texture;
       this._visualization.floorTexture = texture;
     });
   }

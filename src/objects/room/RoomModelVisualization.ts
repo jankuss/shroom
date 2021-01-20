@@ -26,6 +26,10 @@ import { getTileMapBounds } from "./util/getTileMapBounds";
 export class RoomModelVisualization
   extends PIXI.Container
   implements IRoomVisualization, IRoomRectangle, ILandscapeContainer {
+  private _hideTileCursor = false;
+  private _hideWalls = false;
+  private _hideFloor = false;
+
   private _wallLeftColor: number | undefined;
   private _wallRightColor: number | undefined;
   private _wallTopColor: number | undefined;
@@ -79,6 +83,7 @@ export class RoomModelVisualization
   };
 
   private _refreshRoom = false;
+  private _rebuildRoom = false;
 
   constructor(
     private _application: PIXI.Application,
@@ -127,6 +132,33 @@ export class RoomModelVisualization
       roomX,
       roomY,
     };
+  }
+
+  public get hideFloor() {
+    return this._hideFloor;
+  }
+
+  public set hideFloor(value) {
+    this._hideFloor = value;
+    this._rebuildRoom = true;
+  }
+
+  public get hideWalls() {
+    return this._hideWalls;
+  }
+
+  public set hideWalls(value) {
+    this._hideWalls = value;
+    this._rebuildRoom = true;
+  }
+
+  public get hideTileCursor() {
+    return this._hideTileCursor;
+  }
+
+  public set hideTileCursor(value) {
+    this._hideTileCursor = value;
+    this._rebuildRoom = true;
   }
 
   public get wallTexture() {
@@ -443,6 +475,8 @@ export class RoomModelVisualization
     z: number,
     container?: PIXI.Container
   ) {
+    if (this._hideFloor) return;
+
     const tile = new Tile({ color: "#eeeeee", tileHeight: this._tileHeight });
 
     const xEven = x % 2 === 0;
@@ -467,6 +501,8 @@ export class RoomModelVisualization
     z: number,
     container?: PIXI.Container
   ) {
+    if (this._hideTileCursor) return;
+
     const position: RoomPosition = { roomX: x, roomY: y, roomZ: z };
     const cursor = new TileCursor(
       position,
@@ -492,6 +528,11 @@ export class RoomModelVisualization
   }
 
   private _handleTick = () => {
+    if (this._rebuildRoom) {
+      this._updateHeightmap();
+      this._rebuildRoom = false;
+    }
+
     if (this._refreshRoom) {
       this._updateParts();
       this._refreshRoom = false;
@@ -588,6 +629,8 @@ export class RoomModelVisualization
     y: number,
     z: number
   ) {
+    if (this._hideWalls || this._hideFloor) return;
+
     switch (element.kind) {
       case "colWall":
         this._createRightWall(x, y, z);
