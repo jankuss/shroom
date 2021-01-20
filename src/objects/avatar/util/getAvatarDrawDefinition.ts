@@ -122,8 +122,6 @@ export function getAvatarDrawDefinition(
               hiddenLayers: [],
               id: itemId.toString(),
               index: 0,
-              setId: "0",
-              setType: "0",
             };
           }
 
@@ -138,8 +136,6 @@ export function getAvatarDrawDefinition(
                   colorable: false,
                   hiddenLayers: [],
                   index: 0,
-                  setId: "0",
-                  setType: "0",
                 },
               ];
             }
