@@ -17,6 +17,10 @@ export class FurnitureRoomVisualization implements IFurnitureRoomVisualization {
       remove: () => {
         // Do nothing
       },
+      update: () => {
+        // Do nothing
+      },
+      sprite: null as any,
     };
   }
 }

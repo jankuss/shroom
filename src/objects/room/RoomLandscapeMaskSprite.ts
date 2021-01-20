@@ -25,35 +25,36 @@ export class RoomLandscapeMaskSprite extends PIXI.Sprite {
   private _sprites: Set<PIXI.Sprite> = new Set();
   private _roomWidth: number;
   private _roomHeight: number;
-  private _wallHeight: number;
   private _renderer: PIXI.Renderer;
+  private _roomBounds: {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+  };
 
   constructor({
-    width,
-    height,
-    wallHeight,
+    roomBounds,
     renderer,
   }: {
-    width: number;
-    height: number;
-    wallHeight: number;
+    roomBounds: { minX: number; minY: number; maxX: number; maxY: number };
     renderer: PIXI.Renderer;
   }) {
     super();
-    this._roomWidth = width;
-    this._roomHeight = height;
-    this._wallHeight = wallHeight;
+    this._roomBounds = roomBounds;
+    this._roomWidth = roomBounds.maxX - roomBounds.minX;
+    this._roomHeight = roomBounds.maxY - roomBounds.minY;
     this._renderer = renderer;
-  }
-
-  updateRoom(room: Room) {
-    this._roomHeight = room.roomHeight;
-    this._roomWidth = room.roomWidth;
-    this._wallHeight = room.wallHeight;
   }
 
   addSprite(element: PIXI.Sprite) {
     this._sprites.add(element);
+    this._updateTexture();
+  }
+
+  updateSprite(element: PIXI.Sprite) {
+    if (!this._sprites.has(element)) return;
+
     this._updateTexture();
   }
 
@@ -64,8 +65,8 @@ export class RoomLandscapeMaskSprite extends PIXI.Sprite {
 
   private _updateTexture() {
     const texture = PIXI.RenderTexture.create({
-      width: this._roomWidth,
-      height: this._roomHeight + this._wallHeight,
+      width: this._roomWidth * 2,
+      height: this._roomHeight,
     });
 
     const container = new PIXI.Container();
@@ -77,8 +78,11 @@ export class RoomLandscapeMaskSprite extends PIXI.Sprite {
       container.addChild(sprite);
     });
 
-    container.y = this._wallHeight;
-    this.y = -this._wallHeight;
+    container.y = -this._roomBounds.minY;
+    this.y = this._roomBounds.minY;
+
+    container.x = -this._roomBounds.minX;
+    this.x = this._roomBounds.minX;
 
     this._renderer.render(container, texture);
 

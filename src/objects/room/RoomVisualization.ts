@@ -2,11 +2,13 @@ import * as PIXI from "pixi.js";
 import {
   IRoomVisualization,
   MaskNode,
+  PartNode,
   RoomVisualizationMeta,
 } from "../../interfaces/IRoomVisualization";
 import { RoomLandscapeMaskSprite } from "./RoomLandscapeMaskSprite";
 import { Room } from "./Room";
 import { BehaviorSubject } from "rxjs";
+import { IRoomPart } from "./parts/IRoomPart";
 
 export class RoomVisualization
   extends PIXI.Container
@@ -20,6 +22,7 @@ export class RoomVisualization
   private _wallPlane: PIXI.Container = new PIXI.Container();
   private _tileCursorPlane: PIXI.Container = new PIXI.Container();
   private _landscapeContainer: PIXI.Container = new PIXI.Container();
+  private _parts: IRoomPart[] = [];
 
   private _masksContainer = new PIXI.Container();
 
@@ -75,6 +78,14 @@ export class RoomVisualization
     return this._wallPlane;
   }
 
+  addPart(part: IRoomPart): PartNode {
+    return {
+      remove: () => {
+        // Do nothing
+      },
+    };
+  }
+
   subscribeRoomMeta(
     listener: (value: RoomVisualizationMeta) => void
   ): { unsubscribe: () => void } {
@@ -93,9 +104,7 @@ export class RoomVisualization
       this.masks.get(id) ??
       new RoomLandscapeMaskSprite({
         renderer: this.renderer,
-        width: this.room.roomWidth,
-        height: this.room.roomHeight,
-        wallHeight: this.room.wallHeight,
+        roomBounds: null as any,
       });
 
     current.addSprite(element);
@@ -108,12 +117,16 @@ export class RoomVisualization
 
     return {
       remove: () => current.removeSprite(element),
+      update: () => {
+        // Don't do anything
+      },
+      sprite: element,
     };
   }
 
   updateRoom(room: Room) {
     this.room = room;
-    this.masks.forEach((mask) => mask.updateRoom(room));
+    //this.masks.forEach((mask) => mask.updateRoom(room));
     this._updateRoomVisualizationMeta({
       masks: this.masks,
       wallHeight: this.room.wallHeight,

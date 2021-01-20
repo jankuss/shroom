@@ -10,4 +10,5 @@ export interface RoomPartData {
   tileRightColor: number;
   tileTopColor: number;
   tileTexture: PIXI.Texture;
+  masks: Map<string, PIXI.Sprite>;
 }

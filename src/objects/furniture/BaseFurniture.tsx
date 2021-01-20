@@ -151,6 +151,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
               remove: () => {
                 // Do nothing
               },
+              update: () => {
+                // Do nothing
+              },
+              sprite: null as any,
             };
           },
         },
@@ -344,6 +348,20 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       element.baseX = this.x;
       element.baseY = this.y;
     });
+
+    const maskId = this._getMaskId(this.direction);
+
+    const maskSprites = this._maskNodes.map((maskNode) => maskNode.sprite);
+    this._maskNodes.forEach((mask) => mask.remove());
+    this._maskNodes = [];
+
+    if (maskId != null) {
+      maskSprites.forEach((maskSprite) => {
+        this._maskNodes.push(
+          this.dependencies.visualization.addMask(maskId, maskSprite)
+        );
+      });
+    }
   }
 
   private _updateFurniture() {
@@ -421,6 +439,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   private _updateFurnitureSprites(loadFurniResult: LoadFurniResult) {
     if (!this.mounted) return;
+
+    this._maskNodes.forEach((node) => node.remove());
 
     this._unknownSprite?.destroy();
     this._unknownSprite = undefined;

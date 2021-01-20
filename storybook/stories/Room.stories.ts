@@ -328,87 +328,23 @@ export function LandscapeColor() {
     landscape.color = "#ffcccc";
 
     const window1 = new WallFurniture({
-      roomX: 2,
-      roomY: 3,
-      direction: 2,
-      roomZ: 0,
-      type: "window_skyscraper",
-    });
-
-    const window2 = new WallFurniture({
-      roomX: 2,
-      roomY: 5,
-      direction: 2,
-      roomZ: 0,
-      type: "window_skyscraper",
-    });
-
-    const window3 = new WallFurniture({
-      roomX: 2,
+      roomX: 1,
       roomY: 6,
       direction: 2,
-      roomZ: 0,
+      offsetX: 16,
+      offsetY: 30,
       type: "window_skyscraper",
     });
 
-    const window4 = new WallFurniture({
-      roomX: 2,
-      roomY: 3,
-      direction: 4,
-      roomZ: 0,
-      type: "window_skyscraper",
-    });
-
-    const window5 = new WallFurniture({
-      roomX: 3,
-      roomY: 2,
-      direction: 2,
-      roomZ: 0,
-      type: "window_skyscraper",
-    });
-
-    const window6 = new WallFurniture({
-      roomX: 3,
-      roomY: 2,
-      direction: 4,
-      roomZ: 0,
-      type: "window_skyscraper",
-    });
-
-    const window7 = new WallFurniture({
-      roomX: 4,
-      roomY: 2,
-      direction: 4,
-      roomZ: 0,
-      type: "window_skyscraper",
-    });
-
-    const window8 = new WallFurniture({
-      roomX: 5,
-      roomY: 1,
-      direction: 2,
-      roomZ: 0,
-      type: "window_skyscraper",
-    });
-
-    const window9 = new WallFurniture({
-      roomX: 5,
-      roomY: 1,
-      direction: 4,
-      roomZ: 0,
-      type: "window_skyscraper",
+    room.onActiveWallChange.subscribe((value) => {
+      window1.roomX = value.roomX;
+      window1.roomY = value.roomY;
+      window1.offsetX = value.offsetX;
+      window1.offsetY = value.offsetY;
     });
 
     room.addRoomObject(landscape);
     room.addRoomObject(window1);
-    room.addRoomObject(window2);
-    room.addRoomObject(window3);
-    room.addRoomObject(window4);
-    room.addRoomObject(window5);
-    room.addRoomObject(window6);
-    room.addRoomObject(window7);
-    room.addRoomObject(window8);
-    room.addRoomObject(window9);
 
     application.stage.addChild(room);
   });

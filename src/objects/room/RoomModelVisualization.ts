@@ -3,6 +3,7 @@ import { Subject } from "rxjs";
 import {
   IRoomVisualization,
   MaskNode,
+  PartNode,
   RoomVisualizationMeta,
 } from "../../interfaces/IRoomVisualization";
 import { RoomPosition } from "../../types/RoomPosition";
@@ -11,6 +12,7 @@ import { ParsedTileType, ParsedTileWall } from "../../util/parseTileMap";
 import { ILandscapeContainer } from "./ILandscapeContainer";
 import { IRoomRectangle, Rectangle } from "./IRoomRectangle";
 import { ParsedTileMap } from "./ParsedTileMap";
+import { IRoomPart } from "./parts/IRoomPart";
 import { RoomPartData } from "./parts/RoomPartData";
 import { Stair } from "./parts/Stair";
 import { StairCorner } from "./parts/StairCorner";
@@ -19,6 +21,7 @@ import { TileCursor } from "./parts/TileCursor";
 import { WallLeft } from "./parts/WallLeft";
 import { WallOuterCorner } from "./parts/WallOuterCorner";
 import { WallRight } from "./parts/WallRight";
+import { RoomLandscapeMaskSprite } from "./RoomLandscapeMaskSprite";
 import { getTileMapBounds } from "./util/getTileMapBounds";
 
 export class RoomModelVisualization
@@ -39,6 +42,7 @@ export class RoomModelVisualization
   private _primaryLayer: PIXI.Container = new PIXI.Container();
   private _landscapeLayer: PIXI.Container = new PIXI.Container();
   private _wallHitAreaLayer: PIXI.Container = new PIXI.Container();
+  private _masksLayer: PIXI.Container = new PIXI.Container();
 
   private _wallTexture: PIXI.Texture | undefined;
   private _floorTexture: PIXI.Texture | undefined;
@@ -46,6 +50,9 @@ export class RoomModelVisualization
   private _walls: (WallLeft | WallRight | WallOuterCorner)[] = [];
   private _tiles: (Tile | Stair | StairCorner)[] = [];
   private _tileCursors: TileCursor[] = [];
+  private _masks: Map<string, RoomLandscapeMaskSprite> = new Map();
+
+  private _parts: Set<IRoomPart> = new Set();
 
   private _borderWidth = 8;
   private _tileHeight = 8;
@@ -88,6 +95,7 @@ export class RoomModelVisualization
     this._positionalContainer.addChild(this._landscapeLayer);
     this._positionalContainer.addChild(this._primaryLayer);
 
+    this._positionalContainer.addChild(this._masksLayer);
     this._positionalContainer.x = -this.roomBounds.minX;
     this._positionalContainer.y = -this.roomBounds.minY;
     this._primaryLayer.sortableChildren = true;
@@ -98,6 +106,17 @@ export class RoomModelVisualization
     this._updateHeightmap();
 
     this._application.ticker.add(this._handleTick);
+  }
+
+  addPart(part: IRoomPart): PartNode {
+    this._parts.add(part);
+    part.update(this._getCurrentRoomPartData());
+
+    return {
+      remove: () => {
+        this._parts.delete(part);
+      },
+    };
   }
 
   getMaskLevel(roomX: number, roomY: number): { roomX: number; roomY: number } {
@@ -259,10 +278,26 @@ export class RoomModelVisualization
   }
 
   addMask(id: string, element: PIXI.Sprite): MaskNode {
+    const existing = this._masks.get(id);
+    const current =
+      this._masks.get(id) ??
+      new RoomLandscapeMaskSprite({
+        renderer: this._application.renderer,
+        roomBounds: this.roomBounds,
+      });
+
+    current.addSprite(element);
+    this._primaryLayer.addChild(current);
+
+    if (existing == null) {
+      this._masks.set(id, current);
+      this._updateParts();
+    }
+
     return {
-      remove: () => {
-        return;
-      },
+      update: () => current.updateSprite(element),
+      remove: () => current.removeSprite(element),
+      sprite: element,
     };
   }
 
@@ -283,6 +318,7 @@ export class RoomModelVisualization
       tileTopColor: this._tileTopColor ?? 0x989865,
       tileTexture: this._floorTexture ?? PIXI.Texture.WHITE,
       wallTexture: this._wallTexture ?? PIXI.Texture.WHITE,
+      masks: this._masks,
     };
   }
 
@@ -318,7 +354,7 @@ export class RoomModelVisualization
 
   private _updateParts() {
     this._setCache(false);
-    [...this._tiles, ...this._walls].forEach((tile) =>
+    [...this._tiles, ...this._walls, ...this._parts].forEach((tile) =>
       tile.update(this._getCurrentRoomPartData())
     );
     this._setCache(true);
