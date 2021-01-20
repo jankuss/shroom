@@ -107,12 +107,19 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
     graphics.alpha = this._drawHitArea ? 1 : 0;
     graphics.endFill();
 
-    graphics.addListener("mousemove", (event) => {
+    const handleMoveEvent = (event: PIXI.InteractionEvent) => {
       if (event.target === graphics) {
         const position = event.data.getLocalPosition(graphics);
         this.props.onMouseMove({ offsetX: position.x, offsetY: position.y });
       }
+    };
+
+    graphics.addListener("mousemove", handleMoveEvent);
+    graphics.addListener("mouseover", handleMoveEvent);
+    graphics.addListener("mouseout", () => {
+      this.props.onMouseOut();
     });
+
     graphics.interactive = true;
 
     this._hitAreaElement = graphics;
@@ -175,5 +182,6 @@ export interface WallProps {
   hideBorder: boolean;
   hitAreaContainer: PIXI.Container;
   onMouseMove: (event: { offsetX: number; offsetY: number }) => void;
+  onMouseOut: () => void;
   cutawayHeight?: number;
 }

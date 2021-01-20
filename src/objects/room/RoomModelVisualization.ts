@@ -59,12 +59,16 @@ export class RoomModelVisualization
   private _wallHeight = 116;
 
   private _onActiveTileChange = new Subject<RoomPosition>();
-  private _onActiveWallChange = new Subject<{
-    roomX: number;
-    roomY: number;
-    offsetX: number;
-    offsetY: number;
-  }>();
+  private _onActiveWallChange = new Subject<
+    | {
+        roomX: number;
+        roomY: number;
+        offsetX: number;
+        offsetY: number;
+        wall: "l" | "r";
+      }
+    | undefined
+  >();
 
   private _onTileClick = new Subject<RoomPosition>();
 
@@ -488,8 +492,17 @@ export class RoomModelVisualization
   private _createRightWall(roomX: number, roomY: number, roomZ: number) {
     const wall = new WallRight({
       hideBorder: false,
-      onMouseMove: () => {
-        //
+      onMouseMove: (event) => {
+        this._onActiveWallChange.next({
+          roomX,
+          roomY,
+          offsetX: -event.offsetX,
+          offsetY: event.offsetY / 2 + this._wallHeight / 2 - event.offsetX / 4,
+          wall: "r",
+        });
+      },
+      onMouseOut: () => {
+        this._onActiveWallChange.next(undefined);
       },
       hitAreaContainer: this._wallHitAreaLayer,
     });
@@ -520,7 +533,11 @@ export class RoomModelVisualization
           roomY,
           offsetX: event.offsetX,
           offsetY: event.offsetY / 2 + this._wallHeight / 2 - event.offsetX / 4,
+          wall: "l",
         });
+      },
+      onMouseOut: () => {
+        this._onActiveWallChange.next(undefined);
       },
       hitAreaContainer: this._wallHitAreaLayer,
       cutawayHeight: cutawayHeight,

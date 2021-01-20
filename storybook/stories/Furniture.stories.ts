@@ -310,7 +310,8 @@ export function DifferentFetchTypes() {
       direction: 2,
       roomX: 1,
       roomY: 1,
-      roomZ: 0,
+      offsetX: 0,
+      offsetY: 0,
     });
     const floorFurniture = new FloorFurniture({
       id: 4054,
@@ -659,7 +660,8 @@ export function WallWindowDestroy() {
     const furniture = new WallFurniture({
       roomX: 1,
       roomY: 1,
-      roomZ: 0,
+      offsetX: 0,
+      offsetY: 0,
       animation: "0",
       direction: 4,
       type: "window_skyscraper",
@@ -703,7 +705,8 @@ export function WallWindowDestroyWhileLoading() {
     const furniture = new WallFurniture({
       roomX: 1,
       roomY: 1,
-      roomZ: 0,
+      offsetX: 0,
+      offsetY: 0,
       animation: "0",
       direction: 4,
       type: "window_skyscraper",
@@ -806,10 +809,13 @@ export function WallFurniturePosition() {
     });
 
     room.onActiveWallChange.subscribe((value) => {
+      if (value == null) return;
+
       furniture1.roomX = value.roomX;
       furniture1.roomY = value.roomY;
       furniture1.offsetX = value.offsetX;
       furniture1.offsetY = value.offsetY;
+      furniture1.direction = value.wall === "l" ? 2 : 4;
 
       console.log(value.offsetX, value.offsetY);
     });

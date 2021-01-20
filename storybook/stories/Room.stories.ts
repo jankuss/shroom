@@ -337,10 +337,17 @@ export function LandscapeColor() {
     });
 
     room.onActiveWallChange.subscribe((value) => {
+      if (value == null) {
+        window1.alpha = 0;
+        return;
+      }
+
+      window1.alpha = 1;
       window1.roomX = value.roomX;
       window1.roomY = value.roomY;
       window1.offsetX = value.offsetX;
       window1.offsetY = value.offsetY;
+      window1.direction = value.wall === "l" ? 2 : 4;
     });
 
     room.addRoomObject(landscape);

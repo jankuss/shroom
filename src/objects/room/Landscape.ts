@@ -142,8 +142,6 @@ export class Landscape extends RoomObject implements IRoomPart {
         const mask = this._getMask(2, maskLevel.roomX, 0);
         wall.mask = mask;
 
-        console.log("MASK", maskLevel.roomX, mask);
-
         const position = this.geometry.getPosition(
           meta.level + 1,
           meta.start,
