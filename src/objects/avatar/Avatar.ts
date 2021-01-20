@@ -85,6 +85,13 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   }
 
   /**
+   * The look of the avatar
+   */
+  public get look() {
+    return this._look;
+  }
+
+  /**
    * Set this with a callback if you want to capture clicks on the Avatar.
    */
   public get onClick() {

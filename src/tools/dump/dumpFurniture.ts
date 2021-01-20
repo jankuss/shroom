@@ -15,8 +15,6 @@ export async function dumpFurniture(
     outputFormat: "png",
   });
 
-  await fs.writeFile(path.join(dumpLocation, "spritesheet.png"), image);
-
   const visualizationData = await fs.readFile(
     path.join(dumpLocation, `${baseName}_visualization.bin`),
     "utf-8"
@@ -43,15 +41,11 @@ export async function dumpFurniture(
   };
 
   const jsonString = JSON.stringify(data);
-
-  await fs.writeFile(path.join(dumpLocation, "index.json"), jsonString);
-
   const encoder = new TextEncoder();
 
-  const furnitureFile = new ShroomAssetBundle([
-    { fileName: "index.json", buffer: encoder.encode(jsonString) },
-    { fileName: "spritesheet.png", buffer: image },
-  ]);
+  const furnitureFile = new ShroomAssetBundle();
+  furnitureFile.addFile("index.json", encoder.encode(jsonString));
+  furnitureFile.addFile("spritesheet.png", image);
 
   await fs.writeFile(`${dumpLocation}.shroom`, furnitureFile.toBuffer());
 }

@@ -8,6 +8,7 @@ import { promises as fs } from "fs";
 import { FigureMapData } from "../../objects/avatar/util/data/FigureMapData";
 import { createOffsetFile } from "./createOffsetFile";
 import { dumpFurniture } from "./dumpFurniture";
+import { dumpFigure } from "./dumpFigure";
 
 export const glob = promisify(g);
 
@@ -58,9 +59,7 @@ export async function dump({ externalVariables, downloadPath }: Options) {
       `Found ${figureSwfs.length} figure swfs. Starting the extraction process.`
     );
 
-    await extractSwfs(logger, "Figure", figureSwfs, async () => {
-      // Do nothing
-    });
+    await extractSwfs(logger, "Figure", figureSwfs, dumpFigure);
   });
 
   await step("Post Processing", async () => {

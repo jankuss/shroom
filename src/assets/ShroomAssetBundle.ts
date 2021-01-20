@@ -8,7 +8,9 @@ export class ShroomAssetBundle implements IAssetBundle {
   private _blobs: Map<string, Blob> = new Map();
   private _strings: Map<string, string> = new Map();
 
-  constructor(files: { fileName: string; buffer: ArrayBuffer | Buffer }[]) {
+  constructor(
+    files: { fileName: string; buffer: ArrayBuffer | Buffer }[] = []
+  ) {
     files.forEach((file) => this._files.set(file.fileName, file.buffer));
   }
 
@@ -44,6 +46,10 @@ export class ShroomAssetBundle implements IAssetBundle {
     }
 
     return new ShroomAssetBundle(files);
+  }
+
+  addFile(fileName: string, buffer: ArrayBuffer | Buffer) {
+    this._files.set(fileName, buffer);
   }
 
   toBuffer(): Buffer {
