@@ -115,10 +115,6 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       this.dependencies = dependencies;
     }
 
-    setInterval(() => {
-      console.log(this._maskNodes.length, this._maskSprites.length);
-    }, 500);
-
     PIXI.Ticker.shared.add(this._onTicker);
 
     this._loadFurniResultPromise = new Promise<LoadFurniResult>((resolve) => {
