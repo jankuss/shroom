@@ -248,13 +248,17 @@ export function CustomColor() {
   return createShroom(({ application, shroom }) => {
     const room = Room.create(shroom, {
       tilemap: `
-        xxxxxxxxx
-        xxxx11100
-        xxxx11100
-        xxxx00000
-        x00000000
-        x00000000
-        x00000000
+        xxxxxxxxxxxx
+        xxxx11100000
+        xxxx11100000
+        xxxx00000000
+        x00000000000
+        x00000000000
+        x00000000000
+        x00000000000
+        x00000000000
+        x00000000000
+        x00000000000
       `,
     });
 

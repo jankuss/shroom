@@ -400,6 +400,12 @@ export class RoomModelVisualization
     container?: PIXI.Container
   ) {
     const tile = new Tile({ color: "#eeeeee", tileHeight: this._tileHeight });
+
+    const xEven = x % 2 === 0;
+    const yEven = y % 2 === 0;
+
+    tile.tilePositions = new PIXI.Point(xEven ? 32 : 0, yEven ? 32 : 0);
+
     const position = this._getPosition(x, y, z);
 
     tile.x = position.x;
@@ -440,8 +446,6 @@ export class RoomModelVisualization
     if (this._refreshRoom) {
       this._updateParts();
       this._refreshRoom = false;
-
-      console.log("REFRESH ROOM");
     }
   };
 
