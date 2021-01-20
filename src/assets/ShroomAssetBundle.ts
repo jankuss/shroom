@@ -16,6 +16,9 @@ export class ShroomAssetBundle implements IAssetBundle {
 
   static async fromUrl(url: string) {
     const response = await fetch(url);
+    if (response.status >= 400)
+      throw new Error(`Failed to load: ${url} - ${response.status}`);
+
     const buffer = await response.arrayBuffer();
 
     return ShroomAssetBundle.fromBuffer(buffer);
