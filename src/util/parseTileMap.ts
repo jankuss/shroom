@@ -3,13 +3,15 @@ import { getTileInfo } from "./getTileInfo";
 import { ColumnWall, getColumnWalls } from "./tilemap/getColumnWalls";
 import { getRowWalls, RowWall } from "./tilemap/getRowWalls";
 
+export type ParsedTileWall = {
+  type: "wall";
+  kind: "colWall" | "rowWall" | "innerCorner" | "outerCorner";
+  height: number;
+  hideBorder?: boolean;
+};
+
 export type ParsedTileType =
-  | {
-      type: "wall";
-      kind: "colWall" | "rowWall" | "innerCorner" | "outerCorner";
-      height: number;
-      hideBorder?: boolean;
-    }
+  | ParsedTileWall
   | { type: "tile"; z: number }
   | { type: "hidden" }
   | { type: "stairs"; kind: 0 | 2; z: number }

@@ -1,13 +1,13 @@
 import { RoomObject } from "../RoomObject";
 import { getZOrder } from "../../util/getZOrder";
 import { BaseFurniture } from "./BaseFurniture";
-import { IFurniture, IFurnitureBehavior } from "./IFurniture";
 import { getMaskId } from "../room/util/getMaskId";
 import { FurnitureFetchInfo } from "./FurnitureFetchInfo";
 import { getFurnitureFetch } from "./util/getFurnitureFetch";
 import { FurnitureId } from "../../interfaces/IFurnitureData";
+import { LegacyWallGeometry } from "../room/util/LegacyWallGeometry";
 
-export class WallFurniture extends RoomObject implements IFurniture {
+export class WallFurniture extends RoomObject {
   public readonly placementType = "wall";
 
   private _baseFurniture: BaseFurniture;
@@ -15,7 +15,10 @@ export class WallFurniture extends RoomObject implements IFurniture {
   private readonly _id: FurnitureId | undefined;
   private _roomX: number;
   private _roomY: number;
-  private _roomZ: number;
+
+  private _offsetX = 0;
+  private _offsetY = 0;
+
   private _animation: string | undefined;
   private _direction: number;
   private _highlight = false;
@@ -23,11 +26,11 @@ export class WallFurniture extends RoomObject implements IFurniture {
   constructor(
     options: {
       roomX: number;
-      roomZ: number;
       roomY: number;
+      offsetX: number;
+      offsetY: number;
       direction: number;
       animation?: string;
-      behaviors?: IFurnitureBehavior<WallFurniture>[];
     } & FurnitureFetchInfo
   ) {
     super();
@@ -37,9 +40,11 @@ export class WallFurniture extends RoomObject implements IFurniture {
 
     this._roomX = options.roomX;
     this._roomY = options.roomY;
-    this._roomZ = options.roomZ;
     this._animation = options.animation;
     this._direction = options.direction;
+
+    this._offsetX = options.offsetX;
+    this._offsetY = options.offsetY;
 
     this._baseFurniture = new BaseFurniture({
       animation: this.animation,
@@ -47,8 +52,6 @@ export class WallFurniture extends RoomObject implements IFurniture {
       type: getFurnitureFetch(options, "wall"),
       getMaskId: (direction) => getMaskId(direction, this.roomX, this.roomY),
     });
-
-    options.behaviors?.forEach((behavior) => behavior.setParent(this));
   }
 
   public get extradata() {
@@ -120,12 +123,20 @@ export class WallFurniture extends RoomObject implements IFurniture {
     this._updatePosition();
   }
 
-  public get roomZ() {
-    return this._roomZ;
+  public get offsetX() {
+    return this._offsetX;
+  }
+  public set offsetX(value) {
+    this._offsetX = value;
+    this._updatePosition();
   }
 
-  public set roomZ(value) {
-    this._roomZ = value;
+  public get offsetY() {
+    return this._offsetY;
+  }
+
+  public set offsetY(value) {
+    this._offsetY = value;
     this._updatePosition();
   }
 
@@ -182,24 +193,50 @@ export class WallFurniture extends RoomObject implements IFurniture {
   }
 
   private _getOffsets(direction: number) {
-    if (direction === 2 || direction === 6) return { x: -16, y: -64 };
-    if (direction === 4 || direction === 0) return { x: 16, y: -64 };
+    const geo = new LegacyWallGeometry(this.room.getParsedTileTypes());
+    const roomPosition = geo.getLocation(
+      this.roomX,
+      this.roomY,
+      this._offsetX,
+      this._offsetY,
+      direction === 2 ? "l" : "r"
+    );
+    if (direction === 2) {
+      const position = this.room.getPosition(
+        roomPosition.x,
+        roomPosition.y,
+        roomPosition.z * 2 - 0.5
+      );
 
-    throw new Error("Invalid direction for wall item");
+      return {
+        x: position.x,
+        y: position.y - this.room.wallHeight,
+      };
+    } else {
+      const position = this.room.getPosition(
+        roomPosition.x,
+        roomPosition.y - 0.5,
+        roomPosition.z * 2 - 0.5
+      );
+
+      return {
+        x: position.x,
+        y: position.y - this.room.wallHeight,
+      };
+    }
   }
 
   private _updatePosition() {
     const offsets = this._getOffsets(this.direction);
     if (offsets == null) return;
 
-    const base = this.geometry.getPosition(this.roomX, this.roomY, this.roomZ);
+    const position = this._getOffsets(this.direction);
 
-    this._baseFurniture.x = base.x + offsets.x;
-    this._baseFurniture.y = base.y + offsets.y;
+    this._baseFurniture.x = position.x;
+    this._baseFurniture.y = position.y;
     this._baseFurniture.maskId = (direction) =>
       getMaskId(direction, this.roomX, this.roomY);
 
-    this._baseFurniture.zIndex =
-      getZOrder(this.roomX, this.roomZ, this.roomY) - 1;
+    this._baseFurniture.zIndex = getZOrder(this.roomX, this.roomY, 0) - 1;
   }
 }
