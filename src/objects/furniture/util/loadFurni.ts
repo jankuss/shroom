@@ -4,6 +4,7 @@ import { IFurnitureAssetsData } from "../data/interfaces/IFurnitureAssetsData";
 import { IFurnitureIndexData } from "../data/interfaces/IFurnitureIndexData";
 import { IFurnitureVisualizationData } from "../data/interfaces/IFurnitureVisualizationData";
 import { FurnitureExtraData } from "../FurnitureExtraData";
+import { IFurnitureAssetBundle } from "../IFurnitureAssetBundle";
 import { FurniDrawDefinition } from "./DrawDefinition";
 import { getFurniDrawDefinition } from "./getFurniDrawDefinition";
 
@@ -28,14 +29,11 @@ export type LoadFurniResult = {
 
 export async function loadFurni(
   typeWithColor: string,
-  revision: number | undefined,
-  options: LoadFurniOptions
+  bundle: IFurnitureAssetBundle
 ): Promise<LoadFurniResult> {
-  const type = typeWithColor.split("*")[0];
-
-  const assetsData = await options.getAssets(type, revision);
-  const indexData = await options.getIndex(type, revision);
-  const visualizationData = await options.getVisualization(type, revision);
+  const assetsData = await bundle.getAssets();
+  const indexData = await bundle.getIndex();
+  const visualizationData = await bundle.getVisualization();
   const validDirections = visualizationData.getDirections(64);
   const sortedDirections = [...validDirections].sort((a, b) => a - b);
 
@@ -49,12 +47,7 @@ export async function loadFurni(
     const loadedTextures = await Promise.all(
       assetsToLoad.map(async (asset) => {
         try {
-          const imageUrl = await options.getTextureUrl(
-            type,
-            asset.name,
-            revision
-          );
-          const image = await HitTexture.fromUrl(imageUrl);
+          const image = await bundle.getTexture(asset.name);
 
           return [asset.name, image] as const;
         } catch (e) {
@@ -91,18 +84,4 @@ export async function loadFurni(
     visualizationData,
     directions: sortedDirections,
   };
-}
-
-interface LoadFurniOptions {
-  getAssets: (type: string, revision?: number) => Promise<IFurnitureAssetsData>;
-  getVisualization: (
-    type: string,
-    revision?: number
-  ) => Promise<IFurnitureVisualizationData>;
-  getTextureUrl: (
-    type: string,
-    name: string,
-    revision?: number
-  ) => Promise<string>;
-  getIndex: (type: string, revision?: number) => Promise<IFurnitureIndexData>;
 }

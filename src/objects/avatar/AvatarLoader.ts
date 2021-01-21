@@ -16,9 +16,13 @@ import { AvatarGeometryData } from "./util/data/AvatarGeometryData";
 import { AvatarAction } from "./enum/AvatarAction";
 import { AvatarEffectData } from "./util/data/AvatarEffectData";
 import { IAvatarEffectData } from "./util/data/interfaces/IAvatarEffectData";
+import { IAssetBundle } from "../../assets/IAssetBundle";
+import { LegacyAssetBundle } from "../../assets/LegacyAssetBundle";
+import { ZipAssetBundle } from "../../assets/ZipAssetBundle";
+import { ShroomAssetBundle } from "../../assets/ShroomAssetBundle";
 
 interface Options {
-  resolveImage: (id: string, library: string) => Promise<HitTexture>;
+  getAssetBundle: (library: string) => Promise<IAssetBundle>;
   createLookServer: () => Promise<LookServer>;
 }
 
@@ -59,6 +63,7 @@ export class AvatarLoader implements IAvatarLoader {
   private _lookServer: Promise<LookServer>;
   private _effectCache: Map<string, Promise<IAvatarEffectData>> = new Map();
   private _lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
+  private _assetBundles: Map<string, Promise<IAssetBundle>> = new Map();
 
   constructor(private _options: Options) {
     this._lookServer = this._options.createLookServer().then(async (server) => {
@@ -77,39 +82,32 @@ export class AvatarLoader implements IAvatarLoader {
   static create(resourcePath = "") {
     return new AvatarLoader({
       createLookServer: async () => {
-        const {
-          animationData,
-          offsetsData,
-          figureMap,
-          figureData,
-          partSetsData,
-          actionsData,
-          geometry,
-        } = await Bluebird.props({
-          animationData: AvatarAnimationData.default(),
-          figureData: FigureData.fromUrl(`${resourcePath}/figuredata.xml`),
-          figureMap: FigureMapData.fromUrl(`${resourcePath}/figuremap.xml`),
-          offsetsData: AvatarOffsetsData.fromUrl(
-            `${resourcePath}/offsets.json`
-          ),
-          partSetsData: AvatarPartSetsData.default(),
-          actionsData: AvatarActionsData.default(),
-          geometry: AvatarGeometryData.default(),
-        });
-
-        return createLookServer({
-          animationData,
-          figureData,
-          offsetsData,
-          figureMap,
-          partSetsData,
-          actionsData,
-          geometry,
-        });
+        return initializeDefaultLookServer(resourcePath);
       },
-      resolveImage: async (id, library) => {
-        return HitTexture.fromUrl(
-          `${resourcePath}/figure/${library}/${id}.png`
+      getAssetBundle: async (library) => {
+        return new LegacyAssetBundle(`${resourcePath}/figure/${library}`);
+      },
+    });
+  }
+
+  static createForZip(resourcePath = "") {
+    return new AvatarLoader({
+      createLookServer: async () => {
+        return initializeDefaultLookServer(resourcePath);
+      },
+      getAssetBundle: async (library) => {
+        return new ZipAssetBundle(`${resourcePath}/figure/${library}.zip`);
+      },
+    });
+  }
+  static createForAssetBundle(resourcePath = "") {
+    return new AvatarLoader({
+      createLookServer: async () => {
+        return initializeDefaultLookServer(resourcePath);
+      },
+      getAssetBundle: async (library) => {
+        return ShroomAssetBundle.fromUrl(
+          `${resourcePath}/figure/${library}.shroom`
         );
       },
     });
@@ -149,7 +147,9 @@ export class AvatarLoader implements IAvatarLoader {
           if (globalFile != null) {
             loadedFiles.set(item.fileId, globalFile);
           } else {
-            const file = this._options.resolveImage(item.fileId, item.library);
+            const file = this._getAssetBundle(item.library)
+              .then((bundle) => bundle.getBlob(`${item.fileId}.png`))
+              .then((blob) => HitTexture.fromBlob(blob));
             this._globalCache.set(item.fileId, file);
             loadedFiles.set(item.fileId, file);
           }
@@ -220,6 +220,16 @@ export class AvatarLoader implements IAvatarLoader {
     return obj;
   }
 
+  private async _getAssetBundle(library: string) {
+    const current = this._assetBundles.get(library);
+    if (current != null) return current;
+
+    const bundle = this._options.getAssetBundle(library);
+    this._assetBundles.set(library, bundle);
+
+    return bundle;
+  }
+
   private _loadEffect(type: string, id: string) {
     const key = `${type}_${id}`;
     let current = this._effectCache.get(key);
@@ -254,4 +264,34 @@ export class AvatarLoader implements IAvatarLoader {
 
     return drawDefinition;
   }
+}
+
+async function initializeDefaultLookServer(resourcePath: string) {
+  const {
+    animationData,
+    offsetsData,
+    figureMap,
+    figureData,
+    partSetsData,
+    actionsData,
+    geometry,
+  } = await Bluebird.props({
+    animationData: AvatarAnimationData.default(),
+    figureData: FigureData.fromUrl(`${resourcePath}/figuredata.xml`),
+    figureMap: FigureMapData.fromUrl(`${resourcePath}/figuremap.xml`),
+    offsetsData: AvatarOffsetsData.fromUrl(`${resourcePath}/offsets.json`),
+    partSetsData: AvatarPartSetsData.default(),
+    actionsData: AvatarActionsData.default(),
+    geometry: AvatarGeometryData.default(),
+  });
+
+  return createLookServer({
+    animationData,
+    figureData,
+    offsetsData,
+    figureMap,
+    partSetsData,
+    actionsData,
+    geometry,
+  });
 }

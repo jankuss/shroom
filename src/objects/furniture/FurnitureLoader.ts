@@ -1,19 +1,23 @@
+import { LegacyAssetBundle } from "../../assets/LegacyAssetBundle";
+import { ShroomAssetBundle } from "../../assets/ShroomAssetBundle";
+import { ZipAssetBundle } from "../../assets/ZipAssetBundle";
 import { IFurnitureData } from "../../interfaces/IFurnitureData";
 import {
   FurnitureFetch,
   IFurnitureLoader,
 } from "../../interfaces/IFurnitureLoader";
-import { FurnitureAssetsData } from "./data/FurnitureAssetsData";
-import { FurnitureIndexData } from "./data/FurnitureIndexData";
-import { FurnitureVisualizationData } from "./data/FurnitureVisualizationData";
-import { IFurnitureAssetsData } from "./data/interfaces/IFurnitureAssetsData";
-import { IFurnitureIndexData } from "./data/interfaces/IFurnitureIndexData";
-import { IFurnitureVisualizationData } from "./data/interfaces/IFurnitureVisualizationData";
+import { IFurnitureAssetBundle } from "./IFurnitureAssetBundle";
+import { JsonFurnitureAssetBundle } from "./JsonFurnitureAssetBundle";
 import { loadFurni, LoadFurniResult } from "./util/loadFurni";
+import { XmlFurnitureAssetBundle } from "./XmlFurnitureAssetBundle";
 
 export class FurnitureLoader implements IFurnitureLoader {
   private _furnitureCache: Map<string, Promise<LoadFurniResult>> = new Map();
   private _artificalDelay: number | undefined;
+  private _assetBundles: Map<
+    string,
+    Promise<IFurnitureAssetBundle>
+  > = new Map();
 
   constructor(private _options: Options) {}
 
@@ -26,43 +30,37 @@ export class FurnitureLoader implements IFurnitureLoader {
   }
 
   static create(furnitureData: IFurnitureData, resourcePath = "") {
-    const normalizePath = (revision: number | undefined, type: string) => {
-      if (revision == null) return type;
-
-      return `${revision}/${type}`;
-    };
-
     return new FurnitureLoader({
       furnitureData,
-      getAssets: (type, revision) => {
-        const assetsPath = `${resourcePath}/hof_furni/${normalizePath(
-          revision,
-          type
-        )}/${type}_assets.bin`;
-
-        return FurnitureAssetsData.fromUrl(assetsPath);
+      getAssetBundle: async (type, revision) => {
+        const bundle = new LegacyAssetBundle(
+          `${resourcePath}/hof_furni/${normalizePath(revision, type)}`
+        );
+        return new XmlFurnitureAssetBundle(type, bundle);
       },
-      getVisualization: (type, revision) => {
-        const visualizationPath = `${resourcePath}/hof_furni/${normalizePath(
-          revision,
-          type
-        )}/${type}_visualization.bin`;
+    });
+  }
 
-        return FurnitureVisualizationData.fromUrl(visualizationPath);
+  static createForZip(furnitureData: IFurnitureData, resourcePath = "") {
+    return new FurnitureLoader({
+      furnitureData,
+      getAssetBundle: async (type, revision) => {
+        const bundle = new ZipAssetBundle(
+          `${resourcePath}/hof_furni/${normalizePath(revision, type)}.zip`
+        );
+        return new XmlFurnitureAssetBundle(type, bundle);
       },
-      getTextureUrl: async (type, name, revision) => {
-        return `${resourcePath}/hof_furni/${normalizePath(
-          revision,
-          type
-        )}/${name}.png`;
-      },
-      getIndex: async (type, revision) => {
-        const indexPath = `${resourcePath}/hof_furni/${normalizePath(
-          revision,
-          type
-        )}/index.bin`;
+    });
+  }
 
-        return FurnitureIndexData.fromUrl(indexPath);
+  static createForJson(furnitureData: IFurnitureData, resourcePath = "") {
+    return new FurnitureLoader({
+      furnitureData,
+      getAssetBundle: async (type, revision) => {
+        const bundle = await ShroomAssetBundle.fromUrl(
+          `${resourcePath}/hof_furni/${normalizePath(revision, type)}.shroom`
+        );
+        return new JsonFurnitureAssetBundle(bundle);
       },
     });
   }
@@ -99,29 +97,37 @@ export class FurnitureLoader implements IFurnitureLoader {
       return furniture;
     }
 
-    furniture = loadFurni(typeWithColor, revision, {
-      getAssets: this._options.getAssets,
-      getVisualization: this._options.getVisualization,
-      getTextureUrl: this._options.getTextureUrl,
-      getIndex: this._options.getIndex,
-    });
+    furniture = loadFurni(
+      typeWithColor,
+      await this._getAssetBundle(type, revision)
+    );
     this._furnitureCache.set(type, furniture);
 
     return furniture;
+  }
+
+  private _getAssetBundle(type: string, revision?: number) {
+    const key = `${type}_${revision}`;
+    const current = this._assetBundles.get(key);
+    if (current != null) return current;
+
+    const bundle = this._options.getAssetBundle(type, revision);
+    this._assetBundles.set(key, bundle);
+
+    return bundle;
   }
 }
 
 interface Options {
   furnitureData: IFurnitureData;
-  getAssets: (type: string, revision?: number) => Promise<IFurnitureAssetsData>;
-  getVisualization: (
+  getAssetBundle: (
     type: string,
     revision?: number
-  ) => Promise<IFurnitureVisualizationData>;
-  getTextureUrl: (
-    type: string,
-    name: string,
-    revision?: number
-  ) => Promise<string>;
-  getIndex: (type: string, revision?: number) => Promise<IFurnitureIndexData>;
+  ) => Promise<IFurnitureAssetBundle>;
 }
+
+const normalizePath = (revision: number | undefined, type: string) => {
+  if (revision == null) return type;
+
+  return `${revision}/${type}`;
+};

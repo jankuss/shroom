@@ -25,6 +25,19 @@ export abstract class FurnitureVisualization
     this._view = view;
   }
 
+  isAnimated(animation = "0"): boolean {
+    const frameCount = this._view?.furniture.visualizationData.getFrameCountWithoutRepeat(
+      64,
+      Number(animation)
+    );
+
+    if (frameCount != null) {
+      return frameCount > 1;
+    }
+
+    return false;
+  }
+
   abstract update(): void;
   abstract destroy(): void;
 

@@ -27,7 +27,11 @@ const application = new PIXI.Application({
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
-const shroom = Shroom.create({ application, resourcePath: "./resources" });
+const shroom = Shroom.create({
+  application,
+  resourcePath: "./resources",
+  configuration: { placeholder: PIXI.Texture.from("./image.png") },
+});
 const room = Room.create(shroom, {
   tilemap: `
    xxxxx

@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `onActiveWallChange` - useful for handling wall item placement.
 
+### Changed
+
+- **BREAKING:**: Asset dumping & loading
+
+  Assets now get dumped into `.shroom` files, instead of individual files.
+
 ### Removed
 
 - Temporarily disable landscapes because of performance issues

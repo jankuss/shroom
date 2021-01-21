@@ -2,7 +2,9 @@ import { parseExternalVariables } from "./parseExternalVariables";
 
 import fetch from "node-fetch";
 
-export async function getVariables(externalVariablesUrl: string) {
+export async function getExternalVariableUrls(
+  externalVariablesUrl: string
+): Promise<ExternalVariables> {
   const externalVariablesString = await fetch(
     externalVariablesUrl
   ).then((res) => res.text());
@@ -22,10 +24,21 @@ export async function getVariables(externalVariablesUrl: string) {
   if (figureDataUrl == null) throw new Error("Invalid figure data url");
   if (furniDataUrl == null) throw new Error("Invalid furni data url");
 
+  const gordonUrl = figureMapUrl.split("/").slice(0, -1).join("/");
+
   return {
     figureMapUrl,
     hofFurniUrl,
     figureDataUrl,
     furniDataUrl,
+    gordonUrl,
   };
+}
+
+export interface ExternalVariables {
+  figureMapUrl: string;
+  hofFurniUrl: string;
+  figureDataUrl: string;
+  furniDataUrl: string;
+  gordonUrl: string;
 }
