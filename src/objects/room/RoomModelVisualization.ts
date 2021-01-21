@@ -539,9 +539,14 @@ export class RoomModelVisualization
     }
   };
 
-  private _createRightWall(roomX: number, roomY: number, roomZ: number) {
+  private _createRightWall(
+    roomX: number,
+    roomY: number,
+    roomZ: number,
+    options: { hideBorder?: boolean }
+  ) {
     const wall = new WallRight({
-      hideBorder: false,
+      hideBorder: options.hideBorder ?? false,
       onMouseMove: (event) => {
         this._onActiveWallChange.next({
           roomX,
@@ -633,7 +638,7 @@ export class RoomModelVisualization
 
     switch (element.kind) {
       case "colWall":
-        this._createRightWall(x, y, z);
+        this._createRightWall(x, y, z, { hideBorder: element.hideBorder });
         break;
 
       case "rowWall":
@@ -641,7 +646,7 @@ export class RoomModelVisualization
         break;
 
       case "innerCorner":
-        this._createRightWall(x, y, z);
+        this._createRightWall(x, y, z, { hideBorder: false });
         this._createLeftWall(x, y, z, { hideBorder: true });
         break;
 
