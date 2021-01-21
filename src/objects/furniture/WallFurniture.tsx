@@ -193,7 +193,7 @@ export class WallFurniture extends RoomObject {
   }
 
   private _getOffsets(direction: number) {
-    const geo = new LegacyWallGeometry(this.room.getParsedTileTypes(), 0);
+    const geo = new LegacyWallGeometry(this.room.getParsedTileTypes());
     const roomPosition = geo.getLocation(
       this.roomX,
       this.roomY,
