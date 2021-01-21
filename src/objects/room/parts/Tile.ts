@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import { HitDetectionElement } from "../../../interfaces/IHitDetection";
 
 import { getFloorMatrix, getLeftMatrix, getRightMatrix } from "../matrixes";
 import { IRoomPart } from "./IRoomPart";
