@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Temporarily disable landscapes because of performance issues
 
+### Fixed
+
+- Display of avatar when rendering certain clothing items
+
 ## [0.5.1] - 2021-01-13
 
 ### Fixed
