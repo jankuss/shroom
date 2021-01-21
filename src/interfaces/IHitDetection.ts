@@ -17,9 +17,9 @@ export interface HitEvent {
 }
 
 export interface HitDetectionElement {
-  getHitBox(): Rect;
   trigger(type: HitEventType, event: HitEvent): void;
   hits(x: number, y: number): boolean;
+  getHitDetectionZIndex(): number;
 }
 
 export interface HitDetectionNode {

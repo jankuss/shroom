@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
+import { HitDetectionElement } from "../../../interfaces/IHitDetection";
 
 import { getFloorMatrix, getLeftMatrix, getRightMatrix } from "../matrixes";
-import { getTileColors } from "../util/getTileColors";
 import { IRoomPart } from "./IRoomPart";
 import { RoomPartData } from "./RoomPartData";
 

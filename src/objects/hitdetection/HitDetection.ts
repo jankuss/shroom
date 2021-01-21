@@ -49,26 +49,6 @@ export class HitDetection implements IHitDetection {
     );
   }
 
-  private _debugHitDetection() {
-    this._container?.destroy();
-    this._container = new PIXI.Container();
-
-    this._map.forEach((value) => {
-      const box = value.getHitBox();
-      const graphics = new PIXI.Graphics();
-
-      graphics.x = box.x;
-      graphics.y = box.y;
-      graphics.beginFill(0x000000, 0.1);
-      graphics.drawRect(0, 0, box.width, box.height);
-      graphics.endFill();
-
-      this._container?.addChild(graphics);
-    });
-
-    this._app.stage.addChild(this._container);
-  }
-
   private _triggerEvent(
     x: number,
     y: number,
@@ -102,26 +82,13 @@ export class HitDetection implements IHitDetection {
     x = x - rect.x;
     y = y - rect.y;
 
-    const entries = Array.from(this._map.values()).map((element) => ({
-      hitBox: element.getHitBox(),
-      element,
-    }));
+    const entries = Array.from(this._map.values());
+    const ordered = entries.sort(
+      (a, b) => b.getHitDetectionZIndex() - a.getHitDetectionZIndex()
+    );
 
-    const ordered = entries.sort((a, b) => b.hitBox.zIndex - a.hitBox.zIndex);
-
-    const hit = ordered.filter(({ element, hitBox }) => {
-      const inBoundsX = hitBox.x <= x && x <= hitBox.x + hitBox.width;
-      const inBoundsY = hitBox.y <= y && y <= hitBox.y + hitBox.height;
-
-      const inBounds = inBoundsX && inBoundsY;
-
-      if (inBounds) {
-        return element.hits(x, y);
-      } else {
-        return false;
-      }
+    return ordered.filter((element) => {
+      return element.hits(x, y);
     });
-
-    return hit.map(({ element }) => element);
   }
 }
