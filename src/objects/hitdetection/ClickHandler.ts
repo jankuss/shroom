@@ -7,8 +7,12 @@ export class ClickHandler {
     timeout: number;
   };
 
+  private _didReceiveClick = false;
+
   private _onClick: HitEventHandler | undefined;
   private _onDoubleClick: HitEventHandler | undefined;
+
+  private _clickTimeout: number | undefined;
 
   public get onClick() {
     return this._onClick;
@@ -27,18 +31,31 @@ export class ClickHandler {
   }
 
   handleClick(event: HitEvent) {
-    if (this.onClick != null || this.onDoubleClick != null) {
-      event.stopPropagation();
-    }
-
     if (this._doubleClickInfo == null) {
-      this.onClick && this.onClick(event);
-      this._startDoubleClick(event);
+      if (!this._didReceiveClick) {
+        this._didReceiveClick = true;
+        this.onClick && this.onClick(event);
+
+        setTimeout(() => {
+          this._didReceiveClick = false;
+        });
+
+        if (this.onDoubleClick != null) {
+          this._startDoubleClick(event);
+        }
+      }
     } else {
-      this.onDoubleClick &&
-        this.onDoubleClick(this._doubleClickInfo.initialEvent);
-      this._resetDoubleClick();
+      this._performDoubleClick(event);
     }
+  }
+
+  private _performDoubleClick(event: HitEvent) {
+    if (this._doubleClickInfo == null) return;
+
+    event.stopPropagation();
+    this.onDoubleClick &&
+      this.onDoubleClick(this._doubleClickInfo.initialEvent);
+    this._resetDoubleClick();
   }
 
   private _resetDoubleClick() {
@@ -49,6 +66,8 @@ export class ClickHandler {
   }
 
   private _startDoubleClick(event: HitEvent) {
+    event.stopPropagation();
+
     this._doubleClickInfo = {
       initialEvent: event,
       timeout: window.setTimeout(() => this._resetDoubleClick(), 350),

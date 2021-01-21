@@ -94,7 +94,9 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
   trigger(type: HitEventType, event: HitEvent): void {
     const handlers = this._handlers.get(type);
 
-    handlers?.forEach((handler) => handler({ ...event, tag: this._tag }));
+    event.tag = this._tag;
+
+    handlers?.forEach((handler) => handler(event));
   }
 
   addEventListener(type: HitEventType, handler: HitEventHandler) {

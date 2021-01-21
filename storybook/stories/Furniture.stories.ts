@@ -44,10 +44,13 @@ export function Default() {
       });
 
       furniture.onClick = action(`Furniture ${i} clicked`);
+      furniture.onDoubleClick = action(`Furniture ${i} Double Clicked`);
       furniture.validDirections.then(action(`Furniture ${i} valid directions`));
 
       room.addRoomObject(furniture);
     }
+
+    room.onTileClick = (position) => console.log(position);
 
     const dice = new FloorFurniture({
       roomX: 1,

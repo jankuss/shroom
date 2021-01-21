@@ -109,6 +109,7 @@ export class Room
     this.application = application;
 
     this._visualization = new RoomModelVisualization(
+      this._hitDetection,
       this.application,
       new ParsedTileMap(normalizedTileMap)
     );
@@ -130,6 +131,10 @@ export class Room
     };
 
     this.addChild(this._visualization);
+
+    this._visualization.onTileClick.subscribe((value) => {
+      this.onTileClick && this.onTileClick(value);
+    });
   }
 
   /**

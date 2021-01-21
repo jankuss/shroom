@@ -199,13 +199,21 @@ export function IssueWithAvatarEventsNotHandled() {
       roomZ: 0,
     });
 
-    avatar.onClick = (event) => console.log(event);
-    furniture.onClick = () => {
+    avatar.onClick = (event) => {
+      event.stopPropagation();
+
+      action("Avatar Clicked")(event);
+    };
+    furniture.onClick = (event) => {
+      event.stopPropagation();
+
       furniture.animation = "-1";
 
       setTimeout(() => {
         furniture.animation = undefined;
       }, 500);
+
+      action("Furniture Clicked")(event);
     };
 
     room.onTileClick = action("Position");

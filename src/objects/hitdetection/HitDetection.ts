@@ -3,6 +3,7 @@ import {
   HitDetectionElement,
   HitDetectionNode,
   HitEvent,
+  HitEventType,
   IHitDetection,
 } from "../../interfaces/IHitDetection";
 
@@ -41,39 +42,19 @@ export class HitDetection implements IHitDetection {
   }
 
   handleClick(event: MouseEvent) {
-    this._triggerEvent(
-      event.clientX,
-      event.clientY,
-      (element, event) => element.trigger("click", event),
-      event
-    );
+    this._triggerEvent(event.clientX, event.clientY, "click", event);
   }
 
   private _triggerEvent(
     x: number,
     y: number,
-    invoke: (element: HitDetectionElement, event: HitEvent) => void,
+    eventType: HitEventType,
     domEvent: MouseEvent
   ) {
     const elements = this._performHitTest(x, y);
-    let stopped = false;
 
-    const event: HitEvent = {
-      stopPropagation: () => {
-        stopped = true;
-      },
-      absorb: () => {
-        domEvent?.stopImmediatePropagation();
-      },
-      mouseEvent: domEvent,
-    };
-
-    for (let i = 0; i < elements.length; i++) {
-      if (stopped) break;
-      const element = elements[i];
-
-      invoke(element, event);
-    }
+    const event = new HitEventImplementation(eventType, domEvent, elements);
+    event.resumePropagation();
   }
 
   private _performHitTest(x: number, y: number) {
@@ -90,5 +71,49 @@ export class HitDetection implements IHitDetection {
     return ordered.filter((element) => {
       return element.hits(x, y);
     });
+  }
+}
+
+class HitEventImplementation implements HitEvent {
+  private _currentIndex = 0;
+  private _stopped = false;
+  private _tag: string | undefined;
+
+  constructor(
+    private _eventType: HitEventType,
+    private _mouseEvent: MouseEvent,
+    private _path: HitDetectionElement[]
+  ) {}
+
+  public get mouseEvent() {
+    return this._mouseEvent;
+  }
+
+  public get tag() {
+    return this._tag;
+  }
+
+  public set tag(value) {
+    this._tag = value;
+  }
+
+  stopPropagation(): void {
+    this._stopped = true;
+  }
+
+  resumePropagation(): void {
+    this._stopped = false;
+    this._propagateEvent();
+  }
+
+  private _propagateEvent() {
+    for (let i = this._currentIndex; i < this._path.length; i++) {
+      this._currentIndex = i + 1;
+
+      if (this._stopped) break;
+
+      const element = this._path[i];
+      element.trigger(this._eventType, this);
+    }
   }
 }

@@ -13,7 +13,7 @@ export interface HitEvent {
   tag?: string;
 
   stopPropagation(): void;
-  absorb(): void;
+  resumePropagation(): void;
 }
 
 export interface HitDetectionElement {

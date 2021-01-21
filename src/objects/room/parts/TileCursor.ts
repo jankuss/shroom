@@ -1,14 +1,22 @@
 import * as PIXI from "pixi.js";
+import {
+  HitDetectionElement,
+  HitDetectionNode,
+  HitEvent,
+  IHitDetection,
+} from "../../../interfaces/IHitDetection";
 import { RoomPosition } from "../../../types/RoomPosition";
 
-export class TileCursor extends PIXI.Container {
+export class TileCursor extends PIXI.Container implements HitDetectionElement {
   private _roomX: number;
   private _roomY: number;
   private _roomZ: number;
   private _graphics: PIXI.Graphics;
   private _hover = false;
+  private _node: HitDetectionNode;
 
   constructor(
+    hitDetection: IHitDetection,
     private _position: RoomPosition,
     private onClick: (position: RoomPosition) => void,
     private onOver: (position: RoomPosition) => void,
@@ -22,6 +30,48 @@ export class TileCursor extends PIXI.Container {
     this._updateGraphics();
 
     this.addChild(this._graphics);
+
+    this._node = hitDetection.register(this);
+  }
+
+  trigger(type: "click", event: HitEvent): void {
+    switch (type) {
+      case "click":
+        this.onClick({
+          roomX: this._roomX,
+          roomY: this._roomY,
+          roomZ: this._roomZ,
+        });
+        break;
+    }
+  }
+
+  hits(x: number, y: number): boolean {
+    const tx = this.worldTransform.tx;
+    const ty = this.worldTransform.ty;
+
+    const diffX = x - tx;
+    const diffY = y - ty;
+
+    return this._pointInside(
+      [diffX, diffY],
+      [
+        [points.p1.x, points.p1.y],
+        [points.p2.x, points.p2.y],
+        [points.p3.x, points.p3.y],
+        [points.p4.x, points.p4.y],
+      ]
+    );
+  }
+
+  getHitDetectionZIndex(): number {
+    return -1000;
+  }
+
+  destroy() {
+    super.destroy();
+
+    this._node.remove();
   }
 
   private _createGraphics() {
@@ -36,9 +86,6 @@ export class TileCursor extends PIXI.Container {
     graphics.interactive = true;
     graphics.addListener("mouseover", () => this._updateHover(true));
     graphics.addListener("mouseout", () => this._updateHover(false));
-    graphics.addListener("click", () => {
-      this.onClick(this._position);
-    });
 
     return graphics;
   }
@@ -66,6 +113,28 @@ export class TileCursor extends PIXI.Container {
     } else {
       this.onOut(this._position);
     }
+  }
+
+  private _pointInside(point: [number, number], vs: [number, number][]) {
+    // ray-casting algorithm based on
+    // https://wrf.ecse.rpi.edu/Research/Short_Notes/pnpoly.html/pnpoly.html
+
+    const x = point[0];
+    const y = point[1];
+
+    let inside = false;
+    for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+      const xi = vs[i][0];
+      const yi = vs[i][1];
+      const xj = vs[j][0];
+      const yj = vs[j][1];
+
+      const intersect =
+        yi > y != yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+      if (intersect) inside = !inside;
+    }
+
+    return inside;
   }
 }
 
