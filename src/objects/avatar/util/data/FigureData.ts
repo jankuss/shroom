@@ -91,6 +91,11 @@ export class FigureData extends AvatarData implements IFigureData {
             const id = part.getAttribute("id");
             const type = part.getAttribute("type");
             const colorable = part.getAttribute("colorable");
+            let index = Number(part.getAttribute("index"));
+
+            if (isNaN(index)) {
+              index = 0;
+            }
 
             if (id == null) throw new Error("Invalid id");
             if (type == null) throw new Error("Invalid type");
@@ -99,6 +104,7 @@ export class FigureData extends AvatarData implements IFigureData {
               id,
               type,
               colorable: colorable === "1" ? true : false,
+              index,
             };
           })
           .forEach((part) => {

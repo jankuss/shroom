@@ -8,4 +8,5 @@ export type FigureDataPart = {
   id: string;
   colorable: boolean;
   type: string;
+  index: number;
 };

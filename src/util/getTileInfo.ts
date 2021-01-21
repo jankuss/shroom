@@ -13,6 +13,8 @@ const offsets = {
   bottomRight: { x: 1, y: 1 },
 };
 
+export type NumberOfTile = number | "x";
+
 export function getNumberOfTileType(tileType: TileType): number | "x" {
   if (tileType === "x" || tileType == null) return "x";
 

@@ -81,6 +81,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _destroyed = false;
 
   private _maskNodes: MaskNode[] = [];
+  private _maskSprites: FurnitureSprite[] = [];
+
   private _cancelTicker: (() => void) | undefined = undefined;
   private _getMaskId: MaskIdGetter;
 
@@ -154,6 +156,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
               remove: () => {
                 // Do nothing
               },
+              update: () => {
+                // Do nothing
+              },
+              sprite: null as any,
             };
           },
         },
@@ -348,6 +354,20 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       element.baseX = this.x;
       element.baseY = this.y;
     });
+
+    const maskId = this._getMaskId(this.direction);
+
+    const maskSprites = this._maskSprites;
+    this._maskNodes.forEach((mask) => mask.remove());
+    this._maskNodes = [];
+
+    if (maskId != null) {
+      maskSprites.forEach((maskSprite) => {
+        this._maskNodes.push(
+          this.dependencies.visualization.addMask(maskId, maskSprite)
+        );
+      });
+    }
   }
 
   private _updateFurniture() {
@@ -417,6 +437,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         this._maskNodes.push(
           this.dependencies.visualization.addMask(maskId, sprite)
         );
+        this._maskSprites.push(sprite);
       }
     }
 
@@ -425,6 +446,9 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   private _updateFurnitureSprites(loadFurniResult: LoadFurniResult) {
     if (!this.mounted) return;
+
+    this._maskNodes.forEach((node) => node.remove());
+    this._maskNodes = [];
 
     this._unknownSprite?.destroy();
     this._unknownSprite = undefined;
@@ -468,6 +492,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this.visualization.updateFrame(this.dependencies.animationTicker.current());
 
     this._handleAnimationChange();
+    this._updatePosition();
   }
 
   private _applyLayerDataToSprite(

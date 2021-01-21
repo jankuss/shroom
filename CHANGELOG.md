@@ -7,11 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `onActiveWallChange` - useful for handling wall item placement.
+
 ### Changed
 
 - **BREAKING:**: Asset dumping & loading
 
   Assets now get dumped into `.shroom` files, instead of individual files.
+
+### Removed
+
+- Temporarily disable landscapes because of performance issues
+
+### Fixed
+
+- Display of avatar when rendering certain clothing items
 
 ## [0.5.1] - 2021-01-13
 

@@ -378,13 +378,13 @@ export function BaseAvatarClothes() {
   return createShroom(({ application, shroom }) => {
     const baseAvatar = BaseAvatar.fromShroom(shroom, {
       look: {
-        look: "ch-210-66",
+        look: "ch-3001-73",
         direction: 2,
         actions: new Set<AvatarAction>(),
       },
       zIndex: 1,
-      skipBodyParts: true,
       skipCaching: true,
+      skipBodyParts: true,
       position: {
         x: 0,
         y: 32,

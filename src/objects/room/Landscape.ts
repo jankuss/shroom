@@ -1,6 +1,9 @@
 import * as PIXI from "pixi.js";
+import { PartNode } from "../../interfaces/IRoomVisualization";
 import { ParsedTileType } from "../../util/parseTileMap";
 import { RoomObject } from "../RoomObject";
+import { IRoomPart } from "./parts/IRoomPart";
+import { RoomPartData } from "./parts/RoomPartData";
 import { getMaskId } from "./util/getMaskId";
 
 interface WallCollectionMeta {
@@ -12,7 +15,7 @@ interface WallCollectionMeta {
 
 type Unsubscribe = () => void;
 
-export class Landscape extends RoomObject {
+export class Landscape extends RoomObject implements IRoomPart {
   private _container: PIXI.Container | undefined;
   private _leftTexture: PIXI.Texture | undefined;
   private _rightTexture: PIXI.Texture | undefined;
@@ -28,6 +31,8 @@ export class Landscape extends RoomObject {
   private _masks: Map<string, PIXI.Sprite> = new Map();
   private _color: string | undefined;
   private _unsubscribe: Unsubscribe | undefined = undefined;
+
+  private _partNode: PartNode | undefined;
 
   constructor() {
     super();
@@ -66,21 +71,21 @@ export class Landscape extends RoomObject {
     });
   }
 
+  update(data: RoomPartData): void {
+    this._masks = data.masks;
+    this._wallHeightWithZ = data.wallHeight;
+
+    this._updateLandscapeImages();
+  }
+
   destroyed(): void {
     this._unsubscribe && this._unsubscribe();
     this._container?.destroy();
+    this._partNode?.remove();
   }
 
   registered(): void {
-    this._unsubscribe = this.roomVisualization.subscribeRoomMeta(
-      ({ masks, wallHeightWithZ, wallHeight }) => {
-        this._masks = masks;
-        this._wallHeight = wallHeight;
-        this._wallHeightWithZ = wallHeightWithZ;
-        this._updateLandscapeImages();
-      }
-    ).unsubscribe;
-
+    this._partNode = this.roomVisualization.addPart(this);
     this._updateLandscapeImages();
   }
 
@@ -133,8 +138,8 @@ export class Landscape extends RoomObject {
 
       if (meta.type === "rowWall") {
         const maskLevel = this.landscapeContainer.getMaskLevel(meta.level, 0);
-        const mask = this._getMask(2, maskLevel.roomX, 0);
 
+        const mask = this._getMask(2, maskLevel.roomX, 0);
         wall.mask = mask;
 
         const position = this.geometry.getPosition(

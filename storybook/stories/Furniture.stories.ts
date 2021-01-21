@@ -313,7 +313,8 @@ export function DifferentFetchTypes() {
       direction: 2,
       roomX: 1,
       roomY: 1,
-      roomZ: 0,
+      offsetX: 0,
+      offsetY: 0,
     });
     const floorFurniture = new FloorFurniture({
       id: 4054,
@@ -662,7 +663,8 @@ export function WallWindowDestroy() {
     const furniture = new WallFurniture({
       roomX: 1,
       roomY: 1,
-      roomZ: 0,
+      offsetX: 0,
+      offsetY: 0,
       animation: "0",
       direction: 4,
       type: "window_skyscraper",
@@ -706,7 +708,8 @@ export function WallWindowDestroyWhileLoading() {
     const furniture = new WallFurniture({
       roomX: 1,
       roomY: 1,
-      roomZ: 0,
+      offsetX: 0,
+      offsetY: 0,
       animation: "0",
       direction: 4,
       type: "window_skyscraper",
@@ -764,6 +767,80 @@ export function FurnitureColoring() {
       animation: "0",
       direction: 2,
       id: 290,
+    });
+
+    room.x = application.screen.width / 2 - room.roomWidth / 2;
+    room.y = application.screen.height / 2 - room.roomHeight / 2;
+    room.addRoomObject(furniture1);
+    room.addRoomObject(furniture2);
+    room.addRoomObject(furniture3);
+    application.stage.addChild(room);
+  });
+}
+
+export function WallFurniturePosition() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+      xxxxxxxxxxxx
+      xxxxxxxxxxxx
+      xxxxxxxxxxxx
+      xxxxxxxxxxxx
+      xxxxxxxxxxxx
+      xxxxx000000x
+      xxxxx000000x
+      xxxx0000000x
+      xxxxx000000x
+      xxxxx000000x
+      xxxxx000000x
+      xxxxxxxxxxxx
+      xxxxxxxxxxxx
+      xxxxxxxxxxxx
+      xxxxxxxxxxxx
+      xxxxxxxxxxxx
+      `,
+    });
+
+    const furniture1 = new WallFurniture({
+      roomX: 4,
+      roomY: 5,
+      offsetX: 6,
+      offsetY: 51,
+      animation: "0",
+      direction: 2,
+      type: "flag_peru",
+    });
+
+    room.onActiveWallChange.subscribe((value) => {
+      if (value == null) return;
+
+      furniture1.roomX = value.roomX;
+      furniture1.roomY = value.roomY;
+      furniture1.offsetX = value.offsetX;
+      furniture1.offsetY = value.offsetY;
+      furniture1.direction = value.wall === "l" ? 2 : 4;
+
+      console.log(value.offsetX, value.offsetY);
+    });
+
+    const furniture2 = new WallFurniture({
+      roomX: 5,
+      roomY: 4,
+      offsetX: 9,
+      offsetY: 51,
+      animation: "0",
+      direction: 4,
+      type: "flag_peru",
+    });
+
+    const furniture3 = new WallFurniture({
+      roomX: 4,
+      roomY: 10,
+      offsetX: 9,
+      offsetY: 14,
+      animation: "0",
+      direction: 2,
+      type: "flag_peru",
     });
 
     room.x = application.screen.width / 2 - room.roomWidth / 2;

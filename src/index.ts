@@ -27,3 +27,7 @@ export { BasicFurnitureVisualization } from "./objects/furniture/visualization/B
 export { FurnitureBottleVisualization } from "./objects/furniture/visualization/FurnitureBottleVisualization";
 export { FurnitureVisualization } from "./objects/furniture/visualization/FurnitureVisualization";
 export { IFurnitureVisualization } from "./objects/furniture/IFurnitureVisualization";
+
+export { WallLeft } from "./objects/room/parts/WallLeft";
+export { WallRight } from "./objects/room/parts/WallRight";
+export { RoomModelVisualization } from "./objects/room/RoomModelVisualization";
