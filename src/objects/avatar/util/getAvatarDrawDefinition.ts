@@ -396,14 +396,6 @@ function getAssetForFrame({
   }
 }
 
-function getLibraryForPartType(partType: AvatarFigurePartType) {
-  switch (partType) {
-    case AvatarFigurePartType.LeftSleeve:
-    case AvatarFigurePartType.RightSleeve:
-      return "hh_human_shirt";
-  }
-}
-
 function getAssetFromPartMeta(
   assetPartDefinition: string,
   libraryId: string,
