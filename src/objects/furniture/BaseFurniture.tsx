@@ -238,6 +238,22 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this._clickHandler.onDoubleClick = value;
   }
 
+  public get onPointerDown() {
+    return this._clickHandler.onPointerDown;
+  }
+
+  public set onPointerDown(value) {
+    this._clickHandler.onPointerDown = value;
+  }
+
+  public get onPointerUp() {
+    return this._clickHandler.onPointerUp;
+  }
+
+  public set onPointerUp(value) {
+    this._clickHandler.onPointerUp = value;
+  }
+
   public get x() {
     return this._x;
   }
@@ -579,6 +595,14 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       sprite.addEventListener("click", (event) =>
         this._clickHandler.handleClick(event)
       );
+
+      sprite.addEventListener("pointerup", (event) => {
+        this._clickHandler.handlePointerUp(event);
+      });
+
+      sprite.addEventListener("pointerdown", (event) => {
+        this._clickHandler.handlePointerDown(event);
+      });
     }
 
     sprite.hitTexture = texture;

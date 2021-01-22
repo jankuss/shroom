@@ -164,6 +164,22 @@ export class WallFurniture extends RoomObject {
     this._baseFurniture.onDoubleClick = value;
   }
 
+  public get onPointerDown() {
+    return this._baseFurniture.onPointerDown;
+  }
+
+  public set onPointerDown(value) {
+    this._baseFurniture.onPointerDown = value;
+  }
+
+  public get onPointerUp() {
+    return this._baseFurniture.onPointerUp;
+  }
+
+  public set onPointerUp(value) {
+    this._baseFurniture.onPointerUp = value;
+  }
+
   destroyed(): void {
     this._baseFurniture.destroy();
   }

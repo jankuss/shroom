@@ -17,6 +17,14 @@ export class HitDetection implements IHitDetection {
       capture: true,
     });
 
+    _app.view.addEventListener("pointerdown", (event) =>
+      this.handlePointerDown(event)
+    );
+
+    _app.view.addEventListener("pointerup", (event) =>
+      this.handlePointerUp(event)
+    );
+
     _app.view.addEventListener(
       "contextmenu",
       (event) => this.handleClick(event),
@@ -43,6 +51,14 @@ export class HitDetection implements IHitDetection {
 
   handleClick(event: MouseEvent) {
     this._triggerEvent(event.clientX, event.clientY, "click", event);
+  }
+
+  handlePointerDown(event: PointerEvent) {
+    this._triggerEvent(event.clientX, event.clientY, "pointerdown", event);
+  }
+
+  handlePointerUp(event: PointerEvent) {
+    this._triggerEvent(event.clientX, event.clientY, "pointerup", event);
   }
 
   private _triggerEvent(

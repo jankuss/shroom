@@ -211,10 +211,17 @@ export function IssueWithAvatarEventsNotHandled() {
 
       setTimeout(() => {
         furniture.animation = undefined;
+        event.resumePropagation();
       }, 500);
 
       action("Furniture Clicked")(event);
     };
+
+    avatar.onPointerDown = action("Avatar Pointer Down");
+    avatar.onPointerUp = action("Avatar Pointer Up");
+
+    furniture.onPointerDown = action("Furniture Pointer Down");
+    furniture.onPointerUp = action("Furniture Pointer Up");
 
     room.onTileClick = action("Position");
 

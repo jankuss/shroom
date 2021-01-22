@@ -179,7 +179,13 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   private _update() {
     const frameCount = this._animationFrameCount ?? 1;
 
-    this._sprites.forEach((sprite) => (sprite.visible = false));
+    this._sprites.forEach((sprite) => {
+      sprite.visible = false;
+
+      if (sprite instanceof FurnitureSprite) {
+        sprite.ignore = true;
+      }
+    });
     this._furnitureDrawDefintion?.parts.forEach((part) => {
       if (this.modifier != null) {
         part = this.modifier(part);
@@ -204,6 +210,10 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
       if (sprite != null) {
         this._sprites.add(sprite);
         sprite.visible = true;
+
+        if (sprite instanceof FurnitureSprite) {
+          sprite.ignore = false;
+        }
       }
     });
   }

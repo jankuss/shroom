@@ -6,7 +6,7 @@ export interface Rect {
   zIndex: number;
 }
 
-export type HitEventType = "click";
+export type HitEventType = "click" | "pointerdown" | "pointerup";
 
 export interface HitEvent {
   mouseEvent: MouseEvent;

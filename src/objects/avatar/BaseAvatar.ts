@@ -123,6 +123,22 @@ export class BaseAvatar extends PIXI.Container {
     this._clickHandler.onDoubleClick = value;
   }
 
+  get onPointerDown() {
+    return this._clickHandler.onPointerDown;
+  }
+
+  set onPointerDown(value) {
+    this._clickHandler.onPointerDown = value;
+  }
+
+  get onPointerUp() {
+    return this._clickHandler.onPointerUp;
+  }
+
+  set onPointerUp(value) {
+    this._clickHandler.onPointerUp = value;
+  }
+
   get lookOptions() {
     if (this._nextLookOptions != null) {
       return this._nextLookOptions;
@@ -298,6 +314,14 @@ export class BaseAvatar extends PIXI.Container {
     sprite.y = asset.y;
     sprite.addEventListener("click", (event) => {
       this._clickHandler.handleClick(event);
+    });
+
+    sprite.addEventListener("pointerdown", (event) => {
+      this._clickHandler.handlePointerDown(event);
+    });
+
+    sprite.addEventListener("pointerup", (event) => {
+      this._clickHandler.handlePointerUp(event);
     });
 
     if (part.color != null && part.mode === "colored") {
