@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `onActiveWallChange` - useful for handling wall item placement.
 - Add `onPointerDown` & `onPointerUp` for furnitures and avatars.
+- Support unpadded tilemaps
 
 ### Changed
 
