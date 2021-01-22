@@ -6,20 +6,20 @@ export interface Rect {
   zIndex: number;
 }
 
-export type HitEventType = "click";
+export type HitEventType = "click" | "pointerdown" | "pointerup";
 
 export interface HitEvent {
   mouseEvent: MouseEvent;
   tag?: string;
 
   stopPropagation(): void;
-  absorb(): void;
+  resumePropagation(): void;
 }
 
 export interface HitDetectionElement {
-  getHitBox(): Rect;
   trigger(type: HitEventType, event: HitEvent): void;
   hits(x: number, y: number): boolean;
+  getHitDetectionZIndex(): number;
 }
 
 export interface HitDetectionNode {

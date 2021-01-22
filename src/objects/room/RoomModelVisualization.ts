@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Subject } from "rxjs";
+import { IHitDetection } from "../../interfaces/IHitDetection";
 import {
   IRoomVisualization,
   MaskNode,
@@ -86,6 +87,7 @@ export class RoomModelVisualization
   private _rebuildRoom = false;
 
   constructor(
+    private _hitDetection: IHitDetection,
     private _application: PIXI.Application,
     public readonly parsedTileMap: ParsedTileMap
   ) {
@@ -132,6 +134,10 @@ export class RoomModelVisualization
       roomX,
       roomY,
     };
+  }
+
+  public get onTileClick() {
+    return this._onTileClick;
   }
 
   public get hideFloor() {
@@ -505,6 +511,7 @@ export class RoomModelVisualization
 
     const position: RoomPosition = { roomX: x, roomY: y, roomZ: z };
     const cursor = new TileCursor(
+      this._hitDetection,
       position,
       () => {
         this._onTileClick.next(position);

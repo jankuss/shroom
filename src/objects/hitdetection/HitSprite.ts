@@ -87,10 +87,16 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
     this.mirrored = this._mirrored;
   }
 
+  getHitDetectionZIndex(): number {
+    return this.zIndex;
+  }
+
   trigger(type: HitEventType, event: HitEvent): void {
     const handlers = this._handlers.get(type);
 
-    handlers?.forEach((handler) => handler({ ...event, tag: this._tag }));
+    event.tag = this._tag;
+
+    handlers?.forEach((handler) => handler(event));
   }
 
   addEventListener(type: HitEventType, handler: HitEventHandler) {
@@ -135,8 +141,19 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
     if (this._getHitmap == null) return false;
     if (this.ignore) return false;
 
-    const hits = this._getHitmap();
+    const hitBox = this.getHitBox();
 
-    return hits(x, y, { x: this.worldTransform.tx, y: this.worldTransform.ty });
+    const inBoundsX = hitBox.x <= x && x <= hitBox.x + hitBox.width;
+    const inBoundsY = hitBox.y <= y && y <= hitBox.y + hitBox.height;
+
+    if (inBoundsX && inBoundsY) {
+      const hits = this._getHitmap();
+      return hits(x, y, {
+        x: this.worldTransform.tx,
+        y: this.worldTransform.ty,
+      });
+    }
+
+    return false;
   }
 }

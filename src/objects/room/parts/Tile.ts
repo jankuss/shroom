@@ -1,7 +1,6 @@
 import * as PIXI from "pixi.js";
 
 import { getFloorMatrix, getLeftMatrix, getRightMatrix } from "../matrixes";
-import { getTileColors } from "../util/getTileColors";
 import { IRoomPart } from "./IRoomPart";
 import { RoomPartData } from "./RoomPartData";
 
@@ -23,6 +22,15 @@ export class Tile extends PIXI.Container implements IRoomPart {
   private _tileHeight: number;
   private _roomPartData: RoomPartData | undefined;
   private _tilePositions: PIXI.Point = new PIXI.Point(0, 0);
+
+  get color() {
+    return this._color;
+  }
+
+  set color(value) {
+    this._color = value;
+    this._updateSprites();
+  }
 
   public get tilePositions() {
     return this._tilePositions;
@@ -56,15 +64,6 @@ export class Tile extends PIXI.Container implements IRoomPart {
     this.tileHeight = data.tileHeight;
     this._roomPartData = data;
     this._texture = data.tileTexture;
-    this._updateSprites();
-  }
-
-  get color() {
-    return this._color;
-  }
-
-  set color(value) {
-    this._color = value;
     this._updateSprites();
   }
 

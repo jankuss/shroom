@@ -31,6 +31,8 @@ export class FloorFurniture
 
   private _onClick: HitEventHandler | undefined;
   private _onDoubleClick: HitEventHandler | undefined;
+  private _onPointerDown: HitEventHandler | undefined;
+  private _onPointerUp: HitEventHandler | undefined;
 
   constructor(
     options: {
@@ -183,6 +185,24 @@ export class FloorFurniture
   public set onDoubleClick(value) {
     this._onDoubleClick = value;
     this._baseFurniture.onDoubleClick = this.onDoubleClick;
+  }
+
+  public get onPointerDown() {
+    return this._onPointerDown;
+  }
+
+  public set onPointerDown(value) {
+    this._onPointerDown = value;
+    this._baseFurniture.onPointerDown = this.onPointerDown;
+  }
+
+  public get onPointerUp() {
+    return this._onPointerDown;
+  }
+
+  public set onPointerUp(value) {
+    this._onPointerUp = value;
+    this._baseFurniture.onPointerUp = this.onPointerUp;
   }
 
   /**

@@ -3,6 +3,7 @@ import {
   HitDetectionElement,
   HitDetectionNode,
   HitEvent,
+  HitEventType,
   IHitDetection,
 } from "../../interfaces/IHitDetection";
 
@@ -15,6 +16,14 @@ export class HitDetection implements IHitDetection {
     _app.view.addEventListener("click", (event) => this.handleClick(event), {
       capture: true,
     });
+
+    _app.view.addEventListener("pointerdown", (event) =>
+      this.handlePointerDown(event)
+    );
+
+    _app.view.addEventListener("pointerup", (event) =>
+      this.handlePointerUp(event)
+    );
 
     _app.view.addEventListener(
       "contextmenu",
@@ -41,59 +50,27 @@ export class HitDetection implements IHitDetection {
   }
 
   handleClick(event: MouseEvent) {
-    this._triggerEvent(
-      event.clientX,
-      event.clientY,
-      (element, event) => element.trigger("click", event),
-      event
-    );
+    this._triggerEvent(event.clientX, event.clientY, "click", event);
   }
 
-  private _debugHitDetection() {
-    this._container?.destroy();
-    this._container = new PIXI.Container();
+  handlePointerDown(event: PointerEvent) {
+    this._triggerEvent(event.clientX, event.clientY, "pointerdown", event);
+  }
 
-    this._map.forEach((value) => {
-      const box = value.getHitBox();
-      const graphics = new PIXI.Graphics();
-
-      graphics.x = box.x;
-      graphics.y = box.y;
-      graphics.beginFill(0x000000, 0.1);
-      graphics.drawRect(0, 0, box.width, box.height);
-      graphics.endFill();
-
-      this._container?.addChild(graphics);
-    });
-
-    this._app.stage.addChild(this._container);
+  handlePointerUp(event: PointerEvent) {
+    this._triggerEvent(event.clientX, event.clientY, "pointerup", event);
   }
 
   private _triggerEvent(
     x: number,
     y: number,
-    invoke: (element: HitDetectionElement, event: HitEvent) => void,
+    eventType: HitEventType,
     domEvent: MouseEvent
   ) {
     const elements = this._performHitTest(x, y);
-    let stopped = false;
 
-    const event: HitEvent = {
-      stopPropagation: () => {
-        stopped = true;
-      },
-      absorb: () => {
-        domEvent?.stopImmediatePropagation();
-      },
-      mouseEvent: domEvent,
-    };
-
-    for (let i = 0; i < elements.length; i++) {
-      if (stopped) break;
-      const element = elements[i];
-
-      invoke(element, event);
-    }
+    const event = new HitEventImplementation(eventType, domEvent, elements);
+    event.resumePropagation();
   }
 
   private _performHitTest(x: number, y: number) {
@@ -102,26 +79,57 @@ export class HitDetection implements IHitDetection {
     x = x - rect.x;
     y = y - rect.y;
 
-    const entries = Array.from(this._map.values()).map((element) => ({
-      hitBox: element.getHitBox(),
-      element,
-    }));
+    const entries = Array.from(this._map.values());
+    const ordered = entries.sort(
+      (a, b) => b.getHitDetectionZIndex() - a.getHitDetectionZIndex()
+    );
 
-    const ordered = entries.sort((a, b) => b.hitBox.zIndex - a.hitBox.zIndex);
-
-    const hit = ordered.filter(({ element, hitBox }) => {
-      const inBoundsX = hitBox.x <= x && x <= hitBox.x + hitBox.width;
-      const inBoundsY = hitBox.y <= y && y <= hitBox.y + hitBox.height;
-
-      const inBounds = inBoundsX && inBoundsY;
-
-      if (inBounds) {
-        return element.hits(x, y);
-      } else {
-        return false;
-      }
+    return ordered.filter((element) => {
+      return element.hits(x, y);
     });
+  }
+}
 
-    return hit.map(({ element }) => element);
+class HitEventImplementation implements HitEvent {
+  private _currentIndex = 0;
+  private _stopped = false;
+  private _tag: string | undefined;
+
+  constructor(
+    private _eventType: HitEventType,
+    private _mouseEvent: MouseEvent,
+    private _path: HitDetectionElement[]
+  ) {}
+
+  public get mouseEvent() {
+    return this._mouseEvent;
+  }
+
+  public get tag() {
+    return this._tag;
+  }
+
+  public set tag(value) {
+    this._tag = value;
+  }
+
+  stopPropagation(): void {
+    this._stopped = true;
+  }
+
+  resumePropagation(): void {
+    this._stopped = false;
+    this._propagateEvent();
+  }
+
+  private _propagateEvent() {
+    for (let i = this._currentIndex; i < this._path.length; i++) {
+      this._currentIndex = i + 1;
+
+      if (this._stopped) break;
+
+      const element = this._path[i];
+      element.trigger(this._eventType, this);
+    }
   }
 }

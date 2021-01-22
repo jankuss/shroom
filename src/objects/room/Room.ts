@@ -10,21 +10,14 @@ import { IRoomObject } from "../../interfaces/IRoomObject";
 import { IRoomObjectContainer } from "../../interfaces/IRoomObjectContainer";
 import { RoomPosition } from "../../types/RoomPosition";
 import { TileType } from "../../types/TileType";
-import { ParsedTileType, parseTileMap } from "../../util/parseTileMap";
+import { ParsedTileType } from "../../util/parseTileMap";
 import { parseTileMapString } from "../../util/parseTileMapString";
-import { Stair } from "./Stair";
-import { Tile } from "./Tile";
-import { TileCursor } from "./TileCursor";
-import { getTileMapBounds } from "./util/getTileMapBounds";
-import { Wall } from "./Wall";
 import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
-import { ILandscapeContainer } from "./ILandscapeContainer";
 import { RoomObjectContainer } from "./RoomObjectContainer";
 import { Subject } from "rxjs";
 import { RoomModelVisualization } from "./RoomModelVisualization";
 import { ParsedTileMap } from "./ParsedTileMap";
-import { StairCorner } from "./StairCorner";
 import { getTileColors, getWallColors } from "./util/getTileColors";
 
 export interface Dependencies {
@@ -116,6 +109,7 @@ export class Room
     this.application = application;
 
     this._visualization = new RoomModelVisualization(
+      this._hitDetection,
       this.application,
       new ParsedTileMap(normalizedTileMap)
     );
@@ -137,6 +131,10 @@ export class Room
     };
 
     this.addChild(this._visualization);
+
+    this._visualization.onTileClick.subscribe((value) => {
+      this.onTileClick && this.onTileClick(value);
+    });
   }
 
   /**
