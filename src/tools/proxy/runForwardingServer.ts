@@ -1,6 +1,9 @@
 import WebSocket from "ws";
 import { createConnection } from "net";
 import ByteBuffer from "bytebuffer";
+
+import { createServer } from "https";
+import { readFileSync } from "fs";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const frame = require("frame-stream");
 
@@ -10,19 +13,39 @@ export function runForwardingServer({
   debug = false,
   prependLengthPrefix = false,
   targetHost,
+  keyPath,
+  certPath
 }: {
   wsPort: number;
   targetPort: number;
   debug?: boolean;
   targetHost?: string;
   prependLengthPrefix?: boolean;
+  keyPath?: string,
+  certPath?: string,
 }) {
-  const server = new WebSocket.Server({ port: wsPort });
+  let webSocketOptions: WebSocket.ServerOptions;
+  if (keyPath && certPath) {
+    webSocketOptions = {
+      server: createServer({
+        key: readFileSync(keyPath),
+        cert: readFileSync(certPath)
+      })
+    };
+
+    webSocketOptions.server?.listen(wsPort);
+  } else {
+    webSocketOptions = {
+      port: wsPort
+    };
+  }
+
+  const server = new WebSocket.Server(webSocketOptions);
+
   const targetHostStr =
     targetHost == null ? `:${targetPort}` : `${targetHost}:${targetPort}`;
-
   console.log(
-    `WebSocket Server started on port ${wsPort}. Forwarding traffic to ${targetHostStr}.`
+    `${webSocketOptions.server ? 'Secure' : ''} WebSocket Server started on port ${wsPort}. Forwarding traffic to ${targetHostStr}.`
   );
 
   let idCounter = 0;

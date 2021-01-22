@@ -61,6 +61,14 @@ yargs(hideBin(process.argv))
           default: false,
           describe: "Sends the length integer as a prefix to the message",
         })
+        .option("key", {
+          type: "string",
+          describe: "Path to key for secure websocket"
+        })
+        .option("cert", {
+          type: "string",
+          describe: "Certificate for secure websocket"
+        })
         .option("debug", {
           type: "boolean",
           describe: "Run in debug mode",
@@ -78,6 +86,8 @@ yargs(hideBin(process.argv))
       port: number;
       prependLengthPrefix: boolean;
       debug: boolean;
+      cert?: string;
+      key?: string;
       targetHost?: string;
     }) => {
       runForwardingServer({
@@ -86,6 +96,8 @@ yargs(hideBin(process.argv))
         debug: options.debug,
         prependLengthPrefix: options.prependLengthPrefix,
         targetHost: options.targetHost,
+        keyPath: options.key,
+        certPath: options.cert,
       });
     }
   )
