@@ -12,16 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `onActiveWallChange` - useful for handling wall item placement
 - Add `onPointerDown` & `onPointerUp` for furnitures and avatars
 - Support unpadded tilemaps
+- Secure WebSocket support for `shroom proxy` (thanks @somekindadude)
 
 ### Changed
 
 - Mouse events now don't trigger `onTileClick` when `stopPropagation` is called on a avatar or furniture above it
-
-### Changed
-
 - **BREAKING:**: Asset dumping & loading
 
-  Assets now get dumped into `.shroom` files, instead of individual files.
+  Assets now get dumped into `.shroom` files, instead of individual files. Rerun the `shroom dump` command to regenerate those assets.
+
+- Allow skipping the download on `shroom dump` when omitting the `--url` parameter
 
 ### Removed
 
