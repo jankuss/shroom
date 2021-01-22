@@ -18,7 +18,6 @@ import { AvatarEffectData } from "./util/data/AvatarEffectData";
 import { IAvatarEffectData } from "./util/data/interfaces/IAvatarEffectData";
 import { IAssetBundle } from "../../assets/IAssetBundle";
 import { LegacyAssetBundle } from "../../assets/LegacyAssetBundle";
-import { ZipAssetBundle } from "../../assets/ZipAssetBundle";
 import { ShroomAssetBundle } from "../../assets/ShroomAssetBundle";
 
 interface Options {
@@ -90,16 +89,6 @@ export class AvatarLoader implements IAvatarLoader {
     });
   }
 
-  static createForZip(resourcePath = "") {
-    return new AvatarLoader({
-      createLookServer: async () => {
-        return initializeDefaultLookServer(resourcePath);
-      },
-      getAssetBundle: async (library) => {
-        return new ZipAssetBundle(`${resourcePath}/figure/${library}.zip`);
-      },
-    });
-  }
   static createForAssetBundle(resourcePath = "") {
     return new AvatarLoader({
       createLookServer: async () => {

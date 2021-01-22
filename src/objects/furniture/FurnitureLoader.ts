@@ -1,6 +1,5 @@
 import { LegacyAssetBundle } from "../../assets/LegacyAssetBundle";
 import { ShroomAssetBundle } from "../../assets/ShroomAssetBundle";
-import { ZipAssetBundle } from "../../assets/ZipAssetBundle";
 import { IFurnitureData } from "../../interfaces/IFurnitureData";
 import {
   FurnitureFetch,
@@ -35,18 +34,6 @@ export class FurnitureLoader implements IFurnitureLoader {
       getAssetBundle: async (type, revision) => {
         const bundle = new LegacyAssetBundle(
           `${resourcePath}/hof_furni/${normalizePath(revision, type)}`
-        );
-        return new XmlFurnitureAssetBundle(type, bundle);
-      },
-    });
-  }
-
-  static createForZip(furnitureData: IFurnitureData, resourcePath = "") {
-    return new FurnitureLoader({
-      furnitureData,
-      getAssetBundle: async (type, revision) => {
-        const bundle = new ZipAssetBundle(
-          `${resourcePath}/hof_furni/${normalizePath(revision, type)}.zip`
         );
         return new XmlFurnitureAssetBundle(type, bundle);
       },

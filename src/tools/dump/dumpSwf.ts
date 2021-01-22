@@ -1,12 +1,7 @@
 import { promises as fs } from "fs";
 import * as path from "path";
-import JSZip from "jszip";
-import { basename } from "path";
+
 import "./types";
-import { createSpritesheet } from "./createSpritesheet";
-import { FurnitureVisualizationData } from "../../objects/furniture/data/FurnitureVisualizationData";
-import { FurnitureIndexData } from "../../objects/furniture/data/FurnitureIndexData";
-import { FurnitureAssetsData } from "../../objects/furniture/data/FurnitureAssetsData";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { readFromBufferP, extractImages } = require("swf-extract");
