@@ -472,6 +472,7 @@ export function GldGate() {
 
     floorFurniture3.onClick = () => {
       b = !b;
+      console.log("CHANGE");
 
       if (b) {
         floorFurniture3.animation = "1";

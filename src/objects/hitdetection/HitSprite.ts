@@ -21,6 +21,15 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
   private _mirrored: boolean;
   private _mirrorNotVisually: boolean;
   private _ignore = false;
+  private _ignoreMouse = false;
+
+  private _getHitmap:
+    | (() => (
+        x: number,
+        y: number,
+        transform: { x: number; y: number }
+      ) => boolean)
+    | undefined;
 
   constructor({
     hitDetection,
@@ -51,6 +60,14 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
     this.mirrored = this._mirrored;
   }
 
+  public get ignoreMouse() {
+    return this._ignoreMouse;
+  }
+
+  public set ignoreMouse(value) {
+    this._ignoreMouse = value;
+  }
+
   public get group() {
     return this._group;
   }
@@ -71,14 +88,6 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
     this._mirrored = value;
     this.scale.x = this._mirrored ? -1 : 1;
   }
-
-  private _getHitmap:
-    | (() => (
-        x: number,
-        y: number,
-        transform: { x: number; y: number }
-      ) => boolean)
-    | undefined;
 
   public get hitTexture() {
     return this._hitTexture;
@@ -108,6 +117,10 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
     event.tag = this._tag;
 
     handlers?.forEach((handler) => handler(event));
+  }
+
+  removeAllEventListeners() {
+    this._handlers = new Map();
   }
 
   addEventListener(type: HitEventType, handler: HitEventHandler) {
@@ -151,6 +164,7 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
   hits(x: number, y: number): boolean {
     if (this._getHitmap == null) return false;
     if (this.ignore) return false;
+    if (this.ignoreMouse) return false;
 
     const hitBox = this.getHitBox();
 

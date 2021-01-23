@@ -603,19 +603,20 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       group: this,
     });
 
-    if (layer?.ignoreMouse !== true) {
-      sprite.addEventListener("click", (event) =>
-        this._clickHandler.handleClick(event)
-      );
+    const ignoreMouse = layer?.ignoreMouse != null && layer.ignoreMouse;
+    sprite.ignoreMouse = ignoreMouse;
 
-      sprite.addEventListener("pointerup", (event) => {
-        this._clickHandler.handlePointerUp(event);
-      });
+    sprite.addEventListener("click", (event) => {
+      this._clickHandler.handleClick(event);
+    });
 
-      sprite.addEventListener("pointerdown", (event) => {
-        this._clickHandler.handlePointerDown(event);
-      });
-    }
+    sprite.addEventListener("pointerup", (event) => {
+      this._clickHandler.handlePointerUp(event);
+    });
+
+    sprite.addEventListener("pointerdown", (event) => {
+      this._clickHandler.handlePointerDown(event);
+    });
 
     sprite.hitTexture = texture;
 

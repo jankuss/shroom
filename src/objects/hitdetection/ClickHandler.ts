@@ -69,7 +69,6 @@ export class ClickHandler {
 
   private _performDoubleClick(event: HitEvent) {
     if (this._doubleClickInfo == null) return;
-    if (event.target !== this._doubleClickInfo.initialEvent.target) return;
 
     this.onDoubleClick &&
       this.onDoubleClick(this._doubleClickInfo.initialEvent);
