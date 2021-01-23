@@ -18,7 +18,6 @@ export class HitTexture {
 
   static async fromSpriteSheet(spritesheet: PIXI.Spritesheet, name: string) {
     const texture = spritesheet.textures[name];
-
     return new HitTexture(texture);
   }
 
@@ -72,8 +71,8 @@ export class HitTexture {
     const baseTexture = this._texture.baseTexture;
     const hitmap = this._getHitMap();
 
-    const dx = Math.round(x * baseTexture.resolution);
-    const dy = Math.round(y * baseTexture.resolution);
+    const dx = Math.round(this._texture.orig.x + x * baseTexture.resolution);
+    const dy = Math.round(this._texture.orig.y + y * baseTexture.resolution);
     const ind = dx + dy * baseTexture.realWidth;
     const ind1 = ind % 32;
     const ind2 = (ind / 32) | 0;

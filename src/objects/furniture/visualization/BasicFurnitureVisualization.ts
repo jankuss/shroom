@@ -10,22 +10,21 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
 
   setView(view: IFurnitureVisualizationView): void {
     super.setView(view);
-
-    this._refreshFurniture = true;
+    this._update();
   }
 
   updateDirection(direction: number): void {
     if (this._currentDirection === direction) return;
 
     this._currentDirection = direction;
-    this._refreshFurniture = true;
+    this._update();
   }
 
   updateAnimation(animation: string): void {
     if (this._animationId === animation) return;
 
     this._animationId = animation;
-    this._refreshFurniture = true;
+    this._update();
   }
 
   updateFrame(): void {

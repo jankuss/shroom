@@ -56,11 +56,11 @@ export function getAvatarDrawDefinition(
     direction,
     headDirection,
     item: itemId,
+    effect,
   }: Options,
   deps: AvatarDependencies
 ): AvatarDrawDefinition | undefined {
   const actions = new Set(initialActions).add(AvatarAction.Default);
-
   const { partSetsData, actionsData, figureData, geometry } = deps;
 
   // Sort actions by precedence. This basically determines in which order actions are applied.

@@ -63,6 +63,8 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
 
     this._disableTransitions = this._changeAnimationCount === 0;
     this._changeAnimationCount++;
+
+    this.updateFrame(0);
   }
 
   updateAnimation(animation: string): void {
@@ -73,7 +75,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     if (this._currentDirection === direction) return;
 
     this._currentDirection = direction;
-    this._refreshFurniture = true;
+    this._updateFurniture();
   }
 
   isLastFramePlayedForLayer(layerIndex: number) {
