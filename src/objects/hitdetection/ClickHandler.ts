@@ -11,8 +11,6 @@ export class ClickHandler {
     timeout: number;
   };
 
-  private _didReceiveClick = false;
-
   private _map = new Map<string, boolean>();
 
   private _onClick: HitEventHandler | undefined;
@@ -86,7 +84,7 @@ export class ClickHandler {
     this._map.set(name, false);
     setTimeout(() => {
       this._map.delete(name);
-    }, 0);
+    });
   }
 
   private _canHandleEvent(name: string) {
@@ -95,11 +93,14 @@ export class ClickHandler {
 
   private _performDoubleClick(event: HitEvent) {
     if (this._doubleClickInfo == null) return;
+    if (event.target !== this._doubleClickInfo.initialEvent.target) return;
 
-    event.stopPropagation();
     this.onDoubleClick &&
       this.onDoubleClick(this._doubleClickInfo.initialEvent);
-    this._resetDoubleClick();
+
+    setTimeout(() => {
+      this._resetDoubleClick();
+    });
   }
 
   private _resetDoubleClick() {
@@ -110,8 +111,6 @@ export class ClickHandler {
   }
 
   private _startDoubleClick(event: HitEvent) {
-    event.stopPropagation();
-
     this._doubleClickInfo = {
       initialEvent: event,
       timeout: window.setTimeout(() => this._resetDoubleClick(), 350),

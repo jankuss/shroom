@@ -11,6 +11,7 @@ export type HitEventType = "click" | "pointerdown" | "pointerup";
 export interface HitEvent {
   mouseEvent: MouseEvent;
   tag?: string;
+  target: HitDetectionElement;
 
   stopPropagation(): void;
   resumePropagation(): void;

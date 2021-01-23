@@ -204,6 +204,11 @@ export function IssueWithAvatarEventsNotHandled() {
 
       action("Avatar Clicked")(event);
     };
+
+    avatar.onDoubleClick = (event) => {
+      event.stopPropagation();
+    };
+
     furniture.onClick = (event) => {
       event.stopPropagation();
 
@@ -211,8 +216,7 @@ export function IssueWithAvatarEventsNotHandled() {
 
       setTimeout(() => {
         furniture.animation = undefined;
-        event.resumePropagation();
-      }, 500);
+      }, 3500);
 
       action("Furniture Clicked")(event);
     };

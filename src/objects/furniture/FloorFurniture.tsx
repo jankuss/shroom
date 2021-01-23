@@ -197,7 +197,7 @@ export class FloorFurniture
   }
 
   public get onPointerUp() {
-    return this._onPointerDown;
+    return this._onPointerUp;
   }
 
   public set onPointerUp(value) {

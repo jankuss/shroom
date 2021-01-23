@@ -69,7 +69,7 @@ export class HitDetection implements IHitDetection {
   ) {
     const elements = this._performHitTest(x, y);
 
-    const event = new HitEventImplementation(eventType, domEvent, elements);
+    const event = new HitEventPropagation(eventType, domEvent, elements);
     event.resumePropagation();
   }
 
@@ -90,7 +90,7 @@ export class HitDetection implements IHitDetection {
   }
 }
 
-class HitEventImplementation implements HitEvent {
+class HitEventPropagation {
   private _currentIndex = 0;
   private _stopped = false;
   private _tag: string | undefined;
@@ -129,7 +129,39 @@ class HitEventImplementation implements HitEvent {
       if (this._stopped) break;
 
       const element = this._path[i];
-      element.trigger(this._eventType, this);
+
+      element.trigger(this._eventType, new TargetedHitEvent(this, element));
     }
+  }
+}
+
+class TargetedHitEvent implements HitEvent {
+  constructor(
+    private _base: HitEventPropagation,
+    private _target: HitDetectionElement
+  ) {}
+
+  public get target() {
+    return this._target;
+  }
+
+  public get mouseEvent() {
+    return this._base.mouseEvent;
+  }
+
+  public get tag() {
+    return this._base.tag;
+  }
+
+  public set tag(value) {
+    this._base.tag = value;
+  }
+
+  stopPropagation(): void {
+    return this._base.stopPropagation();
+  }
+
+  resumePropagation(): void {
+    return this._base.resumePropagation();
   }
 }
