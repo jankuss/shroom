@@ -93,7 +93,7 @@ export class HitDetection implements IHitDetection {
 class HitEventPropagation {
   private _currentIndex = 0;
   private _stopped = false;
-  private _tag: string | undefined;
+  private _groups: Set<unknown> = new Set();
 
   constructor(
     private _eventType: HitEventType,
@@ -103,14 +103,6 @@ class HitEventPropagation {
 
   public get mouseEvent() {
     return this._mouseEvent;
-  }
-
-  public get tag() {
-    return this._tag;
-  }
-
-  public set tag(value) {
-    this._tag = value;
   }
 
   stopPropagation(): void {
@@ -130,12 +122,21 @@ class HitEventPropagation {
 
       const element = this._path[i];
 
-      element.trigger(this._eventType, new TargetedHitEvent(this, element));
+      const group = element.group;
+      if (group == null || !this._groups.has(group)) {
+        element.trigger(this._eventType, new TargetedHitEvent(this, element));
+
+        if (group != null) {
+          this._groups.add(group);
+        }
+      }
     }
   }
 }
 
 class TargetedHitEvent implements HitEvent {
+  private _tag: string | undefined;
+
   constructor(
     private _base: HitEventPropagation,
     private _target: HitDetectionElement
@@ -150,11 +151,11 @@ class TargetedHitEvent implements HitEvent {
   }
 
   public get tag() {
-    return this._base.tag;
+    return this._tag;
   }
 
   public set tag(value) {
-    this._base.tag = value;
+    this._tag = value;
   }
 
   stopPropagation(): void {

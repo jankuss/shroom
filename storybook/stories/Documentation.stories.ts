@@ -76,6 +76,8 @@ export function ImplementingFurnitureLogic() {
       };
 
       furniture.onDoubleClick = (event) => {
+        console.log("EVENT TAG", event.tag);
+
         switch (event.tag) {
           case "activate":
             roll();

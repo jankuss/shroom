@@ -407,6 +407,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     if (this._unknownSprite == null) {
       this._unknownSprite = new FurnitureSprite({
         hitDetection: this.dependencies.hitDetection,
+        group: this,
       });
 
       this._unknownSprite.baseX = this.x;
@@ -599,6 +600,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       hitDetection: this.dependencies.hitDetection,
       mirrored: asset.flipH,
       tag: layer?.tag,
+      group: this,
     });
 
     if (layer?.ignoreMouse !== true) {

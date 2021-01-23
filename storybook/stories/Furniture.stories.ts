@@ -118,8 +118,8 @@ export function Animated() {
       const animation = i % 2 === 0 ? "0" : "1";
 
       const furniture = new FloorFurniture({
-        roomX: 1,
-        roomY: 1,
+        roomX: 1 + i,
+        roomY: 1 + i,
         roomZ: 0,
         type: `rare_dragonlamp*${i}`,
         direction,

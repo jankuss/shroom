@@ -13,6 +13,7 @@ import { HitTexture } from "./HitTexture";
 export type HitEventHandler = (event: HitEvent) => void;
 
 export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
+  private _group: unknown;
   private _hitDetectionNode: HitDetectionNode | undefined;
   private _handlers = new Map<HitEventType, Set<HitEventHandler>>();
   private _hitTexture: HitTexture | undefined;
@@ -20,6 +21,39 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
   private _mirrored: boolean;
   private _mirrorNotVisually: boolean;
   private _ignore = false;
+
+  constructor({
+    hitDetection,
+    mirrored = false,
+    mirroredNotVisually = false,
+    getHitmap,
+    tag,
+    group,
+  }: {
+    hitDetection: IHitDetection;
+    getHitmap?: () => Hitmap;
+    mirrored?: boolean;
+    mirroredNotVisually?: boolean;
+    tag?: string;
+    group?: unknown;
+  }) {
+    super();
+
+    if (group != null) {
+      this._group = group;
+    }
+
+    this._mirrored = mirrored;
+    this._mirrorNotVisually = mirroredNotVisually;
+    this._getHitmap = getHitmap;
+    this._tag = tag;
+    this._hitDetectionNode = hitDetection.register(this);
+    this.mirrored = this._mirrored;
+  }
+
+  public get group() {
+    return this._group;
+  }
 
   public get ignore() {
     return this._ignore;
@@ -62,29 +96,6 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
           mirrorHorizonally: this._mirrored || this._mirrorNotVisually,
         });
     }
-  }
-
-  constructor({
-    hitDetection,
-    mirrored = false,
-    mirroredNotVisually = false,
-    getHitmap,
-    tag,
-  }: {
-    hitDetection: IHitDetection;
-    getHitmap?: () => Hitmap;
-    mirrored?: boolean;
-    mirroredNotVisually?: boolean;
-    tag?: string;
-  }) {
-    super();
-
-    this._mirrored = mirrored;
-    this._mirrorNotVisually = mirroredNotVisually;
-    this._getHitmap = getHitmap;
-    this._tag = tag;
-    this._hitDetectionNode = hitDetection.register(this);
-    this.mirrored = this._mirrored;
   }
 
   getHitDetectionZIndex(): number {

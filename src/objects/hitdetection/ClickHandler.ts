@@ -2,10 +2,6 @@ import { HitEvent } from "../../interfaces/IHitDetection";
 import { HitEventHandler } from "./HitSprite";
 
 export class ClickHandler {
-  public static readonly CLICK = "click";
-  public static readonly POINTER_DOWN = "pointerdown";
-  public static readonly POINTER_UP = "pointerup";
-
   private _doubleClickInfo?: {
     initialEvent: HitEvent;
     timeout: number;
@@ -51,45 +47,24 @@ export class ClickHandler {
   }
 
   handleClick(event: HitEvent) {
-    if (this._canHandleEvent(ClickHandler.CLICK)) {
-      this._beginEvent(ClickHandler.CLICK);
+    if (this._doubleClickInfo == null) {
+      this.onClick && this.onClick(event);
 
-      if (this._doubleClickInfo == null) {
-        this.onClick && this.onClick(event);
-
-        if (this.onDoubleClick != null) {
-          this._startDoubleClick(event);
-        }
-      } else {
-        event.stopPropagation();
-        this._performDoubleClick(event);
+      if (this.onDoubleClick != null) {
+        this._startDoubleClick(event);
       }
+    } else {
+      event.stopPropagation();
+      this._performDoubleClick(event);
     }
   }
 
   handlePointerDown(event: HitEvent) {
-    if (!this._canHandleEvent(ClickHandler.POINTER_DOWN)) return;
-    this._beginEvent(ClickHandler.POINTER_DOWN);
-
     this.onPointerDown && this.onPointerDown(event);
   }
 
   handlePointerUp(event: HitEvent) {
-    if (!this._canHandleEvent(ClickHandler.POINTER_UP)) return;
-    this._beginEvent(ClickHandler.POINTER_UP);
-
     this.onPointerUp && this.onPointerUp(event);
-  }
-
-  private _beginEvent(name: string) {
-    this._map.set(name, false);
-    setTimeout(() => {
-      this._map.delete(name);
-    });
-  }
-
-  private _canHandleEvent(name: string) {
-    return this._map.get(name) ?? true;
   }
 
   private _performDoubleClick(event: HitEvent) {

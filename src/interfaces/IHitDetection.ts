@@ -21,6 +21,7 @@ export interface HitDetectionElement {
   trigger(type: HitEventType, event: HitEvent): void;
   hits(x: number, y: number): boolean;
   getHitDetectionZIndex(): number;
+  group?: unknown;
 }
 
 export interface HitDetectionNode {

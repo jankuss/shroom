@@ -306,6 +306,7 @@ export class BaseAvatar extends PIXI.Container {
     const sprite = new HitSprite({
       hitDetection: this.dependencies.hitDetection,
       mirrored: asset.mirror,
+      group: this,
     });
 
     sprite.hitTexture = texture;
