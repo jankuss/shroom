@@ -62,6 +62,7 @@ export class ClickHandler {
         }
       }
     } else {
+      event.stopPropagation();
       this._performDoubleClick(event);
     }
   }
