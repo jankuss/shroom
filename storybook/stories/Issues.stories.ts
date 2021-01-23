@@ -207,6 +207,8 @@ export function IssueWithAvatarEventsNotHandled() {
 
     avatar.onDoubleClick = (event) => {
       event.stopPropagation();
+
+      action("Avatar Double Clicked")(event);
     };
 
     furniture.onClick = (event) => {

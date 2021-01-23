@@ -305,8 +305,11 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
   public set animation(value) {
     this._animation = value;
-    this.visualization.updateAnimation(this.animation);
-    this._handleAnimationChange();
+
+    if (this.mounted) {
+      this.visualization.updateAnimation(this.animation);
+      this._handleAnimationChange();
+    }
   }
 
   public get maskId() {
@@ -344,6 +347,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   };
 
   private _updateDirection() {
+    if (!this.mounted) return;
+
     if (this._validDirections != null) {
       this.visualization.updateDirection(
         getDirectionForFurniture(this.direction, this._validDirections)

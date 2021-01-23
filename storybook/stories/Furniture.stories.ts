@@ -110,6 +110,16 @@ export function Animated() {
         }
       };
 
+      if (i === 0) {
+        room.onActiveTileChange.subscribe((value) => {
+          if (value == null) return;
+
+          furniture.roomX = value.roomX;
+          furniture.roomY = value.roomY;
+          furniture.roomZ = value.roomZ;
+        });
+      }
+
       room.addRoomObject(furniture);
     }
 
