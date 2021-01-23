@@ -1,6 +1,6 @@
 {
   "name": "@jankuss/shroom",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "main": "dist/index.js",
   "license": "LGPL-3.0-or-later",
   "repository": {
