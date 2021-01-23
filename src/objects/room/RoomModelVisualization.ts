@@ -213,11 +213,18 @@ export class RoomModelVisualization
   }
 
   public get roomBounds() {
+    const hasWalls = this.hideWalls || this.hideFloor;
+
+    const minOffsetY = hasWalls ? 0 : -this._wallHeight - this._borderWidth;
+    const minXOffset = hasWalls ? 0 : -this._borderWidth;
+    const maxOffsetX = hasWalls ? 0 : this._borderWidth;
+    const maxOffsetY = hasWalls ? 0 : this._tileHeight;
+
     return {
-      minX: this._tileMapBounds.minX - this._borderWidth,
-      maxX: this._tileMapBounds.maxX + this._borderWidth,
-      minY: this._tileMapBounds.minY - this._borderWidth - this._wallHeight,
-      maxY: this._tileMapBounds.maxY + this._tileHeight,
+      minX: this._tileMapBounds.minX + minXOffset,
+      maxX: this._tileMapBounds.maxX + maxOffsetX,
+      minY: this._tileMapBounds.minY + minOffsetY,
+      maxY: this._tileMapBounds.maxY + maxOffsetY,
     };
   }
 
@@ -396,6 +403,9 @@ export class RoomModelVisualization
     }
 
     this._updateParts();
+
+    this._positionalContainer.x = -this.roomBounds.minX;
+    this._positionalContainer.y = -this.roomBounds.minY;
   }
 
   private _updateParts() {
@@ -592,6 +602,8 @@ export class RoomModelVisualization
       cutawayHeight,
     }: { hideBorder?: boolean; cutawayHeight?: number }
   ) {
+    if (this._hideWalls) return;
+
     const wall = new WallLeft({
       hideBorder,
       onMouseMove: (event) => {

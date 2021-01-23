@@ -210,6 +210,8 @@ const Title = styled.div<{ active: boolean }>`
     margin-bottom: 0;
   }
 
+  margin-top: 4px;
+
   ${(props) => (props.active ? activeCss : undefined)}
 `;
 

@@ -74,10 +74,9 @@ export class Room
   private _onTileClick: ((position: RoomPosition) => void) | undefined;
 
   private _application: PIXI.Application;
-  private _activeTileSubject = new Subject<RoomPosition | undefined>();
 
   public get onActiveTileChange() {
-    return this._activeTileSubject.asObservable();
+    return this._visualization.onActiveTileChange;
   }
 
   public get onActiveWallChange() {
