@@ -51,19 +51,19 @@ export class ClickHandler {
   }
 
   handleClick(event: HitEvent) {
-    if (this._doubleClickInfo == null) {
-      if (this._canHandleEvent(ClickHandler.CLICK)) {
-        this._beginEvent(ClickHandler.CLICK);
+    if (this._canHandleEvent(ClickHandler.CLICK)) {
+      this._beginEvent(ClickHandler.CLICK);
 
+      if (this._doubleClickInfo == null) {
         this.onClick && this.onClick(event);
 
         if (this.onDoubleClick != null) {
           this._startDoubleClick(event);
         }
+      } else {
+        event.stopPropagation();
+        this._performDoubleClick(event);
       }
-    } else {
-      event.stopPropagation();
-      this._performDoubleClick(event);
     }
   }
 

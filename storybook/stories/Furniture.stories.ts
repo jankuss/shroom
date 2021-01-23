@@ -53,7 +53,32 @@ export function Default() {
       room.addRoomObject(furniture);
     }
 
+    const test1 = new FloorFurniture({
+      roomX: 3,
+      roomY: 3,
+      roomZ: 0,
+      id: 1626,
+      direction: 2,
+    });
+
+    const test2 = new FloorFurniture({
+      roomX: 3,
+      roomY: 3,
+      roomZ: 0,
+      id: 285,
+      direction: 2,
+    });
+
+    test1.onClick = () => {
+      console.log("Clicked");
+    };
+    test1.onDoubleClick = () => {
+      console.log("Double Clicked");
+    };
+
     room.onTileClick = (position) => console.log(position);
+    room.addRoomObject(test1);
+    room.addRoomObject(test2);
 
     const dice = new FloorFurniture({
       roomX: 1,
@@ -93,7 +118,7 @@ export function Animated() {
       const animation = i % 2 === 0 ? "0" : "1";
 
       const furniture = new FloorFurniture({
-        roomX: 1 + i * 3,
+        roomX: 1,
         roomY: 1,
         roomZ: 0,
         type: `rare_dragonlamp*${i}`,
@@ -103,13 +128,14 @@ export function Animated() {
 
       furniture.onClick = action(`Furniture ${i} clicked`);
       furniture.onDoubleClick = () => {
+        action(`Furniture ${i} double clicked`)();
         if (furniture.animation === "0") {
           furniture.animation = "1";
         } else {
           furniture.animation = "0";
         }
       };
-
+      /*
       if (i === 0) {
         room.onActiveTileChange.subscribe((value) => {
           if (value == null) return;
@@ -118,7 +144,7 @@ export function Animated() {
           furniture.roomY = value.roomY;
           furniture.roomZ = value.roomZ;
         });
-      }
+      }*/
 
       room.addRoomObject(furniture);
     }

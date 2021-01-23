@@ -63,8 +63,6 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
 
     this._disableTransitions = this._changeAnimationCount === 0;
     this._changeAnimationCount++;
-
-    this.updateFrame(0);
   }
 
   updateAnimation(animation: string): void {
