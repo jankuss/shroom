@@ -22,7 +22,6 @@
     "@types/xml2js": "^0.4.5",
     "@typescript-eslint/eslint-plugin": "^4.12.0",
     "@typescript-eslint/parser": "^4.12.0",
-    "canvas": "^2.6.1",
     "eslint": "^7.17.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-standard": "^16.0.2",
@@ -63,7 +62,8 @@
     "tween.js": "^16.6.0",
     "ws": "^7.4.2",
     "xml2js": "^0.4.23",
-    "yargs": "^16.2.0"
+    "yargs": "^16.2.0",
+    "canvas": "^2.6.1"
   },
   "peerDependencies": {
     "pixi.js": "^5.3.3"
