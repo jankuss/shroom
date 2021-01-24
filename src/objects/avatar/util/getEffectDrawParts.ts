@@ -32,9 +32,10 @@ export function getEffectDrawParts(
   } = dependencies;
 
   const frameCount = effect.getFrameCount();
-  const assets = new Map<string, Map<number, AvatarAsset>>();
-  const drawParts = new Map<string, AvatarDrawPart>();
-  const partIndexMap = new Map<string, number>();
+  const assets = new Map<
+    string,
+    { part: AvatarDrawPart | undefined; frames: Map<number, AvatarAsset> }[]
+  >();
 
   for (let i = 0; i < frameCount; i++) {
     const effectFrameInfo = effect.getFrameParts(i);
@@ -43,6 +44,22 @@ export function getEffectDrawParts(
       if (bodyPart == null) continue;
 
       const parts = getBodyPartParts(bodyPart, { partByType });
+      const partIndexMap = new Map<string, number>();
+      const getPartIndex = (type: string) => {
+        const current = partIndexMap.get(type);
+        let newValue = 0;
+
+        if (current == null) {
+          newValue = 0;
+        } else {
+          newValue += 1;
+        }
+
+        partIndexMap.set(type, newValue);
+
+        return newValue;
+      };
+
       for (const part of parts) {
         const partInfo = partSetsData.getPartInfo(part.type);
         if (partInfo == null) continue;
@@ -75,45 +92,57 @@ export function getEffectDrawParts(
         });
 
         if (frame != null) {
-          const current =
-            assets.get(part.type) ?? new Map<number, AvatarAsset>();
-          current.set(i, frame);
+          const partIndex = getPartIndex(part.type);
+          const currentPartArr = assets.get(part.type) ?? [];
 
-          assets.set(part.type, current);
+          let current = currentPartArr[partIndex];
+          if (current == null) {
+            current = {
+              frames: new Map<number, AvatarAsset>(),
+              part: undefined,
+            };
+            currentPartArr.push(current);
+          }
+
+          current.frames.set(i, frame);
+          current.part = {
+            color: part.colorable ? `#${part.color}` : undefined,
+            mode:
+              part.type !== "ey" && part.colorable ? "colored" : "just-image",
+            type: part.type,
+            index: part.index,
+            assets: [],
+          };
+
+          assets.set(part.type, currentPartArr);
         }
-
-        const drawPart: AvatarDrawPart = {
-          color: part.colorable ? `#${part.color}` : undefined,
-          mode: part.type !== "ey" && part.colorable ? "colored" : "just-image",
-          type: part.type,
-          index: part.index,
-          assets: [],
-        };
-
-        drawParts.set(part.type, drawPart);
       }
     }
   }
 
-  drawParts.forEach((drawPart, key) => {
-    const assetMap: Map<number, AvatarAsset> =
-      assets.get(drawPart.type) ?? new Map();
-
-    const drawPartAssets: AvatarAsset[] = [];
-    for (let i = 0; i < frameCount; i++) {
-      const asset = assetMap.get(i);
-      if (asset != null) {
-        drawPartAssets.push(asset);
-        drawPartAssets.push(asset);
+  assets.forEach((arr, key) => {
+    arr.forEach(({ part, frames }) => {
+      const drawPartAssets: AvatarAsset[] = [];
+      for (let i = 0; i < frameCount; i++) {
+        const asset = frames.get(i);
+        if (asset != null) {
+          drawPartAssets.push(asset);
+          drawPartAssets.push(asset);
+        }
       }
-    }
 
-    drawPartMap.set(key, [
-      {
-        ...drawPart,
-        assets: drawPartAssets,
-      },
-    ]);
+      if (part != null) {
+        const current = drawPartMap.get(key) ?? [];
+
+        drawPartMap.set(key, [
+          ...current,
+          {
+            ...part,
+            assets: drawPartAssets,
+          },
+        ]);
+      }
+    });
   });
 
   return drawPartMap;

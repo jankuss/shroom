@@ -1,5 +1,3 @@
-import { traverseDOMTree } from "../../../../util/traverseDOMTree";
-import { AvatarData } from "./AvatarData";
 import {
   AvatarEffectFrameBodypart,
   IAvatarEffectData,
@@ -11,27 +9,13 @@ export class AvatarEffectData implements IAvatarEffectData {
   constructor(string: string) {
     const document = new DOMParser().parseFromString(string, "text/xml");
 
-    let frameIndex = 0;
-    let currentFrameIndex: number | undefined;
+    document.querySelectorAll("frame").forEach((frame, index) => {
+      frame.querySelectorAll("bodypart").forEach((bodypart) => {
+        const bodyPart = this._getFrameBodyPartFromElement(bodypart);
+        const current = this._frameParts.get(index) ?? [];
 
-    traverseDOMTree(document, {
-      enter: (node) => {
-        if (node instanceof Element && node.tagName.toLowerCase() === "frame") {
-          currentFrameIndex = frameIndex++;
-        }
-
-        if (
-          node instanceof Element &&
-          node.tagName.toLowerCase() === "bodypart" &&
-          currentFrameIndex != null
-        ) {
-          const current = this._frameParts.get(currentFrameIndex) ?? [];
-          const bodyPart = this._getFrameBodyPartFromElement(node);
-
-          this._frameParts.set(currentFrameIndex, [...current, bodyPart]);
-        }
-      },
-      exit: () => {},
+        this._frameParts.set(index, [...current, bodyPart]);
+      });
     });
   }
 

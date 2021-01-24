@@ -8,20 +8,11 @@ export class AvatarEffectMap implements IAvatarEffectMap {
   constructor(string: string) {
     const document = new DOMParser().parseFromString(string, "text/xml");
 
-    traverseDOMTree(document, {
-      enter: (node) => {
-        if (
-          node instanceof Element &&
-          node.tagName.toLowerCase() === "effect"
-        ) {
-          const effect = this._getEffectFromElement(node);
-          this._effects.set(effect.id, effect);
-        }
-      },
-      exit: () => {},
+    document.querySelectorAll("effect").forEach((element) => {
+      const effect = this._getEffectFromElement(element);
+      this._effects.set(effect.id, effect);
+      this._effectsArray.push(effect);
     });
-
-    this._effectsArray = Array.from(this._effects.values());
   }
 
   getEffects(): AvatarEffect[] {
