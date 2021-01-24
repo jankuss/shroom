@@ -1,9 +1,9 @@
 export interface IAvatarEffectData {
   getFrameCount(): number;
-  getFrameParts(frame: number): AvatarEffectFrame[];
+  getFrameParts(frame: number): AvatarEffectFrameBodypart[];
 }
 
-export type AvatarEffectFrame = {
+export type AvatarEffectFrameBodypart = {
   type: "bodypart";
   id: string;
   action: string;

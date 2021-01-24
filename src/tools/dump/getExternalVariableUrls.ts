@@ -26,12 +26,15 @@ export async function getExternalVariableUrls(
 
   const gordonUrl = figureMapUrl.split("/").slice(0, -1).join("/");
 
+  const effectMapUrl = `${gordonUrl}/effectmap.xml`;
+
   return {
     figureMapUrl,
     hofFurniUrl,
     figureDataUrl,
     furniDataUrl,
     gordonUrl,
+    effectMapUrl,
   };
 }
 
@@ -41,4 +44,5 @@ export interface ExternalVariables {
   figureDataUrl: string;
   furniDataUrl: string;
   gordonUrl: string;
+  effectMapUrl: string;
 }

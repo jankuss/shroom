@@ -1,14 +1,36 @@
 import { AvatarAction } from "../../enum/AvatarAction";
-import { AvatarData } from "./AvatarData";
 import {
   IAvatarActionsData,
   AvatarActionInfo,
 } from "./interfaces/IAvatarActionsData";
 import { actionsXml } from "./static/actions.xml";
 
-export class AvatarActionsData
-  extends AvatarData
-  implements IAvatarActionsData {
+export class AvatarActionsData implements IAvatarActionsData {
+  private _map = new Map<string, AvatarActionInfo>();
+  private _handItems = new Map<string, number>();
+
+  constructor(xml: string) {
+    const document = new DOMParser().parseFromString(xml, "text/xml");
+
+    document.querySelectorAll(`action`).forEach((action) => {
+      const actionId = action.getAttribute("id");
+      if (actionId == null) return;
+
+      const info = getAvatarActionInfoFromElement(action);
+      this._map.set(actionId, info);
+
+      action.querySelectorAll(`param`).forEach((param) => {
+        const paramId = param.getAttribute("id");
+        if (paramId == null) return;
+
+        const value = Number(param?.getAttribute("value"));
+        if (isNaN(value)) return;
+
+        this._handItems.set(`${actionId}_${paramId}`, value);
+      });
+    });
+  }
+
   static async fromUrl(url: string) {
     const response = await fetch(url);
     const text = await response.text();
@@ -21,29 +43,15 @@ export class AvatarActionsData
   }
 
   getHandItemId(actionId: string, id: string): number | undefined {
-    const actionParam = this.querySelector(
-      `action[id="${actionId}"] param[id="${id}"]`
-    );
-
-    const value = Number(actionParam?.getAttribute("value"));
-
-    if (isNaN(value)) return;
-
-    return value;
+    return this._handItems.get(`${actionId}_${id}`);
   }
 
   getActions(): AvatarActionInfo[] {
-    return this.querySelectorAll("action").map((element) =>
-      getAvatarActionInfoFromElement(element)
-    );
+    return Array.from(this._map.values());
   }
 
   getAction(id: AvatarAction): AvatarActionInfo | undefined {
-    const action = this.querySelector(`action[id="${id}"]`);
-
-    if (action == null) return;
-
-    return getAvatarActionInfoFromElement(action);
+    return this._map.get(id);
   }
 }
 

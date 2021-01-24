@@ -27,8 +27,6 @@ export async function dumpFigure(
     file.addFile(baseName, buffer);
   });
 
-  console.log("XML", xmlPaths);
-
   binFiles.forEach(({ path: filePath, buffer }) => {
     const baseName = path.basename(filePath);
     file.addFile(baseName, buffer);

@@ -1,5 +1,3 @@
-import { notNullOrUndefined } from "../../../../util/notNullOrUndefined";
-import { AvatarData } from "./AvatarData";
 import {
   AvatarGeometry,
   Bodypart,
@@ -7,9 +5,63 @@ import {
 } from "./interfaces/IAvatarGeometryData";
 import { geometryXml } from "./static/geometry.xml";
 
-export class AvatarGeometryData
-  extends AvatarData
-  implements IAvatarGeometryData {
+export class AvatarGeometryData implements IAvatarGeometryData {
+  private _bodypartMap: Map<string, Bodypart> = new Map();
+  private _avatarSetMap: Map<string, string[]> = new Map();
+  private _geometries: Map<string, AvatarGeometry> = new Map();
+
+  constructor(string: string) {
+    const document = new DOMParser().parseFromString(string, "text/xml");
+
+    document
+      .querySelectorAll(`canvas[scale="h"] geometry`)
+      .forEach((element) => {
+        const geometry = this._getGeometryFromElement(element);
+        this._geometries.set(geometry.id, geometry);
+      });
+
+    document.querySelectorAll(`avatarset`).forEach((element) => {
+      const avatarSetId = element.getAttribute("id");
+      if (avatarSetId == null) return;
+
+      const bodyParts = element.querySelectorAll(`bodypart`);
+
+      bodyParts.forEach((bodyPart) => {
+        const id = bodyPart.getAttribute("id");
+
+        if (id != null) {
+          const current = this._avatarSetMap.get(avatarSetId) ?? [];
+          this._avatarSetMap.set(avatarSetId, [...current, id]);
+        }
+      });
+    });
+
+    document.querySelectorAll(`type`).forEach((element) => {
+      const typeId = element.getAttribute("id");
+      if (typeId == null) return;
+
+      element.querySelectorAll(`bodypart`).forEach((bodypart) => {
+        const bodyPart = this._getBodyPartFromElement(bodypart);
+        if (bodyPart == null) return;
+
+        const bodyPartItems: BodyPartItemFromElement[] = [];
+
+        bodypart.querySelectorAll(`item`).forEach((item) => {
+          const bodyPartItem = this._getBodyPartItemFromElement(item);
+
+          if (bodyPartItem != null) {
+            bodyPartItems.push(bodyPartItem);
+          }
+        });
+
+        this._bodypartMap.set(`${typeId}_${bodyPart.id}`, {
+          ...bodyPart,
+          items: bodyPartItems,
+        });
+      });
+    });
+  }
+
   static async fromUrl(url: string) {
     const response = await fetch(url);
     const text = await response.text();
@@ -22,64 +74,68 @@ export class AvatarGeometryData
   }
 
   getBodyPart(geometry: string, bodyPartId: string): Bodypart | undefined {
-    const element = this.querySelector(
-      `type[id="${geometry}"] bodypart[id="${bodyPartId}"]`
-    );
-
-    if (element == null) return;
-    const id = element.getAttribute("id");
-
-    if (id == null) return;
-
-    const z = Number(element.getAttribute("z"));
-
-    if (isNaN(z)) return;
-
-    return {
-      id,
-      items: Array.from(element.querySelectorAll("item"))
-        .map((item) => {
-          const id = item.getAttribute("id");
-          const z = Number(item.getAttribute("z"));
-
-          if (id == null) return;
-          if (isNaN(z)) return;
-
-          return {
-            id,
-            z,
-          };
-        })
-        .filter(notNullOrUndefined),
-      z,
-    };
+    return this._bodypartMap.get(`${geometry}_${bodyPartId}`);
   }
 
   getBodyParts(avaterSet: string): string[] {
-    const bodyParts = this.querySelectorAll(
-      `avatarset[id="${avaterSet}"] bodypart`
-    );
-
-    return bodyParts
-      .map((element) => element.getAttribute("id"))
-      .filter(notNullOrUndefined);
+    return this._avatarSetMap.get(avaterSet) ?? [];
   }
 
   getGeometry(geometry: string): AvatarGeometry | undefined {
-    const element = this.querySelector(
-      `canvas[scale="h"] geometry[id="${geometry}"]`
-    );
+    return this._geometries.get(geometry);
+  }
 
-    const width = Number(element?.getAttribute("width"));
-    const height = Number(element?.getAttribute("height"));
-    const dx = Number(element?.getAttribute("dx"));
-    const dy = Number(element?.getAttribute("dy"));
+  private _getGeometryFromElement(element: Element) {
+    const id = element.getAttribute("id");
+    const width = Number(element.getAttribute("width"));
+    const height = Number(element.getAttribute("height"));
+    const dx = Number(element.getAttribute("dx"));
+    const dy = Number(element.getAttribute("dy"));
+
+    if (id == null) throw new Error("Invalid id");
 
     return {
+      id,
       width,
       height,
       dx,
       dy,
     };
   }
+
+  private _getBodyPartFromElement(item: Element) {
+    const id = item.getAttribute("id");
+    const z = Number(item.getAttribute("z"));
+
+    if (id == null) return;
+    if (isNaN(z)) return;
+
+    return {
+      id,
+      z,
+    };
+  }
+
+  private _getBodyPartItemFromElement(item: Element) {
+    const id = item.getAttribute("id");
+    const z = Number(item.getAttribute("z"));
+
+    if (id == null) return;
+    if (isNaN(z)) return;
+
+    return {
+      id,
+      z,
+    };
+  }
+}
+
+interface BodyPartFromElement {
+  id: string;
+  z: number;
+}
+
+interface BodyPartItemFromElement {
+  id: string;
+  z: number;
 }

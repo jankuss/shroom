@@ -14,6 +14,7 @@ export class FigureData extends AvatarData implements IFigureData {
   private _parts: Map<string, FigureDataPart[]> = new Map();
   private _paletteIdForSetType = new Map<string, string>();
   private _colors = new Map<string, string>();
+  private _hiddenLayers = new Map<string, string[]>();
 
   constructor(xml: string) {
     super(xml);
@@ -40,13 +41,7 @@ export class FigureData extends AvatarData implements IFigureData {
   }
 
   getHiddenLayers(setType: string, id: string): string[] {
-    const hiddenLayers = this.querySelectorAll(
-      `sets settype[type="${setType}"] set[id="${id}"] hiddenlayers layer`
-    )
-      .map((element) => element.getAttribute("parttype"))
-      .filter(notNullOrUndefined);
-
-    return hiddenLayers;
+    return this._hiddenLayers.get(_getPartsKey(setType, id)) ?? [];
   }
 
   private _cacheData() {
@@ -85,6 +80,19 @@ export class FigureData extends AvatarData implements IFigureData {
 
         const parts = Array.from(set.querySelectorAll("part"));
         const partArr: FigureDataPart[] = [];
+
+        const hiddenLayers: string[] = [];
+        set
+          .querySelectorAll(`hiddenlayers layer`)
+          .forEach((hiddenLayerElement) => {
+            const partType = hiddenLayerElement.getAttribute("parttype");
+
+            if (partType != null) {
+              hiddenLayers.push(partType);
+            }
+          });
+
+        this._hiddenLayers.set(_getPartsKey(setType, setId), hiddenLayers);
 
         parts
           .map((part) => {

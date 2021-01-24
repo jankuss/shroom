@@ -1,4 +1,5 @@
 export interface AvatarGeometry {
+  id: string;
   width: number;
   height: number;
   dx: number;

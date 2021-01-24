@@ -1,5 +1,10 @@
 export interface IAvatarEffectMap {
-  getEffectInfo(
-    id: string
-  ): { id: string; lib: string; type: string } | undefined;
+  getEffectInfo(id: string): AvatarEffect | undefined;
+  getEffects(): AvatarEffect[];
+}
+
+export interface AvatarEffect {
+  id: string;
+  lib: string;
+  type: string;
 }

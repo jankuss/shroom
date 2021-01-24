@@ -25,8 +25,11 @@ import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
 import { getPartDataForParsedLook, PartData } from "./getPartDataForParsedLook";
 import { getDrawOrderForActions } from "./getDrawOrderForActions";
 import { associateBy } from "../../../util/associateBy";
+import { getAssetFromPartMeta } from "./getAssetFromPartMeta";
+import { getEffectDrawParts } from "./getEffectDrawParts";
+import { getBodyPartParts } from "./getBodyPartParts";
 
-const basePartSet = new Set<AvatarFigurePartType>([
+export const basePartSet = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.LeftHand,
   AvatarFigurePartType.RightHand,
   AvatarFigurePartType.Body,
@@ -73,7 +76,7 @@ export function getAvatarDrawDefinition(
   } = deps;
 
   // Sort actions by precedence. This basically determines in which order actions are applied.
-  // For example, if a avatar is sitting and respecting, the sorting by precedence will return
+  // For example, if a avatar is sitting and respecting, the sorting by precedence will returfn
   // the following order:
   // Default < Sit < Respect
 
@@ -164,90 +167,12 @@ export function getAvatarDrawDefinition(
   });
 
   if (effect != null) {
-    const frameCount = effect.getFrameCount();
-    const assets = new Map<string, Map<number, AvatarAsset>>();
-    const drawParts = new Map<string, AvatarDrawPart>();
-    const partIndexMap = new Map<string, number>();
-
-    for (let i = 0; i < frameCount; i++) {
-      const effectFrameInfo = effect.getFrameParts(i);
-      for (const effectBodyPart of effectFrameInfo) {
-        const bodyPart = bodyPartById.get(effectBodyPart.id);
-        if (bodyPart == null) continue;
-
-        const parts = getBodyPartParts(bodyPart, { partByType });
-        for (const part of parts) {
-          const partInfo = partSetsData.getPartInfo(part.type);
-          if (partInfo == null) continue;
-
-          const actionData = actionsData.getAction(
-            effectBodyPart.action as AvatarAction
-          );
-          if (actionData == null) continue;
-
-          const animationFrame = animationData.getAnimationFrame(
-            actionData.id,
-            part.type,
-            effectBodyPart.frame
-          );
-
-          const frame = getAssetForFrame({
-            animationFrame: animationFrame,
-            actionData,
-            partId: part.id,
-            partType: part.type as AvatarFigurePartType,
-            partTypeFlipped: partInfo.flippedSetType as AvatarFigurePartType,
-            direction: direction + effectBodyPart.dd,
-            setId: part.setId,
-            setType: part.setType,
-            figureData,
-            figureMap,
-            offsetsData,
-            offsetX: effectBodyPart.dx,
-            offsetY: effectBodyPart.dy,
-          });
-
-          if (frame != null) {
-            const current =
-              assets.get(part.type) ?? new Map<number, AvatarAsset>();
-            current.set(i, frame);
-
-            assets.set(part.type, current);
-          }
-
-          const drawPart: AvatarDrawPart = {
-            color: part.colorable ? `#${part.color}` : undefined,
-            mode:
-              part.type !== "ey" && part.colorable ? "colored" : "just-image",
-            type: part.type,
-            index: part.index,
-            assets: [],
-          };
-
-          drawParts.set(part.type, drawPart);
-        }
-      }
-    }
-
-    drawParts.forEach((drawPart, key) => {
-      const assetMap: Map<number, AvatarAsset> =
-        assets.get(drawPart.type) ?? new Map();
-
-      const drawPartAssets: AvatarAsset[] = [];
-      for (let i = 0; i < frameCount; i++) {
-        const asset = assetMap.get(i);
-        if (asset != null) {
-          drawPartAssets.push(asset);
-          drawPartAssets.push(asset);
-        }
-      }
-
-      drawPartMap.set(key, [
-        {
-          ...drawPart,
-          assets: drawPartAssets,
-        },
-      ]);
+    getEffectDrawParts(
+      effect,
+      { bodyPartById, direction, partByType },
+      deps
+    ).forEach((parts, key) => {
+      drawPartMap.set(key, parts);
     });
   }
 
@@ -262,49 +187,6 @@ export function getAvatarDrawDefinition(
     offsetX: 0,
     offsetY: 0,
   };
-}
-
-function getBodyPartParts(
-  bodyPart: Bodypart,
-  {
-    itemId,
-    partByType,
-  }: { itemId?: number | string; partByType: Map<string, PartData[]> }
-) {
-  return bodyPart.items
-    .flatMap((item): PartData[] | PartData => {
-      if (item.id === AvatarFigurePartType.RightHandItem && itemId != null) {
-        return {
-          type: AvatarFigurePartType.RightHandItem,
-          color: undefined,
-          colorable: false,
-          hiddenLayers: [],
-          id: itemId.toString(),
-          index: 0,
-        };
-      }
-
-      const partsForType = partByType.get(item.id);
-      if (partsForType == null) {
-        if (basePartSet.has(item.id as AvatarFigurePartType)) {
-          return [
-            {
-              id: "1",
-              type: item.id,
-              color: undefined,
-              colorable: false,
-              hiddenLayers: [],
-              index: 0,
-            },
-          ];
-        }
-
-        return [];
-      }
-
-      return partsForType;
-    })
-    .map((part) => ({ ...part, bodypart: bodyPart }));
 }
 
 function getBodyPart(
@@ -403,7 +285,7 @@ function getBodyPart(
   };
 }
 
-function getAssetForFrame({
+export function getAssetForFrame({
   animationFrame,
   actionData,
   partTypeFlipped,
@@ -508,48 +390,6 @@ function getAssetForFrame({
       }
     }
   }
-}
-
-function getAssetFromPartMeta(
-  assetPartDefinition: string,
-  libraryId: string,
-  assetInfoFrame: { flipped: boolean; swapped: boolean; asset: string },
-  offsetsData: IAvatarOffsetsData,
-  { offsetX, offsetY }: { offsetX: number; offsetY: number }
-) {
-  const offsets = offsetsData.getOffsets(assetInfoFrame.asset);
-
-  if (offsets == null) return;
-
-  let offsetsX = 0;
-  let offsetsY = 0;
-
-  offsetsY = -offsets.offsetY + offsetY;
-
-  if (assetInfoFrame.flipped) {
-    offsetsX = 64 + offsets.offsetX - offsetX;
-  } else {
-    offsetsX = -offsets.offsetX - offsetX;
-  }
-
-  if (assetPartDefinition === "lay") {
-    if (assetInfoFrame.flipped) {
-      offsetsX -= 52;
-    } else {
-      offsetsX += 52;
-    }
-  }
-
-  if (isNaN(offsetsX)) throw new Error("Invalid x offset");
-  if (isNaN(offsetsY)) throw new Error("Invalid y offset");
-
-  return {
-    fileId: assetInfoFrame.asset,
-    library: libraryId,
-    mirror: assetInfoFrame.flipped,
-    x: offsetsX,
-    y: offsetsY + 16,
-  };
 }
 
 function generateAssetName(

@@ -7,8 +7,8 @@ import { extractSwfs } from "./extractSwfs";
 import { promises as fs } from "fs";
 import { FigureMapData } from "../../objects/avatar/util/data/FigureMapData";
 import { createOffsetFile } from "./createOffsetFile";
-import { dumpFurniture } from "./dumpFurniture";
 import { dumpFigure } from "./dumpFigure";
+import { dumpFurniture } from "./dumpFurniture";
 
 export const glob = promisify(g);
 
@@ -39,6 +39,7 @@ export async function dump({ externalVariables, downloadPath }: Options) {
       console.log("- Figure Map:", variables.figureMapUrl);
       console.log("- Furni Data", variables.furniDataUrl);
       console.log("- Furniture:", variables.hofFurniUrl);
+      console.log("- Effect Map:", variables.effectMapUrl);
       console.log("");
 
       await downloadAllFiles(downloadPath, variables, logger);
@@ -52,14 +53,21 @@ export async function dump({ externalVariables, downloadPath }: Options) {
       `Found ${furnitureSwfs.length} furniture swfs. Starting the extraction process.`
     );
 
-    //await extractSwfs(logger, "Furniture", furnitureSwfs, dumpFurniture);
+    await extractSwfs(logger, "Furniture", furnitureSwfs, dumpFurniture);
 
-    const figureSwfs = await glob(`${downloadPath}/figure/**/hh_human_fx.swf`);
+    const figureSwfs = await glob(`${downloadPath}/figure/**/*.swf`);
     console.log(
       `Found ${figureSwfs.length} figure swfs. Starting the extraction process.`
     );
 
     await extractSwfs(logger, "Figure", figureSwfs, dumpFigure);
+
+    const effectsSwf = await glob(`${downloadPath}/effects/**/*.swf`);
+    console.log(
+      `Found ${figureSwfs.length} effect swfs. Starting the extraction process.`
+    );
+
+    await extractSwfs(logger, "Effects", effectsSwf, dumpFigure);
   });
 
   await step("Post Processing", async () => {
