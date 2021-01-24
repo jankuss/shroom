@@ -32,6 +32,7 @@ export class AvatarEffectData extends AvatarData implements IAvatarEffectData {
         const frame = Number(element.getAttribute("frame"));
         const dx = Number(element.getAttribute("dx"));
         const dy = Number(element.getAttribute("dy"));
+        const dd = Number(element.getAttribute("dd"));
 
         if (action == null) throw new Error("Invalid action");
         if (id == null) throw new Error("Invalid id");
@@ -44,6 +45,7 @@ export class AvatarEffectData extends AvatarData implements IAvatarEffectData {
           id,
           dx,
           dy,
+          dd,
         };
       });
 

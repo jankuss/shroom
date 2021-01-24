@@ -52,9 +52,9 @@ export async function dump({ externalVariables, downloadPath }: Options) {
       `Found ${furnitureSwfs.length} furniture swfs. Starting the extraction process.`
     );
 
-    await extractSwfs(logger, "Furniture", furnitureSwfs, dumpFurniture);
+    //await extractSwfs(logger, "Furniture", furnitureSwfs, dumpFurniture);
 
-    const figureSwfs = await glob(`${downloadPath}/figure/**/*.swf`);
+    const figureSwfs = await glob(`${downloadPath}/figure/**/hh_human_fx.swf`);
     console.log(
       `Found ${figureSwfs.length} figure swfs. Starting the extraction process.`
     );

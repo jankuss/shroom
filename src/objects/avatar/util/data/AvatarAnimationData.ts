@@ -26,6 +26,23 @@ export class AvatarAnimationData
     return new AvatarAnimationData(atob(animationXml));
   }
 
+  getAnimationFrame(
+    id: string,
+    type: string,
+    frame: number
+  ): AvatarAnimationFrame | undefined {
+    const frames = this.querySelectorAll(
+      `action[id="${id}"] part[set-type="${type}"] frame`
+    );
+
+    const animationFrameElement = frames[frame];
+    if (animationFrameElement == null) return;
+
+    const element = this._getAnimationFrameFromElement(animationFrameElement);
+
+    return element;
+  }
+
   getAnimationFrames(id: string, type: string) {
     const key = `${id}_${type};`;
     const current = this._animationFrames.get(key);
@@ -40,26 +57,7 @@ export class AvatarAnimationData
 
     const result = frames.map(
       (element): AvatarAnimationFrame => {
-        const number = Number(element.getAttribute("number"));
-        if (isNaN(number)) throw new Error("number was NaN");
-
-        const repeatsString = element.getAttribute("repeats");
-
-        let repeats = 2;
-
-        if (repeatsString != null) {
-          repeats = Number(repeatsString);
-        }
-
-        const assetpartdefinition = element.getAttribute("assetpartdefinition");
-        if (assetpartdefinition == null)
-          throw new Error("assetpartdefinition was null");
-
-        return {
-          number,
-          assetpartdefinition,
-          repeats,
-        };
+        return this._getAnimationFrameFromElement(element);
       }
     );
 
@@ -108,6 +106,31 @@ export class AvatarAnimationData
     return {
       x: dx,
       y: dy,
+    };
+  }
+
+  private _getAnimationFrameFromElement(
+    element: Element
+  ): AvatarAnimationFrame {
+    const number = Number(element.getAttribute("number"));
+    if (isNaN(number)) throw new Error("number was NaN");
+
+    const repeatsString = element.getAttribute("repeats");
+
+    let repeats = 2;
+
+    if (repeatsString != null) {
+      repeats = Number(repeatsString);
+    }
+
+    const assetpartdefinition = element.getAttribute("assetpartdefinition");
+    if (assetpartdefinition == null)
+      throw new Error("assetpartdefinition was null");
+
+    return {
+      number,
+      assetpartdefinition,
+      repeats,
     };
   }
 }

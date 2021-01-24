@@ -10,4 +10,5 @@ export type AvatarEffectFrame = {
   frame: number;
   dx: number;
   dy: number;
+  dd: number;
 };

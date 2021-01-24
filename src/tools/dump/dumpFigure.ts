@@ -6,16 +6,30 @@ import { ShroomAssetBundle } from "../../assets/ShroomAssetBundle";
 export async function dumpFigure(
   baseName: string,
   dumpLocation: string,
-  imagePaths: string[]
+  imagePaths: string[],
+  xmlPaths: string[]
 ) {
   const imageFiles = await Promise.all(
     imagePaths.map((path) =>
       fs.readFile(path).then((buffer) => ({ path, buffer }))
     )
   );
+  const binFiles = await Promise.all(
+    xmlPaths.map((path) =>
+      fs.readFile(path).then((buffer) => ({ path, buffer }))
+    )
+  );
+
   const file = new ShroomAssetBundle();
 
   imageFiles.forEach(({ path: filePath, buffer }) => {
+    const baseName = path.basename(filePath);
+    file.addFile(baseName, buffer);
+  });
+
+  console.log("XML", xmlPaths);
+
+  binFiles.forEach(({ path: filePath, buffer }) => {
     const baseName = path.basename(filePath);
     file.addFile(baseName, buffer);
   });

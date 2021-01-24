@@ -31,6 +31,8 @@ export async function createLookServer(
     { look, actions, direction, headDirection, item }: LookOptions,
     effect?: IAvatarEffectData
   ) => {
+    console.log("LOOK SERVER", effect);
+
     return getAvatarDrawDefinition(
       {
         parsedLook: parseLookString(look),

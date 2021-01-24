@@ -54,6 +54,10 @@ function _getLookOptionsString(lookOptions: LookOptions) {
     parts.push(`look(${lookOptions.look})`);
   }
 
+  if (lookOptions.effect != null) {
+    parts.push(`effect(${lookOptions.effect.type}${lookOptions.effect.id})`);
+  }
+
   return parts.join(",");
 }
 
@@ -152,6 +156,7 @@ export class AvatarLoader implements IAvatarLoader {
         headDirection,
         look,
         item,
+        effect,
       });
 
       if (initial != null) {
@@ -161,6 +166,7 @@ export class AvatarLoader implements IAvatarLoader {
             direction,
             headDirection,
             look,
+            effect,
           });
         });
       }
@@ -224,9 +230,14 @@ export class AvatarLoader implements IAvatarLoader {
     let current = this._effectCache.get(key);
 
     if (current == null) {
-      current = AvatarEffectData.fromUrl(
-        `./resources/figure/hh_human_fx/hh_human_fx_${type}${id}.bin`
-      );
+      current = ShroomAssetBundle.fromUrl(
+        `./resources/figure/hh_human_fx.shroom`
+      ).then(async (bundle) => {
+        const xml = await bundle.getString(`${type}${id}.bin`);
+
+        return new AvatarEffectData(xml);
+      });
+
       this._effectCache.set(key, current);
     }
 

@@ -14,6 +14,10 @@ export class ShroomAssetBundle implements IAssetBundle {
     files.forEach((file) => this._files.set(file.fileName, file.buffer));
   }
 
+  public get files() {
+    return Array.from(this._files.entries());
+  }
+
   static async fromUrl(url: string) {
     const response = await fetch(url);
     if (response.status >= 400)
