@@ -19,9 +19,18 @@ import { IAvatarEffectData } from "./util/data/interfaces/IAvatarEffectData";
 import { IAssetBundle } from "../../assets/IAssetBundle";
 import { LegacyAssetBundle } from "../../assets/LegacyAssetBundle";
 import { ShroomAssetBundle } from "../../assets/ShroomAssetBundle";
+import {
+  AvatarEffect,
+  IAvatarEffectMap,
+} from "./util/data/interfaces/IAvatarEffectMap";
+import { AvatarEffectMap } from "./util/data/AvatarEffectMap";
+import { IAvatarEffectBundle } from "./util/data/interfaces/IAvatarEffectBundle";
+import { AvatarEffectBundle } from "./AvatarEffectBundle";
 
 interface Options {
   getAssetBundle: (library: string) => Promise<IAssetBundle>;
+  getEffectMap: () => Promise<IAvatarEffectMap>;
+  getEffectBundle: (effectData: AvatarEffect) => Promise<IAvatarEffectBundle>;
   createLookServer: () => Promise<LookServer>;
 }
 
@@ -55,7 +64,7 @@ function _getLookOptionsString(lookOptions: LookOptions) {
   }
 
   if (lookOptions.effect != null) {
-    parts.push(`effect(${lookOptions.effect.type}${lookOptions.effect.id})`);
+    parts.push(`effect(${lookOptions.effect})`);
   }
 
   return parts.join(",");
@@ -67,6 +76,7 @@ export class AvatarLoader implements IAvatarLoader {
   private _effectCache: Map<string, Promise<IAvatarEffectData>> = new Map();
   private _lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
   private _assetBundles: Map<string, Promise<IAssetBundle>> = new Map();
+  private _effectMap: Promise<IAvatarEffectMap>;
 
   constructor(private _options: Options) {
     this._lookServer = this._options.createLookServer().then(async (server) => {
@@ -80,6 +90,8 @@ export class AvatarLoader implements IAvatarLoader {
 
       return server;
     });
+
+    this._effectMap = this._options.getEffectMap();
   }
 
   static create(resourcePath = "") {
@@ -89,6 +101,18 @@ export class AvatarLoader implements IAvatarLoader {
       },
       getAssetBundle: async (library) => {
         return new LegacyAssetBundle(`${resourcePath}/figure/${library}`);
+      },
+      getEffectMap: async () => {
+        const response = await fetch(`${resourcePath}/effectmap.xml`);
+        const text = await response.text();
+
+        return new AvatarEffectMap(text);
+      },
+      getEffectBundle: async (effect) => {
+        const data = await ShroomAssetBundle.fromUrl(
+          `${resourcePath}/effects/${effect.lib}.shroom`
+        );
+        return new AvatarEffectBundle(data);
       },
     });
   }
@@ -102,6 +126,18 @@ export class AvatarLoader implements IAvatarLoader {
         return ShroomAssetBundle.fromUrl(
           `${resourcePath}/figure/${library}.shroom`
         );
+      },
+      getEffectMap: async () => {
+        const response = await fetch(`${resourcePath}/effectmap.xml`);
+        const text = await response.text();
+
+        return new AvatarEffectMap(text);
+      },
+      getEffectBundle: async (effect) => {
+        const data = await ShroomAssetBundle.fromUrl(
+          `${resourcePath}/effects/${effect.lib}.shroom`
+        );
+        return new AvatarEffectBundle(data);
       },
     });
   }
@@ -120,11 +156,18 @@ export class AvatarLoader implements IAvatarLoader {
   ): Promise<AvatarLoaderResult> {
     const { actions, look, item, effect, initial, skipCaching } = options;
 
+    const effectMap = await this._effectMap;
+
     const loadedFiles = new Map<string, Promise<HitTexture>>();
 
     let effectData: IAvatarEffectData | undefined;
     if (effect != null) {
-      effectData = await this._loadEffect(effect.type, effect.id);
+      const effectInfo = effectMap.getEffectInfo(effect);
+      if (effectInfo != null) {
+        const effectBundle = await this._options.getEffectBundle(effectInfo);
+
+        effectData = await effectBundle.getData();
+      }
     }
 
     const loadResources = (options: LookOptions) =>

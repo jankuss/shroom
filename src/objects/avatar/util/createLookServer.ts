@@ -13,7 +13,7 @@ export interface LookOptions {
   direction: number;
   headDirection?: number;
   item?: string | number;
-  effect?: { type: "dance" | "fx"; id: string };
+  effect?: string;
   initial?: boolean;
   skipCaching?: boolean;
 }
