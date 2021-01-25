@@ -49,12 +49,9 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
     this._container?.destroy();
   }
 
-  destroyed(): void {
+  destroy() {
+    super.destroy();
     this.destroySprites();
-  }
-
-  registered(): void {
-    this.updateSprites();
   }
 
   private _createStairBoxFront(index: number): PIXI.DisplayObject[] {
