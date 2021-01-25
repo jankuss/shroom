@@ -5,6 +5,7 @@ import {
   WallFurniture,
   RoomCamera,
   Avatar,
+  FloorFurniture,
 } from "@jankuss/shroom";
 
 import { createShroom } from "./common/createShroom";
@@ -496,6 +497,14 @@ export function TestTileClick() {
       `,
     });
 
+    const furniture = new FloorFurniture({
+      roomX: 5,
+      roomY: 5,
+      roomZ: 0,
+      type: "club_sofa",
+      direction: 2,
+    });
+
     const avatar = new Avatar({
       look:
         "hd-180-1.hr-828-61.ha-1012-110.he-1604-62.ea-1404-62.fa-1204-62.ch-255-66.lg-280-110.sh-305-62",
@@ -512,10 +521,7 @@ export function TestTileClick() {
     };
 
     room.addRoomObject(avatar);
-
-    setTimeout(() => {
-      room.destroy();
-    }, 5000);
+    room.addRoomObject(furniture);
 
     application.stage.addChild(room);
   });
