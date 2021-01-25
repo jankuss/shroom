@@ -60,6 +60,12 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
     this._update();
   }
 
+  destroy() {
+    super.destroy();
+    this._hitAreaElement?.destroy();
+    this.removeChildren();
+  }
+
   protected _update() {
     if (this._hitAreaElement != null) {
       this.props.hitAreaContainer.removeChild(this._hitAreaElement);

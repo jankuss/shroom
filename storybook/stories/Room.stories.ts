@@ -4,6 +4,7 @@ import {
   Landscape,
   WallFurniture,
   RoomCamera,
+  Avatar,
 } from "@jankuss/shroom";
 
 import { createShroom } from "./common/createShroom";
@@ -467,6 +468,54 @@ export function HideTileCursor() {
     });
 
     room.hideTileCursor = true;
+
+    application.stage.addChild(room);
+  });
+}
+
+export function TestTileClick() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxxxxxxxxxxx
+        xxxxxxxxxxxx
+        xxxxxxxxxxxx
+        xxxxxxxxxxxx
+        xxxxxxxxxxxx
+        xxxxx000000x
+        xxxxx000000x
+        xxxxx000000x
+        xxxxx000000x
+        xxxxx000000x
+        xxxxx000000x
+        xxxxxxxxxxxx
+        xxxxxxxxxxxx
+        xxxxxxxxxxxx
+        xxxxxxxxxxxx
+        xxxxxxxxxxxx
+      `,
+    });
+
+    const avatar = new Avatar({
+      look:
+        "hd-180-1.hr-828-61.ha-1012-110.he-1604-62.ea-1404-62.fa-1204-62.ch-255-66.lg-280-110.sh-305-62",
+      direction: 3,
+      roomX: 1,
+      roomY: 1,
+      roomZ: 0,
+      headDirection: 3,
+    });
+
+    room.onTileClick = (event) => {
+      console.log("ROOM", event);
+      avatar.walk(event.roomX, event.roomY, event.roomZ);
+    };
+
+    room.addRoomObject(avatar);
+
+    setTimeout(() => {
+      room.destroy();
+    }, 5000);
 
     application.stage.addChild(room);
   });

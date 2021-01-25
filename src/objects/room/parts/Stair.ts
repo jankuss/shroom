@@ -142,6 +142,7 @@ export class Stair extends PIXI.Container implements IRoomPart {
 
   destroy() {
     super.destroy();
+    this.removeChildren();
   }
 }
 
