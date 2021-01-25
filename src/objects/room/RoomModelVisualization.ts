@@ -319,6 +319,11 @@ export class RoomModelVisualization
     return this._wallLayer;
   }
 
+  destroy() {
+    super.destroy();
+    this._destroyAllSprites();
+  }
+
   addMask(id: string, element: PIXI.Sprite): MaskNode {
     /*
     const existing = this._masks.get(id);
@@ -385,7 +390,7 @@ export class RoomModelVisualization
     return this.parsedTileMap.largestDiff * 32 + this._wallHeight;
   }
 
-  private _updateHeightmap() {
+  private _destroyAllSprites() {
     [...this._tileCursors, ...this._tiles, ...this._walls].forEach((part) =>
       part.destroy()
     );
@@ -393,6 +398,10 @@ export class RoomModelVisualization
     this._tileCursors = [];
     this._tiles = [];
     this._walls = [];
+  }
+
+  private _updateHeightmap() {
+    this._destroyAllSprites();
 
     for (let y = 0; y < this.parsedTileMap.parsedTileTypes.length; y++) {
       for (let x = 0; x < this.parsedTileMap.parsedTileTypes[y].length; x++) {

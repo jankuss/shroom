@@ -138,6 +138,10 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this._update(true);
   }
 
+  isAnimated() {
+    return true;
+  }
+
   private _getCurrentProgress(frame: number) {
     if (this._animationQueueStartFrame == null) {
       return 0;

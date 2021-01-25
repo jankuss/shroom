@@ -70,6 +70,7 @@ export class TileCursor extends PIXI.Container implements HitDetectionElement {
 
   destroy() {
     super.destroy();
+    console.log("DESTROYED");
 
     this._node.remove();
   }
