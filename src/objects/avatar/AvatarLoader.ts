@@ -26,12 +26,20 @@ import {
 import { AvatarEffectMap } from "./util/data/AvatarEffectMap";
 import { IAvatarEffectBundle } from "./util/data/interfaces/IAvatarEffectBundle";
 import { AvatarEffectBundle } from "./AvatarEffectBundle";
+import { getLibrariesForLook } from "./util/getLibrariesForLook";
+import { parseLookString } from "./util/parseLookString";
+import {
+  AvatarDependencies,
+  getAvatarDrawDefinition,
+} from "./util/getAvatarDrawDefinition";
+import { IAvatarOffsetsData } from "./util/data/interfaces/IAvatarOffsetsData";
+import { AvatarAssetLibraryCollection } from "./AvatarAssetLibraryCollection";
 
 interface Options {
   getAssetBundle: (library: string) => Promise<IAssetBundle>;
   getEffectMap: () => Promise<IAvatarEffectMap>;
   getEffectBundle: (effectData: AvatarEffect) => Promise<IAvatarEffectBundle>;
-  createLookServer: () => Promise<LookServer>;
+  createDependencies: () => Promise<AvatarDependencies>;
 }
 
 const directions = [0, 1, 2, 3, 4, 5, 6, 7];
@@ -77,28 +85,38 @@ export class AvatarLoader implements IAvatarLoader {
   private _lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
   private _assetBundles: Map<string, Promise<IAssetBundle>> = new Map();
   private _effectMap: Promise<IAvatarEffectMap>;
+  private _dependencies: Promise<AvatarDependencies>;
+  private _offsets = new AvatarAssetLibraryCollection();
 
   constructor(private _options: Options) {
-    this._lookServer = this._options.createLookServer().then(async (server) => {
-      // Wait for the placeholder model to load
-      await this._getAvatarDrawDefinition(server, {
-        direction: 0,
-        headDirection: 0,
-        actions: new Set(),
-        look: "hd-99999-99999",
-      });
+    this._dependencies = this._options.createDependencies();
 
-      return server;
-    });
+    this._lookServer = this._dependencies
+      .then(async (dependencies) => {
+        // Wait for the placeholder model to load
+        return createLookServer({
+          ...dependencies,
+          offsetsData: this._offsets,
+        });
+      })
+      .then(async (server) => {
+        await this._getAvatarDrawDefinition(server, {
+          direction: 0,
+          headDirection: 0,
+          actions: new Set(),
+          look: "hd-99999-99999",
+        });
+
+        return server;
+      });
 
     this._effectMap = this._options.getEffectMap();
   }
 
   static create(resourcePath = "") {
     return new AvatarLoader({
-      createLookServer: async () => {
-        return initializeDefaultLookServer(resourcePath);
-      },
+      createDependencies: () =>
+        initializeDefaultAvatarDependencies(resourcePath),
       getAssetBundle: async (library) => {
         return new LegacyAssetBundle(`${resourcePath}/figure/${library}`);
       },
@@ -119,9 +137,8 @@ export class AvatarLoader implements IAvatarLoader {
 
   static createForAssetBundle(resourcePath = "") {
     return new AvatarLoader({
-      createLookServer: async () => {
-        return initializeDefaultLookServer(resourcePath);
-      },
+      createDependencies: () =>
+        initializeDefaultAvatarDependencies(resourcePath),
       getAssetBundle: async (library) => {
         return ShroomAssetBundle.fromUrl(
           `${resourcePath}/figure/${library}.shroom`
@@ -170,6 +187,19 @@ export class AvatarLoader implements IAvatarLoader {
       }
     }
 
+    const { figureData, figureMap } = await this._dependencies;
+
+    const libs = getLibrariesForLook(parseLookString(options.look), {
+      figureData: figureData,
+      figureMap: figureMap,
+    });
+
+    await Promise.all(
+      Array.from(libs).map((lib) =>
+        this._getAssetBundle(lib).then((bundle) => this._offsets.open(bundle))
+      )
+    );
+
     const loadResources = (options: LookOptions) =>
       this._getDrawDefinitionCached(
         getDrawDefinition,
@@ -192,41 +222,7 @@ export class AvatarLoader implements IAvatarLoader {
         });
       });
 
-    const loadDirection = (direction: number, headDirection: number) => {
-      loadResources({
-        actions: new Set(actions),
-        direction,
-        headDirection,
-        look,
-        item,
-        effect,
-      });
-
-      if (initial != null) {
-        preloadActions.forEach((action) => {
-          loadResources({
-            actions: new Set([action]),
-            direction,
-            headDirection,
-            look,
-            effect,
-          });
-        });
-      }
-    };
-
-    if (skipCaching) {
-      loadDirection(
-        options.direction,
-        options.headDirection ?? options.direction
-      );
-    } else {
-      directions.forEach((direction) => {
-        directions.forEach((headDirection) => {
-          loadDirection(direction, headDirection);
-        });
-      });
-    }
+    loadResources(options);
 
     const awaitedEntries = await Promise.all(
       [...loadedFiles.entries()].map(
@@ -256,6 +252,13 @@ export class AvatarLoader implements IAvatarLoader {
     };
 
     return obj;
+  }
+
+  private async _openBundles(libs: string[]) {
+    const { figureData, figureMap } = await this._dependencies;
+    const bundles = await Promise.all(
+      Array.from(libs).map((lib) => this._getAssetBundle(lib))
+    );
   }
 
   private async _getAssetBundle(library: string) {
@@ -309,7 +312,9 @@ export class AvatarLoader implements IAvatarLoader {
   }
 }
 
-async function initializeDefaultLookServer(resourcePath: string) {
+async function initializeDefaultAvatarDependencies(
+  resourcePath: string
+): Promise<AvatarDependencies> {
   const {
     animationData,
     offsetsData,
@@ -328,7 +333,7 @@ async function initializeDefaultLookServer(resourcePath: string) {
     geometry: AvatarGeometryData.default(),
   });
 
-  return createLookServer({
+  return {
     animationData,
     figureData,
     offsetsData,
@@ -336,5 +341,5 @@ async function initializeDefaultLookServer(resourcePath: string) {
     partSetsData,
     actionsData,
     geometry,
-  });
+  };
 }
