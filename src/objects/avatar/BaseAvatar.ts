@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import {
   AvatarAsset,
   AvatarDrawDefinition,
-  AvatarDrawPart,
+  DefaultAvatarDrawPart,
 } from "./util/getAvatarDrawDefinition";
 import { LookOptions } from "./util/createLookServer";
 import {
@@ -260,41 +260,43 @@ export class BaseAvatar extends PIXI.Container {
     this._container = new PIXI.Container();
 
     drawDefinition.parts.forEach((part) => {
-      const figurePart = part.type as AvatarFigurePartType;
-      if (this._skipBodyParts && bodyPartTypes.has(figurePart)) {
-        return;
+      if (part.kind === "AVATAR_DRAW_PART") {
+        const figurePart = part.type as AvatarFigurePartType;
+        if (this._skipBodyParts && bodyPartTypes.has(figurePart)) {
+          return;
+        }
+
+        if (this._headOnly && !headPartTypes.has(figurePart)) {
+          return;
+        }
+
+        const frame = currentFrame % part.assets.length;
+        const asset = part.assets[frame];
+
+        let sprite = this._sprites.get(asset.fileId);
+
+        if (sprite == null) {
+          sprite = this._createAsset(part, asset);
+        }
+
+        if (sprite == null) return;
+
+        sprite.x = asset.x;
+        sprite.y = asset.y;
+        sprite.visible = true;
+        sprite.mirrored = asset.mirror;
+        sprite.ignore = false;
+        sprite.zIndex = this.spritesZIndex;
+
+        this._sprites.set(asset.fileId, sprite);
+        this._container?.addChild(sprite);
       }
-
-      if (this._headOnly && !headPartTypes.has(figurePart)) {
-        return;
-      }
-
-      const frame = currentFrame % part.assets.length;
-      const asset = part.assets[frame];
-
-      let sprite = this._sprites.get(asset.fileId);
-
-      if (sprite == null) {
-        sprite = this._createAsset(part, asset);
-      }
-
-      if (sprite == null) return;
-
-      sprite.x = asset.x;
-      sprite.y = asset.y;
-      sprite.visible = true;
-      sprite.mirrored = asset.mirror;
-      sprite.ignore = false;
-      sprite.zIndex = this.spritesZIndex;
-
-      this._sprites.set(asset.fileId, sprite);
-      this._container?.addChild(sprite);
     });
 
     this.addChild(this._container);
   }
 
-  private _createAsset(part: AvatarDrawPart, asset: AvatarAsset) {
+  private _createAsset(part: DefaultAvatarDrawPart, asset: AvatarAsset) {
     if (this._avatarLoaderResult == null)
       throw new Error(
         "Cant create asset when avatar loader result not present"

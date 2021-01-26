@@ -113,7 +113,7 @@ export function getAvatarDrawDefinition(
 
   const removeSetTypes = new Set<AvatarFigurePartType>();
 
-  const drawPartMap = new Map<string, AvatarDrawPart[]>();
+  const drawPartMap = new Map<string, DefaultAvatarDrawPart[]>();
 
   activeActions.forEach((action) => {
     if (action.activepartset == null) return;
@@ -147,7 +147,7 @@ export function getAvatarDrawDefinition(
         deps
       );
 
-      const localDrawPartMap = new Map<string, AvatarDrawPart[]>();
+      const localDrawPartMap = new Map<string, DefaultAvatarDrawPart[]>();
 
       // Group body part draw parts by part type
       drawParts.resolvedParts.forEach((part) => {
@@ -167,13 +167,17 @@ export function getAvatarDrawDefinition(
   });
 
   if (effect != null) {
-    getEffectDrawParts(
+    const { drawPart, additionalParts } = getEffectDrawParts(
       effect,
       { bodyPartById, direction, partByType },
       deps
-    ).forEach((parts, key) => {
+    );
+
+    drawPart.forEach((parts, key) => {
       drawPartMap.set(key, parts);
     });
+
+    console.log("ADDITIONAL PARTS", additionalParts);
   }
 
   // Get draw parts in the order specified by the draworder.
@@ -210,14 +214,14 @@ function getBodyPart(
     figureData,
   }: AvatarDependencies
 ): {
-  resolvedParts: AvatarDrawPart[];
+  resolvedParts: DefaultAvatarDrawPart[];
   removeSetTypes: Set<AvatarFigurePartType>;
 } {
   if (actionData == null) throw new Error("Invalid action data");
 
   let remainingPartCount = parts.length - 1;
 
-  const resolvedParts: AvatarDrawPart[] = [];
+  const resolvedParts: DefaultAvatarDrawPart[] = [];
   const removeSetTypes = new Set<AvatarFigurePartType>();
 
   while (remainingPartCount >= 0) {
@@ -266,6 +270,7 @@ function getBodyPart(
 
     if (assetsFiltered.length > 0) {
       resolvedParts.push({
+        kind: "AVATAR_DRAW_PART",
         assets: assetsFiltered,
         color: part.colorable ? `#${part.color}` : undefined,
         mode: part.type !== "ey" && part.colorable ? "colored" : "just-image",
@@ -410,12 +415,20 @@ export type AvatarAsset = {
   mirror: boolean;
 };
 
-export type AvatarDrawPart = {
+export type AvatarDrawPart = DefaultAvatarDrawPart | AvatarEffectDrawPart;
+
+export type DefaultAvatarDrawPart = {
+  kind: "AVATAR_DRAW_PART";
   type: string;
-  assets: AvatarAsset[];
-  color: string | undefined;
-  mode: "colored" | "just-image";
   index: number;
+  mode: "colored" | "just-image";
+  color: string | undefined;
+  assets: AvatarAsset[];
+};
+
+export type AvatarEffectDrawPart = {
+  kind: "EFFECT_DRAW_PART";
+  assets: AvatarAsset[];
 };
 
 export interface AvatarDrawDefinition {

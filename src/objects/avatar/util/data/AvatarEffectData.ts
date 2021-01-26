@@ -1,10 +1,13 @@
+import { getNumberFromAttribute } from "../../../../util/getNumberFromAttribute";
 import {
   AvatarEffectFrameBodypart,
+  AvatarEffectSprite,
   IAvatarEffectData,
 } from "./interfaces/IAvatarEffectData";
 
 export class AvatarEffectData implements IAvatarEffectData {
   private _frameParts: Map<number, AvatarEffectFrameBodypart[]> = new Map();
+  private _sprites: Map<string, AvatarEffectSprite> = new Map();
 
   constructor(string: string) {
     const document = new DOMParser().parseFromString(string, "text/xml");
@@ -17,6 +20,11 @@ export class AvatarEffectData implements IAvatarEffectData {
         this._frameParts.set(index, [...current, bodyPart]);
       });
     });
+
+    document.querySelectorAll("sprite").forEach((element) => {
+      const sprite = this._getEffectSpriteFromElement(element);
+      this._sprites.set(sprite.id, sprite);
+    });
   }
 
   static async fromUrl(url: string) {
@@ -26,12 +34,37 @@ export class AvatarEffectData implements IAvatarEffectData {
     return new AvatarEffectData(text);
   }
 
-  getFrameParts(frame: number): AvatarEffectFrameBodypart[] {
+  getFrameBodyParts(frame: number): AvatarEffectFrameBodypart[] {
     return this._frameParts.get(frame) ?? [];
   }
 
   getFrameCount(): number {
     return this._frameParts.size;
+  }
+
+  getSprites(): AvatarEffectSprite[] {
+    return Array.from(this._sprites.values());
+  }
+
+  getSpriteDirection(id: string, direction: number) {
+    return undefined;
+  }
+
+  private _getEffectSpriteFromElement(element: Element): AvatarEffectSprite {
+    const id = element.getAttribute("id");
+    const ink = getNumberFromAttribute(element.getAttribute("ink"));
+    const member = element.getAttribute("member") ?? undefined;
+    const staticY = getNumberFromAttribute(element.getAttribute("staticY"));
+
+    if (id == null) throw new Error("Invalid id");
+    if (member == null) throw new Error("Invalid member");
+
+    return {
+      id,
+      ink,
+      member,
+      staticY,
+    };
   }
 
   private _getFrameBodyPartFromElement(element: Element) {
@@ -47,7 +80,6 @@ export class AvatarEffectData implements IAvatarEffectData {
     if (isNaN(frame)) throw new Error("Invalid frame");
 
     return {
-      type: "bodypart" as const,
       action,
       frame,
       id,

@@ -5,9 +5,10 @@ import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
 import { PartData } from "./getPartDataForParsedLook";
 import {
   AvatarDependencies,
-  AvatarDrawPart,
+  DefaultAvatarDrawPart,
   AvatarAsset,
   getAssetForFrame,
+  AvatarEffectDrawPart,
 } from "./getAvatarDrawDefinition";
 import { getBodyPartParts } from "./getBodyPartParts";
 
@@ -20,7 +21,7 @@ export function getEffectDrawParts(
   },
   dependencies: AvatarDependencies
 ) {
-  const drawPartMap = new Map<string, AvatarDrawPart[]>();
+  const drawPartMap = new Map<string, DefaultAvatarDrawPart[]>();
   const { bodyPartById, partByType, direction } = options;
   const {
     partSetsData,
@@ -34,11 +35,26 @@ export function getEffectDrawParts(
   const frameCount = effect.getFrameCount();
   const assets = new Map<
     string,
-    { part: AvatarDrawPart | undefined; frames: Map<number, AvatarAsset> }[]
+    {
+      part: DefaultAvatarDrawPart | undefined;
+      frames: Map<number, AvatarAsset>;
+    }[]
   >();
+  const additionalParts: AvatarEffectDrawPart[] = [];
+
+  const getSpriteId = (member: string, direction: number, frame: number) =>
+    `h_${member}_${direction}_${frame}`;
+
+  effect.getSprites().forEach((sprite) => {
+    const id = getSpriteId(sprite.member, 0, 0);
+    additionalParts.push({
+      kind: "EFFECT_DRAW_PART",
+      assets: [{ fileId: id, library: "", mirror: false, x: 0, y: 0 }],
+    });
+  });
 
   for (let i = 0; i < frameCount; i++) {
-    const effectFrameInfo = effect.getFrameParts(i);
+    const effectFrameInfo = effect.getFrameBodyParts(i);
     for (const effectBodyPart of effectFrameInfo) {
       const bodyPart = bodyPartById.get(effectBodyPart.id);
       if (bodyPart == null) continue;
@@ -106,6 +122,7 @@ export function getEffectDrawParts(
 
           current.frames.set(i, frame);
           current.part = {
+            kind: "AVATAR_DRAW_PART",
             color: part.colorable ? `#${part.color}` : undefined,
             mode:
               part.type !== "ey" && part.colorable ? "colored" : "just-image",
@@ -145,5 +162,8 @@ export function getEffectDrawParts(
     });
   });
 
-  return drawPartMap;
+  return {
+    drawPart: drawPartMap,
+    additionalParts,
+  };
 }

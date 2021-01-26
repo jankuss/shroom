@@ -550,7 +550,7 @@ export function AvatarDance() {
       roomZ: 0,
       headDirection: 4,
     });
-    avatar.effect = "dance.1";
+    avatar.effect = "1";
 
     const avatar2 = new Avatar({
       look:
@@ -561,7 +561,7 @@ export function AvatarDance() {
       roomZ: 0,
       headDirection: 4,
     });
-    avatar2.effect = "2";
+    avatar2.effect = "dance.2";
 
     const avatar3 = new Avatar({
       look:
@@ -572,7 +572,7 @@ export function AvatarDance() {
       roomZ: 0,
       headDirection: 4,
     });
-    avatar3.effect = "3";
+    avatar3.effect = "dance.3";
 
     const avatar4 = new Avatar({
       look:
@@ -583,7 +583,7 @@ export function AvatarDance() {
       roomZ: 0,
       headDirection: 4,
     });
-    avatar4.effect = "4";
+    avatar4.effect = "dance.4";
 
     room.addRoomObject(avatar);
     room.addRoomObject(avatar2);
