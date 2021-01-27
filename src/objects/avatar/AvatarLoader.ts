@@ -34,6 +34,8 @@ import {
 } from "./util/getAvatarDrawDefinition";
 import { IAvatarOffsetsData } from "./util/data/interfaces/IAvatarOffsetsData";
 import { AvatarAssetLibraryCollection } from "./AvatarAssetLibraryCollection";
+import { ManifestLibrary } from "./util/data/ManifestLibrary";
+import { IManifestLibrary } from "./util/data/interfaces/IManifestLibrary";
 
 interface Options {
   getAssetBundle: (library: string) => Promise<IAssetBundle>;
@@ -83,7 +85,7 @@ export class AvatarLoader implements IAvatarLoader {
   private _lookServer: Promise<LookServer>;
   private _effectCache: Map<string, Promise<IAvatarEffectData>> = new Map();
   private _lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
-  private _assetBundles: Map<string, Promise<IAssetBundle>> = new Map();
+  private _assetBundles: Map<string, Promise<IManifestLibrary>> = new Map();
   private _effectMap: Promise<IAvatarEffectMap>;
   private _dependencies: Promise<AvatarDependencies>;
   private _offsets = new AvatarAssetLibraryCollection();
@@ -178,11 +180,13 @@ export class AvatarLoader implements IAvatarLoader {
     const loadedFiles = new Map<string, Promise<HitTexture>>();
 
     let effectData: IAvatarEffectData | undefined;
+    let effectBundle: IAvatarEffectBundle | undefined;
+
     if (effect != null) {
       const effectInfo = effectMap.getEffectInfo(effect);
-      if (effectInfo != null) {
-        const effectBundle = await this._options.getEffectBundle(effectInfo);
 
+      if (effectInfo != null) {
+        effectBundle = await this._options.getEffectBundle(effectInfo);
         effectData = await effectBundle.getData();
       }
     }
@@ -194,43 +198,23 @@ export class AvatarLoader implements IAvatarLoader {
       figureMap: figureMap,
     });
 
+    if (effectBundle != null) {
+      await this._offsets.open(effectBundle);
+    }
+
     await Promise.all(
       Array.from(libs).map((lib) =>
         this._getAssetBundle(lib).then((bundle) => this._offsets.open(bundle))
       )
     );
 
-    const loadResources = (options: LookOptions) =>
-      this._getDrawDefinitionCached(
-        getDrawDefinition,
-        options,
-        effectData
-      )?.parts.forEach((parts) => {
-        parts.assets.forEach((item) => {
-          if (loadedFiles.has(item.fileId)) return;
-          const globalFile = this._globalCache.get(item.fileId);
+    const fileIds = getDrawDefinition(options, effectData)
+      ?.parts.flatMap((part) => part.assets)
+      .map((asset) => asset.fileId);
 
-          if (globalFile != null) {
-            loadedFiles.set(item.fileId, globalFile);
-          } else {
-            const file = this._getAssetBundle(item.library)
-              .then((bundle) => bundle.getBlob(`${item.fileId}.png`))
-              .then((blob) => HitTexture.fromBlob(blob));
-            this._globalCache.set(item.fileId, file);
-            loadedFiles.set(item.fileId, file);
-          }
-        });
-      });
-
-    loadResources(options);
-
-    const awaitedEntries = await Promise.all(
-      [...loadedFiles.entries()].map(
-        async ([id, promise]) => [id, await promise] as const
-      )
-    );
-
-    const awaitedFiles = new Map<string, HitTexture>(awaitedEntries);
+    if (fileIds != null) {
+      await this._offsets.loadTextures(fileIds);
+    }
 
     const obj: AvatarLoaderResult = {
       getDrawDefinition: (options) => {
@@ -244,8 +228,12 @@ export class AvatarLoader implements IAvatarLoader {
         return result;
       },
       getTexture: (id) => {
-        const texture = awaitedFiles.get(id);
-        if (texture == null) throw new Error(`Invalid texture: ${id}`);
+        const texture = this._offsets.getTexture(id);
+
+        if (texture == null) {
+          console.error("Texture not found in", this._offsets);
+          throw new Error(`Invalid texture: ${id}`);
+        }
 
         return texture;
       },
@@ -254,18 +242,13 @@ export class AvatarLoader implements IAvatarLoader {
     return obj;
   }
 
-  private async _openBundles(libs: string[]) {
-    const { figureData, figureMap } = await this._dependencies;
-    const bundles = await Promise.all(
-      Array.from(libs).map((lib) => this._getAssetBundle(lib))
-    );
-  }
-
   private async _getAssetBundle(library: string) {
     const current = this._assetBundles.get(library);
     if (current != null) return current;
 
-    const bundle = this._options.getAssetBundle(library);
+    const bundle = this._options
+      .getAssetBundle(library)
+      .then((bundle) => new ManifestLibrary(bundle));
     this._assetBundles.set(library, bundle);
 
     return bundle;

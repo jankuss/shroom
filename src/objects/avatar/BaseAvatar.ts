@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import {
   AvatarAsset,
   AvatarDrawDefinition,
+  AvatarEffectDrawPart,
   DefaultAvatarDrawPart,
 } from "./util/getAvatarDrawDefinition";
 import { LookOptions } from "./util/createLookServer";
@@ -258,6 +259,7 @@ export class BaseAvatar extends PIXI.Container {
     this._container?.destroy();
 
     this._container = new PIXI.Container();
+    this._container.sortableChildren = true;
 
     drawDefinition.parts.forEach((part) => {
       if (part.kind === "AVATAR_DRAW_PART") {
@@ -286,7 +288,29 @@ export class BaseAvatar extends PIXI.Container {
         sprite.visible = true;
         sprite.mirrored = asset.mirror;
         sprite.ignore = false;
-        sprite.zIndex = this.spritesZIndex;
+        sprite.zIndex = this.spritesZIndex + part.z;
+
+        this._sprites.set(asset.fileId, sprite);
+        this._container?.addChild(sprite);
+      } else if (part.kind === "EFFECT_DRAW_PART") {
+        const frame = currentFrame % part.assets.length;
+        const asset = part.assets[frame];
+
+        let sprite = this._sprites.get(asset.fileId);
+
+        if (sprite == null) {
+          sprite = this._createAsset(part, asset);
+        }
+
+        if (sprite == null) return;
+
+        sprite.blendMode = PIXI.BLEND_MODES.ADD;
+        sprite.x = asset.x;
+        sprite.y = asset.y;
+        sprite.visible = true;
+        sprite.mirrored = asset.mirror;
+        sprite.ignore = false;
+        sprite.zIndex = this.spritesZIndex + part.z;
 
         this._sprites.set(asset.fileId, sprite);
         this._container?.addChild(sprite);
@@ -296,7 +320,10 @@ export class BaseAvatar extends PIXI.Container {
     this.addChild(this._container);
   }
 
-  private _createAsset(part: DefaultAvatarDrawPart, asset: AvatarAsset) {
+  private _createAsset(
+    part: DefaultAvatarDrawPart | AvatarEffectDrawPart,
+    asset: AvatarAsset
+  ) {
     if (this._avatarLoaderResult == null)
       throw new Error(
         "Cant create asset when avatar loader result not present"
@@ -327,7 +354,11 @@ export class BaseAvatar extends PIXI.Container {
       this._clickHandler.handlePointerUp(event);
     });
 
-    if (part.color != null && part.mode === "colored") {
+    if (
+      part.kind === "AVATAR_DRAW_PART" &&
+      part.color != null &&
+      part.mode === "colored"
+    ) {
       sprite.tint = parseInt(part.color.slice(1), 16);
     } else {
       sprite.tint = 0xffffff;

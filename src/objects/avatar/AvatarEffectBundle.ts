@@ -1,17 +1,24 @@
 import { IAssetBundle } from "../../assets/IAssetBundle";
 import { HitTexture } from "../hitdetection/HitTexture";
 import { AvatarEffectData } from "./util/data/AvatarEffectData";
+import { AvatarManifestData } from "./util/data/AvatarManifestData";
 import { IAvatarEffectBundle } from "./util/data/interfaces/IAvatarEffectBundle";
 import { IAvatarEffectData } from "./util/data/interfaces/IAvatarEffectData";
+import { IAvatarManifestData } from "./util/data/interfaces/IAvatarManifestData";
 
 export class AvatarEffectBundle implements IAvatarEffectBundle {
   private _data: Promise<IAvatarEffectData>;
   private _textures: Map<string, Promise<HitTexture>> = new Map();
+  private _manifest: Promise<IAvatarManifestData>;
 
   constructor(private _bundle: IAssetBundle) {
     this._data = _bundle
       .getString(`animation.bin`)
       .then((xml) => new AvatarEffectData(xml));
+
+    this._manifest = _bundle
+      .getString(`manifest.bin`)
+      .then((xml) => new AvatarManifestData(xml));
   }
 
   async getData(): Promise<IAvatarEffectData> {
@@ -28,5 +35,9 @@ export class AvatarEffectBundle implements IAvatarEffectBundle {
     this._textures.set(name, texture);
 
     return texture;
+  }
+
+  async getManifest(): Promise<IAvatarManifestData> {
+    return this._manifest;
   }
 }

@@ -11,6 +11,7 @@ import {
   AvatarEffectDrawPart,
 } from "./getAvatarDrawDefinition";
 import { getBodyPartParts } from "./getBodyPartParts";
+import { applyOffsets } from "./getAssetFromPartMeta";
 
 export function getEffectDrawParts(
   effect: IAvatarEffectData,
@@ -47,9 +48,30 @@ export function getEffectDrawParts(
 
   effect.getSprites().forEach((sprite) => {
     const id = getSpriteId(sprite.member, 0, 0);
+    const directionInfo = effect.getSpriteDirection(sprite.id, direction);
+
+    const offsets = offsetsData.getOffsets(id);
+
+    if (offsets == null) return;
+    const { x, y } = applyOffsets({
+      offsets,
+      customOffsets: { offsetX: 0, offsetY: 0 },
+      lay: false,
+      flipped: false,
+    });
+
     additionalParts.push({
       kind: "EFFECT_DRAW_PART",
-      assets: [{ fileId: id, library: "", mirror: false, x: 0, y: 0 }],
+      assets: [
+        {
+          fileId: id,
+          library: "",
+          mirror: false,
+          x,
+          y,
+        },
+      ],
+      z: directionInfo?.dz ?? 0,
     });
   });
 
@@ -97,7 +119,7 @@ export function getEffectDrawParts(
           partId: part.id,
           partType: part.type as AvatarFigurePartType,
           partTypeFlipped: partInfo.flippedSetType as AvatarFigurePartType,
-          direction: direction + effectBodyPart.dd,
+          direction: direction,
           setId: part.setId,
           setType: part.setType,
           figureData,
@@ -129,6 +151,7 @@ export function getEffectDrawParts(
             type: part.type,
             index: part.index,
             assets: [],
+            z: 0,
           };
 
           assets.set(part.type, currentPartArr);

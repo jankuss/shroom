@@ -1,24 +1,37 @@
-import { IAssetBundle } from "../../assets/IAssetBundle";
-import { AvatarManifestData } from "./util/data/AvatarManifestData";
+import { HitTexture } from "../hitdetection/HitTexture";
 import { ManifestAsset } from "./util/data/interfaces/IAvatarManifestData";
 import { IAvatarOffsetsData } from "./util/data/interfaces/IAvatarOffsetsData";
+import { IManifestLibrary } from "./util/data/interfaces/IManifestLibrary";
+
+const NO_ASSET = Symbol("NO_ASSET");
 
 export class AvatarAssetLibraryCollection implements IAvatarOffsetsData {
   private _assets: Map<string, ManifestAsset> = new Map();
-  private _opened: Set<IAssetBundle> = new Set();
+  private _libraries: Map<string, IManifestLibrary> = new Map();
 
-  async open(bundle: IAssetBundle) {
+  private _opened: Set<IManifestLibrary> = new Set();
+  private _loadTextures: Map<
+    string,
+    Promise<HitTexture | typeof NO_ASSET>
+  > = new Map();
+  private _textures: Map<string, HitTexture | typeof NO_ASSET> = new Map();
+
+  async open(bundle: IManifestLibrary) {
     if (this._opened.has(bundle)) return;
+
     this._opened.add(bundle);
 
-    bundle.getString(`manifest.bin`).then((manifestFile) => {
-      const manifest = new AvatarManifestData(manifestFile);
-      manifest.getAssets().forEach((asset) => {
+    const manifest = await bundle.getManifest();
+    await Promise.all(
+      manifest.getAssets().map(async (asset) => {
         this._assets.set(asset.name, asset);
-      });
+        this._libraries.set(asset.name, bundle);
+      })
+    );
+  }
 
-      console.log("OPENED", this._assets.size);
-    });
+  async loadTextures(ids: string[]) {
+    return Promise.all(ids.map((id) => this._loadTexture(id)));
   }
 
   getOffsets(
@@ -31,5 +44,29 @@ export class AvatarAssetLibraryCollection implements IAvatarOffsetsData {
       offsetX: asset.x,
       offsetY: asset.y,
     };
+  }
+
+  getTexture(fileName: string) {
+    const texture = this._textures.get(fileName);
+    if (texture === NO_ASSET) return;
+
+    return texture;
+  }
+
+  private _loadTexture(id: string) {
+    const current = this._loadTextures.get(id);
+    if (current != null) return current;
+
+    const manifestLibrary = this._libraries.get(id);
+    if (manifestLibrary == null)
+      throw new Error(`Couldn't find library for ${id}`);
+
+    const promise = manifestLibrary.getTexture(id).then((value) => {
+      this._textures.set(id, value ?? NO_ASSET);
+      return value ?? NO_ASSET;
+    });
+    this._loadTextures.set(id, promise);
+
+    return promise;
   }
 }

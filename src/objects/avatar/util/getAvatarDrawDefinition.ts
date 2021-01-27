@@ -166,8 +166,10 @@ export function getAvatarDrawDefinition(
     });
   });
 
+  let additionalParts: AvatarEffectDrawPart[] = [];
+
   if (effect != null) {
-    const { drawPart, additionalParts } = getEffectDrawParts(
+    const { drawPart, additionalParts: ap } = getEffectDrawParts(
       effect,
       { bodyPartById, direction, partByType },
       deps
@@ -177,14 +179,19 @@ export function getAvatarDrawDefinition(
       drawPartMap.set(key, parts);
     });
 
-    console.log("ADDITIONAL PARTS", additionalParts);
+    additionalParts = ap;
   }
 
   // Get draw parts in the order specified by the draworder.
-  const drawParts = drawOrderAdditional
+  const drawParts: AvatarDrawPart[] = drawOrderAdditional
     .filter((type) => !removeSetTypes.has(type as AvatarFigurePartType))
     .flatMap((partType) => drawPartMap.get(partType))
-    .filter(notNullOrUndefined);
+    .filter(notNullOrUndefined)
+    .map((part, index) => ({ ...part, z: index * 0.001 }));
+
+  additionalParts.forEach((ap) => {
+    drawParts.push(ap);
+  });
 
   return {
     parts: drawParts,
@@ -276,6 +283,7 @@ function getBodyPart(
         mode: part.type !== "ey" && part.colorable ? "colored" : "just-image",
         type: part.type,
         index: part.index,
+        z: 0,
       });
     }
 
@@ -424,11 +432,13 @@ export type DefaultAvatarDrawPart = {
   mode: "colored" | "just-image";
   color: string | undefined;
   assets: AvatarAsset[];
+  z: number;
 };
 
 export type AvatarEffectDrawPart = {
   kind: "EFFECT_DRAW_PART";
   assets: AvatarAsset[];
+  z: number;
 };
 
 export interface AvatarDrawDefinition {
