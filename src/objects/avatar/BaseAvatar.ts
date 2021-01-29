@@ -304,7 +304,12 @@ export class BaseAvatar extends PIXI.Container {
 
         if (sprite == null) return;
 
-        sprite.blendMode = PIXI.BLEND_MODES.ADD;
+        switch (part.ink) {
+          case 33:
+            sprite.blendMode = PIXI.BLEND_MODES.ADD;
+            break;
+        }
+
         sprite.x = asset.x;
         sprite.y = asset.y;
         sprite.visible = true;

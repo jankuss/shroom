@@ -2,7 +2,6 @@ import { IAvatarOffsetsData } from "./data/interfaces/IAvatarOffsetsData";
 
 export function getAssetFromPartMeta(
   assetPartDefinition: string,
-  libraryId: string,
   assetInfoFrame: { flipped: boolean; swapped: boolean; asset: string },
   offsetsData: IAvatarOffsetsData,
   { offsetX, offsetY }: { offsetX: number; offsetY: number }
@@ -23,7 +22,7 @@ export function getAssetFromPartMeta(
 
   return {
     fileId: assetInfoFrame.asset,
-    library: libraryId,
+    library: "",
     mirror: assetInfoFrame.flipped,
     x: offsetsX,
     y: offsetsY,

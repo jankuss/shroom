@@ -552,7 +552,7 @@ export function AvatarDance() {
         if (b) {
           avatar.effect = `dance.${(index % 4) + 1}`;
         } else {
-          avatar.effect = `1`;
+          avatar.effect = `13`;
         }
       });
     };
@@ -567,6 +567,9 @@ export function AvatarDance() {
           roomY: y * 2 - 1,
           roomZ: 0,
         });
+
+        avatar2.effect = `dance.2`;
+
         room.addRoomObject(avatar2);
         avatars.push(avatar2);
         avatar2.onClick = () => {

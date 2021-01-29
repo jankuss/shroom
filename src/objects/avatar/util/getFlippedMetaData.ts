@@ -79,28 +79,38 @@ export function getFlippedMetaData({
     return { direction, flip: true, partType, swapped: false };
   }
 
-  let overrideDirection = direction;
-
-  if (direction === 4) {
-    overrideDirection = 2;
-  }
-
-  if (direction === 5) {
-    overrideDirection = 1;
-  }
-
-  if (direction === 6) {
-    overrideDirection = 0;
-  }
+  const overrideDirection = getBasicFlippedMetaData(direction);
 
   if (flippedPartType != partType) {
     return {
-      direction: overrideDirection,
+      direction: overrideDirection.direction,
       flip: false,
       partType: flippedPartType ?? partType,
       swapped: true,
     };
   }
 
-  return { direction: overrideDirection, flip: false, partType };
+  return { direction: overrideDirection.direction, flip: false, partType };
+}
+
+export function getBasicFlippedMetaData(direction: number) {
+  let overrideDirection = direction;
+  let flipped = false;
+
+  if (direction === 4) {
+    overrideDirection = 2;
+    flipped = true;
+  }
+
+  if (direction === 5) {
+    overrideDirection = 1;
+    flipped = true;
+  }
+
+  if (direction === 6) {
+    overrideDirection = 0;
+    flipped = true;
+  }
+
+  return { direction: overrideDirection, flipped };
 }

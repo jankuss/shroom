@@ -26,8 +26,10 @@ import { getPartDataForParsedLook, PartData } from "./getPartDataForParsedLook";
 import { getDrawOrderForActions } from "./getDrawOrderForActions";
 import { associateBy } from "../../../util/associateBy";
 import { getAssetFromPartMeta } from "./getAssetFromPartMeta";
-import { getEffectDrawParts } from "./getEffectDrawParts";
 import { getBodyPartParts } from "./getBodyPartParts";
+import { getAvatarDirection } from "./getAvatarDirection";
+import { EffectDrawDefinition } from "../effects/EffectDrawDefinition";
+import { AvatarDrawDefinitionStructure } from "../structure/AvatarDrawDefinition";
 
 export const basePartSet = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.LeftHand,
@@ -75,6 +77,25 @@ export function getAvatarDrawDefinition(
     offsetsData,
   } = deps;
 
+  const def = new AvatarDrawDefinitionStructure(
+    {
+      actions,
+      direction,
+      frame: 0,
+      look: parsedLook,
+      item: itemId,
+      headDirection,
+      effect,
+    },
+    deps
+  );
+
+  return {
+    parts: def.getDrawDefinition(),
+    offsetX: 0,
+    offsetY: 0,
+  };
+
   // Sort actions by precedence. This basically determines in which order actions are applied.
   // For example, if a avatar is sitting and respecting, the sorting by precedence will returfn
   // the following order:
@@ -97,12 +118,6 @@ export function getAvatarDrawDefinition(
     hasItem: itemId != null,
   });
 
-  const drawOrderRaw =
-    getDrawOrder(drawOrderId, direction) ?? getDrawOrder("std", direction);
-
-  // Since the draworder file has missing parts, we add them here.
-  const drawOrderAdditional = addMissingDrawOrderItems(new Set(drawOrderRaw));
-
   const bodyParts = geometry
     .getBodyParts("full")
     .map((id) => geometry.getBodyPart("vertical", id))
@@ -112,8 +127,27 @@ export function getAvatarDrawDefinition(
   const bodyPartById = associateBy(bodyParts, (part) => part.id);
 
   const removeSetTypes = new Set<AvatarFigurePartType>();
-
   const drawPartMap = new Map<string, DefaultAvatarDrawPart[]>();
+
+  const effectDrawDefintion =
+    effect &&
+    new EffectDrawDefinition(
+      effect,
+      { bodyPartById, direction, partByType },
+      deps
+    );
+
+  const displayDirection = getAvatarDirection(
+    direction,
+    effectDrawDefintion?.getDirectionOffset()
+  );
+
+  const drawOrderRaw =
+    getDrawOrder(drawOrderId, displayDirection) ??
+    getDrawOrder("std", displayDirection);
+
+  // Since the draworder file has missing parts, we add them here.
+  const drawOrderAdditional = addMissingDrawOrderItems(new Set(drawOrderRaw));
 
   activeActions.forEach((action) => {
     if (action.activepartset == null) return;
@@ -139,8 +173,8 @@ export function getAvatarDrawDefinition(
       const drawParts = getBodyPart(
         {
           actionData: action,
-          direction,
-          headDirection,
+          direction: displayDirection,
+          headDirection: headDirection != null ? headDirection : undefined,
           parts,
           itemId,
         },
@@ -168,28 +202,36 @@ export function getAvatarDrawDefinition(
 
   let additionalParts: AvatarEffectDrawPart[] = [];
 
-  if (effect != null) {
-    const { drawPart, additionalParts: ap } = getEffectDrawParts(
-      effect,
-      { bodyPartById, direction, partByType },
-      deps
-    );
-
-    drawPart.forEach((parts, key) => {
+  if (effectDrawDefintion != null) {
+    effectDrawDefintion.getAvatarBodyDrawParts().forEach((parts, key) => {
       drawPartMap.set(key, parts);
     });
 
-    additionalParts = ap;
+    additionalParts = effectDrawDefintion.getAdditionalDrawParts();
   }
 
   // Get draw parts in the order specified by the draworder.
-  const drawParts: AvatarDrawPart[] = drawOrderAdditional
+  let drawParts: AvatarDrawPart[] = drawOrderAdditional
     .filter((type) => !removeSetTypes.has(type as AvatarFigurePartType))
     .flatMap((partType) => drawPartMap.get(partType))
     .filter(notNullOrUndefined)
     .map((part, index) => ({ ...part, z: index * 0.001 }));
 
-  additionalParts.forEach((ap) => {
+  const additionalPartsDefault = additionalParts.filter(
+    (part) => !part.addition
+  );
+  const additionalPartAdditions = additionalParts.filter(
+    (part) => part.addition
+  );
+
+  if (effectDrawDefintion != null) {
+    drawParts = effectDrawDefintion.applyAvatarOffsets([
+      ...drawParts,
+      ...additionalPartAdditions,
+    ]);
+  }
+
+  additionalPartsDefault.forEach((ap) => {
     drawParts.push(ap);
   });
 
@@ -377,30 +419,15 @@ export function getAssetForFrame({
       flipH = !flipH;
     }
 
-    let libraryId = figureMap.getLibraryOfPart(partId, flippedMeta.partType);
-    if (libraryId == null && setId != null && setType != null) {
-      const checkParts = figureData.getParts(setType, setId) ?? [];
+    const asset = getAssetFromPartMeta(
+      assetPartDefinition,
+      { flipped: flipH, swapped: false, asset: assetId },
+      offsetsData,
+      { offsetX, offsetY }
+    );
 
-      for (let i = 0; i < checkParts.length; i++) {
-        const checkPart = checkParts[i];
-
-        libraryId = figureMap.getLibraryOfPart(checkPart.id, checkPart.type);
-        if (libraryId != null) break;
-      }
-    }
-
-    if (libraryId != null) {
-      const asset = getAssetFromPartMeta(
-        assetPartDefinition,
-        libraryId,
-        { flipped: flipH, swapped: false, asset: assetId },
-        offsetsData,
-        { offsetX, offsetY }
-      );
-
-      if (asset != null) {
-        return asset;
-      }
+    if (asset != null) {
+      return asset;
     }
   }
 }
@@ -439,6 +466,8 @@ export type AvatarEffectDrawPart = {
   kind: "EFFECT_DRAW_PART";
   assets: AvatarAsset[];
   z: number;
+  ink?: number;
+  addition: boolean;
 };
 
 export interface AvatarDrawDefinition {
