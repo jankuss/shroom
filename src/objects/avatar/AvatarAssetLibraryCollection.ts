@@ -28,6 +28,20 @@ export class AvatarAssetLibraryCollection implements IAvatarOffsetsData {
         this._libraries.set(asset.name, bundle);
       })
     );
+
+    await Promise.all(
+      manifest.getAliases().map((alias) => {
+        const base = manifest.getAssetByName(alias.link);
+        if (base != null) {
+          this._assets.set(alias.name, {
+            ...base,
+            flipH: alias.fliph,
+            flipV: alias.flipv,
+          });
+          this._libraries.set(alias.name, bundle);
+        }
+      })
+    );
   }
 
   async loadTextures(ids: string[]) {
@@ -57,11 +71,13 @@ export class AvatarAssetLibraryCollection implements IAvatarOffsetsData {
     const current = this._loadTextures.get(id);
     if (current != null) return current;
 
+    const actualId = this._assets.get(id)?.name ?? id;
+
     const manifestLibrary = this._libraries.get(id);
     if (manifestLibrary == null)
       throw new Error(`Couldn't find library for ${id}`);
 
-    const promise = manifestLibrary.getTexture(id).then((value) => {
+    const promise = manifestLibrary.getTexture(actualId).then((value) => {
       this._textures.set(id, value ?? NO_ASSET);
       return value ?? NO_ASSET;
     });

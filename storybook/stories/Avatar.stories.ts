@@ -557,7 +557,7 @@ export function AvatarDance() {
       });
     };
 
-    for (let y = 1; y <= 4; y++) {
+    for (let y = 1; y <= 1; y++) {
       for (let x = 0; x < 8; x++) {
         const avatar2 = new Avatar({
           look:
@@ -568,7 +568,7 @@ export function AvatarDance() {
           roomZ: 0,
         });
 
-        avatar2.effect = `1`;
+        avatar2.effect = `5`;
 
         room.addRoomObject(avatar2);
         avatars.push(avatar2);

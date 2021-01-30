@@ -12,6 +12,7 @@ import {
   IFigureData,
 } from "../util/data/interfaces/IFigureData";
 import { IFigureMapData } from "../util/data/interfaces/IFigureMapData";
+import { getAvatarDirection } from "../util/getAvatarDirection";
 import {
   AvatarAsset,
   DefaultAvatarDrawPart,
@@ -21,6 +22,7 @@ import {
 export class AvatarPart {
   private _action: AvatarActionInfo | undefined;
   private _direction: number | undefined;
+  private _directionOffset = 0;
 
   private _animationData: IAvatarAnimationData;
   private _figureData: IFigureData;
@@ -29,6 +31,9 @@ export class AvatarPart {
   private _partSetsData: IAvatarPartSetsData;
   private _assets: AvatarAsset[] = [];
   private _customFrames: CustomPartFrame[] = [];
+
+  private _frameOffsets: Map<number, { x: number; y: number }> = new Map();
+  private _avatarOffsets = false;
 
   constructor(
     private _figureDataPart: FigureDataPart,
@@ -72,11 +77,43 @@ export class AvatarPart {
   }
 
   setDirection(direction: number) {
-    this._direction = direction;
+    this._direction = getAvatarDirection(direction);
   }
 
   addCustomFrame(customFrame: CustomPartFrame) {
+    if (this._avatarOffsets) return;
+
     this._customFrames.push(customFrame);
+  }
+
+  setDirectionOffset(offset: number) {
+    this._directionOffset = offset;
+  }
+
+  setOffsets(
+    action: AvatarActionInfo,
+    frame: number,
+    offsets: { x: number; y: number }
+  ) {
+    this._frameOffsets.set(frame, offsets);
+
+    if (!this._avatarOffsets) {
+      this._avatarOffsets = true;
+      this._customFrames = [];
+    }
+
+    this._customFrames.push({
+      action: action,
+      frame: 0,
+      dx: 0,
+      dy: 0,
+    });
+  }
+
+  getDirection(offset = 0) {
+    if (this._direction == null) return;
+
+    return getAvatarDirection(this._direction + this._directionOffset + offset);
   }
 
   /**
@@ -104,6 +141,10 @@ export class AvatarPart {
     };
   }
 
+  private _getOffsetForFrame(frame: number) {
+    return this._frameOffsets.get(frame) ?? { x: 0, y: 0 };
+  }
+
   private _update() {
     const partInfo = this._partSetsData.getPartInfo(this.type);
     this._assets = [];
@@ -111,17 +152,21 @@ export class AvatarPart {
     // If any custom frames are set, use them instead of the default animation behavior.
     // This is usually used when effects override certain body parts and their actions/animations.
     if (this._customFrames.length > 0) {
-      this._customFrames.forEach((customFrame) => {
+      this._customFrames.forEach((customFrame, i) => {
         const action = customFrame.action;
-        if (this._direction == null) throw new Error("Invalid direction");
+        const baseDirection = this.getDirection(customFrame.dd);
 
-        const direction = this._direction + (customFrame.dd ?? 0);
+        if (baseDirection == null) throw new Error("Invalid direction");
+
+        const direction = getAvatarDirection(baseDirection);
 
         const frame = this._animationData.getAnimationFrame(
           action.id,
           this.type,
           customFrame.frame
         );
+
+        const offset = this._getOffsetForFrame(i);
 
         const asset = getAssetForFrame({
           animationFrame: frame,
@@ -133,8 +178,8 @@ export class AvatarPart {
           partId: this._figureDataPart.id,
           partType: this._figureDataPart.type as AvatarFigurePartType,
           partTypeFlipped: partInfo?.flippedSetType as AvatarFigurePartType,
-          offsetX: customFrame.dx ?? 0,
-          offsetY: customFrame.dy ?? 0,
+          offsetX: (customFrame.dx ?? 0) + offset.x,
+          offsetY: (customFrame.dy ?? 0) + offset.y,
         });
 
         if (asset != null) {
@@ -146,7 +191,7 @@ export class AvatarPart {
     }
 
     const action = this._action;
-    const direction = this._direction;
+    const direction = this.getDirection();
 
     if (action == null) return;
     if (direction == null) return;

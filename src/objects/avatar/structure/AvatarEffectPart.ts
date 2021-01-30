@@ -5,28 +5,44 @@ import {
 } from "../util/data/interfaces/IAvatarActionsData";
 import {
   AvatarEffectSprite,
+  AvatarEffectSpriteDirection,
   IAvatarEffectData,
 } from "../util/data/interfaces/IAvatarEffectData";
 import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
 import { applyOffsets } from "../util/getAssetFromPartMeta";
+import { getAvatarDirection } from "../util/getAvatarDirection";
 import {
   AvatarAsset,
   AvatarEffectDrawPart,
 } from "../util/getAvatarDrawDefinition";
 import { getBasicFlippedMetaData } from "../util/getFlippedMetaData";
+import { IAvatarEffectPart } from "./interface/IAvatarEffectPart";
 
-export class AvatarEffectPart {
+export class AvatarEffectPart implements IAvatarEffectPart {
   private _direction: number | undefined;
+  private _directionOffset = 0;
+
   private _customFrames: CustomPartFrame[] = [];
 
   constructor(
     private _sprite: AvatarEffectSprite,
     private _actionsData: IAvatarActionsData,
-    private _offsetsData: IAvatarOffsetsData
+    private _offsetsData: IAvatarOffsetsData,
+    private _effectData: IAvatarEffectData
   ) {}
 
   setDirection(direction: number) {
     this._direction = direction;
+  }
+
+  setDirectionOffset(offset: number) {
+    this._directionOffset = offset;
+  }
+
+  getDirection(offset = 0) {
+    if (this._direction == null) return;
+
+    return getAvatarDirection(this._direction + this._directionOffset + offset);
   }
 
   setEffectFrame(effect: IAvatarEffectData, frame: number) {
@@ -65,13 +81,24 @@ export class AvatarEffectPart {
   getDrawDefinition(): AvatarEffectDrawPart | undefined {
     const assets: AvatarAsset[] = [];
 
+    const directionData =
+      this._direction != null
+        ? this._effectData.getSpriteDirection(this._sprite.id, this._direction)
+        : undefined;
+
     this._customFrames.forEach((customFrame) => {
       const action = customFrame.action;
-      if (this._direction == null) return;
       if (action == null) throw new Error("Invalid action");
 
-      const direction = this._direction + (customFrame.dd ?? 0);
-      const asset = this._getAvatarAsset(direction, customFrame.frame ?? 0);
+      const direction = this.getDirection(customFrame.dd);
+      if (direction == null) return;
+
+      const asset = this._getAvatarAsset(
+        direction,
+        customFrame.frame ?? 0,
+        customFrame,
+        directionData
+      );
 
       if (asset != null) {
         assets.push(asset);
@@ -84,12 +111,17 @@ export class AvatarEffectPart {
       assets: assets.flatMap((asset) => [asset, asset]),
       addition: false,
       kind: "EFFECT_DRAW_PART",
-      z: 0,
+      z: directionData?.dz ?? 0,
       ink: this._sprite.ink,
     };
   }
 
-  private _getAvatarAsset(direction: number, frame: number) {
+  private _getAvatarAsset(
+    direction: number,
+    frame: number,
+    customFrame: CustomPartFrame,
+    directionData?: AvatarEffectSpriteDirection
+  ) {
     let displayDirection = 0;
     if (this._sprite.directions) {
       displayDirection = direction;
@@ -103,11 +135,17 @@ export class AvatarEffectPart {
 
       const offsets = this._offsetsData.getOffsets(id);
 
-      if (offsets == null) return;
+      if (offsets == null) {
+        console.error("ASSET NOT FOUND", id);
+        return;
+      }
 
       const { x, y } = applyOffsets({
         offsets,
-        customOffsets: { offsetX: 0, offsetY: 0 },
+        customOffsets: {
+          offsetX: customFrame.dx ?? 0 - (directionData?.dx ?? 0),
+          offsetY: customFrame.dy ?? 0 + (directionData?.dy ?? 0),
+        },
         lay: false,
         flipped: flippedMeta.flipped,
       });

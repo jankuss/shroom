@@ -180,12 +180,16 @@ export class AvatarEffectData implements IAvatarEffectData {
   ): AvatarEffectSpriteDirection {
     const id = getNumberFromAttribute(element.getAttribute("id"));
     const dz = getNumberFromAttribute(element.getAttribute("dz"));
+    const dx = getNumberFromAttribute(element.getAttribute("dx"));
+    const dy = getNumberFromAttribute(element.getAttribute("dy"));
 
     if (id == null) throw new Error("Invalid id");
 
     return {
       id,
       dz,
+      dx,
+      dy,
     };
   }
 

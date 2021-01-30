@@ -6,6 +6,7 @@ import {
 import { IAvatarEffectData } from "../util/data/interfaces/IAvatarEffectData";
 import { Bodypart } from "../util/data/interfaces/IAvatarGeometryData";
 import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
+import { getAvatarDirection } from "../util/getAvatarDirection";
 import { AvatarPart } from "./AvatarPart";
 
 /**
@@ -27,6 +28,10 @@ export class AvatarBodyPart {
     return this._bodyPart.id;
   }
 
+  public get parts() {
+    return this._parts;
+  }
+
   public setActiveAction(action: AvatarActionInfo) {
     if (action.activepartset == null) return;
     const activePart = this._partSets.getActivePartSet(action.activepartset);
@@ -41,6 +46,12 @@ export class AvatarBodyPart {
   public setDirection(direction: number) {
     this._parts.forEach((part) => {
       part.setDirection(direction);
+    });
+  }
+
+  public setDirectionOffset(offset: number) {
+    this._parts.forEach((part) => {
+      part.setDirectionOffset(offset);
     });
   }
 
@@ -62,6 +73,22 @@ export class AvatarBodyPart {
           dy: effectBodyPart.dy,
         });
       }
+    });
+  }
+
+  public setAvatarOffsets(effect: IAvatarEffectData, frame: number) {
+    const effectBodyPart = effect.getFrameEffectPart("avatar", frame);
+
+    if (effectBodyPart == null) return;
+
+    this._parts.forEach((part) => {
+      const action = this._actions.getAction(AvatarAction.Default);
+      if (action == null) return;
+
+      part.setOffsets(action, frame, {
+        x: effectBodyPart.dx ?? 0,
+        y: effectBodyPart.dy ?? 0,
+      });
     });
   }
 }

@@ -55,6 +55,8 @@ export interface AvatarEffectSprite {
 export interface AvatarEffectSpriteDirection {
   id: number;
   dz?: number;
+  dx?: number;
+  dy?: number;
 }
 
 export interface AvatarEffectDirection {
