@@ -5,7 +5,13 @@ export interface IAvatarEffectData {
     bodyPartId: string,
     frame: number
   ): AvatarEffectFrameBodypart | undefined;
+
   getFrameEffectParts(frame: number): AvatarEffectFrameFXPart[];
+  getFrameEffectPart(
+    id: string,
+    frame: number
+  ): AvatarEffectFrameFXPart | undefined;
+
   getSprites(): AvatarEffectSprite[];
   getSpriteDirection(
     id: string,

@@ -28,6 +28,8 @@ export class AvatarEffectData implements IAvatarEffectData {
     AvatarEffectFrameBodypart
   > = new Map();
 
+  private _frameFxPartsById: Map<string, AvatarEffectFrameFXPart> = new Map();
+
   constructor(string: string) {
     const document = new DOMParser().parseFromString(string, "text/xml");
 
@@ -48,6 +50,7 @@ export class AvatarEffectData implements IAvatarEffectData {
 
         if (fxPart != null) {
           this._frameFxParts.set(index, [...current, fxPart]);
+          this._frameFxPartsById.set(`${fxPart.id}_${index}`, fxPart);
         }
       });
     });
@@ -76,11 +79,19 @@ export class AvatarEffectData implements IAvatarEffectData {
 
     this._frameCount = frameElements.length;
   }
+
   static async fromUrl(url: string) {
     const response = await fetch(url);
     const text = await response.text();
 
     return new AvatarEffectData(text);
+  }
+
+  getFrameEffectPart(
+    id: string,
+    frame: number
+  ): AvatarEffectFrameFXPart | undefined {
+    return this._frameFxPartsById.get(`${id}_${frame}`);
   }
 
   getFrameBodyPart(

@@ -8,7 +8,10 @@ import {
   IAvatarActionsData,
 } from "../util/data/interfaces/IAvatarActionsData";
 import { IAvatarAnimationData } from "../util/data/interfaces/IAvatarAnimationData";
-import { IAvatarEffectData } from "../util/data/interfaces/IAvatarEffectData";
+import {
+  AvatarEffectSprite,
+  IAvatarEffectData,
+} from "../util/data/interfaces/IAvatarEffectData";
 import { IAvatarGeometryData } from "../util/data/interfaces/IAvatarGeometryData";
 import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
 import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
@@ -22,6 +25,7 @@ import {
 import { getDrawOrderForActions } from "../util/getDrawOrderForActions";
 import { ParsedLook, parseLookString } from "../util/parseLookString";
 import { AvatarBodyPart } from "./AvatarBodyPart";
+import { AvatarEffectPart } from "./AvatarEffectPart";
 import { AvatarPartList } from "./AvatarPartList";
 
 export class AvatarDrawDefinitionStructure {
@@ -72,10 +76,28 @@ export class AvatarDrawDefinitionStructure {
     });
 
     const effect = _options.effect;
+
+    const effectParts = new Map<string, AvatarEffectPart>();
+
     if (effect != null) {
+      effect.getSprites().forEach((sprite) => {
+        effectParts.set(
+          sprite.id,
+          new AvatarEffectPart(sprite, this._actionsData, this._offsetsData)
+        );
+      });
+
       for (let i = 0; i < effect.getFrameCount(); i++) {
         bodyParts.forEach((bodyPart) => bodyPart.setEffectFrame(effect, i));
+        effectParts.forEach((effectPart) =>
+          effectPart.setEffectFrame(effect, i)
+        );
       }
+
+      effectParts.forEach((effectPart) => {
+        effectPart.setEffectFrameDefaultIfNotSet();
+        effectPart.setDirection(_options.direction);
+      });
     }
 
     const drawOrder = this._getDrawOrder(activeActions, _options.direction);
@@ -83,9 +105,15 @@ export class AvatarDrawDefinitionStructure {
       partList.getPartsForType(type as AvatarFigurePartType)
     );
 
-    const drawParts = sortedParts
+    const drawParts: AvatarDrawPart[] = sortedParts
       .map((part) => part.getDrawDefinition())
       .filter(notNullOrUndefined);
+
+    effectParts.forEach((part) => {
+      const def = part.getDrawDefinition();
+      if (def == null) return;
+      drawParts.push(def);
+    });
 
     this._drawParts = drawParts;
   }

@@ -64,9 +64,8 @@ export class AvatarPart {
 
   setActiveAction(action: AvatarActionInfo) {
     if (this._action != null && this._action.precedence < action.precedence) {
-      throw new Error(
-        "Applied precedence should always be higher than the active one"
-      );
+      // When the precedence of the present action is already lower than the new one, we should ignore it.
+      return;
     }
 
     this._action = action;
@@ -80,7 +79,11 @@ export class AvatarPart {
     this._customFrames.push(customFrame);
   }
 
-  public getDrawDefinition(): DefaultAvatarDrawPart | undefined {
+  /**
+   * Gets the draw definition for this specific part.
+   * This is a description how this part is drawn on the screen.
+   */
+  getDrawDefinition(): DefaultAvatarDrawPart | undefined {
     this._update();
 
     if (this._assets.length === 0) {
@@ -105,6 +108,8 @@ export class AvatarPart {
     const partInfo = this._partSetsData.getPartInfo(this.type);
     this._assets = [];
 
+    // If any custom frames are set, use them instead of the default animation behavior.
+    // This is usually used when effects override certain body parts and their actions/animations.
     if (this._customFrames.length > 0) {
       this._customFrames.forEach((customFrame) => {
         const action = customFrame.action;
