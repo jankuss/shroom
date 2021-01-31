@@ -197,8 +197,6 @@ export class EffectDrawDefinition {
 
         const drawPart = effectDrawParts.get(fxPart.id);
 
-        console.log("FC PART", fxPart);
-
         if (frameEffectPart != null) {
           const asset: AvatarAsset = {
             ...frameEffectPart,

@@ -28,6 +28,7 @@ import { ParsedLook, parseLookString } from "../util/parseLookString";
 import { AvatarBodyPart } from "./AvatarBodyPart";
 import { AvatarEffectPart } from "./AvatarEffectPart";
 import { AvatarPartList } from "./AvatarPartList";
+import { BodyPartDrawOrder } from "./BodyPartDrawOrder";
 import { IAvatarEffectPart } from "./interface/IAvatarEffectPart";
 
 export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
@@ -86,11 +87,15 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
       });
     });
 
+    console.log("ACTIONS", activeActions);
+
     const effect = _options.effect;
 
     const effectParts = new Map<string, IAvatarEffectPart>();
     this._effectParts = [];
     this._bodyParts = bodyParts;
+
+    const bodyPartsById = associateBy(bodyParts, (bodyPart) => bodyPart.id);
 
     if (effect != null) {
       effect.getSprites().forEach((sprite) => {
@@ -109,6 +114,10 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
         effectParts.set(sprite.id, effectPart);
 
         this._effectParts.push(effectPart);
+      });
+
+      effect.getAddtions().forEach((addition) => {
+        bodyParts;
       });
 
       for (let i = 0; i < effect.getFrameCount(); i++) {
@@ -157,13 +166,33 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
   setEffectFrameDefaultIfNotSet(): void {}
 
   public getDrawDefinition(): AvatarDrawPart[] {
+    const drawOrderId = getDrawOrderForActions(this._activeActions, {
+      hasItem: this._options.item != null,
+    });
+
     const drawOrder = this._getDrawOrder(
       this._activeActions,
       getAvatarDirection(this._direction + this._directionOffset)
     );
-    const sortedParts = drawOrder.flatMap((type) =>
-      this._partList.getPartsForType(type as AvatarFigurePartType)
+
+    const drawOrderDirection = getAvatarDirection(
+      this._direction + this._directionOffset
     );
+    const drawOrderBodyParts = BodyPartDrawOrder.getDrawOrder(
+      drawOrderDirection,
+      drawOrderId
+    );
+
+    if (drawOrderBodyParts == null) return [];
+
+    const bodyPartById = associateBy(this._bodyParts, (part) => part.id);
+
+    const sortedParts = drawOrderBodyParts
+      .map((id) => bodyPartById.get(id))
+      .filter(notNullOrUndefined)
+      .flatMap((bodyPart) => {
+        return bodyPart.getSortedParts("vertical");
+      });
 
     const drawParts: AvatarDrawPart[] = sortedParts
       .map((part) => part.getDrawDefinition())
@@ -176,6 +205,8 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
     const sortedDrawParts = [...drawParts, ...effectDrawParts].sort(
       (a, b) => a.z - b.z
     );
+
+    console.log(sortedDrawParts);
 
     return sortedDrawParts;
   }
@@ -210,7 +241,8 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
             bodyPart,
             partList.getPartsForBodyBart(bodyPart),
             this._partSetsData,
-            this._actionsData
+            this._actionsData,
+            this._geometry
           )
       )
       .sort((a, b) => a.z - b.z);

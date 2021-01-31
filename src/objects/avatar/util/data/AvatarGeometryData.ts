@@ -1,6 +1,8 @@
+import { getNumberFromAttribute } from "../../../../util/getNumberFromAttribute";
 import {
   AvatarGeometry,
   Bodypart,
+  BodypartItem,
   IAvatarGeometryData,
 } from "./interfaces/IAvatarGeometryData";
 import { geometryXml } from "./static/geometry.xml";
@@ -9,6 +11,7 @@ export class AvatarGeometryData implements IAvatarGeometryData {
   private _bodypartMap: Map<string, Bodypart> = new Map();
   private _avatarSetMap: Map<string, string[]> = new Map();
   private _geometries: Map<string, AvatarGeometry> = new Map();
+  private _bodyPartItemMap: Map<string, BodypartItem> = new Map();
 
   constructor(string: string) {
     const document = new DOMParser().parseFromString(string, "text/xml");
@@ -51,6 +54,10 @@ export class AvatarGeometryData implements IAvatarGeometryData {
 
           if (bodyPartItem != null) {
             bodyPartItems.push(bodyPartItem);
+            this._bodyPartItemMap.set(
+              `${typeId}_${bodyPart.id}_${bodyPartItem.id}`,
+              bodyPartItem
+            );
           }
         });
 
@@ -71,6 +78,14 @@ export class AvatarGeometryData implements IAvatarGeometryData {
 
   static default() {
     return new AvatarGeometryData(atob(geometryXml));
+  }
+
+  getBodyPartItem(
+    geometry: string,
+    bodyPartId: string,
+    itemId: string
+  ): BodypartItem | undefined {
+    return this._bodyPartItemMap.get(`${geometry}_${bodyPartId}_${itemId}`);
   }
 
   getBodyPart(geometry: string, bodyPartId: string): Bodypart | undefined {
@@ -116,16 +131,21 @@ export class AvatarGeometryData implements IAvatarGeometryData {
     };
   }
 
-  private _getBodyPartItemFromElement(item: Element) {
+  private _getBodyPartItemFromElement(
+    item: Element
+  ): BodyPartItemFromElement | undefined {
     const id = item.getAttribute("id");
-    const z = Number(item.getAttribute("z"));
+    const z = getNumberFromAttribute(item.getAttribute("z"));
+    const radius = getNumberFromAttribute(item.getAttribute("radius"));
 
     if (id == null) return;
-    if (isNaN(z)) return;
+    if (z == null) return;
+    if (radius == null) return;
 
     return {
       id,
       z,
+      radius,
     };
   }
 }
@@ -138,4 +158,5 @@ interface BodyPartFromElement {
 interface BodyPartItemFromElement {
   id: string;
   z: number;
+  radius: number;
 }

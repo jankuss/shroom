@@ -68,11 +68,6 @@ export class AvatarPart {
   }
 
   setActiveAction(action: AvatarActionInfo) {
-    if (this._action != null && this._action.precedence < action.precedence) {
-      // When the precedence of the present action is already lower than the new one, we should ignore it.
-      return;
-    }
-
     this._action = action;
   }
 

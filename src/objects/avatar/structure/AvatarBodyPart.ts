@@ -1,12 +1,15 @@
+import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import { AvatarAction } from "../enum/AvatarAction";
 import {
   AvatarActionInfo,
   IAvatarActionsData,
 } from "../util/data/interfaces/IAvatarActionsData";
 import { IAvatarEffectData } from "../util/data/interfaces/IAvatarEffectData";
-import { Bodypart } from "../util/data/interfaces/IAvatarGeometryData";
+import {
+  Bodypart,
+  IAvatarGeometryData,
+} from "../util/data/interfaces/IAvatarGeometryData";
 import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
-import { getAvatarDirection } from "../util/getAvatarDirection";
 import { AvatarPart } from "./AvatarPart";
 
 /**
@@ -17,7 +20,8 @@ export class AvatarBodyPart {
     private _bodyPart: Bodypart,
     private _parts: AvatarPart[],
     private _partSets: IAvatarPartSetsData,
-    private _actions: IAvatarActionsData
+    private _actions: IAvatarActionsData,
+    private _geometry: IAvatarGeometryData
   ) {}
 
   public get z() {
@@ -30,6 +34,25 @@ export class AvatarBodyPart {
 
   public get parts() {
     return this._parts;
+  }
+
+  public getSortedParts(geometry: string) {
+    return this._parts
+      .map((part) => {
+        const item = this._geometry.getBodyPartItem(
+          geometry,
+          this._bodyPart.id,
+          part.type
+        );
+        if (item == null) return;
+
+        return { part, item };
+      })
+      .filter(notNullOrUndefined)
+      .sort((a, b) => a.item.radius - b.item.radius)
+      .map((bodyPartItem) => {
+        return bodyPartItem.part;
+      });
   }
 
   public setActiveAction(action: AvatarActionInfo) {
@@ -54,6 +77,8 @@ export class AvatarBodyPart {
       part.setDirectionOffset(offset);
     });
   }
+
+  public addAdditional() {}
 
   public setEffectFrame(effect: IAvatarEffectData, frame: number) {
     const effectBodyPart = effect.getFrameBodyPart(this.id, frame);

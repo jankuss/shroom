@@ -21,6 +21,11 @@ export function Default() {
             x000000000000000
             x000000000000000
             x000000000000000
+            x000000000000000
+            x000000000000000
+            x000000000000000
+            x000000000000000
+            x000000000000000
           `,
     });
 
@@ -49,7 +54,7 @@ export function Default() {
 
     const avatars: Avatar[] = [];
 
-    for (let y = 0; y < 5; y++) {
+    for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
         const avatar = new Avatar({
           look: looks[y % looks.length],
@@ -68,11 +73,7 @@ export function Default() {
 
     setInterval(() => {
       avatars.forEach((avatar) => {
-        if (!avatar.hasAction(AvatarAction.UseItem)) {
-          avatar.addAction(AvatarAction.UseItem);
-        } else {
-          avatar.removeAction(AvatarAction.UseItem);
-        }
+        avatar.addAction(AvatarAction.Respect);
       });
     }, 1000);
 
