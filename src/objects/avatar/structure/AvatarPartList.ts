@@ -1,5 +1,6 @@
 import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
 import { IAvatarAnimationData } from "../util/data/interfaces/IAvatarAnimationData";
+import { IAvatarEffectData } from "../util/data/interfaces/IAvatarEffectData";
 import { Bodypart } from "../util/data/interfaces/IAvatarGeometryData";
 import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
 import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";

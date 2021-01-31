@@ -11,6 +11,7 @@ import {
 } from "../util/data/interfaces/IAvatarGeometryData";
 import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
 import { AvatarPart } from "./AvatarPart";
+import { IAvatarDrawablePart } from "./IAvatarDrawablePart";
 
 /**
  * A bodypart of the avatar. A bodypart manages multiple `AvatarPart` objects.
@@ -36,8 +37,8 @@ export class AvatarBodyPart {
     return this._parts;
   }
 
-  public getSortedParts(geometry: string) {
-    return this._parts
+  public getSortedParts(geometry: string): IAvatarDrawablePart[] {
+    const baseParts = this._parts
       .map((part) => {
         const item = this._geometry.getBodyPartItem(
           geometry,
@@ -53,6 +54,8 @@ export class AvatarBodyPart {
       .map((bodyPartItem) => {
         return bodyPartItem.part;
       });
+
+    return baseParts;
   }
 
   public setActiveAction(action: AvatarActionInfo) {
@@ -78,17 +81,15 @@ export class AvatarBodyPart {
     });
   }
 
-  public addAdditional() {}
-
   public setEffectFrame(effect: IAvatarEffectData, frame: number) {
     const effectBodyPart = effect.getFrameBodyPart(this.id, frame);
     if (effectBodyPart == null) return;
 
-    this._parts.forEach((part) => {
-      const action = this._actions.getAction(
-        effectBodyPart.action as AvatarAction
-      );
+    const action = this._actions.getAction(
+      effectBodyPart.action as AvatarAction
+    );
 
+    this._parts.forEach((part) => {
       if (action != null) {
         part.addCustomFrame({
           action,

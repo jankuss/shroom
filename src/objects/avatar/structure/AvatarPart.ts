@@ -67,6 +67,8 @@ export class AvatarPart {
     return this._figureDataPart.index;
   }
 
+  setBase(base: string) {}
+
   setActiveAction(action: AvatarActionInfo) {
     this._action = action;
   }

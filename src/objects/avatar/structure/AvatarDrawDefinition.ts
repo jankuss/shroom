@@ -1,17 +1,13 @@
 import { associateBy } from "../../../util/associateBy";
 import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import { AvatarAction } from "../enum/AvatarAction";
-import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
 import { addMissingDrawOrderItems } from "../util/addMissingDrawOrderItems";
 import {
   AvatarActionInfo,
   IAvatarActionsData,
 } from "../util/data/interfaces/IAvatarActionsData";
 import { IAvatarAnimationData } from "../util/data/interfaces/IAvatarAnimationData";
-import {
-  AvatarEffectSprite,
-  IAvatarEffectData,
-} from "../util/data/interfaces/IAvatarEffectData";
+import { IAvatarEffectData } from "../util/data/interfaces/IAvatarEffectData";
 import { IAvatarGeometryData } from "../util/data/interfaces/IAvatarGeometryData";
 import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
 import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
@@ -24,7 +20,8 @@ import {
   AvatarDrawPart,
 } from "../util/getAvatarDrawDefinition";
 import { getDrawOrderForActions } from "../util/getDrawOrderForActions";
-import { ParsedLook, parseLookString } from "../util/parseLookString";
+import { ParsedLook } from "../util/parseLookString";
+import { AvatarAdditionPart } from "./AvatarAdditionPart";
 import { AvatarBodyPart } from "./AvatarBodyPart";
 import { AvatarEffectPart } from "./AvatarEffectPart";
 import { AvatarPartList } from "./AvatarPartList";
@@ -50,6 +47,8 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
   private _effectParts: AvatarEffectPart[];
   private _bodyParts: AvatarBodyPart[];
 
+  private _additions: Map<AvatarBodyPart, AvatarAdditionPart[]> = new Map();
+
   constructor(
     private _options: Options,
     {
@@ -71,9 +70,12 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
     this._offsetsData = offsetsData;
     this._figureMap = figureMap;
 
+    const effect = _options.effect;
+
     const partList = this._getPartsForLook(_options.look);
     const bodyParts = this._getBodyParts(partList);
     const activeActions = this._getActiveActions();
+    const bodyPartsById = associateBy(bodyParts, (bodyPart) => bodyPart.id);
 
     activeActions.forEach((action) => {
       bodyParts.forEach((bodyPart) => {
@@ -87,17 +89,21 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
       });
     });
 
-    console.log("ACTIONS", activeActions);
-
-    const effect = _options.effect;
-
     const effectParts = new Map<string, IAvatarEffectPart>();
     this._effectParts = [];
     this._bodyParts = bodyParts;
 
-    const bodyPartsById = associateBy(bodyParts, (bodyPart) => bodyPart.id);
-
     if (effect != null) {
+      effect.getAddtions().forEach((sprite) => {
+        const bodyPart =
+          sprite.align != null ? bodyPartsById.get(sprite.align) : undefined;
+        if (bodyPart != null) {
+          const current = this._additions.get(bodyPart) ?? [];
+          const additionPart = new AvatarAdditionPart();
+          this._additions.set(bodyPart, [...current, additionPart]);
+        }
+      });
+
       effect.getSprites().forEach((sprite) => {
         if (sprite.id === "avatar") {
           effectParts.set(sprite.id, this);
@@ -114,10 +120,6 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
         effectParts.set(sprite.id, effectPart);
 
         this._effectParts.push(effectPart);
-      });
-
-      effect.getAddtions().forEach((addition) => {
-        bodyParts;
       });
 
       for (let i = 0; i < effect.getFrameCount(); i++) {
@@ -149,6 +151,10 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
     this._partList = partList;
   }
 
+  setBase(base: string): void {
+    throw new Error("Method not implemented.");
+  }
+
   setDirection(direction: number): void {
     this._direction = direction;
   }
@@ -163,7 +169,9 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
     });
   }
 
-  setEffectFrameDefaultIfNotSet(): void {}
+  setEffectFrameDefaultIfNotSet(): void {
+    // Do nothing
+  }
 
   public getDrawDefinition(): AvatarDrawPart[] {
     const drawOrderId = getDrawOrderForActions(this._activeActions, {
@@ -205,8 +213,6 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
     const sortedDrawParts = [...drawParts, ...effectDrawParts].sort(
       (a, b) => a.z - b.z
     );
-
-    console.log(sortedDrawParts);
 
     return sortedDrawParts;
   }

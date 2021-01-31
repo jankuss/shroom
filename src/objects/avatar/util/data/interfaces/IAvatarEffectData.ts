@@ -24,6 +24,7 @@ export interface IAvatarEffectData {
 export interface AvatarEffectFXAddition {
   id: string;
   align?: string;
+  base?: string;
 }
 
 export interface AvatarEffectFrameFXPart {
