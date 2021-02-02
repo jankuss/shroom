@@ -76,6 +76,7 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
     const bodyParts = this._getBodyParts(partList);
     const activeActions = this._getActiveActions();
     const bodyPartsById = associateBy(bodyParts, (bodyPart) => bodyPart.id);
+    const additions: AvatarAdditionPart[] = [];
 
     activeActions.forEach((action) => {
       bodyParts.forEach((bodyPart) => {
@@ -99,8 +100,17 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
           sprite.align != null ? bodyPartsById.get(sprite.align) : undefined;
         if (bodyPart != null) {
           const current = this._additions.get(bodyPart) ?? [];
-          const additionPart = new AvatarAdditionPart();
+          const additionPart = new AvatarAdditionPart(
+            sprite,
+            this._actionsData,
+            this._offsetsData,
+            this._partSetsData
+          );
+
           this._additions.set(bodyPart, [...current, additionPart]);
+          additions.push(additionPart);
+
+          bodyPart.addAddition(additionPart);
         }
       });
 
@@ -127,11 +137,19 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
         effectParts.forEach((effectPart) =>
           effectPart.setEffectFrame(effect, i)
         );
+
+        additions.forEach((addition) => {
+          addition.setEffectFrame(effect, i);
+        });
       }
 
       effectParts.forEach((effectPart) => {
         effectPart.setEffectFrameDefaultIfNotSet();
         effectPart.setDirection(_options.direction);
+      });
+
+      additions.forEach((addition) => {
+        addition.setDirection(this._direction);
       });
     }
 
@@ -143,6 +161,10 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
       });
 
       effectParts.forEach((part) => {
+        part.setDirectionOffset(directionOffset);
+      });
+
+      additions.forEach((part) => {
         part.setDirectionOffset(directionOffset);
       });
     }
@@ -164,8 +186,15 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
   }
 
   setEffectFrame(effect: IAvatarEffectData, frame: number): void {
+    const avatarFrameData = effect.getFrameEffectPart("avatar", frame);
+    if (avatarFrameData == null) return;
+
     this._bodyParts.forEach((bodyPart) => {
-      bodyPart.setAvatarOffsets(effect, frame);
+      bodyPart.setAvatarOffsets(avatarFrameData, frame);
+    });
+
+    this._effectParts.forEach((effectPart) => {
+      effectPart.setAvatarOffsets(avatarFrameData, frame);
     });
   }
 

@@ -4,12 +4,16 @@ import {
   AvatarActionInfo,
   IAvatarActionsData,
 } from "../util/data/interfaces/IAvatarActionsData";
-import { IAvatarEffectData } from "../util/data/interfaces/IAvatarEffectData";
+import {
+  AvatarEffectFrameFXPart,
+  IAvatarEffectData,
+} from "../util/data/interfaces/IAvatarEffectData";
 import {
   Bodypart,
   IAvatarGeometryData,
 } from "../util/data/interfaces/IAvatarGeometryData";
 import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
+import { AvatarAdditionPart } from "./AvatarAdditionPart";
 import { AvatarPart } from "./AvatarPart";
 import { IAvatarDrawablePart } from "./IAvatarDrawablePart";
 
@@ -17,6 +21,8 @@ import { IAvatarDrawablePart } from "./IAvatarDrawablePart";
  * A bodypart of the avatar. A bodypart manages multiple `AvatarPart` objects.
  */
 export class AvatarBodyPart {
+  private _additions: AvatarAdditionPart[] = [];
+
   constructor(
     private _bodyPart: Bodypart,
     private _parts: AvatarPart[],
@@ -37,6 +43,10 @@ export class AvatarBodyPart {
     return this._parts;
   }
 
+  public addAddition(addition: AvatarAdditionPart) {
+    this._additions.push(addition);
+  }
+
   public getSortedParts(geometry: string): IAvatarDrawablePart[] {
     const baseParts = this._parts
       .map((part) => {
@@ -55,7 +65,7 @@ export class AvatarBodyPart {
         return bodyPartItem.part;
       });
 
-    return baseParts;
+    return [...baseParts, ...this._additions];
   }
 
   public setActiveAction(action: AvatarActionInfo) {
@@ -93,7 +103,7 @@ export class AvatarBodyPart {
       if (action != null) {
         part.addCustomFrame({
           action,
-          frame: effectBodyPart.frame,
+          frame: effectBodyPart.frame ?? 0,
           dd: effectBodyPart.dd,
           dx: effectBodyPart.dx,
           dy: effectBodyPart.dy,
@@ -102,19 +112,13 @@ export class AvatarBodyPart {
     });
   }
 
-  public setAvatarOffsets(effect: IAvatarEffectData, frame: number) {
-    const effectBodyPart = effect.getFrameEffectPart("avatar", frame);
-
-    if (effectBodyPart == null) return;
-
+  public setAvatarOffsets(avatarFrame: AvatarEffectFrameFXPart, frame: number) {
     this._parts.forEach((part) => {
-      const action = this._actions.getAction(AvatarAction.Default);
-      if (action == null) return;
+      part.setAvatarOffsets(avatarFrame, frame);
+    });
 
-      part.setOffsets(action, frame, {
-        x: effectBodyPart.dx ?? 0,
-        y: effectBodyPart.dy ?? 0,
-      });
+    this._additions.forEach((addition) => {
+      addition.setAvatarOffsets(avatarFrame, frame);
     });
   }
 }

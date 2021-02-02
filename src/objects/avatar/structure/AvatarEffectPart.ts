@@ -4,6 +4,7 @@ import {
   IAvatarActionsData,
 } from "../util/data/interfaces/IAvatarActionsData";
 import {
+  AvatarEffectFrameFXPart,
   AvatarEffectSprite,
   AvatarEffectSpriteDirection,
   IAvatarEffectData,
@@ -17,10 +18,12 @@ import {
 } from "../util/getAvatarDrawDefinition";
 import { getBasicFlippedMetaData } from "../util/getFlippedMetaData";
 import { IAvatarEffectPart } from "./interface/IAvatarEffectPart";
+import { getEffectSprite } from "./util/getEffectSprite";
 
 export class AvatarEffectPart implements IAvatarEffectPart {
   private _direction: number | undefined;
   private _directionOffset = 0;
+  private _offsets: Map<number, AvatarEffectFrameFXPart> = new Map();
 
   private _customFrames: CustomPartFrame[] = [];
 
@@ -66,6 +69,10 @@ export class AvatarEffectPart implements IAvatarEffectPart {
         dy: part.dy,
       });
     }
+  }
+
+  setAvatarOffsets(avatarFrame: AvatarEffectFrameFXPart, frame: number) {
+    this._offsets.set(frame, avatarFrame);
   }
 
   setEffectFrameDefaultIfNotSet() {
@@ -131,9 +138,12 @@ export class AvatarEffectPart implements IAvatarEffectPart {
     displayDirection = flippedMeta.direction;
 
     if (this._sprite.member != null) {
-      const id = getSpriteId(this._sprite.member, displayDirection, frame);
-
-      const offsets = this._offsetsData.getOffsets(id);
+      const { id, offsets, flip } = getEffectSprite(
+        this._sprite.member,
+        direction,
+        frame,
+        this._offsetsData
+      );
 
       if (offsets == null) {
         console.error("ASSET NOT FOUND", id);
@@ -147,13 +157,13 @@ export class AvatarEffectPart implements IAvatarEffectPart {
           offsetY: customFrame.dy ?? 0 + (directionData?.dy ?? 0),
         },
         lay: false,
-        flipped: flippedMeta.flipped,
+        flipped: flip,
       });
 
       return {
         fileId: id,
         library: "",
-        mirror: flippedMeta.flipped,
+        mirror: flip,
         x,
         y,
       };
@@ -161,7 +171,7 @@ export class AvatarEffectPart implements IAvatarEffectPart {
   }
 }
 
-const getSpriteId = (member: string, direction: number, frame: number) =>
+export const getSpriteId = (member: string, direction: number, frame: number) =>
   `h_${member}_${direction}_${frame}`;
 
 interface CustomPartFrame {

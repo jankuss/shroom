@@ -112,5 +112,29 @@ export function getBasicFlippedMetaData(direction: number) {
     flipped = true;
   }
 
-  return { direction: overrideDirection, flipped };
+  return { direction: overrideDirection, flip: flipped };
+}
+
+export function getPartFlippedMetaData(
+  direction: number,
+  {
+    partType,
+    flippedPartType,
+  }: {
+    partType?: AvatarFigurePartType;
+    flippedPartType?: AvatarFigurePartType;
+  }
+) {
+  const overrideDirection = getBasicFlippedMetaData(direction);
+
+  if (flippedPartType != partType) {
+    return {
+      direction: overrideDirection.direction,
+      flip: false,
+      partType: flippedPartType ?? partType,
+      swapped: true,
+    };
+  }
+
+  return { direction: overrideDirection.direction, flip: false, partType };
 }

@@ -138,7 +138,7 @@ export class EffectDrawDefinition {
           const animationFrame = animationData.getAnimationFrame(
             actionData.id,
             part.type,
-            effectBodyPart.frame
+            effectBodyPart.frame ?? 0
           );
 
           const frame = getAssetForFrame({
@@ -365,13 +365,13 @@ class EffectFXSprite {
         offsets,
         customOffsets: { offsetX: 0, offsetY: 0 },
         lay: false,
-        flipped: flippedMeta.flipped,
+        flipped: flippedMeta.flip,
       });
 
       return {
         fileId: id,
         library: "",
-        mirror: flippedMeta.flipped,
+        mirror: flippedMeta.flip,
         x,
         y,
       };

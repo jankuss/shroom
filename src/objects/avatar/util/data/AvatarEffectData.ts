@@ -11,6 +11,7 @@ import {
 
 export class AvatarEffectData implements IAvatarEffectData {
   private _frameBodyParts: Map<number, AvatarEffectFrameBodypart[]> = new Map();
+
   private _frameFxParts: Map<number, AvatarEffectFrameFXPart[]> = new Map();
 
   private _sprites: Map<string, AvatarEffectSprite> = new Map();
@@ -27,13 +28,17 @@ export class AvatarEffectData implements IAvatarEffectData {
     string,
     AvatarEffectFrameBodypart
   > = new Map();
+  private _frameBodyPartByBase: Map<
+    string,
+    AvatarEffectFrameBodypart
+  > = new Map();
 
   private _frameFxPartsById: Map<string, AvatarEffectFrameFXPart> = new Map();
 
   constructor(string: string) {
     const document = new DOMParser().parseFromString(string, "text/xml");
 
-    const frameElements = document.querySelectorAll("frame");
+    const frameElements = document.querySelectorAll("animation > frame");
 
     frameElements.forEach((frame, index) => {
       frame.querySelectorAll("bodypart").forEach((bodypart) => {
@@ -42,6 +47,10 @@ export class AvatarEffectData implements IAvatarEffectData {
 
         this._frameBodyParts.set(index, [...current, bodyPart]);
         this._frameBodyPartsById.set(`${bodypart.id}_${index}`, bodyPart);
+
+        if (bodyPart.base != null) {
+          this._frameBodyPartByBase.set(`${bodyPart.base}_${index}`, bodyPart);
+        }
       });
 
       frame.querySelectorAll("fx").forEach((element) => {
@@ -85,6 +94,13 @@ export class AvatarEffectData implements IAvatarEffectData {
     const text = await response.text();
 
     return new AvatarEffectData(text);
+  }
+
+  getFrameBodyPartByBase(
+    bodyPartId: string,
+    frame: number
+  ): AvatarEffectFrameBodypart | undefined {
+    return this._frameBodyPartByBase.get(`${bodyPartId}_${frame}`);
   }
 
   getFrameEffectPart(
@@ -132,12 +148,14 @@ export class AvatarEffectData implements IAvatarEffectData {
   private _getFXAddition(element: Element): AvatarEffectFXAddition {
     const id = element.getAttribute("id") ?? undefined;
     const align = element.getAttribute("align") ?? undefined;
+    const base = element.getAttribute("base") ?? undefined;
 
     if (id == null) throw new Error("Invalid id");
 
     return {
       id,
       align,
+      base,
     };
   }
 
@@ -212,16 +230,15 @@ export class AvatarEffectData implements IAvatarEffectData {
   }
 
   private _getFrameBodyPartFromElement(element: Element) {
-    const action = element.getAttribute("action");
+    const action = element.getAttribute("action") ?? undefined;
     const id = element.getAttribute("id");
-    const frame = Number(element.getAttribute("frame"));
-    const dx = Number(element.getAttribute("dx"));
-    const dy = Number(element.getAttribute("dy"));
-    const dd = Number(element.getAttribute("dd"));
+    const frame = getNumberFromAttribute(element.getAttribute("frame"));
+    const dx = getNumberFromAttribute(element.getAttribute("dx"));
+    const dy = getNumberFromAttribute(element.getAttribute("dy"));
+    const dd = getNumberFromAttribute(element.getAttribute("dd"));
+    const base = element.getAttribute("base") ?? undefined;
 
-    if (action == null) throw new Error("Invalid action");
     if (id == null) throw new Error("Invalid id");
-    if (isNaN(frame)) throw new Error("Invalid frame");
 
     return {
       action,
@@ -230,6 +247,7 @@ export class AvatarEffectData implements IAvatarEffectData {
       dx,
       dy,
       dd,
+      base,
     };
   }
 }

@@ -310,7 +310,11 @@ export class BaseAvatar extends PIXI.Container {
             break;
         }
 
-        sprite.x = asset.x;
+        sprite.x =
+          asset.x +
+          (asset.substractWidth != null && asset.substractWidth
+            ? sprite.texture.width
+            : 0);
         sprite.y = asset.y;
         sprite.visible = true;
         sprite.mirrored = asset.mirror;

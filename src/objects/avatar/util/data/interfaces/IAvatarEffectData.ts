@@ -5,6 +5,10 @@ export interface IAvatarEffectData {
     bodyPartId: string,
     frame: number
   ): AvatarEffectFrameBodypart | undefined;
+  getFrameBodyPartByBase(
+    bodyPartId: string,
+    frame: number
+  ): AvatarEffectFrameBodypart | undefined;
 
   getFrameEffectParts(frame: number): AvatarEffectFrameFXPart[];
   getFrameEffectPart(
@@ -38,11 +42,11 @@ export interface AvatarEffectFrameFXPart {
 
 export interface AvatarEffectFrameBodypart {
   id: string;
-  action: string;
-  frame: number;
-  dx: number;
-  dy: number;
-  dd: number;
+  action?: string;
+  frame?: number;
+  dx?: number;
+  dy?: number;
+  dd?: number;
 }
 
 export interface AvatarEffectSprite {

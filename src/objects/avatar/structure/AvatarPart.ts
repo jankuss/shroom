@@ -4,7 +4,10 @@ import {
   AvatarAnimationFrame,
   IAvatarAnimationData,
 } from "../util/data/interfaces/IAvatarAnimationData";
-import { IAvatarEffectData } from "../util/data/interfaces/IAvatarEffectData";
+import {
+  AvatarEffectFrameFXPart,
+  IAvatarEffectData,
+} from "../util/data/interfaces/IAvatarEffectData";
 import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
 import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
 import {
@@ -32,8 +35,7 @@ export class AvatarPart {
   private _assets: AvatarAsset[] = [];
   private _customFrames: CustomPartFrame[] = [];
 
-  private _frameOffsets: Map<number, { x: number; y: number }> = new Map();
-  private _avatarOffsets = false;
+  private _offsets: Map<number, AvatarEffectFrameFXPart> = new Map();
 
   constructor(
     private _figureDataPart: FigureDataPart,
@@ -78,8 +80,6 @@ export class AvatarPart {
   }
 
   addCustomFrame(customFrame: CustomPartFrame) {
-    if (this._avatarOffsets) return;
-
     this._customFrames.push(customFrame);
   }
 
@@ -87,24 +87,8 @@ export class AvatarPart {
     this._directionOffset = offset;
   }
 
-  setOffsets(
-    action: AvatarActionInfo,
-    frame: number,
-    offsets: { x: number; y: number }
-  ) {
-    this._frameOffsets.set(frame, offsets);
-
-    if (!this._avatarOffsets) {
-      this._avatarOffsets = true;
-      this._customFrames = [];
-    }
-
-    this._customFrames.push({
-      action: action,
-      frame: 0,
-      dx: 0,
-      dy: 0,
-    });
+  setAvatarOffsets(avatarFrame: AvatarEffectFrameFXPart, frame: number) {
+    this._offsets.set(frame, avatarFrame);
   }
 
   getDirection(offset = 0) {
@@ -139,7 +123,13 @@ export class AvatarPart {
   }
 
   private _getOffsetForFrame(frame: number) {
-    return this._frameOffsets.get(frame) ?? { x: 0, y: 0 };
+    const data = this._offsets.get(frame);
+    if (data == null) return { x: 0, y: 0 };
+
+    return {
+      x: data.dx ?? 0,
+      y: data.dy ?? 0,
+    };
   }
 
   private _update() {
@@ -204,23 +194,51 @@ export class AvatarPart {
       framesIndexed = [undefined];
     }
 
-    for (let i = 0; i < framesIndexed.length; i++) {
-      const frame = framesIndexed[i];
+    if (this._offsets.size > 0) {
+      this._offsets.forEach((offset) => {
+        const animationFrame = this._animationData.getAnimationFrame(
+          action.id,
+          this.type,
+          offset.frame ?? 0
+        );
 
-      const asset = getAssetForFrame({
-        animationFrame: frame,
-        actionData: action,
-        direction: direction,
-        figureData: this._figureData,
-        figureMap: this._figureMap,
-        offsetsData: this._offsetsData,
-        partId: this._figureDataPart.id,
-        partType: this._figureDataPart.type as AvatarFigurePartType,
-        partTypeFlipped: partInfo?.flippedSetType as AvatarFigurePartType,
+        const asset = getAssetForFrame({
+          animationFrame: animationFrame,
+          actionData: action,
+          direction: direction,
+          figureData: this._figureData,
+          figureMap: this._figureMap,
+          offsetsData: this._offsetsData,
+          partId: this._figureDataPart.id,
+          partType: this._figureDataPart.type as AvatarFigurePartType,
+          partTypeFlipped: partInfo?.flippedSetType as AvatarFigurePartType,
+          offsetX: offset.dx,
+          offsetY: offset.dy,
+        });
+
+        if (asset != null) {
+          this._assets.push(asset);
+        }
       });
+    } else {
+      for (let i = 0; i < framesIndexed.length; i++) {
+        const frame = framesIndexed[i];
 
-      if (asset != null) {
-        this._assets.push(asset);
+        const asset = getAssetForFrame({
+          animationFrame: frame,
+          actionData: action,
+          direction: direction,
+          figureData: this._figureData,
+          figureMap: this._figureMap,
+          offsetsData: this._offsetsData,
+          partId: this._figureDataPart.id,
+          partType: this._figureDataPart.type as AvatarFigurePartType,
+          partTypeFlipped: partInfo?.flippedSetType as AvatarFigurePartType,
+        });
+
+        if (asset != null) {
+          this._assets.push(asset);
+        }
       }
     }
   }

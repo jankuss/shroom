@@ -87,7 +87,6 @@ const drawOrdersDefault: DrawOrderList = {
     "top",
   ],
   6: [
-    "behind",
     "bottom",
     "rightarm",
     "rightitem",
@@ -95,10 +94,10 @@ const drawOrdersDefault: DrawOrderList = {
     "leftitem",
     "leftarm",
     "head",
+    "behind",
     "top",
   ],
   7: [
-    "behind",
     "bottom",
     "rightarm",
     "rightitem",
@@ -106,6 +105,7 @@ const drawOrdersDefault: DrawOrderList = {
     "leftarm",
     "torso",
     "head",
+    "behind",
     "top",
   ],
 };

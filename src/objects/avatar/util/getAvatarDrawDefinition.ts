@@ -303,6 +303,7 @@ export type AvatarAsset = {
   y: number;
   library: string;
   mirror: boolean;
+  substractWidth?: boolean;
 };
 
 export type AvatarDrawPart = DefaultAvatarDrawPart | AvatarEffectDrawPart;

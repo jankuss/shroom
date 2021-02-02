@@ -547,19 +547,18 @@ export function AvatarDance() {
 
     const avatars: Avatar[] = [];
 
-    let b = false;
+    let currentEffect = 1;
     const toggle = () => {
+      currentEffect++;
       avatars.forEach((avatar, index) => {
-        if (b) {
-          avatar.effect = `dance.${(index % 4) + 1}`;
-        } else {
-          avatar.effect = `13`;
-        }
+        avatar.effect = `${currentEffect}`;
       });
     };
 
     for (let y = 1; y <= 1; y++) {
       for (let x = 0; x < 8; x++) {
+        if (x !== 4) continue;
+
         const avatar2 = new Avatar({
           look:
             "hd-180-1.hr-828-61.ha-1012-110.he-1604-62.ea-1404-62.fa-1204-62.ch-255-66.lg-280-110.sh-305-62",
@@ -574,7 +573,6 @@ export function AvatarDance() {
         room.addRoomObject(avatar2);
         avatars.push(avatar2);
         avatar2.onClick = () => {
-          b = !b;
           toggle();
         };
       }
