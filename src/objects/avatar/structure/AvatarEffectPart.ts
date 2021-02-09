@@ -129,20 +129,14 @@ export class AvatarEffectPart implements IAvatarEffectPart {
     customFrame: CustomPartFrame,
     directionData?: AvatarEffectSpriteDirection
   ) {
-    let displayDirection = 0;
-    if (this._sprite.directions) {
-      displayDirection = direction;
-    }
-
-    const flippedMeta = getBasicFlippedMetaData(displayDirection);
-    displayDirection = flippedMeta.direction;
-
     if (this._sprite.member != null) {
       const { id, offsets, flip } = getEffectSprite(
         this._sprite.member,
         direction,
         frame,
-        this._offsetsData
+        this._offsetsData,
+        this._sprite.directions,
+        false
       );
 
       if (offsets == null) {

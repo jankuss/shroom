@@ -19,6 +19,7 @@ import {
 import { getSpriteId } from "./AvatarEffectPart";
 import { CustomPartFrame } from "./AvatarPart";
 import { IAvatarDrawablePart } from "./IAvatarDrawablePart";
+import { getEffectSprite } from "./util/getEffectSprite";
 
 export class AvatarAdditionPart implements IAvatarDrawablePart {
   private _direction: number | undefined;
@@ -115,7 +116,16 @@ export class AvatarAdditionPart implements IAvatarDrawablePart {
         : `${customFrame.action.assetpartdefinition}_${this._addition.id}_1`;
 
     if (member != null) {
-      let id = getSpriteId(member, direction, frame);
+      const { id, offsets, flip } = getEffectSprite(
+        member,
+        direction,
+        frame,
+        this._offsetsData,
+        true,
+        this._mode === "fx"
+      );
+
+      /*let id = getSpriteId(member, direction, frame);
       let offsets = this._offsetsData.getOffsets(id);
       let flip = false;
 
@@ -125,7 +135,7 @@ export class AvatarAdditionPart implements IAvatarDrawablePart {
         id = getSpriteId(member, flippedMeta.direction, frame);
         offsets = this._offsetsData.getOffsets(id);
         flip = flippedMeta.flip;
-      }
+      }*/
 
       if (offsets == null) {
         console.error("ASSET NOT FOUND", id);

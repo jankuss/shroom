@@ -6,13 +6,15 @@ export function getEffectSprite(
   member: string,
   direction: number,
   frame: number,
-  offsetsData: IAvatarOffsetsData
+  offsetsData: IAvatarOffsetsData,
+  hasDirection: boolean,
+  handleFlipped: boolean
 ) {
   let id = getSpriteId(member, direction, frame);
   let offsets = offsetsData.getOffsets(id);
   let flip = false;
 
-  if (offsets == null) {
+  if (handleFlipped && offsets == null) {
     const flippedMeta = getBasicFlippedMetaData(direction);
 
     id = getSpriteId(member, flippedMeta.direction, frame);
@@ -20,11 +22,12 @@ export function getEffectSprite(
     flip = flippedMeta.flip;
   }
 
-  if (offsets == null) {
-    const flippedMeta = getBasicFlippedMetaData(0);
+  if (!hasDirection) {
     id = getSpriteId(member, 0, frame);
-    offsets = offsetsData.getOffsets(id);
-    flip = flippedMeta.flip;
+
+    if (offsets == null) {
+      offsets = offsetsData.getOffsets(id);
+    }
   }
 
   return {
