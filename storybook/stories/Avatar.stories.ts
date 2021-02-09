@@ -566,7 +566,7 @@ export function AvatarDance() {
           roomZ: 0,
         });
 
-        avatar2.effect = `5`;
+        avatar2.effect = `dance.1`;
 
         room.addRoomObject(avatar2);
         avatars.push(avatar2);

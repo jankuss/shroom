@@ -29,7 +29,8 @@ import { parseLookString } from "./util/parseLookString";
 import { AvatarAssetLibraryCollection } from "./AvatarAssetLibraryCollection";
 import { ManifestLibrary } from "./data/ManifestLibrary";
 import { IManifestLibrary } from "./data/interfaces/IManifestLibrary";
-import { AvatarDependencies, AvatarDrawDefinition } from "./types";
+import { AvatarDependencies } from "./types";
+import { AvatarDrawDefinition } from "./structure/AvatarDrawDefinition";
 
 interface Options {
   getAssetBundle: (library: string) => Promise<IAssetBundle>;
@@ -197,7 +198,8 @@ export class AvatarLoader implements IAvatarLoader {
 
     // Get asset ids for the look
     const fileIds = getDrawDefinition(options, effectData)
-      ?.parts.flatMap((part) => part.assets)
+      ?.getDrawDefinition()
+      .flatMap((part) => part.assets)
       .map((asset) => asset.fileId);
 
     // Load the required textures for the look

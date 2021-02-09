@@ -23,7 +23,7 @@ import { BodyPartDrawOrder } from "./BodyPartDrawOrder";
 import { IAvatarEffectPart } from "./interface/IAvatarEffectPart";
 import { AvatarDependencies, AvatarDrawPart } from "../types";
 
-export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
+export class AvatarDrawDefinition implements IAvatarEffectPart {
   private _figureData: IFigureData;
   private _actionsData: IAvatarActionsData;
   private _geometry: IAvatarGeometryData;
@@ -40,7 +40,7 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
   private _effectParts: AvatarEffectPart[];
   private _bodyParts: AvatarBodyPartList;
 
-  private _additions: Map<AvatarBodyPart, AvatarAdditionPart[]> = new Map();
+  private _drawParts: AvatarDrawPart[] | undefined = undefined;
 
   constructor(
     private _options: Options,
@@ -160,6 +160,8 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
   }
 
   public getDrawDefinition(): AvatarDrawPart[] {
+    if (this._drawParts != null) return this._drawParts;
+
     const drawOrderId = getDrawOrderForActions(this._activeActions, {
       hasItem: this._options.item != null,
     });
@@ -193,6 +195,7 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
       (a, b) => a.z - b.z
     );
 
+    this._drawParts = sortedDrawParts;
     return sortedDrawParts;
   }
 

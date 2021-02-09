@@ -41,6 +41,10 @@ export class AvatarEffectPart implements IAvatarEffectPart {
   getDirection(offset = 0) {
     if (this._direction == null) return;
 
+    if (!this._sprite.directions) {
+      return 0;
+    }
+
     return getAvatarDirection(this._direction + this._directionOffset + offset);
   }
 

@@ -1,4 +1,4 @@
-import { AvatarDrawDefinition } from "../objects/avatar/types";
+import { AvatarDrawDefinition } from "../objects/avatar/structure/AvatarDrawDefinition";
 import { LookOptions } from "../objects/avatar/util/createLookServer";
 import { HitTexture } from "../objects/hitdetection/HitTexture";
 

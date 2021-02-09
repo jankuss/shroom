@@ -35,12 +35,6 @@ export type AvatarEffectDrawPart = {
   addition: boolean;
 };
 
-export interface AvatarDrawDefinition {
-  parts: AvatarDrawPart[];
-  offsetX: number;
-  offsetY: number;
-}
-
 export interface AvatarDependencies {
   figureData: IFigureData;
   figureMap: IFigureMapData;

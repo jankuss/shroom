@@ -13,10 +13,10 @@ import { Shroom } from "../Shroom";
 import { AvatarFigurePartType } from "./enum/AvatarFigurePartType";
 import {
   AvatarAsset,
-  AvatarDrawDefinition,
   AvatarEffectDrawPart,
   DefaultAvatarDrawPart,
 } from "./types";
+import { AvatarDrawDefinition } from "./structure/AvatarDrawDefinition";
 
 const bodyPartTypes: Set<AvatarFigurePartType> = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.Head,
@@ -228,8 +228,8 @@ export class BaseAvatar extends PIXI.Container {
   private _updatePosition(definition: AvatarDrawDefinition) {
     if (this._container == null) return;
 
-    this._container.x = definition.offsetX;
-    this._container.y = definition.offsetY;
+    this._container.x = 0;
+    this._container.y = 0;
   }
 
   private _updateSprites() {
@@ -261,7 +261,7 @@ export class BaseAvatar extends PIXI.Container {
     this._container = new PIXI.Container();
     this._container.sortableChildren = true;
 
-    drawDefinition.parts.forEach((part) => {
+    drawDefinition.getDrawDefinition().forEach((part) => {
       if (part.kind === "AVATAR_DRAW_PART") {
         const figurePart = part.type as AvatarFigurePartType;
         if (this._skipBodyParts && bodyPartTypes.has(figurePart)) {

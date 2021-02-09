@@ -2,8 +2,8 @@ import { ParsedLook } from "./parseLookString";
 import { AvatarAction } from "../enum/AvatarAction";
 import { IAvatarEffectData } from "../data/interfaces/IAvatarEffectData";
 import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
-import { AvatarDrawDefinitionStructure } from "../structure/AvatarDrawDefinition";
-import { AvatarDependencies, AvatarDrawDefinition } from "../types";
+import { AvatarDrawDefinition } from "../structure/AvatarDrawDefinition";
+import { AvatarDependencies } from "../types";
 
 export const basePartSet = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.LeftHand,
@@ -29,7 +29,7 @@ export function getAvatarDrawDefinition(
   deps: AvatarDependencies
 ): AvatarDrawDefinition | undefined {
   const actions = new Set(initialActions).add(AvatarAction.Default);
-  const def = new AvatarDrawDefinitionStructure(
+  const def = new AvatarDrawDefinition(
     {
       actions,
       direction,
@@ -42,11 +42,7 @@ export function getAvatarDrawDefinition(
     deps
   );
 
-  return {
-    parts: def.getDrawDefinition(),
-    offsetX: 0,
-    offsetY: 0,
-  };
+  return def;
 }
 
 interface Options {
