@@ -9,6 +9,13 @@ import { IFigureMapData } from "../util/data/interfaces/IFigureMapData";
 import { ParsedLook } from "../util/parseLookString";
 import { AvatarPart } from "./AvatarPart";
 
+export const basePartSet = new Set<AvatarFigurePartType>([
+  AvatarFigurePartType.LeftHand,
+  AvatarFigurePartType.RightHand,
+  AvatarFigurePartType.Body,
+  AvatarFigurePartType.Head,
+]);
+
 export class AvatarPartList {
   private _parts: AvatarPart[] = [];
   private _hiddenLayers: Set<string> = new Set();
@@ -31,7 +38,7 @@ export class AvatarPartList {
 
       hiddenLayers.forEach((layer) => this._hiddenLayers.add(layer));
 
-      if (parts != null) {
+      if (parts != null && parts.length > 0) {
         parts.forEach((part) => {
           const avatarPart = new AvatarPart(part, colorValue, _deps);
 
@@ -43,6 +50,27 @@ export class AvatarPartList {
     if (itemId != null) {
       this._addItem(itemId);
     }
+
+    basePartSet.forEach((partType) => {
+      const partsForType = this._partsByType.get(
+        partType as AvatarFigurePartType
+      );
+
+      if (partsForType == null || partsForType.length === 0) {
+        this._registerPart(
+          new AvatarPart(
+            {
+              id: "1",
+              type: partType as AvatarFigurePartType,
+              colorable: false,
+              index: 0,
+            },
+            undefined,
+            _deps
+          )
+        );
+      }
+    });
   }
 
   getPartsForBodyBart(bodyPart: Bodypart) {

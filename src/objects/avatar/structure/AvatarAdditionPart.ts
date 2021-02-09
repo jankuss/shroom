@@ -12,11 +12,6 @@ import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData
 import { applyOffsets } from "../util/getAssetFromPartMeta";
 import { getAvatarDirection } from "../util/getAvatarDirection";
 import { AvatarAsset, AvatarDrawPart } from "../util/getAvatarDrawDefinition";
-import {
-  getBasicFlippedMetaData,
-  getFlippedMetaData,
-} from "../util/getFlippedMetaData";
-import { getSpriteId } from "./AvatarEffectPart";
 import { CustomPartFrame } from "./AvatarPart";
 import { IAvatarDrawablePart } from "./IAvatarDrawablePart";
 import { getEffectSprite } from "./util/getEffectSprite";

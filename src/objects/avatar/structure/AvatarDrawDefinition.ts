@@ -1,6 +1,7 @@
 import { associateBy } from "../../../util/associateBy";
 import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import { AvatarAction } from "../enum/AvatarAction";
+import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
 import { addMissingDrawOrderItems } from "../util/addMissingDrawOrderItems";
 import {
   AvatarActionInfo,
@@ -23,6 +24,7 @@ import { getDrawOrderForActions } from "../util/getDrawOrderForActions";
 import { ParsedLook } from "../util/parseLookString";
 import { AvatarAdditionPart } from "./AvatarAdditionPart";
 import { AvatarBodyPart } from "./AvatarBodyPart";
+import { AvatarBodyPartList } from "./AvatarBodyPartList";
 import { AvatarEffectPart } from "./AvatarEffectPart";
 import { AvatarPartList } from "./AvatarPartList";
 import { BodyPartDrawOrder } from "./BodyPartDrawOrder";
@@ -45,7 +47,7 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
   private _partList: AvatarPartList;
   private _activeActions: AvatarActionInfo[];
   private _effectParts: AvatarEffectPart[];
-  private _bodyParts: AvatarBodyPart[];
+  private _bodyParts: AvatarBodyPartList;
 
   private _additions: Map<AvatarBodyPart, AvatarAdditionPart[]> = new Map();
 
@@ -73,46 +75,27 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
     const effect = _options.effect;
 
     const partList = this._getPartsForLook(_options.look);
-    const bodyParts = this._getBodyParts(partList);
+
+    const bodyParts = AvatarBodyPartList.create(
+      partList,
+      this._options.item != null,
+      { actionsData, geometry, partSetsData, offsetsData }
+    );
     const activeActions = this._getActiveActions();
-    const bodyPartsById = associateBy(bodyParts, (bodyPart) => bodyPart.id);
-    const additions: AvatarAdditionPart[] = [];
 
-    activeActions.forEach((action) => {
-      bodyParts.forEach((bodyPart) => {
-        bodyPart.setActiveAction(action);
+    this._bodyParts = bodyParts;
 
-        if (bodyPart.id === "head") {
-          bodyPart.setDirection(_options.headDirection ?? _options.direction);
-        } else {
-          bodyPart.setDirection(_options.direction);
-        }
-      });
-    });
+    bodyParts.applyActions(activeActions);
+    bodyParts.setBodyPartDirection(
+      this._options.direction,
+      this._options.headDirection
+    );
 
     const effectParts = new Map<string, IAvatarEffectPart>();
     this._effectParts = [];
-    this._bodyParts = bodyParts;
 
     if (effect != null) {
-      effect.getAddtions().forEach((sprite) => {
-        const bodyPart =
-          sprite.align != null ? bodyPartsById.get(sprite.align) : undefined;
-        if (bodyPart != null) {
-          const current = this._additions.get(bodyPart) ?? [];
-          const additionPart = new AvatarAdditionPart(
-            sprite,
-            this._actionsData,
-            this._offsetsData,
-            this._partSetsData
-          );
-
-          this._additions.set(bodyPart, [...current, additionPart]);
-          additions.push(additionPart);
-
-          bodyPart.addAddition(additionPart);
-        }
-      });
+      bodyParts.applyEffectAdditions(effect);
 
       effect.getSprites().forEach((sprite) => {
         if (sprite.id === "avatar") {
@@ -133,14 +116,11 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
       });
 
       for (let i = 0; i < effect.getFrameCount(); i++) {
-        bodyParts.forEach((bodyPart) => bodyPart.setEffectFrame(effect, i));
+        bodyParts.setEffectFrame(effect, i);
+
         effectParts.forEach((effectPart) =>
           effectPart.setEffectFrame(effect, i)
         );
-
-        additions.forEach((addition) => {
-          addition.setEffectFrame(effect, i);
-        });
       }
 
       effectParts.forEach((effectPart) => {
@@ -148,33 +128,21 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
         effectPart.setDirection(_options.direction);
       });
 
-      additions.forEach((addition) => {
-        addition.setDirection(this._direction);
-      });
+      bodyParts.setAdditionsDirection(_options.direction);
     }
 
     const directionOffset = effect?.getDirection()?.offset ?? 0;
 
     if (directionOffset != null) {
-      bodyParts.forEach((bodyPart) => {
-        bodyPart.setDirectionOffset(directionOffset);
-      });
-
       effectParts.forEach((part) => {
         part.setDirectionOffset(directionOffset);
       });
 
-      additions.forEach((part) => {
-        part.setDirectionOffset(directionOffset);
-      });
+      bodyParts.setDirectionOffset(directionOffset);
     }
 
     this._activeActions = activeActions;
     this._partList = partList;
-  }
-
-  setBase(base: string): void {
-    throw new Error("Method not implemented.");
   }
 
   setDirection(direction: number): void {
@@ -189,9 +157,7 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
     const avatarFrameData = effect.getFrameEffectPart("avatar", frame);
     if (avatarFrameData == null) return;
 
-    this._bodyParts.forEach((bodyPart) => {
-      bodyPart.setAvatarOffsets(avatarFrameData, frame);
-    });
+    this._bodyParts.setAvatarOffsets(avatarFrameData, frame);
 
     this._effectParts.forEach((effectPart) => {
       effectPart.setAvatarOffsets(avatarFrameData, frame);
@@ -222,10 +188,8 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
 
     if (drawOrderBodyParts == null) return [];
 
-    const bodyPartById = associateBy(this._bodyParts, (part) => part.id);
-
     const sortedParts = drawOrderBodyParts
-      .map((id) => bodyPartById.get(id))
+      .map((id) => this._bodyParts.getBodyPartById(id))
       .filter(notNullOrUndefined)
       .flatMap((bodyPart) => {
         return bodyPart.getSortedParts("vertical");
@@ -258,29 +222,6 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
     const drawOrderAdditional = addMissingDrawOrderItems(new Set(drawOrderRaw));
 
     return drawOrderAdditional;
-  }
-
-  private _getBodyParts(partList: AvatarPartList) {
-    const bodyPartIds = [...this._geometry.getBodyParts("full")];
-
-    if (this._options.item != null) {
-      bodyPartIds.push("rightitem");
-    }
-
-    return bodyPartIds
-      .map((id) => this._geometry.getBodyPart("vertical", id))
-      .filter(notNullOrUndefined)
-      .map(
-        (bodyPart) =>
-          new AvatarBodyPart(
-            bodyPart,
-            partList.getPartsForBodyBart(bodyPart),
-            this._partSetsData,
-            this._actionsData,
-            this._geometry
-          )
-      )
-      .sort((a, b) => a.z - b.z);
   }
 
   private _getPartsForLook(look: ParsedLook) {

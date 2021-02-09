@@ -83,7 +83,10 @@ function _getLookOptionsString(lookOptions: LookOptions) {
 export class AvatarLoader implements IAvatarLoader {
   private _globalCache: Map<string, Promise<HitTexture>> = new Map();
   private _lookServer: Promise<LookServer>;
-  private _effectCache: Map<string, Promise<IAvatarEffectData>> = new Map();
+  private _effectCache: Map<
+    string,
+    Promise<EffectCacheEntry | undefined>
+  > = new Map();
   private _lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
   private _assetBundles: Map<string, Promise<IManifestLibrary>> = new Map();
   private _effectMap: Promise<IAvatarEffectMap>;
@@ -95,13 +98,13 @@ export class AvatarLoader implements IAvatarLoader {
 
     this._lookServer = this._dependencies
       .then(async (dependencies) => {
-        // Wait for the placeholder model to load
         return createLookServer({
           ...dependencies,
           offsetsData: this._offsets,
         });
       })
       .then(async (server) => {
+        // Wait for the placeholder model to load
         await this._getAvatarDrawDefinition(server, {
           direction: 0,
           headDirection: 0,
@@ -173,50 +176,55 @@ export class AvatarLoader implements IAvatarLoader {
     getDrawDefinition: LookServer,
     options: LookOptions
   ): Promise<AvatarLoaderResult> {
-    const { actions, look, item, effect, initial, skipCaching } = options;
-
-    const effectMap = await this._effectMap;
-
-    const loadedFiles = new Map<string, Promise<HitTexture>>();
+    const { effect } = options;
 
     let effectData: IAvatarEffectData | undefined;
     let effectBundle: IAvatarEffectBundle | undefined;
 
+    // If an effect is set, try to load it
     if (effect != null) {
-      const effectInfo = effectMap.getEffectInfo(effect);
-
-      if (effectInfo != null) {
-        effectBundle = await this._options.getEffectBundle(effectInfo);
-        effectData = await effectBundle.getData();
+      const effectCache = await this._loadEffectCached(effect);
+      if (effectCache != null) {
+        effectData = effectCache.effectData;
+        effectBundle = effectCache.effectBundle;
       }
     }
 
     const { figureData, figureMap } = await this._dependencies;
 
+    // Open the effect library
+    if (effectBundle != null) {
+      await this._offsets.open(effectBundle);
+    }
+
+    // Get the required libraries for the look
     const libs = getLibrariesForLook(parseLookString(options.look), {
       figureData: figureData,
       figureMap: figureMap,
     });
 
-    if (effectBundle != null) {
-      await this._offsets.open(effectBundle);
-    }
+    console.log(libs);
 
+    // Open the required libraries for the look
     await Promise.all(
       Array.from(libs).map((lib) =>
         this._getAssetBundle(lib).then((bundle) => this._offsets.open(bundle))
       )
     );
 
+    // Get asset ids for the look
     const fileIds = getDrawDefinition(options, effectData)
       ?.parts.flatMap((part) => part.assets)
       .map((asset) => asset.fileId);
 
+    // Load the required textures for the look
     if (fileIds != null) {
       await this._offsets.loadTextures(fileIds);
     }
 
-    const obj: AvatarLoaderResult = {
+    console.log(fileIds);
+
+    return {
       getDrawDefinition: (options) => {
         const result = this._getDrawDefinitionCached(
           getDrawDefinition,
@@ -238,8 +246,34 @@ export class AvatarLoader implements IAvatarLoader {
         return texture;
       },
     };
+  }
 
-    return obj;
+  private async _loadEffectCached(effect: string) {
+    const current = this._effectCache.get(effect);
+    if (current != null) return current;
+
+    const promise = this._loadEffect(effect);
+    this._effectCache.set(effect, promise);
+
+    return promise;
+  }
+
+  private async _loadEffect(
+    effect: string
+  ): Promise<EffectCacheEntry | undefined> {
+    const effectMap = await this._effectMap;
+
+    const effectInfo = effectMap.getEffectInfo(effect);
+
+    if (effectInfo != null) {
+      const effectBundle = await this._options.getEffectBundle(effectInfo);
+      const effectData = await effectBundle.getData();
+
+      return {
+        effectBundle,
+        effectData,
+      };
+    }
   }
 
   private async _getAssetBundle(library: string) {
@@ -252,25 +286,6 @@ export class AvatarLoader implements IAvatarLoader {
     this._assetBundles.set(library, bundle);
 
     return bundle;
-  }
-
-  private _loadEffect(type: string, id: string) {
-    const key = `${type}_${id}`;
-    let current = this._effectCache.get(key);
-
-    if (current == null) {
-      current = ShroomAssetBundle.fromUrl(
-        `./resources/figure/hh_human_fx.shroom`
-      ).then(async (bundle) => {
-        const xml = await bundle.getString(`${type}${id}.bin`);
-
-        return new AvatarEffectData(xml);
-      });
-
-      this._effectCache.set(key, current);
-    }
-
-    return current;
   }
 
   private _getDrawDefinitionCached(
@@ -293,6 +308,11 @@ export class AvatarLoader implements IAvatarLoader {
 
     return drawDefinition;
   }
+}
+
+interface EffectCacheEntry {
+  effectBundle: IAvatarEffectBundle;
+  effectData: IAvatarEffectData;
 }
 
 async function initializeDefaultAvatarDependencies(
