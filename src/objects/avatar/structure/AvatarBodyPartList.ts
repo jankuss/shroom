@@ -3,14 +3,14 @@ import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import {
   AvatarActionInfo,
   IAvatarActionsData,
-} from "../util/data/interfaces/IAvatarActionsData";
+} from "../data/interfaces/IAvatarActionsData";
 import {
   AvatarEffectFrameFXPart,
   IAvatarEffectData,
-} from "../util/data/interfaces/IAvatarEffectData";
-import { IAvatarGeometryData } from "../util/data/interfaces/IAvatarGeometryData";
-import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
-import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
+} from "../data/interfaces/IAvatarEffectData";
+import { IAvatarGeometryData } from "../data/interfaces/IAvatarGeometryData";
+import { IAvatarOffsetsData } from "../data/interfaces/IAvatarOffsetsData";
+import { IAvatarPartSetsData } from "../data/interfaces/IAvatarPartSetsData";
 import { AvatarAdditionPart } from "./AvatarAdditionPart";
 import { AvatarBodyPart } from "./AvatarBodyPart";
 import { AvatarPartList } from "./AvatarPartList";

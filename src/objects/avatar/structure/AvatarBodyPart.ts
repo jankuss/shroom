@@ -3,19 +3,19 @@ import { AvatarAction } from "../enum/AvatarAction";
 import {
   AvatarActionInfo,
   IAvatarActionsData,
-} from "../util/data/interfaces/IAvatarActionsData";
+} from "../data/interfaces/IAvatarActionsData";
 import {
   AvatarEffectFrameFXPart,
   IAvatarEffectData,
-} from "../util/data/interfaces/IAvatarEffectData";
+} from "../data/interfaces/IAvatarEffectData";
 import {
   Bodypart,
   IAvatarGeometryData,
-} from "../util/data/interfaces/IAvatarGeometryData";
-import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
+} from "../data/interfaces/IAvatarGeometryData";
+import { IAvatarPartSetsData } from "../data/interfaces/IAvatarPartSetsData";
 import { AvatarAdditionPart } from "./AvatarAdditionPart";
 import { AvatarPart } from "./AvatarPart";
-import { IAvatarDrawablePart } from "./IAvatarDrawablePart";
+import { IAvatarDrawablePart } from "./interface/IAvatarDrawablePart";
 
 /**
  * A bodypart of the avatar. A bodypart manages multiple `AvatarPart` objects.

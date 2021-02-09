@@ -1,4 +1,4 @@
-import { HitTexture } from "../../../../hitdetection/HitTexture";
+import { HitTexture } from "../../../hitdetection/HitTexture";
 import { IAvatarEffectData } from "./IAvatarEffectData";
 import { IAvatarManifestData } from "./IAvatarManifestData";
 import { IManifestLibrary } from "./IManifestLibrary";

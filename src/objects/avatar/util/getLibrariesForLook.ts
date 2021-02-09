@@ -1,5 +1,5 @@
-import { IFigureData } from "./data/interfaces/IFigureData";
-import { IFigureMapData } from "./data/interfaces/IFigureMapData";
+import { IFigureData } from "../data/interfaces/IFigureData";
+import { IFigureMapData } from "../data/interfaces/IFigureMapData";
 import { ParsedLook } from "./parseLookString";
 
 export function getLibrariesForLook(

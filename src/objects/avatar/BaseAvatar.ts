@@ -1,10 +1,4 @@
 import * as PIXI from "pixi.js";
-import {
-  AvatarAsset,
-  AvatarDrawDefinition,
-  AvatarEffectDrawPart,
-  DefaultAvatarDrawPart,
-} from "./util/getAvatarDrawDefinition";
 import { LookOptions } from "./util/createLookServer";
 import {
   AvatarLoaderResult,
@@ -17,6 +11,12 @@ import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { Shroom } from "../Shroom";
 import { AvatarFigurePartType } from "./enum/AvatarFigurePartType";
+import {
+  AvatarAsset,
+  AvatarDrawDefinition,
+  AvatarEffectDrawPart,
+  DefaultAvatarDrawPart,
+} from "./types";
 
 const bodyPartTypes: Set<AvatarFigurePartType> = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.Head,

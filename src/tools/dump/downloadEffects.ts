@@ -1,5 +1,5 @@
 import path from "path";
-import { AvatarEffectMap } from "../../objects/avatar/util/data/AvatarEffectMap";
+import { AvatarEffectMap } from "../../objects/avatar/data/AvatarEffectMap";
 import {
   downloadFile,
   DownloadFileResult,

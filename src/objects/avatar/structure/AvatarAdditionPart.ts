@@ -1,20 +1,20 @@
 import { AvatarAction } from "../enum/AvatarAction";
 import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
-import { IAvatarActionsData } from "../util/data/interfaces/IAvatarActionsData";
+import { IAvatarActionsData } from "../data/interfaces/IAvatarActionsData";
 import {
   AvatarEffectFrameBodypart,
   AvatarEffectFrameFXPart,
   AvatarEffectFXAddition,
   IAvatarEffectData,
-} from "../util/data/interfaces/IAvatarEffectData";
-import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
-import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
+} from "../data/interfaces/IAvatarEffectData";
+import { IAvatarOffsetsData } from "../data/interfaces/IAvatarOffsetsData";
+import { IAvatarPartSetsData } from "../data/interfaces/IAvatarPartSetsData";
 import { applyOffsets } from "../util/getAssetFromPartMeta";
 import { getAvatarDirection } from "../util/getAvatarDirection";
-import { AvatarAsset, AvatarDrawPart } from "../util/getAvatarDrawDefinition";
 import { CustomPartFrame } from "./AvatarPart";
-import { IAvatarDrawablePart } from "./IAvatarDrawablePart";
-import { getEffectSprite } from "./util/getEffectSprite";
+import { IAvatarDrawablePart } from "./interface/IAvatarDrawablePart";
+import { getEffectSprite } from "../util/getEffectSprite";
+import { AvatarAsset, AvatarDrawPart } from "../types";
 
 export class AvatarAdditionPart implements IAvatarDrawablePart {
   private _direction: number | undefined;
@@ -120,20 +120,7 @@ export class AvatarAdditionPart implements IAvatarDrawablePart {
         this._mode === "fx"
       );
 
-      /*let id = getSpriteId(member, direction, frame);
-      let offsets = this._offsetsData.getOffsets(id);
-      let flip = false;
-
       if (offsets == null) {
-        const flippedMeta = getBasicFlippedMetaData(direction);
-
-        id = getSpriteId(member, flippedMeta.direction, frame);
-        offsets = this._offsetsData.getOffsets(id);
-        flip = flippedMeta.flip;
-      }*/
-
-      if (offsets == null) {
-        console.error("ASSET NOT FOUND", id);
         return;
       }
 

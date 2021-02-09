@@ -1,4 +1,4 @@
-import { traverseDOMTree } from "../../../../util/traverseDOMTree";
+import { traverseDOMTree } from "../../../util/traverseDOMTree";
 import { AvatarEffect, IAvatarEffectMap } from "./interfaces/IAvatarEffectMap";
 
 export class AvatarEffectMap implements IAvatarEffectMap {

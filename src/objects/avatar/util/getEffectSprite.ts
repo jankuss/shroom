@@ -1,6 +1,6 @@
-import { IAvatarOffsetsData } from "../../util/data/interfaces/IAvatarOffsetsData";
-import { getBasicFlippedMetaData } from "../../util/getFlippedMetaData";
-import { getSpriteId } from "../AvatarEffectPart";
+import { IAvatarOffsetsData } from "../data/interfaces/IAvatarOffsetsData";
+import { getBasicFlippedMetaData } from "./getFlippedMetaData";
+import { getSpriteId } from "../structure/AvatarEffectPart";
 
 export function getEffectSprite(
   member: string,

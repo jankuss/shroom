@@ -1,7 +1,7 @@
 import path from "path";
-import { IFigureMapData } from "../../objects/avatar/util/data/interfaces/IFigureMapData";
+import { IFigureMapData } from "../../objects/avatar/data/interfaces/IFigureMapData";
 import { promises as fs } from "fs";
-import { AvatarManifestData } from "../../objects/avatar/util/data/AvatarManifestData";
+import { AvatarManifestData } from "../../objects/avatar/data/AvatarManifestData";
 import { ProgressBar } from "./ProgressBar";
 import { Logger } from "./Logger";
 

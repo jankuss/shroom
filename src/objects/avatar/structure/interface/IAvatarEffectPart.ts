@@ -1,4 +1,4 @@
-import { IAvatarEffectData } from "../../util/data/interfaces/IAvatarEffectData";
+import { IAvatarEffectData } from "../../data/interfaces/IAvatarEffectData";
 
 export interface IAvatarEffectPart {
   setDirection(direction: number): void;

@@ -5,7 +5,7 @@ import { promisify } from "util";
 import g from "glob";
 import { extractSwfs } from "./extractSwfs";
 import { promises as fs } from "fs";
-import { FigureMapData } from "../../objects/avatar/util/data/FigureMapData";
+import { FigureMapData } from "../../objects/avatar/data/FigureMapData";
 import { createOffsetFile } from "./createOffsetFile";
 import { dumpFigure } from "./dumpFigure";
 import { dumpFurniture } from "./dumpFurniture";

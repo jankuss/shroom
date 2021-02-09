@@ -1,4 +1,4 @@
-import { notNullOrUndefined } from "../../../../util/notNullOrUndefined";
+import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import { AvatarData } from "./AvatarData";
 import { FigureDataPart, IFigureData } from "./interfaces/IFigureData";
 

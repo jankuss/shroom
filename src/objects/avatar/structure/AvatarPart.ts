@@ -1,26 +1,17 @@
 import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
-import { AvatarActionInfo } from "../util/data/interfaces/IAvatarActionsData";
+import { AvatarActionInfo } from "../data/interfaces/IAvatarActionsData";
 import {
   AvatarAnimationFrame,
   IAvatarAnimationData,
-} from "../util/data/interfaces/IAvatarAnimationData";
-import {
-  AvatarEffectFrameFXPart,
-  IAvatarEffectData,
-} from "../util/data/interfaces/IAvatarEffectData";
-import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
-import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
-import {
-  FigureDataPart,
-  IFigureData,
-} from "../util/data/interfaces/IFigureData";
-import { IFigureMapData } from "../util/data/interfaces/IFigureMapData";
+} from "../data/interfaces/IAvatarAnimationData";
+import { AvatarEffectFrameFXPart } from "../data/interfaces/IAvatarEffectData";
+import { IAvatarOffsetsData } from "../data/interfaces/IAvatarOffsetsData";
+import { IAvatarPartSetsData } from "../data/interfaces/IAvatarPartSetsData";
+import { FigureDataPart, IFigureData } from "../data/interfaces/IFigureData";
+import { IFigureMapData } from "../data/interfaces/IFigureMapData";
 import { getAvatarDirection } from "../util/getAvatarDirection";
-import {
-  AvatarAsset,
-  DefaultAvatarDrawPart,
-  getAssetForFrame,
-} from "../util/getAvatarDrawDefinition";
+import { getAssetForFrame } from "../util/getAssetForFrame";
+import { AvatarAsset, DefaultAvatarDrawPart } from "../types";
 
 export class AvatarPart {
   private _action: AvatarActionInfo | undefined;
@@ -68,8 +59,6 @@ export class AvatarPart {
   public get index() {
     return this._figureDataPart.index;
   }
-
-  setBase(base: string) {}
 
   setActiveAction(action: AvatarActionInfo) {
     this._action = action;
@@ -159,8 +148,6 @@ export class AvatarPart {
           animationFrame: frame,
           actionData: action,
           direction: direction,
-          figureData: this._figureData,
-          figureMap: this._figureMap,
           offsetsData: this._offsetsData,
           partId: this._figureDataPart.id,
           partType: this._figureDataPart.type as AvatarFigurePartType,
@@ -206,8 +193,6 @@ export class AvatarPart {
           animationFrame: animationFrame,
           actionData: action,
           direction: direction,
-          figureData: this._figureData,
-          figureMap: this._figureMap,
           offsetsData: this._offsetsData,
           partId: this._figureDataPart.id,
           partType: this._figureDataPart.type as AvatarFigurePartType,
@@ -228,8 +213,6 @@ export class AvatarPart {
           animationFrame: frame,
           actionData: action,
           direction: direction,
-          figureData: this._figureData,
-          figureMap: this._figureMap,
           offsetsData: this._offsetsData,
           partId: this._figureDataPart.id,
           partType: this._figureDataPart.type as AvatarFigurePartType,

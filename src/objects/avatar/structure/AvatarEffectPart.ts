@@ -2,23 +2,19 @@ import { AvatarAction } from "../enum/AvatarAction";
 import {
   AvatarActionInfo,
   IAvatarActionsData,
-} from "../util/data/interfaces/IAvatarActionsData";
+} from "../data/interfaces/IAvatarActionsData";
 import {
   AvatarEffectFrameFXPart,
   AvatarEffectSprite,
   AvatarEffectSpriteDirection,
   IAvatarEffectData,
-} from "../util/data/interfaces/IAvatarEffectData";
-import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
+} from "../data/interfaces/IAvatarEffectData";
+import { IAvatarOffsetsData } from "../data/interfaces/IAvatarOffsetsData";
 import { applyOffsets } from "../util/getAssetFromPartMeta";
 import { getAvatarDirection } from "../util/getAvatarDirection";
-import {
-  AvatarAsset,
-  AvatarEffectDrawPart,
-} from "../util/getAvatarDrawDefinition";
-import { getBasicFlippedMetaData } from "../util/getFlippedMetaData";
 import { IAvatarEffectPart } from "./interface/IAvatarEffectPart";
-import { getEffectSprite } from "./util/getEffectSprite";
+import { getEffectSprite } from "../util/getEffectSprite";
+import { AvatarAsset, AvatarEffectDrawPart } from "../types";
 
 export class AvatarEffectPart implements IAvatarEffectPart {
   private _direction: number | undefined;
@@ -140,7 +136,6 @@ export class AvatarEffectPart implements IAvatarEffectPart {
       );
 
       if (offsets == null) {
-        console.error("ASSET NOT FOUND", id);
         return;
       }
 

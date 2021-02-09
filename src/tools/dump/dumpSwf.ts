@@ -121,3 +121,5 @@ interface SWFSymbol {
 interface SWF {
   tags: SWFTag[];
 }
+
+interface ExtractedSWF {}

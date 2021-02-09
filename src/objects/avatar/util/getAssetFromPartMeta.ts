@@ -1,4 +1,4 @@
-import { IAvatarOffsetsData } from "./data/interfaces/IAvatarOffsetsData";
+import { IAvatarOffsetsData } from "../data/interfaces/IAvatarOffsetsData";
 
 export function getAssetFromPartMeta(
   assetPartDefinition: string,

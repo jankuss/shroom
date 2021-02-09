@@ -1,5 +1,5 @@
-import { IAssetBundle } from "../../../../assets/IAssetBundle";
-import { HitTexture } from "../../../hitdetection/HitTexture";
+import { IAssetBundle } from "../../../assets/IAssetBundle";
+import { HitTexture } from "../../hitdetection/HitTexture";
 import { AvatarManifestData } from "./AvatarManifestData";
 import { IAvatarManifestData } from "./interfaces/IAvatarManifestData";
 import { IManifestLibrary } from "./interfaces/IManifestLibrary";

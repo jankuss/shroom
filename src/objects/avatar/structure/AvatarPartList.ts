@@ -1,11 +1,11 @@
 import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
-import { IAvatarAnimationData } from "../util/data/interfaces/IAvatarAnimationData";
-import { IAvatarEffectData } from "../util/data/interfaces/IAvatarEffectData";
-import { Bodypart } from "../util/data/interfaces/IAvatarGeometryData";
-import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
-import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
-import { IFigureData } from "../util/data/interfaces/IFigureData";
-import { IFigureMapData } from "../util/data/interfaces/IFigureMapData";
+import { IAvatarAnimationData } from "../data/interfaces/IAvatarAnimationData";
+import { IAvatarEffectData } from "../data/interfaces/IAvatarEffectData";
+import { Bodypart } from "../data/interfaces/IAvatarGeometryData";
+import { IAvatarOffsetsData } from "../data/interfaces/IAvatarOffsetsData";
+import { IAvatarPartSetsData } from "../data/interfaces/IAvatarPartSetsData";
+import { IFigureData } from "../data/interfaces/IFigureData";
+import { IFigureMapData } from "../data/interfaces/IFigureMapData";
 import { ParsedLook } from "../util/parseLookString";
 import { AvatarPart } from "./AvatarPart";
 

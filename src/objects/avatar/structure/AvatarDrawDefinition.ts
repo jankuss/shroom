@@ -1,25 +1,17 @@
-import { associateBy } from "../../../util/associateBy";
 import { notNullOrUndefined } from "../../../util/notNullOrUndefined";
 import { AvatarAction } from "../enum/AvatarAction";
-import { AvatarFigurePartType } from "../enum/AvatarFigurePartType";
-import { addMissingDrawOrderItems } from "../util/addMissingDrawOrderItems";
 import {
   AvatarActionInfo,
   IAvatarActionsData,
-} from "../util/data/interfaces/IAvatarActionsData";
-import { IAvatarAnimationData } from "../util/data/interfaces/IAvatarAnimationData";
-import { IAvatarEffectData } from "../util/data/interfaces/IAvatarEffectData";
-import { IAvatarGeometryData } from "../util/data/interfaces/IAvatarGeometryData";
-import { IAvatarOffsetsData } from "../util/data/interfaces/IAvatarOffsetsData";
-import { IAvatarPartSetsData } from "../util/data/interfaces/IAvatarPartSetsData";
-import { IFigureData } from "../util/data/interfaces/IFigureData";
-import { IFigureMapData } from "../util/data/interfaces/IFigureMapData";
-import { getDrawOrder } from "../util/drawOrder";
+} from "../data/interfaces/IAvatarActionsData";
+import { IAvatarAnimationData } from "../data/interfaces/IAvatarAnimationData";
+import { IAvatarEffectData } from "../data/interfaces/IAvatarEffectData";
+import { IAvatarGeometryData } from "../data/interfaces/IAvatarGeometryData";
+import { IAvatarOffsetsData } from "../data/interfaces/IAvatarOffsetsData";
+import { IAvatarPartSetsData } from "../data/interfaces/IAvatarPartSetsData";
+import { IFigureData } from "../data/interfaces/IFigureData";
+import { IFigureMapData } from "../data/interfaces/IFigureMapData";
 import { getAvatarDirection } from "../util/getAvatarDirection";
-import {
-  AvatarDependencies,
-  AvatarDrawPart,
-} from "../util/getAvatarDrawDefinition";
 import { getDrawOrderForActions } from "../util/getDrawOrderForActions";
 import { ParsedLook } from "../util/parseLookString";
 import { AvatarAdditionPart } from "./AvatarAdditionPart";
@@ -29,6 +21,7 @@ import { AvatarEffectPart } from "./AvatarEffectPart";
 import { AvatarPartList } from "./AvatarPartList";
 import { BodyPartDrawOrder } from "./BodyPartDrawOrder";
 import { IAvatarEffectPart } from "./interface/IAvatarEffectPart";
+import { AvatarDependencies, AvatarDrawPart } from "../types";
 
 export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
   private _figureData: IFigureData;
@@ -38,8 +31,6 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
   private _animationData: IAvatarAnimationData;
   private _offsetsData: IAvatarOffsetsData;
   private _figureMap: IFigureMapData;
-
-  private _drawParts: AvatarDrawPart[] = [];
 
   private _direction: number;
   private _directionOffset = 0;
@@ -173,11 +164,6 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
       hasItem: this._options.item != null,
     });
 
-    const drawOrder = this._getDrawOrder(
-      this._activeActions,
-      getAvatarDirection(this._direction + this._directionOffset)
-    );
-
     const drawOrderDirection = getAvatarDirection(
       this._direction + this._directionOffset
     );
@@ -208,20 +194,6 @@ export class AvatarDrawDefinitionStructure implements IAvatarEffectPart {
     );
 
     return sortedDrawParts;
-  }
-
-  private _getDrawOrder(actions: AvatarActionInfo[], direction: number) {
-    const drawOrderId = getDrawOrderForActions(actions, {
-      hasItem: this._options.item != null,
-    });
-
-    const drawOrderRaw =
-      getDrawOrder(drawOrderId, direction) ?? getDrawOrder("std", direction);
-
-    // Since the draworder file has missing parts, we add them here.
-    const drawOrderAdditional = addMissingDrawOrderItems(new Set(drawOrderRaw));
-
-    return drawOrderAdditional;
   }
 
   private _getPartsForLook(look: ParsedLook) {

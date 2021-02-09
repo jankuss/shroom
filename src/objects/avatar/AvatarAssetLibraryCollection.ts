@@ -1,7 +1,7 @@
 import { HitTexture } from "../hitdetection/HitTexture";
-import { ManifestAsset } from "./util/data/interfaces/IAvatarManifestData";
-import { IAvatarOffsetsData } from "./util/data/interfaces/IAvatarOffsetsData";
-import { IManifestLibrary } from "./util/data/interfaces/IManifestLibrary";
+import { ManifestAsset } from "./data/interfaces/IAvatarManifestData";
+import { IAvatarOffsetsData } from "./data/interfaces/IAvatarOffsetsData";
+import { IManifestLibrary } from "./data/interfaces/IManifestLibrary";
 
 const NO_ASSET = Symbol("NO_ASSET");
 

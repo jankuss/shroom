@@ -1,10 +1,10 @@
 import { IAssetBundle } from "../../assets/IAssetBundle";
 import { HitTexture } from "../hitdetection/HitTexture";
-import { AvatarEffectData } from "./util/data/AvatarEffectData";
-import { AvatarManifestData } from "./util/data/AvatarManifestData";
-import { IAvatarEffectBundle } from "./util/data/interfaces/IAvatarEffectBundle";
-import { IAvatarEffectData } from "./util/data/interfaces/IAvatarEffectData";
-import { IAvatarManifestData } from "./util/data/interfaces/IAvatarManifestData";
+import { AvatarEffectData } from "./data/AvatarEffectData";
+import { AvatarManifestData } from "./data/AvatarManifestData";
+import { IAvatarEffectBundle } from "./data/interfaces/IAvatarEffectBundle";
+import { IAvatarEffectData } from "./data/interfaces/IAvatarEffectData";
+import { IAvatarManifestData } from "./data/interfaces/IAvatarManifestData";
 
 export class AvatarEffectBundle implements IAvatarEffectBundle {
   private _data: Promise<IAvatarEffectData>;

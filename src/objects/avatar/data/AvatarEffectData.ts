@@ -1,4 +1,4 @@
-import { getNumberFromAttribute } from "../../../../util/getNumberFromAttribute";
+import { getNumberFromAttribute } from "../../../util/getNumberFromAttribute";
 import {
   AvatarEffectDirection,
   AvatarEffectFrameBodypart,

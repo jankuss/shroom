@@ -1,4 +1,4 @@
-import { AvatarDrawDefinition, createLookServer, LookServer } from "./util";
+import { createLookServer, LookServer } from "./util";
 import { LookOptions } from "./util/createLookServer";
 import {
   AvatarLoaderResult,
@@ -6,36 +6,30 @@ import {
 } from "../../interfaces/IAvatarLoader";
 import { HitTexture } from "../hitdetection/HitTexture";
 import Bluebird from "bluebird";
-import { AvatarAnimationData } from "./util/data/AvatarAnimationData";
-import { FigureMapData } from "./util/data/FigureMapData";
-import { AvatarOffsetsData } from "./util/data/AvatarOffsetsData";
-import { AvatarPartSetsData } from "./util/data/AvatarPartSetsData";
-import { FigureData } from "./util/data/FigureData";
-import { AvatarActionsData } from "./util/data/AvatarActionsData";
-import { AvatarGeometryData } from "./util/data/AvatarGeometryData";
-import { AvatarAction } from "./enum/AvatarAction";
-import { AvatarEffectData } from "./util/data/AvatarEffectData";
-import { IAvatarEffectData } from "./util/data/interfaces/IAvatarEffectData";
+import { AvatarAnimationData } from "./data/AvatarAnimationData";
+import { FigureMapData } from "./data/FigureMapData";
+import { AvatarOffsetsData } from "./data/AvatarOffsetsData";
+import { AvatarPartSetsData } from "./data/AvatarPartSetsData";
+import { FigureData } from "./data/FigureData";
+import { AvatarActionsData } from "./data/AvatarActionsData";
+import { AvatarGeometryData } from "./data/AvatarGeometryData";
+import { IAvatarEffectData } from "./data/interfaces/IAvatarEffectData";
 import { IAssetBundle } from "../../assets/IAssetBundle";
 import { LegacyAssetBundle } from "../../assets/LegacyAssetBundle";
 import { ShroomAssetBundle } from "../../assets/ShroomAssetBundle";
 import {
   AvatarEffect,
   IAvatarEffectMap,
-} from "./util/data/interfaces/IAvatarEffectMap";
-import { AvatarEffectMap } from "./util/data/AvatarEffectMap";
-import { IAvatarEffectBundle } from "./util/data/interfaces/IAvatarEffectBundle";
+} from "./data/interfaces/IAvatarEffectMap";
+import { AvatarEffectMap } from "./data/AvatarEffectMap";
+import { IAvatarEffectBundle } from "./data/interfaces/IAvatarEffectBundle";
 import { AvatarEffectBundle } from "./AvatarEffectBundle";
 import { getLibrariesForLook } from "./util/getLibrariesForLook";
 import { parseLookString } from "./util/parseLookString";
-import {
-  AvatarDependencies,
-  getAvatarDrawDefinition,
-} from "./util/getAvatarDrawDefinition";
-import { IAvatarOffsetsData } from "./util/data/interfaces/IAvatarOffsetsData";
 import { AvatarAssetLibraryCollection } from "./AvatarAssetLibraryCollection";
-import { ManifestLibrary } from "./util/data/ManifestLibrary";
-import { IManifestLibrary } from "./util/data/interfaces/IManifestLibrary";
+import { ManifestLibrary } from "./data/ManifestLibrary";
+import { IManifestLibrary } from "./data/interfaces/IManifestLibrary";
+import { AvatarDependencies, AvatarDrawDefinition } from "./types";
 
 interface Options {
   getAssetBundle: (library: string) => Promise<IAssetBundle>;
@@ -43,14 +37,6 @@ interface Options {
   getEffectBundle: (effectData: AvatarEffect) => Promise<IAvatarEffectBundle>;
   createDependencies: () => Promise<AvatarDependencies>;
 }
-
-const directions = [0, 1, 2, 3, 4, 5, 6, 7];
-
-const preloadActions = new Set([
-  AvatarAction.Default,
-  AvatarAction.Move,
-  AvatarAction.Sit,
-]);
 
 function _getLookOptionsString(lookOptions: LookOptions) {
   const parts: string[] = [];
@@ -81,7 +67,6 @@ function _getLookOptionsString(lookOptions: LookOptions) {
 }
 
 export class AvatarLoader implements IAvatarLoader {
-  private _globalCache: Map<string, Promise<HitTexture>> = new Map();
   private _lookServer: Promise<LookServer>;
   private _effectCache: Map<
     string,
@@ -203,8 +188,6 @@ export class AvatarLoader implements IAvatarLoader {
       figureMap: figureMap,
     });
 
-    console.log(libs);
-
     // Open the required libraries for the look
     await Promise.all(
       Array.from(libs).map((lib) =>
@@ -221,8 +204,6 @@ export class AvatarLoader implements IAvatarLoader {
     if (fileIds != null) {
       await this._offsets.loadTextures(fileIds);
     }
-
-    console.log(fileIds);
 
     return {
       getDrawDefinition: (options) => {
