@@ -74,8 +74,8 @@ export class TileCursor extends PIXI.Container implements HitDetectionElement {
 
   destroy() {
     super.destroy();
-
     this._node.remove();
+    this._graphics.destroy();
   }
 
   private _createGraphics() {

@@ -660,6 +660,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
           this.visualization.updateFrame(frame);
         }
       );
+      this.visualization.update(this);
       this.visualization.updateFrame(
         this.dependencies.animationTicker.current()
       );
@@ -671,6 +672,8 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     ) {
       this._cancelTicker();
       this._cancelTicker = undefined;
+
+      this.visualization.update(this);
       this.visualization.updateFrame(
         this.dependencies.animationTicker.current()
       );

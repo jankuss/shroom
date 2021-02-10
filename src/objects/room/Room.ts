@@ -329,6 +329,8 @@ export class Room
   destroy() {
     super.destroy();
     this.roomObjects.forEach((object) => this.removeRoomObject(object));
+
+    this._visualization.destroy();
   }
 
   private _getObjectPositionWithOffset(roomX: number, roomY: number) {

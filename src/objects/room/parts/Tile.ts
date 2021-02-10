@@ -67,6 +67,11 @@ export class Tile extends PIXI.Container implements IRoomPart {
     this._updateSprites();
   }
 
+  destroy() {
+    super.destroy();
+    this._destroySprites();
+  }
+
   private _destroySprites() {
     this._sprites.forEach((sprite) => sprite.destroy());
     this._sprites = [];

@@ -26,15 +26,6 @@ export abstract class FurnitureVisualization
   }
 
   isAnimated(animation = "0"): boolean {
-    const frameCount = this._view?.furniture.visualizationData.getFrameCountWithoutRepeat(
-      64,
-      Number(animation)
-    );
-
-    if (frameCount != null) {
-      return frameCount > 1;
-    }
-
     return false;
   }
 
