@@ -473,5 +473,5 @@ export function HideTileCursor() {
 }
 
 export default {
-  title: "Room",
+  title: "Room / General",
 };

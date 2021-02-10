@@ -88,6 +88,25 @@ export class HitDetection implements IHitDetection {
       return element.hits(x, y);
     });
   }
+
+  private _debugHitDetection() {
+    this._container?.destroy();
+    const container = new PIXI.Container();
+
+    this._container = container;
+
+    this._map.forEach((element) => {
+      if (element.createDebugSprite == null) return;
+
+      const sprite = element.createDebugSprite();
+
+      if (sprite == null) return;
+
+      container.addChild(sprite);
+    });
+
+    this._app.stage.addChild(container);
+  }
 }
 
 class HitEventPropagation {

@@ -1,9 +1,9 @@
 import { Avatar, AvatarAction, Room, BaseAvatar } from "@jankuss/shroom";
-import { createShroom } from "./common/createShroom";
+import { createShroom } from "../common/createShroom";
 import { action } from "@storybook/addon-actions";
 
 export default {
-  title: "Avatar",
+  title: "Avatar / General",
 };
 
 export function Default() {

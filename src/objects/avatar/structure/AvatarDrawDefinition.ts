@@ -14,8 +14,6 @@ import { IFigureMapData } from "../data/interfaces/IFigureMapData";
 import { getAvatarDirection } from "../util/getAvatarDirection";
 import { getDrawOrderForActions } from "../util/getDrawOrderForActions";
 import { ParsedLook } from "../util/parseLookString";
-import { AvatarAdditionPart } from "./AvatarAdditionPart";
-import { AvatarBodyPart } from "./AvatarBodyPart";
 import { AvatarBodyPartList } from "./AvatarBodyPartList";
 import { AvatarEffectPart } from "./AvatarEffectPart";
 import { AvatarPartList } from "./AvatarPartList";

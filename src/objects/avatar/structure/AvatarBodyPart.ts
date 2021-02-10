@@ -91,6 +91,12 @@ export class AvatarBodyPart {
     });
   }
 
+  public setFrameRepeat(frameRepeat: number) {
+    this._parts.forEach((part) => {
+      part.setFrameRepeat(frameRepeat);
+    });
+  }
+
   public setEffectFrame(effect: IAvatarEffectData, frame: number) {
     const effectBodyPart = effect.getFrameBodyPart(this.id, frame);
     if (effectBodyPart == null) return;

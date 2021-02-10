@@ -25,6 +25,7 @@ export class AvatarPart {
   private _partSetsData: IAvatarPartSetsData;
   private _assets: AvatarAsset[] = [];
   private _customFrames: CustomPartFrame[] = [];
+  private _frameRepeat = 1;
 
   private _offsets: Map<number, AvatarEffectFrameFXPart> = new Map();
 
@@ -58,6 +59,10 @@ export class AvatarPart {
 
   public get index() {
     return this._figureDataPart.index;
+  }
+
+  setFrameRepeat(value: number) {
+    this._frameRepeat = value;
   }
 
   setActiveAction(action: AvatarActionInfo) {
@@ -98,7 +103,9 @@ export class AvatarPart {
     }
 
     return {
-      assets: this._assets.flatMap((asset) => [asset, asset]),
+      assets: this._assets.flatMap((asset) =>
+        new Array(this._frameRepeat).fill(0).map(() => asset)
+      ),
       color: this._figureDataPart.colorable ? `#${this._color}` : undefined,
       index: this._figureDataPart.index,
       kind: "AVATAR_DRAW_PART",
@@ -130,11 +137,9 @@ export class AvatarPart {
     if (this._customFrames.length > 0) {
       this._customFrames.forEach((customFrame, i) => {
         const action = customFrame.action;
-        const baseDirection = this.getDirection(customFrame.dd);
+        const direction = this.getDirection(customFrame.dd);
 
-        if (baseDirection == null) throw new Error("Invalid direction");
-
-        const direction = getAvatarDirection(baseDirection);
+        if (direction == null) throw new Error("Invalid direction");
 
         const frame = this._animationData.getAnimationFrame(
           action.id,

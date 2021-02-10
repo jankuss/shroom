@@ -118,9 +118,10 @@ export class AvatarBodyPartList {
   }
 
   setEffectFrame(effect: IAvatarEffectData, frame: number) {
-    this._bodyParts.forEach((bodyPart) =>
-      bodyPart.setEffectFrame(effect, frame)
-    );
+    this._bodyParts.forEach((bodyPart) => {
+      bodyPart.setEffectFrame(effect, frame);
+      bodyPart.setFrameRepeat(2);
+    });
 
     this._additionsArr.forEach((addition) => {
       addition.setEffectFrame(effect, frame);

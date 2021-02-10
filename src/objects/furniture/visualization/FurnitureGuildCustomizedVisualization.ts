@@ -19,8 +19,8 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureVisualizatio
   ) {
     super();
 
-    this.primaryColor = options.primaryColor;
-    this.secondaryColor = options.secondaryColor;
+    this.primaryColor = this._normalizeColor(options.primaryColor);
+    this.secondaryColor = this._normalizeColor(options.secondaryColor);
   }
 
   public get primaryColor() {
@@ -79,6 +79,18 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureVisualizatio
     this._base.modifier = (part) => {
       return this._modifyPart(part);
     };
+  }
+
+  private _normalizeColor(color?: string) {
+    if (color == null || color.length === 0) {
+      return undefined;
+    }
+
+    if (color[0] === "#") {
+      return color.slice(1);
+    }
+
+    return color;
   }
 
   private _modifyPart(part: FurniDrawPart): FurniDrawPart {

@@ -14,12 +14,12 @@ import {
   Room,
   WallFurniture,
 } from "@jankuss/shroom";
-import { createShroom } from "./common/createShroom";
+import { createShroom } from "../common/createShroom";
 import { action } from "@storybook/addon-actions";
 import fetch from "node-fetch";
 
 export default {
-  title: "Furniture",
+  title: "Furniture / General",
 };
 
 export function Default() {
