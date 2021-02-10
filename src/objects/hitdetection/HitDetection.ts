@@ -67,6 +67,8 @@ export class HitDetection implements IHitDetection {
     eventType: HitEventType,
     domEvent: MouseEvent
   ) {
+    const start = performance.now();
+
     const elements = this._performHitTest(x, y);
 
     const event = new HitEventPropagation(eventType, domEvent, elements);
