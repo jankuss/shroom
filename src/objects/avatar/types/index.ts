@@ -35,10 +35,13 @@ export type AvatarEffectDrawPart = {
   addition: boolean;
 };
 
-export interface AvatarDependencies {
+export interface AvatarDependencies extends AvatarExternalDependencies {
+  offsetsData: IAvatarOffsetsData;
+}
+
+export interface AvatarExternalDependencies {
   figureData: IFigureData;
   figureMap: IFigureMapData;
-  offsetsData: IAvatarOffsetsData;
   animationData: IAvatarAnimationData;
   partSetsData: IAvatarPartSetsData;
   geometry: IAvatarGeometryData;

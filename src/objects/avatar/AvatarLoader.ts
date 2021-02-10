@@ -29,14 +29,15 @@ import { parseLookString } from "./util/parseLookString";
 import { AvatarAssetLibraryCollection } from "./AvatarAssetLibraryCollection";
 import { ManifestLibrary } from "./data/ManifestLibrary";
 import { IManifestLibrary } from "./data/interfaces/IManifestLibrary";
-import { AvatarDependencies } from "./types";
+import { AvatarDependencies, AvatarExternalDependencies } from "./types";
 import { AvatarDrawDefinition } from "./structure/AvatarDrawDefinition";
+import { IAvatarOffsetsData } from "./data/interfaces/IAvatarOffsetsData";
 
 interface Options {
   getAssetBundle: (library: string) => Promise<IAssetBundle>;
   getEffectMap: () => Promise<IAvatarEffectMap>;
   getEffectBundle: (effectData: AvatarEffect) => Promise<IAvatarEffectBundle>;
-  createDependencies: () => Promise<AvatarDependencies>;
+  createDependencies: () => Promise<AvatarExternalDependencies>;
 }
 
 function _getLookOptionsString(lookOptions: LookOptions) {
@@ -76,7 +77,7 @@ export class AvatarLoader implements IAvatarLoader {
   private _lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
   private _assetBundles: Map<string, Promise<IManifestLibrary>> = new Map();
   private _effectMap: Promise<IAvatarEffectMap>;
-  private _dependencies: Promise<AvatarDependencies>;
+  private _dependencies: Promise<AvatarExternalDependencies>;
   private _offsets = new AvatarAssetLibraryCollection();
 
   constructor(private _options: Options) {
@@ -300,10 +301,9 @@ interface EffectCacheEntry {
 
 async function initializeDefaultAvatarDependencies(
   resourcePath: string
-): Promise<AvatarDependencies> {
+): Promise<AvatarExternalDependencies> {
   const {
     animationData,
-    offsetsData,
     figureMap,
     figureData,
     partSetsData,
@@ -313,7 +313,6 @@ async function initializeDefaultAvatarDependencies(
     animationData: AvatarAnimationData.default(),
     figureData: FigureData.fromUrl(`${resourcePath}/figuredata.xml`),
     figureMap: FigureMapData.fromUrl(`${resourcePath}/figuremap.xml`),
-    offsetsData: AvatarOffsetsData.fromUrl(`${resourcePath}/offsets.json`),
     partSetsData: AvatarPartSetsData.default(),
     actionsData: AvatarActionsData.default(),
     geometry: AvatarGeometryData.default(),
@@ -322,7 +321,6 @@ async function initializeDefaultAvatarDependencies(
   return {
     animationData,
     figureData,
-    offsetsData,
     figureMap,
     partSetsData,
     actionsData,
