@@ -37,29 +37,16 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
   }
 
   update() {
-    this._refreshFurniture = true;
     this._update();
   }
 
   destroy(): void {
-    this._sprites.forEach((sprite) => this.view.destroySprite(sprite));
+    // Do nothing
   }
 
   private _update() {
-    this._sprites.forEach((sprite) => {
-      this.view.destroySprite(sprite);
-    });
-
-    this._sprites = [];
-
-    this.view.furniture
-      .getDrawDefinition(this._currentDirection, this._animationId)
-      .parts.forEach((part) => {
-        const sprite = this.view.createSprite(part, 0);
-
-        if (sprite != null) {
-          this._sprites.push(sprite);
-        }
-      });
+    this.view.setDisplayAnimation(this._animationId);
+    this.view.setDisplayDirection(this._currentDirection);
+    this.view.updateDisplay();
   }
 }

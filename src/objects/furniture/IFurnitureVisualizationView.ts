@@ -1,14 +1,17 @@
-import { FurnitureSprite } from "./FurnitureSprite";
-import { FurniDrawPart } from "./util/DrawDefinition";
-import { LoadFurniResult } from "./util/loadFurni";
+import { IFurnitureVisualizationData } from "./data/interfaces/IFurnitureVisualizationData";
 
 export interface IFurnitureVisualizationView {
-  furniture: LoadFurniResult;
+  setDisplayAnimation(animation?: string): void;
+  setDisplayDirection(direction: number): void;
 
-  createSprite(
-    part: FurniDrawPart,
-    index: number,
-    skipLayerUpdate?: boolean
-  ): FurnitureSprite | undefined;
-  destroySprite(sprite: FurnitureSprite): void;
+  updateDisplay(): void;
+  getLayers(): IFurnitureVisualizationLayer[];
+  getVisualizationData(): IFurnitureVisualizationData;
+}
+
+export interface IFurnitureVisualizationLayer {
+  frameRepeat: number;
+  layerIndex: number;
+  assetCount: number;
+  setCurrentFrameIndex(value: number): void;
 }

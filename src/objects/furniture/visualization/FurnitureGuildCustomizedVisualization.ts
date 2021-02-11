@@ -76,9 +76,9 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureVisualizatio
   }
 
   private _updateModifier() {
-    this._base.modifier = (part) => {
+    /*this._base.modifier = (part) => {
       return this._modifyPart(part);
-    };
+    };*/
   }
 
   private _modifyPart(part: FurniDrawPart): FurniDrawPart {

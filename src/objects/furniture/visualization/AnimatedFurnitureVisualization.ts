@@ -1,5 +1,6 @@
 import { IFurnitureVisualizationData } from "../data/interfaces/IFurnitureVisualizationData";
 import { FurnitureSprite } from "../FurnitureSprite";
+import { IFurnitureVisualizationLayer } from "../IFurnitureVisualizationView";
 import { FurniDrawDefinition, FurniDrawPart } from "../util/DrawDefinition";
 import { FurnitureVisualization } from "./FurnitureVisualization";
 
@@ -17,7 +18,9 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   private _disableTransitions = false;
   private _frame = 0;
   private _overrideAnimation: number | undefined;
-  private _modifier: ((part: FurniDrawPart) => FurniDrawPart) | undefined;
+  private _modifier:
+    | ((part: IFurnitureVisualizationLayer) => IFurnitureVisualizationLayer)
+    | undefined;
 
   private _currentDirection: number | undefined;
   private _currentTargetAnimationId: string | undefined;
@@ -57,7 +60,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this._animationQueueStartFrame = undefined;
     // Skip the transitions of the initial animation change.
     this._animationQueue = this._getAnimationList(
-      this.view.furniture.visualizationData,
+      this.view.getVisualizationData(),
       newAnimation
     );
 
@@ -83,7 +86,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   }
 
   destroy(): void {
-    this._sprites.forEach((sprite) => this.view.destroySprite(sprite));
+    // Do nothing
   }
 
   update() {
@@ -160,20 +163,13 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   private _updateFurniture() {
     if (!this.mounted) return;
 
-    const drawDefintion = this.view.furniture.getDrawDefinition(
-      this._currentDirection ?? 0,
-      this.animationId?.toString()
-    );
+    this.view.setDisplayDirection(this._currentDirection ?? 0);
+    this.view.setDisplayAnimation(this.animationId?.toString());
+    this.view.updateDisplay();
 
-    if (this.modifier == null) {
-      this._furnitureDrawDefintion = drawDefintion;
-    } else {
+    if (this.modifier != null) {
       const modifier = this.modifier;
-
-      this._furnitureDrawDefintion = {
-        ...drawDefintion,
-        parts: drawDefintion.parts.map((part) => modifier(part)),
-      };
+      this.view.getLayers().forEach((layer) => modifier(layer));
     }
 
     this._update();
@@ -182,14 +178,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   private _update(skipLayerUpdate = false) {
     const frameCount = this._animationFrameCount ?? 1;
 
-    this._sprites.forEach((sprite) => {
-      sprite.visible = false;
-
-      if (sprite instanceof FurnitureSprite) {
-        sprite.ignore = true;
-      }
-    });
-    this._furnitureDrawDefintion?.parts.forEach((part) => {
+    this.view.getLayers().forEach((part) => {
       if (this.modifier != null) {
         part = this.modifier(part);
       }
@@ -197,7 +186,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
       const frameProgress = this._frame % frameCount;
 
       let frameIndex = Math.floor(frameProgress / part.frameRepeat);
-      const assetCount = getAssetsCount(part) - 1;
+      const assetCount = part.assetCount - 1;
 
       if (frameIndex > assetCount) {
         frameIndex = assetCount;
@@ -209,15 +198,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
         this._lastFramePlayedMap.set(part.layerIndex, false);
       }
 
-      const sprite = this.view.createSprite(part, frameIndex, skipLayerUpdate);
-      if (sprite != null) {
-        this._sprites.add(sprite);
-        sprite.visible = true;
-
-        if (sprite instanceof FurnitureSprite) {
-          sprite.ignore = false;
-        }
-      }
+      part.setCurrentFrameIndex(frameIndex);
     });
   }
 

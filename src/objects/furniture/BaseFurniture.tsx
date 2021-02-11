@@ -21,6 +21,7 @@ import { IFurnitureVisualization } from "./IFurnitureVisualization";
 import { FurnitureSprite } from "./FurnitureSprite";
 import { AnimatedFurnitureVisualization } from "./visualization/AnimatedFurnitureVisualization";
 import { getDirectionForFurniture } from "./util/getDirectionForFurniture";
+import { FurnitureVisualizationView } from "./FurnitureVisualizationView";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -475,35 +476,14 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this._unknownSprite?.destroy();
     this._unknownSprite = undefined;
 
-    this.visualization.setView({
-      furniture: loadFurniResult,
-      createSprite: (part, assetIndex, skipLayerUpdate) => {
-        const asset = getAssetFromPart(part, assetIndex);
-        if (asset == null) return;
-
-        let cachedAsset = this._sprites.get(asset.name);
-        if (cachedAsset == null) {
-          const sprite = this._createSimpleAsset(loadFurniResult, part, asset);
-
-          if (sprite != null) {
-            this._sprites.set(asset.name, sprite);
-            cachedAsset = sprite;
-          }
-        }
-
-        if (cachedAsset != null) {
-          this._applyLayerDataToSprite(cachedAsset, asset, part);
-        }
-
-        return cachedAsset;
-      },
-      destroySprite: (sprite) => {
-        if (sprite.assetName == null) return;
-
-        this._sprites.delete(sprite.assetName);
-        sprite.destroy();
-      },
-    });
+    this.visualization.setView(
+      new FurnitureVisualizationView(
+        this.dependencies.hitDetection,
+        this._clickHandler,
+        this.dependencies.visualization.container,
+        loadFurniResult
+      )
+    );
 
     this.visualization.update(this);
     this._validDirections = loadFurniResult.directions;
