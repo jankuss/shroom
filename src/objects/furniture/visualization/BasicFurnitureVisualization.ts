@@ -5,7 +5,7 @@ import { FurnitureVisualization } from "./FurnitureVisualization";
 export class BasicFurnitureVisualization extends FurnitureVisualization {
   private _sprites: FurnitureSprite[] = [];
   private _refreshFurniture = false;
-  private _currentDirection = -1;
+  private _currentDirection: number | undefined;
   private _animationId: string | undefined;
 
   setView(view: IFurnitureVisualizationView): void {
@@ -45,8 +45,11 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
   }
 
   private _update() {
+    if (this._currentDirection == null) return;
+
     this.view.setDisplayAnimation(this._animationId);
     this.view.setDisplayDirection(this._currentDirection);
     this.view.updateDisplay();
+    this.view.getLayers().forEach((layer) => layer.setCurrentFrameIndex(0));
   }
 }

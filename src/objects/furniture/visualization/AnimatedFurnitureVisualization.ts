@@ -90,6 +90,10 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
   }
 
   update() {
+    if (this._currentDirection == null) return;
+
+    this.view.setDisplayDirection(this._currentDirection);
+    this.view.updateDisplay();
     this._update();
   }
 

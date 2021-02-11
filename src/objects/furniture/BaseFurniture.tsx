@@ -69,6 +69,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
   private _loadFurniResultPromise: Promise<LoadFurniResult>;
   private _validDirections: number[] | undefined;
   private _resolveLoadFurniResult: ResolveLoadFurniResult | undefined;
+  private _view: FurnitureVisualizationView | undefined;
 
   private _visualization: IFurnitureVisualization | undefined;
   private _fallbackVisualization = new AnimatedFurnitureVisualization();
@@ -377,19 +378,12 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       element.baseY = this.y;
     });
 
-    const maskId = this._getMaskId(this.direction);
+    if (this._view == null) return;
 
-    const maskSprites = this._maskSprites;
-    this._maskNodes.forEach((mask) => mask.remove());
-    this._maskNodes = [];
-
-    if (maskId != null) {
-      maskSprites.forEach((maskSprite) => {
-        this._maskNodes.push(
-          this.dependencies.visualization.addMask(maskId, maskSprite)
-        );
-      });
-    }
+    this._view.x = this.x;
+    this._view.y = this.y;
+    this._view.zIndex = this.zIndex;
+    this._view.updateLayers();
   }
 
   private _updateFurniture() {
@@ -467,6 +461,27 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     return sprite;
   }
 
+  private _createNewView(loadFurniResult: LoadFurniResult) {
+    this._view?.destroy();
+
+    const view = new FurnitureVisualizationView(
+      this.dependencies.hitDetection,
+      this._clickHandler,
+      this.dependencies.visualization.container,
+      loadFurniResult
+    );
+
+    view.x = this.x;
+    view.y = this.y;
+    view.zIndex = this.zIndex;
+    view.alpha = this.alpha ?? 1;
+    view.highlight = this.highlight ?? false;
+
+    this._view = view;
+
+    return view;
+  }
+
   private _updateFurnitureSprites(loadFurniResult: LoadFurniResult) {
     if (!this.mounted) return;
 
@@ -476,14 +491,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this._unknownSprite?.destroy();
     this._unknownSprite = undefined;
 
-    this.visualization.setView(
-      new FurnitureVisualizationView(
-        this.dependencies.hitDetection,
-        this._clickHandler,
-        this.dependencies.visualization.container,
-        loadFurniResult
-      )
-    );
+    this.visualization.setView(this._createNewView(loadFurniResult));
 
     this.visualization.update(this);
     this._validDirections = loadFurniResult.directions;

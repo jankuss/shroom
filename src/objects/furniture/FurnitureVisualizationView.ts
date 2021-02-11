@@ -1,3 +1,4 @@
+import * as PIXI from "pixi.js";
 import { IHitDetection } from "../../interfaces/IHitDetection";
 import { ClickHandler } from "../hitdetection/ClickHandler";
 import { HitTexture } from "../hitdetection/HitTexture";
@@ -18,7 +19,6 @@ export class FurnitureVisualizationView
   implements IFurnitureVisualizationView, IBaseFurniture {
   private _direction: number | undefined;
   private _animation: string | undefined;
-  private _displayFrame: number | undefined;
 
   private _cache: Map<string, FurniDrawDefinition> = new Map();
   private _layers: FurnitureVisualizationLayer[] | undefined;
@@ -113,13 +113,13 @@ export class FurnitureVisualizationView
       layer.y = this.y;
       layer.zIndex = this.zIndex;
       layer.alpha = this.alpha;
+      layer.highlight = this.highlight;
+      layer.update();
     });
   }
 
   updateDisplay(): void {
     if (this._direction == null) throw new Error("Direction was not set");
-    if (this._displayFrame == null)
-      throw new Error("Display frame was not set");
 
     const direction = this._direction;
     const animation = this._animation;
@@ -135,6 +135,12 @@ export class FurnitureVisualizationView
           (id) => this._furniture.getTexture(id)
         )
     );
+
+    this.updateLayers();
+  }
+
+  destroy() {
+    this._layers?.forEach((layer) => layer.destroy());
   }
 
   private _getDrawDefinition(direction: number, animation?: string) {
@@ -169,6 +175,8 @@ class FurnitureVisualizationLayer
   private _spritePositionChanged = false;
   private _spritesChanged = false;
   private _frameIndex = 0;
+
+  private _mountedSprites = new Set<FurnitureSprite>();
 
   public get highlight() {
     if (this._highlight == null) throw new Error("highlight not set");
@@ -248,8 +256,19 @@ class FurnitureVisualizationLayer
   }
 
   setCurrentFrameIndex(value: number): void {
+    const previousFrameIndex = this._frameIndex;
     this._frameIndex = value;
-    this._updateSprites();
+
+    const previousFrame = this._getSprite(previousFrameIndex);
+    if (previousFrame != null) {
+      this._setSpriteVisible(previousFrame, false);
+    }
+
+    const newFrame = this._getSprite(this._frameIndex);
+    if (newFrame != null) {
+      this._setSpriteVisible(newFrame, true);
+      this._addSprite(newFrame);
+    }
   }
 
   update() {
@@ -269,19 +288,41 @@ class FurnitureVisualizationLayer
     this._destroySprites();
   }
 
+  private _addSprite(sprite: FurnitureSprite) {
+    if (this._mountedSprites.has(sprite)) return;
+
+    this._mountedSprites.add(sprite);
+    this._container.addChild(sprite);
+  }
+
   private _destroySprites() {
     this._sprites.forEach((sprite) => {
+      this._container.removeChild(sprite);
       sprite.destroy();
     });
     this._sprites = new Map();
+    this._mountedSprites = new Set();
+  }
+
+  private _setSpriteVisible(sprite: FurnitureSprite, visible: boolean) {
+    if (visible) {
+      sprite.ignore = false;
+      sprite.visible = true;
+    } else {
+      sprite.ignore = true;
+      sprite.visible = false;
+    }
   }
 
   private _updateSprites() {
     const frameIndex = this._frameIndex;
     const sprite = this._getSprite(frameIndex);
 
+    this._sprites.forEach((sprite) => this._setSpriteVisible(sprite, false));
+
     if (sprite != null) {
-      this._container.addChild(sprite);
+      this._addSprite(sprite);
+      this._setSpriteVisible(sprite, true);
     }
   }
 
@@ -295,6 +336,7 @@ class FurnitureVisualizationLayer
 
   private _getSpriteInfo(frameIndex: number) {
     const asset: FurnitureAsset | undefined = this._part.assets[frameIndex];
+
     if (asset == null) return;
 
     const texture = this._getTexture(getAssetTextureName(asset));
@@ -403,6 +445,11 @@ class FurnitureVisualizationLayer
     if (mask) {
       sprite.tint = 0xffffff;
     }
+
+    this._setSpriteVisible(sprite, false);
+    this._sprites.set(frameIndex, sprite);
+
+    return sprite;
   }
 
   private _getAlpha({
