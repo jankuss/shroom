@@ -35,10 +35,10 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _roomZ = 0;
   private _animatedPosition: RoomPosition = { roomX: 0, roomY: 0, roomZ: 0 };
   private _actions: Set<AvatarAction> = new Set();
-  private _fx: { type: "dance"; id: string } | undefined;
   private _loadingAvatarSprites: BaseAvatar;
   private _placeholderSprites: BaseAvatar | undefined;
   private _loaded = false;
+  private _effect: string | undefined;
 
   private _onClick: HitEventHandler | undefined = undefined;
   private _onDoubleClick: HitEventHandler | undefined = undefined;
@@ -135,24 +135,6 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     this._updateEventHandlers();
   }
 
-  public get dance() {
-    if (this._fx?.type === "dance") {
-      return this._fx.id;
-    }
-  }
-
-  public set dance(value) {
-    if (this._fx == undefined || this._fx.type === "dance") {
-      if (value == null) {
-        this._fx = undefined;
-      } else {
-        this._fx = { type: "dance", id: value };
-      }
-
-      this._updateAvatarSprites();
-    }
-  }
-
   /**
    * The x position of the avatar in the room.
    * The y-Axis is marked in the following graphic:
@@ -229,6 +211,15 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
 
   set item(value) {
     this._item = value;
+    this._updateAvatarSprites();
+  }
+
+  public get effect() {
+    return this._effect;
+  }
+
+  public set effect(value) {
+    this._effect = value;
     this._updateAvatarSprites();
   }
 
@@ -510,7 +501,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
       headDirection: this.headDirection,
       look: this._look,
       item: this.item,
-      effect: this._fx,
+      effect: this.effect,
     };
   }
 

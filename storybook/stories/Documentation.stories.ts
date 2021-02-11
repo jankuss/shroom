@@ -53,6 +53,8 @@ export function ImplementingFurnitureLogic() {
         } else {
           furniture.animation = "0";
         }
+
+        console.log("ANIM", furniture.animation);
       };
 
       const roll = () => {

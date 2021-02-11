@@ -528,5 +528,5 @@ export function TestTileClick() {
 }
 
 export default {
-  title: "Room",
+  title: "Room / General",
 };

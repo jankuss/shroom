@@ -1,5 +1,5 @@
+import { AvatarDrawDefinition } from "../objects/avatar/structure/AvatarDrawDefinition";
 import { LookOptions } from "../objects/avatar/util/createLookServer";
-import { AvatarDrawDefinition } from "../objects/avatar/util/getAvatarDrawDefinition";
 import { HitTexture } from "../objects/hitdetection/HitTexture";
 
 export interface IAvatarLoader {

@@ -1,4 +1,5 @@
 import path from "path";
+import { downloadEffects } from "./downloadEffects";
 import { downloadFigures } from "./downloadFigures";
 import { downloadFileWithMessage } from "./downloadFileWithMessage";
 import { downloadFurnitures } from "./downloadFurnitures";
@@ -12,6 +13,7 @@ export async function downloadAllFiles(
     figureMapUrl,
     furniDataUrl,
     hofFurniUrl,
+    effectMapUrl,
     gordonUrl,
   }: ExternalVariables,
   logger: Logger
@@ -37,9 +39,19 @@ export async function downloadAllFiles(
     logger
   );
 
+  const effectMap = await downloadFileWithMessage(
+    { url: effectMapUrl, savePath: path.join(downloadPath, "effectmap.xml") },
+    logger
+  );
+
+  /*
   await downloadFigures({ gordonUrl, file: figureMap, downloadPath }, logger);
   await downloadFurnitures(
     { downloadPath, file: furniData, hofFurniUrl },
+    logger
+  );*/
+  await downloadEffects(
+    { gordonUrl, downloadPath, effectMapDownload: effectMap },
     logger
   );
 }

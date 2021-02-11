@@ -5,10 +5,10 @@ import { promisify } from "util";
 import g from "glob";
 import { extractSwfs } from "./extractSwfs";
 import { promises as fs } from "fs";
-import { FigureMapData } from "../../objects/avatar/util/data/FigureMapData";
+import { FigureMapData } from "../../objects/avatar/data/FigureMapData";
 import { createOffsetFile } from "./createOffsetFile";
-import { dumpFurniture } from "./dumpFurniture";
 import { dumpFigure } from "./dumpFigure";
+import { dumpFurniture } from "./dumpFurniture";
 
 export const glob = promisify(g);
 
@@ -39,6 +39,7 @@ export async function dump({ externalVariables, downloadPath }: Options) {
       console.log("- Figure Map:", variables.figureMapUrl);
       console.log("- Furni Data", variables.furniDataUrl);
       console.log("- Furniture:", variables.hofFurniUrl);
+      console.log("- Effect Map:", variables.effectMapUrl);
       console.log("");
 
       await downloadAllFiles(downloadPath, variables, logger);
@@ -60,6 +61,13 @@ export async function dump({ externalVariables, downloadPath }: Options) {
     );
 
     await extractSwfs(logger, "Figure", figureSwfs, dumpFigure);
+
+    const effectsSwf = await glob(`${downloadPath}/effects/**/*.swf`);
+    console.log(
+      `Found ${figureSwfs.length} effect swfs. Starting the extraction process.`
+    );
+
+    await extractSwfs(logger, "Effects", effectsSwf, dumpFigure);
   });
 
   await step("Post Processing", async () => {
