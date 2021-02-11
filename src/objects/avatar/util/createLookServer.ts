@@ -1,11 +1,9 @@
-import {
-  getAvatarDrawDefinition,
-  AvatarDrawDefinition,
-  AvatarDependencies,
-} from "./getAvatarDrawDefinition";
+import { getAvatarDrawDefinition } from "./getAvatarDrawDefinition";
 import { parseLookString } from "./parseLookString";
 import { AvatarAction } from "../enum/AvatarAction";
-import { IAvatarEffectData } from "./data/interfaces/IAvatarEffectData";
+import { IAvatarEffectData } from "../data/interfaces/IAvatarEffectData";
+import { AvatarDependencies } from "../types";
+import { AvatarDrawDefinition } from "../structure/AvatarDrawDefinition";
 
 export interface LookOptions {
   look: string;
@@ -13,7 +11,7 @@ export interface LookOptions {
   direction: number;
   headDirection?: number;
   item?: string | number;
-  effect?: { type: "dance" | "fx"; id: string };
+  effect?: string;
   initial?: boolean;
   skipCaching?: boolean;
 }

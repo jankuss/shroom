@@ -11,7 +11,8 @@ const SWFReader = require("@gizeta/swf-reader");
 export type OnAfterCallback = (
   baseName: string,
   dumpLocation: string,
-  imagePaths: string[]
+  imagePaths: string[],
+  xmlPaths: string[]
 ) => Promise<void>;
 
 export async function dumpSwf(swfPath: string, onAfter: OnAfterCallback) {
@@ -27,12 +28,18 @@ export async function dumpSwf(swfPath: string, onAfter: OnAfterCallback) {
 
   await fs.mkdir(dumpLocation, { recursive: true });
 
-  await extractXml(swfObject, assetMap, dumpLocation, baseName);
+  const xmlPaths = await extractXml(
+    swfObject,
+    assetMap,
+    dumpLocation,
+    baseName
+  );
   const imagePaths = await extractSwfImages(swf, assetMap, dirName, baseName);
 
   const imagePathStrings = imagePaths.map(({ path }) => path);
+  const xmlPathStrings = xmlPaths.map(({ path }) => path);
 
-  await onAfter(baseName, dumpLocation, imagePathStrings);
+  await onAfter(baseName, dumpLocation, imagePathStrings, xmlPathStrings);
 }
 
 function getAssetMapFromSWF(swf: SWF) {
@@ -114,3 +121,5 @@ interface SWFSymbol {
 interface SWF {
   tags: SWFTag[];
 }
+
+interface ExtractedSWF {}

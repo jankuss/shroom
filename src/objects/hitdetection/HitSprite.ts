@@ -60,6 +60,26 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
     this.mirrored = this._mirrored;
   }
 
+  createDebugSprite(): PIXI.Sprite | undefined {
+    if (this._hitTexture == null) return;
+
+    const hitMap = this._hitTexture.getHitMap();
+    if (hitMap == null) return;
+
+    const sprite = new PIXI.TilingSprite(
+      PIXI.Texture.WHITE,
+      this._hitTexture.texture.width,
+      this._hitTexture.texture.height
+    );
+
+    sprite.alpha = 0.1;
+
+    sprite.x = this.getGlobalPosition().x;
+    sprite.y = this.getGlobalPosition().y;
+
+    return sprite;
+  }
+
   public get ignoreMouse() {
     return this._ignoreMouse;
   }
@@ -96,6 +116,7 @@ export class HitSprite extends PIXI.Sprite implements HitDetectionElement {
   public set hitTexture(value) {
     if (value != null) {
       this.texture = value.texture;
+      this._hitTexture = value;
       this._getHitmap = () => (
         x: number,
         y: number,

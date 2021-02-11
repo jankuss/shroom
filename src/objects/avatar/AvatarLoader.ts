@@ -1,4 +1,4 @@
-import { AvatarDrawDefinition, createLookServer, LookServer } from "./util";
+import { createLookServer, LookServer } from "./util";
 import { LookOptions } from "./util/createLookServer";
 import {
   AvatarLoaderResult,
@@ -6,32 +6,39 @@ import {
 } from "../../interfaces/IAvatarLoader";
 import { HitTexture } from "../hitdetection/HitTexture";
 import Bluebird from "bluebird";
-import { AvatarAnimationData } from "./util/data/AvatarAnimationData";
-import { FigureMapData } from "./util/data/FigureMapData";
-import { AvatarOffsetsData } from "./util/data/AvatarOffsetsData";
-import { AvatarPartSetsData } from "./util/data/AvatarPartSetsData";
-import { FigureData } from "./util/data/FigureData";
-import { AvatarActionsData } from "./util/data/AvatarActionsData";
-import { AvatarGeometryData } from "./util/data/AvatarGeometryData";
-import { AvatarAction } from "./enum/AvatarAction";
-import { AvatarEffectData } from "./util/data/AvatarEffectData";
-import { IAvatarEffectData } from "./util/data/interfaces/IAvatarEffectData";
+import { AvatarAnimationData } from "./data/AvatarAnimationData";
+import { FigureMapData } from "./data/FigureMapData";
+import { AvatarOffsetsData } from "./data/AvatarOffsetsData";
+import { AvatarPartSetsData } from "./data/AvatarPartSetsData";
+import { FigureData } from "./data/FigureData";
+import { AvatarActionsData } from "./data/AvatarActionsData";
+import { AvatarGeometryData } from "./data/AvatarGeometryData";
+import { IAvatarEffectData } from "./data/interfaces/IAvatarEffectData";
 import { IAssetBundle } from "../../assets/IAssetBundle";
 import { LegacyAssetBundle } from "../../assets/LegacyAssetBundle";
 import { ShroomAssetBundle } from "../../assets/ShroomAssetBundle";
+import {
+  AvatarEffect,
+  IAvatarEffectMap,
+} from "./data/interfaces/IAvatarEffectMap";
+import { AvatarEffectMap } from "./data/AvatarEffectMap";
+import { IAvatarEffectBundle } from "./data/interfaces/IAvatarEffectBundle";
+import { AvatarEffectBundle } from "./AvatarEffectBundle";
+import { getLibrariesForLook } from "./util/getLibrariesForLook";
+import { parseLookString } from "./util/parseLookString";
+import { AvatarAssetLibraryCollection } from "./AvatarAssetLibraryCollection";
+import { ManifestLibrary } from "./data/ManifestLibrary";
+import { IManifestLibrary } from "./data/interfaces/IManifestLibrary";
+import { AvatarDependencies, AvatarExternalDependencies } from "./types";
+import { AvatarDrawDefinition } from "./structure/AvatarDrawDefinition";
+import { IAvatarOffsetsData } from "./data/interfaces/IAvatarOffsetsData";
 
 interface Options {
   getAssetBundle: (library: string) => Promise<IAssetBundle>;
-  createLookServer: () => Promise<LookServer>;
+  getEffectMap: () => Promise<IAvatarEffectMap>;
+  getEffectBundle: (effectData: AvatarEffect) => Promise<IAvatarEffectBundle>;
+  createDependencies: () => Promise<AvatarExternalDependencies>;
 }
-
-const directions = [0, 1, 2, 3, 4, 5, 6, 7];
-
-const preloadActions = new Set([
-  AvatarAction.Default,
-  AvatarAction.Move,
-  AvatarAction.Sit,
-]);
 
 function _getLookOptionsString(lookOptions: LookOptions) {
   const parts: string[] = [];
@@ -54,50 +61,92 @@ function _getLookOptionsString(lookOptions: LookOptions) {
     parts.push(`look(${lookOptions.look})`);
   }
 
+  if (lookOptions.effect != null) {
+    parts.push(`effect(${lookOptions.effect})`);
+  }
+
   return parts.join(",");
 }
 
 export class AvatarLoader implements IAvatarLoader {
-  private _globalCache: Map<string, Promise<HitTexture>> = new Map();
   private _lookServer: Promise<LookServer>;
-  private _effectCache: Map<string, Promise<IAvatarEffectData>> = new Map();
+  private _effectCache: Map<
+    string,
+    Promise<EffectCacheEntry | undefined>
+  > = new Map();
   private _lookOptionsCache: Map<string, AvatarDrawDefinition> = new Map();
-  private _assetBundles: Map<string, Promise<IAssetBundle>> = new Map();
+  private _assetBundles: Map<string, Promise<IManifestLibrary>> = new Map();
+  private _effectMap: Promise<IAvatarEffectMap>;
+  private _dependencies: Promise<AvatarExternalDependencies>;
+  private _offsets = new AvatarAssetLibraryCollection();
 
   constructor(private _options: Options) {
-    this._lookServer = this._options.createLookServer().then(async (server) => {
-      // Wait for the placeholder model to load
-      await this._getAvatarDrawDefinition(server, {
-        direction: 0,
-        headDirection: 0,
-        actions: new Set(),
-        look: "hd-99999-99999",
+    this._dependencies = this._options.createDependencies();
+
+    this._lookServer = this._dependencies
+      .then(async (dependencies) => {
+        return createLookServer({
+          ...dependencies,
+          offsetsData: this._offsets,
+        });
+      })
+      .then(async (server) => {
+        // Wait for the placeholder model to load
+        await this._getAvatarDrawDefinition(server, {
+          direction: 0,
+          headDirection: 0,
+          actions: new Set(),
+          look: "hd-99999-99999",
+        });
+
+        return server;
       });
 
-      return server;
-    });
+    this._effectMap = this._options.getEffectMap();
   }
 
   static create(resourcePath = "") {
     return new AvatarLoader({
-      createLookServer: async () => {
-        return initializeDefaultLookServer(resourcePath);
-      },
+      createDependencies: () =>
+        initializeDefaultAvatarDependencies(resourcePath),
       getAssetBundle: async (library) => {
         return new LegacyAssetBundle(`${resourcePath}/figure/${library}`);
+      },
+      getEffectMap: async () => {
+        const response = await fetch(`${resourcePath}/effectmap.xml`);
+        const text = await response.text();
+
+        return new AvatarEffectMap(text);
+      },
+      getEffectBundle: async (effect) => {
+        const data = await ShroomAssetBundle.fromUrl(
+          `${resourcePath}/effects/${effect.lib}.shroom`
+        );
+        return new AvatarEffectBundle(data);
       },
     });
   }
 
   static createForAssetBundle(resourcePath = "") {
     return new AvatarLoader({
-      createLookServer: async () => {
-        return initializeDefaultLookServer(resourcePath);
-      },
+      createDependencies: () =>
+        initializeDefaultAvatarDependencies(resourcePath),
       getAssetBundle: async (library) => {
         return ShroomAssetBundle.fromUrl(
           `${resourcePath}/figure/${library}.shroom`
         );
+      },
+      getEffectMap: async () => {
+        const response = await fetch(`${resourcePath}/effectmap.xml`);
+        const text = await response.text();
+
+        return new AvatarEffectMap(text);
+      },
+      getEffectBundle: async (effect) => {
+        const data = await ShroomAssetBundle.fromUrl(
+          `${resourcePath}/effects/${effect.lib}.shroom`
+        );
+        return new AvatarEffectBundle(data);
       },
     });
   }
@@ -114,80 +163,52 @@ export class AvatarLoader implements IAvatarLoader {
     getDrawDefinition: LookServer,
     options: LookOptions
   ): Promise<AvatarLoaderResult> {
-    const { actions, look, item, effect, initial, skipCaching } = options;
-
-    const loadedFiles = new Map<string, Promise<HitTexture>>();
+    const { effect } = options;
 
     let effectData: IAvatarEffectData | undefined;
+    let effectBundle: IAvatarEffectBundle | undefined;
+
+    // If an effect is set, try to load it
     if (effect != null) {
-      effectData = await this._loadEffect(effect.type, effect.id);
-    }
-
-    const loadResources = (options: LookOptions) =>
-      this._getDrawDefinitionCached(
-        getDrawDefinition,
-        options,
-        effectData
-      )?.parts.forEach((parts) => {
-        parts.assets.forEach((item) => {
-          if (loadedFiles.has(item.fileId)) return;
-          const globalFile = this._globalCache.get(item.fileId);
-
-          if (globalFile != null) {
-            loadedFiles.set(item.fileId, globalFile);
-          } else {
-            const file = this._getAssetBundle(item.library)
-              .then((bundle) => bundle.getBlob(`${item.fileId}.png`))
-              .then((blob) => HitTexture.fromBlob(blob));
-            this._globalCache.set(item.fileId, file);
-            loadedFiles.set(item.fileId, file);
-          }
-        });
-      });
-
-    const loadDirection = (direction: number, headDirection: number) => {
-      loadResources({
-        actions: new Set(actions),
-        direction,
-        headDirection,
-        look,
-        item,
-      });
-
-      if (initial != null) {
-        preloadActions.forEach((action) => {
-          loadResources({
-            actions: new Set([action]),
-            direction,
-            headDirection,
-            look,
-          });
-        });
+      const effectCache = await this._loadEffectCached(effect);
+      if (effectCache != null) {
+        effectData = effectCache.effectData;
+        effectBundle = effectCache.effectBundle;
       }
-    };
-
-    if (skipCaching) {
-      loadDirection(
-        options.direction,
-        options.headDirection ?? options.direction
-      );
-    } else {
-      directions.forEach((direction) => {
-        directions.forEach((headDirection) => {
-          loadDirection(direction, headDirection);
-        });
-      });
     }
 
-    const awaitedEntries = await Promise.all(
-      [...loadedFiles.entries()].map(
-        async ([id, promise]) => [id, await promise] as const
+    const { figureData, figureMap } = await this._dependencies;
+
+    // Open the effect library
+    if (effectBundle != null) {
+      await this._offsets.open(effectBundle);
+    }
+
+    // Get the required libraries for the look
+    const libs = getLibrariesForLook(parseLookString(options.look), {
+      figureData: figureData,
+      figureMap: figureMap,
+    });
+
+    // Open the required libraries for the look
+    await Promise.all(
+      Array.from(libs).map((lib) =>
+        this._getAssetBundle(lib).then((bundle) => this._offsets.open(bundle))
       )
     );
 
-    const awaitedFiles = new Map<string, HitTexture>(awaitedEntries);
+    // Get asset ids for the look
+    const fileIds = getDrawDefinition(options, effectData)
+      ?.getDrawDefinition()
+      .flatMap((part) => part.assets)
+      .map((asset) => asset.fileId);
 
-    const obj: AvatarLoaderResult = {
+    // Load the required textures for the look
+    if (fileIds != null) {
+      await this._offsets.loadTextures(fileIds);
+    }
+
+    return {
       getDrawDefinition: (options) => {
         const result = this._getDrawDefinitionCached(
           getDrawDefinition,
@@ -199,38 +220,56 @@ export class AvatarLoader implements IAvatarLoader {
         return result;
       },
       getTexture: (id) => {
-        const texture = awaitedFiles.get(id);
-        if (texture == null) throw new Error(`Invalid texture: ${id}`);
+        const texture = this._offsets.getTexture(id);
+
+        if (texture == null) {
+          console.error("Texture not found in", this._offsets);
+          throw new Error(`Invalid texture: ${id}`);
+        }
 
         return texture;
       },
     };
+  }
 
-    return obj;
+  private async _loadEffectCached(effect: string) {
+    const current = this._effectCache.get(effect);
+    if (current != null) return current;
+
+    const promise = this._loadEffect(effect);
+    this._effectCache.set(effect, promise);
+
+    return promise;
+  }
+
+  private async _loadEffect(
+    effect: string
+  ): Promise<EffectCacheEntry | undefined> {
+    const effectMap = await this._effectMap;
+
+    const effectInfo = effectMap.getEffectInfo(effect);
+
+    if (effectInfo != null) {
+      const effectBundle = await this._options.getEffectBundle(effectInfo);
+      const effectData = await effectBundle.getData();
+
+      return {
+        effectBundle,
+        effectData,
+      };
+    }
   }
 
   private async _getAssetBundle(library: string) {
     const current = this._assetBundles.get(library);
     if (current != null) return current;
 
-    const bundle = this._options.getAssetBundle(library);
+    const bundle = this._options
+      .getAssetBundle(library)
+      .then((bundle) => new ManifestLibrary(bundle));
     this._assetBundles.set(library, bundle);
 
     return bundle;
-  }
-
-  private _loadEffect(type: string, id: string) {
-    const key = `${type}_${id}`;
-    let current = this._effectCache.get(key);
-
-    if (current == null) {
-      current = AvatarEffectData.fromUrl(
-        `./resources/figure/hh_human_fx/hh_human_fx_${type}${id}.bin`
-      );
-      this._effectCache.set(key, current);
-    }
-
-    return current;
   }
 
   private _getDrawDefinitionCached(
@@ -255,10 +294,16 @@ export class AvatarLoader implements IAvatarLoader {
   }
 }
 
-async function initializeDefaultLookServer(resourcePath: string) {
+interface EffectCacheEntry {
+  effectBundle: IAvatarEffectBundle;
+  effectData: IAvatarEffectData;
+}
+
+async function initializeDefaultAvatarDependencies(
+  resourcePath: string
+): Promise<AvatarExternalDependencies> {
   const {
     animationData,
-    offsetsData,
     figureMap,
     figureData,
     partSetsData,
@@ -268,19 +313,17 @@ async function initializeDefaultLookServer(resourcePath: string) {
     animationData: AvatarAnimationData.default(),
     figureData: FigureData.fromUrl(`${resourcePath}/figuredata.xml`),
     figureMap: FigureMapData.fromUrl(`${resourcePath}/figuremap.xml`),
-    offsetsData: AvatarOffsetsData.fromUrl(`${resourcePath}/offsets.json`),
     partSetsData: AvatarPartSetsData.default(),
     actionsData: AvatarActionsData.default(),
     geometry: AvatarGeometryData.default(),
   });
 
-  return createLookServer({
+  return {
     animationData,
     figureData,
-    offsetsData,
     figureMap,
     partSetsData,
     actionsData,
     geometry,
-  });
+  };
 }

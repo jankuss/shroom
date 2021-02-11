@@ -67,6 +67,8 @@ export class HitDetection implements IHitDetection {
     eventType: HitEventType,
     domEvent: MouseEvent
   ) {
+    const start = performance.now();
+
     const elements = this._performHitTest(x, y);
 
     const event = new HitEventPropagation(eventType, domEvent, elements);
@@ -87,6 +89,25 @@ export class HitDetection implements IHitDetection {
     return ordered.filter((element) => {
       return element.hits(x, y);
     });
+  }
+
+  private _debugHitDetection() {
+    this._container?.destroy();
+    const container = new PIXI.Container();
+
+    this._container = container;
+
+    this._map.forEach((element) => {
+      if (element.createDebugSprite == null) return;
+
+      const sprite = element.createDebugSprite();
+
+      if (sprite == null) return;
+
+      container.addChild(sprite);
+    });
+
+    this._app.stage.addChild(container);
   }
 }
 

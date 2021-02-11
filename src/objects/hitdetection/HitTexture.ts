@@ -55,6 +55,10 @@ export class HitTexture {
     return new HitTexture(texture);
   }
 
+  public getHitMap() {
+    return this._getHitMap();
+  }
+
   hits(
     x: number,
     y: number,

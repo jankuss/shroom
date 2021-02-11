@@ -1,4 +1,4 @@
-import { FigureMapData } from "../../objects/avatar/util/data/FigureMapData";
+import { FigureMapData } from "../../objects/avatar/data/FigureMapData";
 import * as path from "path";
 import Bluebird from "bluebird";
 import * as readline from "readline";

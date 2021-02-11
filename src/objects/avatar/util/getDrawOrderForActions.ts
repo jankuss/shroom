@@ -1,4 +1,4 @@
-import { AvatarActionInfo } from "./data/interfaces/IAvatarActionsData";
+import { AvatarActionInfo } from "../data/interfaces/IAvatarActionsData";
 
 export function getDrawOrderForActions(
   activeActions: AvatarActionInfo[],

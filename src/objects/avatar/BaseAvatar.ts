@@ -1,9 +1,4 @@
 import * as PIXI from "pixi.js";
-import {
-  AvatarAsset,
-  AvatarDrawDefinition,
-  AvatarDrawPart,
-} from "./util/getAvatarDrawDefinition";
 import { LookOptions } from "./util/createLookServer";
 import {
   AvatarLoaderResult,
@@ -16,6 +11,12 @@ import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { Shroom } from "../Shroom";
 import { AvatarFigurePartType } from "./enum/AvatarFigurePartType";
+import {
+  AvatarAsset,
+  AvatarEffectDrawPart,
+  DefaultAvatarDrawPart,
+} from "./types";
+import { AvatarDrawDefinition } from "./structure/AvatarDrawDefinition";
 
 const bodyPartTypes: Set<AvatarFigurePartType> = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.Head,
@@ -227,8 +228,8 @@ export class BaseAvatar extends PIXI.Container {
   private _updatePosition(definition: AvatarDrawDefinition) {
     if (this._container == null) return;
 
-    this._container.x = definition.offsetX;
-    this._container.y = definition.offsetY;
+    this._container.x = 0;
+    this._container.y = 0;
   }
 
   private _updateSprites() {
@@ -258,43 +259,80 @@ export class BaseAvatar extends PIXI.Container {
     this._container?.destroy();
 
     this._container = new PIXI.Container();
+    this._container.sortableChildren = true;
 
-    drawDefinition.parts.forEach((part) => {
-      const figurePart = part.type as AvatarFigurePartType;
-      if (this._skipBodyParts && bodyPartTypes.has(figurePart)) {
-        return;
+    drawDefinition.getDrawDefinition().forEach((part) => {
+      if (part.kind === "AVATAR_DRAW_PART") {
+        const figurePart = part.type as AvatarFigurePartType;
+        if (this._skipBodyParts && bodyPartTypes.has(figurePart)) {
+          return;
+        }
+
+        if (this._headOnly && !headPartTypes.has(figurePart)) {
+          return;
+        }
+
+        const frame = currentFrame % part.assets.length;
+        const asset = part.assets[frame];
+
+        let sprite = this._sprites.get(asset.fileId);
+
+        if (sprite == null) {
+          sprite = this._createAsset(part, asset);
+        }
+
+        if (sprite == null) return;
+
+        sprite.x = asset.x;
+        sprite.y = asset.y;
+        sprite.visible = true;
+        sprite.mirrored = asset.mirror;
+        sprite.ignore = false;
+        sprite.zIndex = this.spritesZIndex + part.z;
+
+        this._sprites.set(asset.fileId, sprite);
+        this._container?.addChild(sprite);
+      } else if (part.kind === "EFFECT_DRAW_PART") {
+        const frame = currentFrame % part.assets.length;
+        const asset = part.assets[frame];
+
+        let sprite = this._sprites.get(asset.fileId);
+
+        if (sprite == null) {
+          sprite = this._createAsset(part, asset);
+        }
+
+        if (sprite == null) return;
+
+        switch (part.ink) {
+          case 33:
+            sprite.blendMode = PIXI.BLEND_MODES.ADD;
+            break;
+        }
+
+        sprite.x =
+          asset.x +
+          (asset.substractWidth != null && asset.substractWidth
+            ? sprite.texture.width
+            : 0);
+        sprite.y = asset.y;
+        sprite.visible = true;
+        sprite.mirrored = asset.mirror;
+        sprite.ignore = false;
+        sprite.zIndex = this.spritesZIndex + part.z;
+
+        this._sprites.set(asset.fileId, sprite);
+        this._container?.addChild(sprite);
       }
-
-      if (this._headOnly && !headPartTypes.has(figurePart)) {
-        return;
-      }
-
-      const frame = currentFrame % part.assets.length;
-      const asset = part.assets[frame];
-
-      let sprite = this._sprites.get(asset.fileId);
-
-      if (sprite == null) {
-        sprite = this._createAsset(part, asset);
-      }
-
-      if (sprite == null) return;
-
-      sprite.x = asset.x;
-      sprite.y = asset.y;
-      sprite.visible = true;
-      sprite.mirrored = asset.mirror;
-      sprite.ignore = false;
-      sprite.zIndex = this.spritesZIndex;
-
-      this._sprites.set(asset.fileId, sprite);
-      this._container?.addChild(sprite);
     });
 
     this.addChild(this._container);
   }
 
-  private _createAsset(part: AvatarDrawPart, asset: AvatarAsset) {
+  private _createAsset(
+    part: DefaultAvatarDrawPart | AvatarEffectDrawPart,
+    asset: AvatarAsset
+  ) {
     if (this._avatarLoaderResult == null)
       throw new Error(
         "Cant create asset when avatar loader result not present"
@@ -325,7 +363,11 @@ export class BaseAvatar extends PIXI.Container {
       this._clickHandler.handlePointerUp(event);
     });
 
-    if (part.color != null && part.mode === "colored") {
+    if (
+      part.kind === "AVATAR_DRAW_PART" &&
+      part.color != null &&
+      part.mode === "colored"
+    ) {
       sprite.tint = parseInt(part.color.slice(1), 16);
     } else {
       sprite.tint = 0xffffff;

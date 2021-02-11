@@ -34,6 +34,10 @@ export class TileCursor extends PIXI.Container implements HitDetectionElement {
     this._node = hitDetection.register(this);
   }
 
+  createDebugSprite() {
+    return undefined;
+  }
+
   trigger(type: "click", event: HitEvent): void {
     switch (type) {
       case "click":
