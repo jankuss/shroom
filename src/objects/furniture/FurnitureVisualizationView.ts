@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { IHitDetection } from "../../interfaces/IHitDetection";
 import { ClickHandler } from "../hitdetection/ClickHandler";
 import { HitTexture } from "../hitdetection/HitTexture";
+import { BaseFurniture } from "./BaseFurniture";
 import { FurnitureAsset } from "./data/interfaces/IFurnitureAssetsData";
 import { IFurnitureVisualizationData } from "./data/interfaces/IFurnitureVisualizationData";
 import { HighlightFilter } from "./filter/HighlightFilter";
@@ -128,6 +129,7 @@ export class FurnitureVisualizationView
     this._layers = this._getDrawDefinition(direction, animation).parts.map(
       (part) =>
         new FurnitureVisualizationLayer(
+          this,
           this._container,
           part,
           this._hitDetection,
@@ -175,6 +177,7 @@ class FurnitureVisualizationLayer
   private _spritePositionChanged = false;
   private _spritesChanged = false;
   private _frameIndex = 0;
+  private _color: number | undefined;
 
   private _mountedSprites = new Set<FurnitureSprite>();
 
@@ -243,7 +246,12 @@ class FurnitureVisualizationLayer
     this._spritePositionChanged = true;
   }
 
+  public get tag() {
+    return this._part.layer?.tag;
+  }
+
   constructor(
+    private _parent: FurnitureVisualizationView,
     private _container: PIXI.Container,
     private _part: FurniDrawPart,
     private _hitDetection: IHitDetection,
@@ -253,6 +261,13 @@ class FurnitureVisualizationLayer
     this.frameRepeat = _part.frameRepeat;
     this.layerIndex = _part.layerIndex;
     this.assetCount = _part.assets.length;
+  }
+
+  setColor(color: number): void {
+    if (this._color === color) return;
+
+    this._color = color;
+    this._spritesChanged = true;
   }
 
   setCurrentFrameIndex(value: number): void {
@@ -363,7 +378,7 @@ class FurnitureVisualizationLayer
       hitDetection: this._hitDetection,
       mirrored: asset.flipH,
       tag: layer?.tag,
-      group: this,
+      group: this._parent,
     });
 
     const ignoreMouse = layer?.ignoreMouse != null && layer.ignoreMouse;
@@ -444,6 +459,10 @@ class FurnitureVisualizationLayer
 
     if (mask) {
       sprite.tint = 0xffffff;
+    }
+
+    if (this._color != null) {
+      sprite.tint = this._color;
     }
 
     this._setSpriteVisible(sprite, false);

@@ -2,7 +2,7 @@ import { FurnitureSprite } from "../FurnitureSprite";
 import { IFurnitureVisualizationView } from "../IFurnitureVisualizationView";
 import { FurnitureVisualization } from "./FurnitureVisualization";
 
-export class BasicFurnitureVisualization extends FurnitureVisualization {
+export class StaticFurnitureVisualization extends FurnitureVisualization {
   private _sprites: FurnitureSprite[] = [];
   private _refreshFurniture = false;
   private _currentDirection: number | undefined;
@@ -53,3 +53,8 @@ export class BasicFurnitureVisualization extends FurnitureVisualization {
     this.view.getLayers().forEach((layer) => layer.setCurrentFrameIndex(0));
   }
 }
+
+/**
+ * @deprecated Use `StaticFurnitureVisualization`
+ */
+export const BasicFurnitureVisualization = StaticFurnitureVisualization;

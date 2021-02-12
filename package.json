@@ -34,6 +34,7 @@
     "prettier": "2.2.1",
     "request": "^2.88.2",
     "ts-jest": "^26.4.3",
+    "ts-mockito": "^2.6.1",
     "ts-node": "^9.0.0",
     "ts-node-dev": "^1.1.1",
     "typescript": "^4.0.3"
@@ -44,6 +45,7 @@
     "bin-pack": "^1.0.2",
     "bluebird": "^3.7.2",
     "bytebuffer": "^5.0.1",
+    "canvas": "^2.6.1",
     "chalk": "^4.1.0",
     "detect-edges": "^1.0.1",
     "events": "^3.2.0",
@@ -62,8 +64,7 @@
     "tween.js": "^16.6.0",
     "ws": "^7.4.2",
     "xml2js": "^0.4.23",
-    "yargs": "^16.2.0",
-    "canvas": "^2.6.1"
+    "yargs": "^16.2.0"
   },
   "peerDependencies": {
     "pixi.js": "^5.3.3"
