@@ -8,6 +8,7 @@ export default {
 function renderEffect(effect: string) {
   return renderAvatarDirections(
     "hd-180-1.hr-828-61.ha-1012-110.he-1604-62.ea-1404-62.fa-1204-62.ch-255-66.lg-280-110.sh-305-62",
+    undefined,
     (avatar) => {
       avatar.effect = effect;
     }

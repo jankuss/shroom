@@ -44,6 +44,7 @@
     "bin-pack": "^1.0.2",
     "bluebird": "^3.7.2",
     "bytebuffer": "^5.0.1",
+    "canvas": "^2.6.1",
     "chalk": "^4.1.0",
     "detect-edges": "^1.0.1",
     "events": "^3.2.0",
@@ -53,6 +54,7 @@
     "jsdom": "^16.4.0",
     "jszip": "^3.5.0",
     "node-fetch": "^2.6.1",
+    "quadtree-lib": "^1.0.9",
     "react": "^16.14.0",
     "rxjs": "^6.6.3",
     "stream": "0.0.2",
@@ -62,8 +64,7 @@
     "tween.js": "^16.6.0",
     "ws": "^7.4.2",
     "xml2js": "^0.4.23",
-    "yargs": "^16.2.0",
-    "canvas": "^2.6.1"
+    "yargs": "^16.2.0"
   },
   "peerDependencies": {
     "pixi.js": "^5.3.3"
