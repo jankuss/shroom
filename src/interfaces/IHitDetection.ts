@@ -24,6 +24,7 @@ export interface HitDetectionElement {
   hits(x: number, y: number): boolean;
   getHitDetectionZIndex(): number;
   createDebugSprite?(): PIXI.Sprite | undefined;
+  getQuadTreeItem(): Quadtree.QuadtreeItem;
 }
 
 export interface HitDetectionNode {

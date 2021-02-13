@@ -6,13 +6,18 @@ import {
   HitEventType,
   IHitDetection,
 } from "../../interfaces/IHitDetection";
+import QuadTree from "quadtree-lib";
+import { Rectangle } from "../room/IRoomRectangle";
 
-export class HitDetection implements IHitDetection {
+export class HitDetection extends PIXI.Container implements IHitDetection {
   private _counter = 0;
   private _map: Map<number, HitDetectionElement> = new Map();
   private _container: PIXI.Container | undefined;
+  private _quadTree: QuadTree<Quadtree.QuadtreeItem> | undefined;
+  private _hitAreaRect: Rectangle | undefined;
 
   constructor(private _app: PIXI.Application) {
+    super();
     _app.view.addEventListener("click", (event) => this.handleClick(event), {
       capture: true,
     });
@@ -38,13 +43,26 @@ export class HitDetection implements IHitDetection {
     return new HitDetection(application);
   }
 
+  updateHitArea(rectangle: Rectangle) {
+    this._hitAreaRect = rectangle;
+    this._updateQuadTree();
+  }
+
   register(rectangle: HitDetectionElement): HitDetectionNode {
     const id = this._counter++;
     this._map.set(id, rectangle);
 
+    if (this._quadTree != null) {
+      this._quadTree.push(rectangle.getQuadTreeItem());
+    }
+
     return {
       remove: () => {
         this._map.delete(id);
+
+        if (this._quadTree != null) {
+          this._quadTree.remove(rectangle.getQuadTreeItem());
+        }
       },
     };
   }
@@ -59,6 +77,18 @@ export class HitDetection implements IHitDetection {
 
   handlePointerUp(event: PointerEvent) {
     this._triggerEvent(event.clientX, event.clientY, "pointerup", event);
+  }
+
+  private _updateQuadTree() {
+    if (this._hitAreaRect == null)
+      throw new Error("Invalid hit area rectangle");
+
+    const tree = new QuadTree(this._hitAreaRect);
+
+    this._quadTree = tree;
+    this._map.forEach((element) => {
+      tree.push(element.getQuadTreeItem());
+    });
   }
 
   private _triggerEvent(
