@@ -1,8 +1,9 @@
 import { HitEvent } from "../../../interfaces/IHitDetection";
+import { IEventManagerEvent } from "../../events/interfaces/IEventManagerEvent";
 
 export interface IFurnitureEventHandlers {
-  onClick?: (event: HitEvent) => void;
-  onDoubleClick?: (event: HitEvent) => void;
-  onPointerDown?: (event: HitEvent) => void;
-  onPointerUp?: (event: HitEvent) => void;
+  onClick?: (event: IEventManagerEvent) => void;
+  onDoubleClick?: (event: IEventManagerEvent) => void;
+  onPointerDown?: (event: IEventManagerEvent) => void;
+  onPointerUp?: (event: IEventManagerEvent) => void;
 }

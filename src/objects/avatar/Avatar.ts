@@ -376,14 +376,14 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
       this._placeholderSprites.dependencies = {
         animationTicker: this.animationTicker,
         avatarLoader: this.avatarLoader,
-        hitDetection: this.hitDetection,
+        eventManager: this.eventManager,
       };
     }
 
     this._loadingAvatarSprites.dependencies = {
       animationTicker: this.animationTicker,
       avatarLoader: this.avatarLoader,
-      hitDetection: this.hitDetection,
+      eventManager: this.eventManager,
     };
 
     this._updateAvatarSprites();

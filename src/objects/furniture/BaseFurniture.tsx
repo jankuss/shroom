@@ -21,6 +21,14 @@ import { IFurnitureVisualization } from "./IFurnitureVisualization";
 import { FurnitureSprite } from "./FurnitureSprite";
 import { AnimatedFurnitureVisualization } from "./visualization/AnimatedFurnitureVisualization";
 import { getDirectionForFurniture } from "./util/getDirectionForFurniture";
+import { IEventManager } from "../events/interfaces/IEventManager";
+import {
+  EventGroupIdentifier,
+  FURNITURE_EVENT,
+  IEventGroup,
+} from "../events/interfaces/IEventGroup";
+import { IEventManagerNode } from "../events/interfaces/IEventManagerNode";
+import { NOOP_EVENT_MANAGER } from "../events/EventManager";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -38,8 +46,8 @@ interface BaseFurnitureDependencies {
   visualization: IFurnitureRoomVisualization;
   animationTicker: IAnimationTicker;
   furnitureLoader: IFurnitureLoader;
-  hitDetection: IHitDetection;
   application: PIXI.Application;
+  eventManager: IEventManager;
 }
 
 export interface BaseFurnitureProps {
@@ -52,7 +60,7 @@ export interface BaseFurnitureProps {
 
 type ResolveLoadFurniResult = (result: LoadFurniResult) => void;
 
-export class BaseFurniture implements IFurnitureEventHandlers {
+export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
   private _sprites: Map<string, FurnitureSprite> = new Map();
   private _loadFurniResult: LoadFurniResult | undefined;
 
@@ -93,7 +101,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     visualization: IFurnitureRoomVisualization;
     animationTicker: IAnimationTicker;
     furnitureLoader: IFurnitureLoader;
-    hitDetection: IHitDetection;
+    eventManager: IEventManager;
   };
 
   constructor({
@@ -129,9 +137,9 @@ export class BaseFurniture implements IFurnitureEventHandlers {
         placeholder: context.configuration.placeholder,
         animationTicker: context.animationTicker,
         furnitureLoader: context.furnitureLoader,
-        hitDetection: context.hitDetection,
         visualization: context.visualization,
         application: context.application,
+        eventManager: context.eventManager,
       },
       ...props,
     });
@@ -146,9 +154,9 @@ export class BaseFurniture implements IFurnitureEventHandlers {
       dependencies: {
         animationTicker: shroom.dependencies.animationTicker,
         furnitureLoader: shroom.dependencies.furnitureLoader,
-        hitDetection: shroom.dependencies.hitDetection,
         placeholder: shroom.dependencies.configuration.placeholder,
         application: shroom.dependencies.application,
+        eventManager: NOOP_EVENT_MANAGER,
         visualization: {
           container,
           addMask: () => {
@@ -320,6 +328,10 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     this._getMaskId = value;
   }
 
+  getEventGroupIdentifier(): EventGroupIdentifier {
+    return FURNITURE_EVENT;
+  }
+
   destroy() {
     this._destroySprites();
 
@@ -406,7 +418,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
 
     if (this._unknownSprite == null) {
       this._unknownSprite = new FurnitureSprite({
-        hitDetection: this.dependencies.hitDetection,
+        eventManager: this.dependencies.eventManager,
         group: this,
       });
 
@@ -597,7 +609,7 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     part: FurniDrawPart
   ): FurnitureSprite {
     const sprite = new FurnitureSprite({
-      hitDetection: this.dependencies.hitDetection,
+      eventManager: this.dependencies.eventManager,
       mirrored: asset.flipH,
       tag: layer?.tag,
       group: this,
@@ -606,15 +618,15 @@ export class BaseFurniture implements IFurnitureEventHandlers {
     const ignoreMouse = layer?.ignoreMouse != null && layer.ignoreMouse;
     sprite.ignoreMouse = ignoreMouse;
 
-    sprite.addEventListener("click", (event) => {
+    sprite.events.addEventListener("click", (event) => {
       this._clickHandler.handleClick(event);
     });
 
-    sprite.addEventListener("pointerup", (event) => {
+    sprite.events.addEventListener("pointerup", (event) => {
       this._clickHandler.handlePointerUp(event);
     });
 
-    sprite.addEventListener("pointerdown", (event) => {
+    sprite.events.addEventListener("pointerdown", (event) => {
       this._clickHandler.handlePointerDown(event);
     });
 

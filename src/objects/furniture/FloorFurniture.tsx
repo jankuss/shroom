@@ -108,9 +108,9 @@ export class FloorFurniture
     this._baseFurniture.dependencies = {
       animationTicker: this.animationTicker,
       furnitureLoader: this.furnitureLoader,
-      hitDetection: this.hitDetection,
       placeholder: this.configuration.placeholder,
       visualization: this.roomVisualization,
+      eventManager: this.eventManager,
     };
 
     this._moveAnimation = new ObjectAnimation(

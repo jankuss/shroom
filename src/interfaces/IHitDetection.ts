@@ -1,3 +1,6 @@
+import { InteractionEvent } from "pixi.js";
+import { Rectangle } from "../objects/room/IRoomRectangle";
+
 export interface Rect {
   x: number;
   y: number;
@@ -9,7 +12,9 @@ export interface Rect {
 export type HitEventType = "click" | "pointerdown" | "pointerup";
 
 export interface HitEvent {
-  mouseEvent: MouseEvent;
+  mouseEvent: MouseEvent | TouchEvent | PointerEvent;
+  interactionEvent: InteractionEvent;
+
   tag?: string;
   target: HitDetectionElement;
 
@@ -24,11 +29,11 @@ export interface HitDetectionElement {
   hits(x: number, y: number): boolean;
   getHitDetectionZIndex(): number;
   createDebugSprite?(): PIXI.Sprite | undefined;
-  getQuadTreeItem(): Quadtree.QuadtreeItem;
 }
 
 export interface HitDetectionNode {
   remove(): void;
+  updateDimensions(element: Rectangle | undefined): void;
 }
 
 export interface IHitDetection {

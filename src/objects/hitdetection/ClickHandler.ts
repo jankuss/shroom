@@ -1,9 +1,10 @@
 import { HitEvent } from "../../interfaces/IHitDetection";
+import { IEventManagerEvent } from "../events/interfaces/IEventManagerEvent";
 import { HitEventHandler } from "./HitSprite";
 
 export class ClickHandler {
   private _doubleClickInfo?: {
-    initialEvent: HitEvent;
+    initialEvent: IEventManagerEvent;
     timeout: number;
   };
 
@@ -46,7 +47,7 @@ export class ClickHandler {
     this._onPointerUp = value;
   }
 
-  handleClick(event: HitEvent) {
+  handleClick(event: IEventManagerEvent) {
     if (this._doubleClickInfo == null) {
       this.onClick && this.onClick(event);
 
@@ -59,15 +60,15 @@ export class ClickHandler {
     }
   }
 
-  handlePointerDown(event: HitEvent) {
+  handlePointerDown(event: IEventManagerEvent) {
     this.onPointerDown && this.onPointerDown(event);
   }
 
-  handlePointerUp(event: HitEvent) {
+  handlePointerUp(event: IEventManagerEvent) {
     this.onPointerUp && this.onPointerUp(event);
   }
 
-  private _performDoubleClick(event: HitEvent) {
+  private _performDoubleClick(event: IEventManagerEvent) {
     if (this._doubleClickInfo == null) return;
 
     this.onDoubleClick &&
@@ -85,7 +86,7 @@ export class ClickHandler {
     this._doubleClickInfo = undefined;
   }
 
-  private _startDoubleClick(event: HitEvent) {
+  private _startDoubleClick(event: IEventManagerEvent) {
     this._doubleClickInfo = {
       initialEvent: event,
       timeout: window.setTimeout(() => this._resetDoubleClick(), 350),

@@ -1,6 +1,5 @@
 import * as PIXI from "pixi.js";
 import { Subject } from "rxjs";
-import { IHitDetection } from "../../interfaces/IHitDetection";
 import {
   IRoomVisualization,
   MaskNode,
@@ -9,6 +8,8 @@ import {
 import { RoomPosition } from "../../types/RoomPosition";
 import { getZOrder } from "../../util/getZOrder";
 import { ParsedTileType, ParsedTileWall } from "../../util/parseTileMap";
+import { EventManager } from "../events/EventManager";
+import { EventManagerContainer } from "../events/EventManagerContainer";
 import { ILandscapeContainer } from "./ILandscapeContainer";
 import { IRoomRectangle, Rectangle } from "./IRoomRectangle";
 import { ParsedTileMap } from "./ParsedTileMap";
@@ -87,7 +88,7 @@ export class RoomModelVisualization
   private _rebuildRoom = false;
 
   constructor(
-    private _hitDetection: IHitDetection,
+    private _eventManager: EventManager,
     private _application: PIXI.Application,
     public readonly parsedTileMap: ParsedTileMap
   ) {
@@ -112,6 +113,9 @@ export class RoomModelVisualization
     this._tileLayer.sortableChildren = true;
 
     this.addChild(this._positionalContainer);
+    this._positionalContainer.addChild(
+      new EventManagerContainer(this._application, this._eventManager)
+    );
 
     this._updateHeightmap();
 
@@ -530,7 +534,7 @@ export class RoomModelVisualization
 
     const position: RoomPosition = { roomX: x, roomY: y, roomZ: z };
     const cursor = new TileCursor(
-      this._hitDetection,
+      this._eventManager,
       position,
       () => {
         this._onTileClick.next(position);

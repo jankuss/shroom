@@ -188,9 +188,9 @@ export class WallFurniture extends RoomObject {
     this._baseFurniture.dependencies = {
       animationTicker: this.animationTicker,
       furnitureLoader: this.furnitureLoader,
-      hitDetection: this.hitDetection,
       placeholder: undefined,
       visualization: this.roomVisualization,
+      eventManager: this.eventManager,
     };
 
     this._updatePosition();

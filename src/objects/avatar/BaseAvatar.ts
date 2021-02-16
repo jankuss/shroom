@@ -7,7 +7,6 @@ import {
 import { ClickHandler } from "../hitdetection/ClickHandler";
 import { HitSprite } from "../hitdetection/HitSprite";
 import { isSetEqual } from "../../util/isSetEqual";
-import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { Shroom } from "../Shroom";
 import { AvatarFigurePartType } from "./enum/AvatarFigurePartType";
@@ -17,6 +16,13 @@ import {
   DefaultAvatarDrawPart,
 } from "./types";
 import { AvatarDrawDefinition } from "./structure/AvatarDrawDefinition";
+import { IEventManager } from "../events/interfaces/IEventManager";
+import { NOOP_EVENT_MANAGER } from "../events/EventManager";
+import {
+  AVATAR_EVENT,
+  EventGroupIdentifier,
+  IEventGroup,
+} from "../events/interfaces/IEventGroup";
 
 const bodyPartTypes: Set<AvatarFigurePartType> = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.Head,
@@ -47,15 +53,16 @@ export interface BaseAvatarOptions {
 }
 
 export interface BaseAvatarDependencies {
-  hitDetection: IHitDetection;
+  eventManager: IEventManager;
   animationTicker: IAnimationTicker;
   avatarLoader: IAvatarLoader;
 }
 
-export class BaseAvatar extends PIXI.Container {
+export class BaseAvatar extends PIXI.Container implements IEventGroup {
   private _container: PIXI.Container | undefined;
   private _avatarLoaderResult: AvatarLoaderResult | undefined;
   private _avatarDrawDefinition: AvatarDrawDefinition | undefined;
+  private _avatarDestroyed = false;
 
   private _lookOptions: LookOptions | undefined;
   private _nextLookOptions: LookOptions | undefined;
@@ -182,8 +189,15 @@ export class BaseAvatar extends PIXI.Container {
 
   static fromShroom(shroom: Shroom, options: BaseAvatarOptions) {
     const avatar = new BaseAvatar({ ...options });
-    avatar.dependencies = shroom.dependencies;
+    avatar.dependencies = {
+      ...shroom.dependencies,
+      eventManager: NOOP_EVENT_MANAGER,
+    };
     return avatar;
+  }
+
+  getEventGroupIdentifier(): EventGroupIdentifier {
+    return AVATAR_EVENT;
   }
 
   destroy(): void {
@@ -250,6 +264,7 @@ export class BaseAvatar extends PIXI.Container {
     drawDefinition: AvatarDrawDefinition,
     currentFrame: number
   ) {
+    if (this._destroyed) throw new Error("BaseAvatar was destroyed already");
     if (!this.mounted) return;
 
     this._sprites.forEach((value) => {
@@ -342,24 +357,24 @@ export class BaseAvatar extends PIXI.Container {
     if (texture == null) return;
 
     const sprite = new HitSprite({
-      hitDetection: this.dependencies.hitDetection,
+      eventManager: this.dependencies.eventManager,
       mirrored: asset.mirror,
       group: this,
     });
 
     sprite.hitTexture = texture;
-
     sprite.x = asset.x;
     sprite.y = asset.y;
-    sprite.addEventListener("click", (event) => {
+
+    sprite.events.addEventListener("click", (event) => {
       this._clickHandler.handleClick(event);
     });
 
-    sprite.addEventListener("pointerdown", (event) => {
+    sprite.events.addEventListener("pointerdown", (event) => {
       this._clickHandler.handlePointerDown(event);
     });
 
-    sprite.addEventListener("pointerup", (event) => {
+    sprite.events.addEventListener("pointerup", (event) => {
       this._clickHandler.handlePointerUp(event);
     });
 
@@ -391,6 +406,7 @@ export class BaseAvatar extends PIXI.Container {
           skipCaching: this._skipCaching,
         })
         .then((result) => {
+          if (this._destroyed) return;
           if (requestId !== this._updateId) return;
 
           this._avatarLoaderResult = result;
@@ -424,6 +440,9 @@ export class BaseAvatar extends PIXI.Container {
       this._cancelTicker();
     }
 
+    if (this._cancelTicker != null) {
+      this._cancelTicker();
+    }
     this._cancelTicker = this.dependencies.animationTicker.subscribe(() => {
       if (this._refreshLook) {
         this._refreshLook = false;

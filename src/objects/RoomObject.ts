@@ -72,8 +72,8 @@ export abstract class RoomObject implements IRoomObject {
     return this.getRoomContext().avatarLoader;
   }
 
-  protected get hitDetection() {
-    return this.getRoomContext().hitDetection;
+  protected get eventManager() {
+    return this.getRoomContext().eventManager;
   }
 
   protected get tilemap() {

@@ -4,7 +4,6 @@ import { IAvatarLoader } from "../../interfaces/IAvatarLoader";
 import { IConfiguration } from "../../interfaces/IConfiguration";
 import { IFurnitureData } from "../../interfaces/IFurnitureData";
 import { IFurnitureLoader } from "../../interfaces/IFurnitureLoader";
-import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IRoomGeometry } from "../../interfaces/IRoomGeometry";
 import { IRoomObject } from "../../interfaces/IRoomObject";
 import { IRoomObjectContainer } from "../../interfaces/IRoomObjectContainer";
@@ -15,16 +14,15 @@ import { parseTileMapString } from "../../util/parseTileMapString";
 import { Shroom } from "../Shroom";
 import { ITileMap } from "../../interfaces/ITileMap";
 import { RoomObjectContainer } from "./RoomObjectContainer";
-import { Subject } from "rxjs";
 import { RoomModelVisualization } from "./RoomModelVisualization";
 import { ParsedTileMap } from "./ParsedTileMap";
 import { getTileColors, getWallColors } from "./util/getTileColors";
+import { EventManager } from "../events/EventManager";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
   avatarLoader: IAvatarLoader;
   furnitureLoader: IFurnitureLoader;
-  hitDetection: IHitDetection;
   configuration: IConfiguration;
   furnitureData?: IFurnitureData;
   application: PIXI.Application;
@@ -60,7 +58,7 @@ export class Room
   private _animationTicker: IAnimationTicker;
   private _avatarLoader: IAvatarLoader;
   private _furnitureLoader: IFurnitureLoader;
-  private _hitDetection: IHitDetection;
+  private _eventManager: EventManager;
   private _configuration: IConfiguration;
 
   private _wallTexture: Promise<PIXI.Texture> | PIXI.Texture | undefined;
@@ -88,7 +86,6 @@ export class Room
     avatarLoader,
     furnitureLoader,
     tilemap,
-    hitDetection,
     configuration,
     application,
   }: {
@@ -103,12 +100,12 @@ export class Room
     this._animationTicker = animationTicker;
     this._furnitureLoader = furnitureLoader;
     this._avatarLoader = avatarLoader;
-    this._hitDetection = hitDetection;
+    this._eventManager = new EventManager();
     this._configuration = configuration;
     this.application = application;
 
     this._visualization = new RoomModelVisualization(
-      this._hitDetection,
+      this._eventManager,
       this.application,
       new ParsedTileMap(normalizedTileMap)
     );
@@ -121,7 +118,7 @@ export class Room
       furnitureLoader: this._furnitureLoader,
       roomObjectContainer: this,
       avatarLoader: this._avatarLoader,
-      hitDetection: this._hitDetection,
+      eventManager: this._eventManager,
       configuration: this._configuration,
       tilemap: this,
       landscapeContainer: this._visualization,
