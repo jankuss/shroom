@@ -35,6 +35,7 @@
     "prettier": "2.2.1",
     "request": "^2.88.2",
     "ts-jest": "^26.4.3",
+    "ts-mockito": "^2.6.1",
     "ts-node": "^9.0.0",
     "ts-node-dev": "^1.1.1",
     "typescript": "^4.0.3"

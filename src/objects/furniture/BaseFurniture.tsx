@@ -27,8 +27,8 @@ import {
   FURNITURE_EVENT,
   IEventGroup,
 } from "../events/interfaces/IEventGroup";
-import { IEventManagerNode } from "../events/interfaces/IEventManagerNode";
 import { NOOP_EVENT_MANAGER } from "../events/EventManager";
+import { FurnitureVisualizationView } from "./FurnitureVisualizationView";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -76,6 +76,7 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
   private _loadFurniResultPromise: Promise<LoadFurniResult>;
   private _validDirections: number[] | undefined;
   private _resolveLoadFurniResult: ResolveLoadFurniResult | undefined;
+  private _view: FurnitureVisualizationView | undefined;
 
   private _visualization: IFurnitureVisualization | undefined;
   private _fallbackVisualization = new AnimatedFurnitureVisualization();
@@ -388,19 +389,12 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
       element.baseY = this.y;
     });
 
-    const maskId = this._getMaskId(this.direction);
+    if (this._view == null) return;
 
-    const maskSprites = this._maskSprites;
-    this._maskNodes.forEach((mask) => mask.remove());
-    this._maskNodes = [];
-
-    if (maskId != null) {
-      maskSprites.forEach((maskSprite) => {
-        this._maskNodes.push(
-          this.dependencies.visualization.addMask(maskId, maskSprite)
-        );
-      });
-    }
+    this._view.x = this.x;
+    this._view.y = this.y;
+    this._view.zIndex = this.zIndex;
+    this._view.updateLayers();
   }
 
   private _updateFurniture() {
@@ -478,6 +472,27 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
     return sprite;
   }
 
+  private _createNewView(loadFurniResult: LoadFurniResult) {
+    this._view?.destroy();
+
+    const view = new FurnitureVisualizationView(
+      this.dependencies.hitDetection,
+      this._clickHandler,
+      this.dependencies.visualization.container,
+      loadFurniResult
+    );
+
+    view.x = this.x;
+    view.y = this.y;
+    view.zIndex = this.zIndex;
+    view.alpha = this.alpha ?? 1;
+    view.highlight = this.highlight ?? false;
+
+    this._view = view;
+
+    return view;
+  }
+
   private _updateFurnitureSprites(loadFurniResult: LoadFurniResult) {
     if (!this.mounted) return;
 
@@ -487,35 +502,7 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
     this._unknownSprite?.destroy();
     this._unknownSprite = undefined;
 
-    this.visualization.setView({
-      furniture: loadFurniResult,
-      createSprite: (part, assetIndex, skipLayerUpdate) => {
-        const asset = getAssetFromPart(part, assetIndex);
-        if (asset == null) return;
-
-        let cachedAsset = this._sprites.get(asset.name);
-        if (cachedAsset == null) {
-          const sprite = this._createSimpleAsset(loadFurniResult, part, asset);
-
-          if (sprite != null) {
-            this._sprites.set(asset.name, sprite);
-            cachedAsset = sprite;
-          }
-        }
-
-        if (cachedAsset != null) {
-          this._applyLayerDataToSprite(cachedAsset, asset, part);
-        }
-
-        return cachedAsset;
-      },
-      destroySprite: (sprite) => {
-        if (sprite.assetName == null) return;
-
-        this._sprites.delete(sprite.assetName);
-        sprite.destroy();
-      },
-    });
+    this.visualization.setView(this._createNewView(loadFurniResult));
 
     this.visualization.update(this);
     this._validDirections = loadFurniResult.directions;
