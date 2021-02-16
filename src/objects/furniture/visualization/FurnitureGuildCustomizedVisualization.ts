@@ -1,4 +1,8 @@
-import { IFurnitureVisualizationView } from "../IFurnitureVisualizationView";
+import { getIntFromHex } from "../../../util/getIntFromHex";
+import {
+  IFurnitureVisualizationLayer,
+  IFurnitureVisualizationView,
+} from "../IFurnitureVisualizationView";
 import { FurniDrawPart } from "../util/DrawDefinition";
 import { AnimatedFurnitureVisualization } from "./AnimatedFurnitureVisualization";
 import { FurnitureVisualization } from "./FurnitureVisualization";
@@ -93,19 +97,21 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureVisualizatio
     return color;
   }
 
-  private _modifyPart(part: FurniDrawPart): FurniDrawPart {
-    switch (part.layer?.tag) {
+  private _modifyPart(
+    part: IFurnitureVisualizationLayer
+  ): IFurnitureVisualizationLayer {
+    switch (part.tag) {
       case FurnitureGuildCustomizedVisualization.PRIMARY_COLOR_TAG:
-        return {
-          ...part,
-          tint: this._primaryColor,
-        };
+        if (this._primaryColor != null) {
+          part.setColor(getIntFromHex(this._primaryColor));
+        }
+        break;
 
       case FurnitureGuildCustomizedVisualization.SECONDARY_COLOR_TAG:
-        return {
-          ...part,
-          tint: this._secondaryColor,
-        };
+        if (this._secondaryColor != null) {
+          part.setColor(getIntFromHex(this._secondaryColor));
+        }
+        break;
     }
 
     return part;
