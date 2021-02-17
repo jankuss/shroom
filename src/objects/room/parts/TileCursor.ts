@@ -1,22 +1,29 @@
 import * as PIXI from "pixi.js";
-import {
-  HitDetectionElement,
-  HitDetectionNode,
-  HitEvent,
-  IHitDetection,
-} from "../../../interfaces/IHitDetection";
+import { BehaviorSubject, Observable } from "rxjs";
 import { RoomPosition } from "../../../types/RoomPosition";
+import { isPointInside } from "../../../util/isPointInside";
+import {
+  EventGroupIdentifier,
+  IEventGroup,
+  TILE_CURSOR,
+} from "../../events/interfaces/IEventGroup";
+import { IEventManager } from "../../events/interfaces/IEventManager";
+import { IEventManagerEvent } from "../../events/interfaces/IEventManagerEvent";
+import { IEventTarget } from "../../events/interfaces/IEventTarget";
+import { Rectangle } from "../IRoomRectangle";
 
-export class TileCursor extends PIXI.Container implements HitDetectionElement {
+export class TileCursor
+  extends PIXI.Container
+  implements IEventTarget, IEventGroup {
   private _roomX: number;
   private _roomY: number;
   private _roomZ: number;
   private _graphics: PIXI.Graphics;
   private _hover = false;
-  private _node: HitDetectionNode;
+  private _subject = new BehaviorSubject<Rectangle | undefined>(undefined);
 
   constructor(
-    hitDetection: IHitDetection,
+    private _eventManager: IEventManager,
     private _position: RoomPosition,
     private onClick: (position: RoomPosition) => void,
     private onOver: (position: RoomPosition) => void,
@@ -31,31 +38,58 @@ export class TileCursor extends PIXI.Container implements HitDetectionElement {
 
     this.addChild(this._graphics);
 
-    this._node = hitDetection.register(this);
+    this._eventManager.register(this);
+  }
+
+  getEventGroupIdentifier(): EventGroupIdentifier {
+    return TILE_CURSOR;
+  }
+
+  getGroup(): IEventGroup {
+    return this;
+  }
+
+  getRectangleObservable(): Observable<Rectangle | undefined> {
+    return this._subject;
+  }
+
+  getEventZOrder(): number {
+    return -1000;
+  }
+
+  triggerPointerTargetChanged(event: IEventManagerEvent): void {}
+
+  triggerClick(event: IEventManagerEvent): void {
+    this.onClick({
+      roomX: this._roomX,
+      roomY: this._roomY,
+      roomZ: this._roomZ,
+    });
+  }
+
+  triggerPointerDown(event: IEventManagerEvent): void {}
+
+  triggerPointerUp(event: IEventManagerEvent): void {}
+
+  triggerPointerOver(event: IEventManagerEvent): void {
+    this._updateHover(true);
+    this.onOver({ roomX: this._roomX, roomY: this._roomY, roomZ: this._roomZ });
+  }
+
+  triggerPointerOut(event: IEventManagerEvent): void {
+    this._updateHover(false);
+    this.onOut({ roomX: this._roomX, roomY: this._roomY, roomZ: this._roomZ });
   }
 
   createDebugSprite() {
     return undefined;
   }
 
-  trigger(type: "click", event: HitEvent): void {
-    switch (type) {
-      case "click":
-        this.onClick({
-          roomX: this._roomX,
-          roomY: this._roomY,
-          roomZ: this._roomZ,
-        });
-        break;
-    }
-  }
-
   hits(x: number, y: number): boolean {
-    const tx = this.worldTransform.tx;
-    const ty = this.worldTransform.ty;
+    const pos = this.getGlobalPosition();
 
-    const diffX = x - tx;
-    const diffY = y - ty;
+    const diffX = x - pos.x;
+    const diffY = y - pos.y;
 
     return this._pointInside(
       [diffX, diffY],
@@ -74,22 +108,30 @@ export class TileCursor extends PIXI.Container implements HitDetectionElement {
 
   destroy() {
     super.destroy();
-    this._node.remove();
+
     this._graphics.destroy();
+    this._eventManager.remove(this);
+  }
+
+  updateTransform() {
+    super.updateTransform();
+
+    this._subject.next(this._getCurrentRectangle());
+  }
+
+  private _getCurrentRectangle(): Rectangle {
+    const position = this.getGlobalPosition();
+
+    return {
+      x: position.x,
+      y: position.y,
+      width: 64,
+      height: 32,
+    };
   }
 
   private _createGraphics() {
     const graphics = new PIXI.Graphics();
-
-    graphics.hitArea = new PIXI.Polygon([
-      new PIXI.Point(points.p1.x, points.p1.y),
-      new PIXI.Point(points.p2.x, points.p2.y),
-      new PIXI.Point(points.p3.x, points.p3.y),
-      new PIXI.Point(points.p4.x, points.p4.y),
-    ]);
-    graphics.interactive = true;
-    graphics.addListener("mouseover", () => this._updateHover(true));
-    graphics.addListener("mouseout", () => this._updateHover(false));
 
     return graphics;
   }
@@ -120,25 +162,7 @@ export class TileCursor extends PIXI.Container implements HitDetectionElement {
   }
 
   private _pointInside(point: [number, number], vs: [number, number][]) {
-    // ray-casting algorithm based on
-    // https://wrf.ecse.rpi.edu/Research/Short_Notes/pnpoly.html/pnpoly.html
-
-    const x = point[0];
-    const y = point[1];
-
-    let inside = false;
-    for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-      const xi = vs[i][0];
-      const yi = vs[i][1];
-      const xj = vs[j][0];
-      const yj = vs[j][1];
-
-      const intersect =
-        yi > y != yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
-      if (intersect) inside = !inside;
-    }
-
-    return inside;
+    return isPointInside(point, vs);
   }
 }
 

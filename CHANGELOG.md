@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2021-02-17
+
+### Added
+
+- **Avatars**
+
+  - Added ability to display effects for an avatar. To use, set the `avatar.effect` property
+  - Improved avatar loading by only loading the required libraries for a specific avatar
+
+- **Event handling**
+  - Added `onPointerOver` and `onPointerOut` event handling for Avatars and Furniture
+  - Added ability to skip event handling for certain kinds of room objects while propagating.
+    Use this in an event handler: `event.skip(FURNITURE, AVATAR)` or `event.skipExcept(TILE_CURSOR)`
+
+### Changed
+
+- Change furniture visualization handling for better testability
+- Reorganize stories in storybook
+- Deprecate `BasicFurnitureVisualization` in favor of `StaticFurnitureVisualization`
+
+### Removed
+
+- Remove use of `offsets.json` for avatars
+- Remove `resumePropagation` for events
+- Disable animation queueing for avatars and furnitures `move`/`walk` methods
+
 ## [0.6.5] - 2021-01-25
 
 ### Fixed

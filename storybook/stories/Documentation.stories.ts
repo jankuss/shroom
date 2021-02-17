@@ -102,6 +102,14 @@ export function ImplementingFurnitureLogic() {
       }
     });
 
+    furniture.onPointerOver = () => {
+      console.log("OVER");
+    };
+
+    furniture.onPointerOut = () => {
+      console.log("OUT");
+    };
+
     room.addRoomObject(furniture);
 
     application.stage.addChild(room);

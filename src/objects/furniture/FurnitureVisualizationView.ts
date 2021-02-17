@@ -1,8 +1,14 @@
 import * as PIXI from "pixi.js";
-import { IHitDetection } from "../../interfaces/IHitDetection";
+import { EventOverOutHandler } from "../events/EventOverOutHandler";
+
+import {
+  EventGroupIdentifier,
+  FURNITURE,
+  IEventGroup,
+} from "../events/interfaces/IEventGroup";
+import { IEventManager } from "../events/interfaces/IEventManager";
 import { ClickHandler } from "../hitdetection/ClickHandler";
 import { HitTexture } from "../hitdetection/HitTexture";
-import { BaseFurniture } from "./BaseFurniture";
 import { FurnitureAsset } from "./data/interfaces/IFurnitureAssetsData";
 import { IFurnitureVisualizationData } from "./data/interfaces/IFurnitureVisualizationData";
 import { HighlightFilter } from "./filter/HighlightFilter";
@@ -17,7 +23,7 @@ import { LoadFurniResult } from "./util/loadFurni";
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
 export class FurnitureVisualizationView
-  implements IFurnitureVisualizationView, IBaseFurniture {
+  implements IFurnitureVisualizationView, IBaseFurniture, IEventGroup {
   private _direction: number | undefined;
   private _animation: string | undefined;
 
@@ -81,11 +87,16 @@ export class FurnitureVisualizationView
   }
 
   constructor(
-    private _hitDetection: IHitDetection,
+    private _eventManager: IEventManager,
     private _clickHandler: ClickHandler,
+    private _overOutHandler: EventOverOutHandler,
     private _container: PIXI.Container,
     private _furniture: LoadFurniResult
   ) {}
+
+  getEventGroupIdentifier(): EventGroupIdentifier {
+    return FURNITURE;
+  }
 
   getLayers(): IFurnitureVisualizationLayer[] {
     if (this._layers == null)
@@ -132,8 +143,9 @@ export class FurnitureVisualizationView
           this,
           this._container,
           part,
-          this._hitDetection,
+          this._eventManager,
           this._clickHandler,
+          this._overOutHandler,
           (id) => this._furniture.getTexture(id)
         )
     );
@@ -254,8 +266,9 @@ class FurnitureVisualizationLayer
     private _parent: FurnitureVisualizationView,
     private _container: PIXI.Container,
     private _part: FurniDrawPart,
-    private _hitDetection: IHitDetection,
+    private _eventManager: IEventManager,
     private _clickHandler: ClickHandler,
+    private _overOutHandler: EventOverOutHandler,
     private _getTexture: (id: string) => HitTexture | undefined
   ) {
     this.frameRepeat = _part.frameRepeat;
@@ -283,6 +296,10 @@ class FurnitureVisualizationLayer
     if (newFrame != null) {
       this._setSpriteVisible(newFrame, true);
       this._addSprite(newFrame);
+
+      if (this._color != null) {
+        newFrame.tint = this._color;
+      }
     }
   }
 
@@ -308,11 +325,13 @@ class FurnitureVisualizationLayer
 
     this._mountedSprites.add(sprite);
     this._container.addChild(sprite);
+    this._overOutHandler.register(sprite.events);
   }
 
   private _destroySprites() {
     this._sprites.forEach((sprite) => {
       this._container.removeChild(sprite);
+      this._overOutHandler.remove(sprite.events);
       sprite.destroy();
     });
     this._sprites = new Map();
@@ -364,7 +383,9 @@ class FurnitureVisualizationLayer
 
   private _getSprite(frameIndex: number) {
     const current = this._sprites.get(frameIndex);
-    if (current != null) return current;
+    if (current != null) {
+      return current;
+    }
 
     const spriteInfo = this._getSpriteInfo(frameIndex);
     if (spriteInfo == null) return;
@@ -375,7 +396,7 @@ class FurnitureVisualizationLayer
     const zIndex = (z ?? 0) + layerIndex * 0.01;
 
     const sprite = new FurnitureSprite({
-      hitDetection: this._hitDetection,
+      eventManager: this._eventManager,
       mirrored: asset.flipH,
       tag: layer?.tag,
       group: this._parent,
@@ -384,15 +405,15 @@ class FurnitureVisualizationLayer
     const ignoreMouse = layer?.ignoreMouse != null && layer.ignoreMouse;
     sprite.ignoreMouse = ignoreMouse;
 
-    sprite.addEventListener("click", (event) => {
+    sprite.events.addEventListener("click", (event) => {
       this._clickHandler.handleClick(event);
     });
 
-    sprite.addEventListener("pointerup", (event) => {
+    sprite.events.addEventListener("pointerup", (event) => {
       this._clickHandler.handlePointerUp(event);
     });
 
-    sprite.addEventListener("pointerdown", (event) => {
+    sprite.events.addEventListener("pointerdown", (event) => {
       this._clickHandler.handlePointerDown(event);
     });
 
@@ -467,6 +488,8 @@ class FurnitureVisualizationLayer
 
     this._setSpriteVisible(sprite, false);
     this._sprites.set(frameIndex, sprite);
+
+    this._overOutHandler.register(sprite.events);
 
     return sprite;
   }

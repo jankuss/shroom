@@ -2,7 +2,6 @@ import { AnimationTicker } from "./animation/AnimationTicker";
 import { AvatarLoader } from "./avatar/AvatarLoader";
 import { FurnitureLoader } from "./furniture/FurnitureLoader";
 import { FurnitureData } from "./furniture/FurnitureData";
-import { HitDetection } from "./hitdetection/HitDetection";
 import { Dependencies } from "./room/Room";
 
 export class Shroom {
@@ -31,7 +30,6 @@ export class Shroom {
     avatarLoader,
     furnitureData,
     furnitureLoader,
-    hitDetection,
   }: {
     resourcePath?: string;
   } & Partial<Dependencies>) {
@@ -45,7 +43,6 @@ export class Shroom {
 
     return {
       for: (application: PIXI.Application) => {
-        const _hitDetection = hitDetection ?? HitDetection.create(application);
         const _animationTicker =
           animationTicker ?? AnimationTicker.create(application);
 
@@ -53,7 +50,6 @@ export class Shroom {
           animationTicker: _animationTicker,
           avatarLoader: _avatarLoader,
           furnitureLoader: _furnitureLoader,
-          hitDetection: _hitDetection,
           configuration: _configuration,
           furnitureData: _furnitureData,
           application,

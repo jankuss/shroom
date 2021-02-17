@@ -1,3 +1,5 @@
+import { IEventManagerEvent } from "./objects/events/interfaces/IEventManagerEvent";
+
 export { RoomObject } from "./objects/RoomObject";
 export { Avatar } from "./objects/avatar/Avatar";
 export { FloorFurniture } from "./objects/furniture/FloorFurniture";
@@ -7,12 +9,10 @@ export { RoomCamera } from "./objects/room/RoomCamera";
 export { loadRoomTexture } from "./util/loadRoomTexture";
 export { parseTileMapString } from "./util/parseTileMapString";
 export { IFurniture, IFurnitureBehavior } from "./objects/furniture/IFurniture";
-export { HitEvent } from "./interfaces/IHitDetection";
 export { IFurnitureData } from "./interfaces/IFurnitureData";
 export { FurnitureData } from "./objects/furniture/FurnitureData";
 export { Shroom } from "./objects/Shroom";
 export { Landscape } from "./objects/room/Landscape";
-export { HitDetection } from "./objects/hitdetection/HitDetection";
 export { AnimationTicker } from "./objects/animation/AnimationTicker";
 export { FurnitureLoader } from "./objects/furniture/FurnitureLoader";
 export { AvatarLoader } from "./objects/avatar/AvatarLoader";
@@ -34,3 +34,11 @@ export { IFurnitureVisualization } from "./objects/furniture/IFurnitureVisualiza
 export { WallLeft } from "./objects/room/parts/WallLeft";
 export { WallRight } from "./objects/room/parts/WallRight";
 export { RoomModelVisualization } from "./objects/room/RoomModelVisualization";
+
+export {
+  AVATAR,
+  TILE_CURSOR,
+  FURNITURE,
+} from "./objects/events/interfaces/IEventGroup";
+
+export type HitEvent = IEventManagerEvent;

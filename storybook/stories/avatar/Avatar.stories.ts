@@ -68,6 +68,14 @@ export function Default() {
 
         room.addRoomObject(avatar);
         avatars.push(avatar);
+
+        avatar.onPointerOver = () => {
+          console.log("OVER");
+        };
+
+        avatar.onPointerOut = () => {
+          console.log("OUT");
+        };
       }
     }
 
