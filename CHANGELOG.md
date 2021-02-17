@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove use of `offsets.json` for avatars
 - Remove `resumePropagation` for events
-- Disable animation queueing for avatars and furnitures
+- Disable animation queueing for avatars and furnitures `move`/`walk` methods
 
 ## [0.6.5] - 2021-01-25
 
