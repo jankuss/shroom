@@ -14,7 +14,6 @@ import {
 import { FurnitureAsset } from "./data/interfaces/IFurnitureAssetsData";
 import { FurnitureLayer } from "./data/interfaces/IFurnitureVisualizationData";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
-import { IHitDetection } from "../../interfaces/IHitDetection";
 import { IRoomContext } from "../../interfaces/IRoomContext";
 import { Shroom } from "../Shroom";
 import { IFurnitureVisualization } from "./IFurnitureVisualization";

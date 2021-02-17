@@ -1,3 +1,5 @@
+import { IEventManagerEvent } from "./objects/events/interfaces/IEventManagerEvent";
+
 export { RoomObject } from "./objects/RoomObject";
 export { Avatar } from "./objects/avatar/Avatar";
 export { FloorFurniture } from "./objects/furniture/FloorFurniture";
@@ -32,3 +34,11 @@ export { IFurnitureVisualization } from "./objects/furniture/IFurnitureVisualiza
 export { WallLeft } from "./objects/room/parts/WallLeft";
 export { WallRight } from "./objects/room/parts/WallRight";
 export { RoomModelVisualization } from "./objects/room/RoomModelVisualization";
+
+export {
+  AVATAR,
+  TILE_CURSOR,
+  FURNITURE,
+} from "./objects/events/interfaces/IEventGroup";
+
+export type HitEvent = IEventManagerEvent;

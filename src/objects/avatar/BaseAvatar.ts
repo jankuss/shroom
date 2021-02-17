@@ -23,6 +23,7 @@ import {
   EventGroupIdentifier,
   IEventGroup,
 } from "../events/interfaces/IEventGroup";
+import { EventOverOutHandler } from "../events/EventOverOutHandler";
 
 const bodyPartTypes: Set<AvatarFigurePartType> = new Set<AvatarFigurePartType>([
   AvatarFigurePartType.Head,
@@ -73,6 +74,7 @@ export class BaseAvatar extends PIXI.Container implements IEventGroup {
 
   private _currentFrame = 0;
   private _clickHandler: ClickHandler = new ClickHandler();
+  private _overOutHandler: EventOverOutHandler = new EventOverOutHandler();
 
   private _refreshFrame = false;
   private _refreshLook = false;
@@ -147,6 +149,22 @@ export class BaseAvatar extends PIXI.Container implements IEventGroup {
     this._clickHandler.onPointerUp = value;
   }
 
+  get onPointerOut() {
+    return this._overOutHandler.onOut;
+  }
+
+  set onPointerOut(value) {
+    this._overOutHandler.onOut = value;
+  }
+
+  get onPointerOver() {
+    return this._overOutHandler.onOver;
+  }
+
+  set onPointerOver(value) {
+    this._overOutHandler.onOver = value;
+  }
+
   get lookOptions() {
     if (this._nextLookOptions != null) {
       return this._nextLookOptions;
@@ -210,7 +228,10 @@ export class BaseAvatar extends PIXI.Container implements IEventGroup {
   }
 
   private _destroyAssets() {
-    this._sprites.forEach((sprite) => sprite.destroy());
+    this._sprites.forEach((sprite) => {
+      this._overOutHandler.remove(sprite.events);
+      sprite.destroy();
+    });
     this._sprites = new Map();
     this._container?.destroy();
   }
@@ -294,6 +315,10 @@ export class BaseAvatar extends PIXI.Container implements IEventGroup {
 
         if (sprite == null) {
           sprite = this._createAsset(part, asset);
+
+          if (sprite != null) {
+            this._overOutHandler.register(sprite.events);
+          }
         }
 
         if (sprite == null) return;
@@ -315,6 +340,10 @@ export class BaseAvatar extends PIXI.Container implements IEventGroup {
 
         if (sprite == null) {
           sprite = this._createAsset(part, asset);
+
+          if (sprite != null) {
+            this._overOutHandler.register(sprite.events);
+          }
         }
 
         if (sprite == null) return;

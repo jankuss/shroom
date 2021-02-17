@@ -1,4 +1,3 @@
-import { HitEvent } from "../../interfaces/IHitDetection";
 import { IEventManagerEvent } from "../events/interfaces/IEventManagerEvent";
 import { HitEventHandler } from "./HitSprite";
 

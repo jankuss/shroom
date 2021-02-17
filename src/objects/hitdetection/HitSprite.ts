@@ -1,6 +1,5 @@
 import * as PIXI from "pixi.js";
 import { BehaviorSubject, Observable } from "rxjs";
-import { HitEvent, HitEventType, Rect } from "../../interfaces/IHitDetection";
 import { EventEmitter } from "../events/EventEmitter";
 import { IEventGroup } from "../events/interfaces/IEventGroup";
 import { IEventManager } from "../events/interfaces/IEventManager";
@@ -185,7 +184,7 @@ export class HitSprite extends PIXI.Sprite implements IEventTarget {
     this._eventManager.remove(this);
   }
 
-  getHitBox(): Rect {
+  getHitBox(): Rectangle {
     const pos = this.getGlobalPosition();
 
     if (this._mirrored) {
@@ -194,7 +193,6 @@ export class HitSprite extends PIXI.Sprite implements IEventTarget {
         y: pos.y,
         width: this.texture.width,
         height: this.texture.height,
-        zIndex: this.zIndex,
       };
     }
 
@@ -203,7 +201,6 @@ export class HitSprite extends PIXI.Sprite implements IEventTarget {
       y: pos.y,
       width: this.texture.width,
       height: this.texture.height,
-      zIndex: this.zIndex,
     };
   }
 

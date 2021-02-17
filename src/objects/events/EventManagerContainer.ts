@@ -16,21 +16,11 @@ export class EventManagerContainer {
       .renderer.plugins.interaction;
 
     interactionManager.addListener(
-      "click",
-      (event: PIXI.InteractionEvent) => {
-        const position = event.data.getLocalPosition(this._application.stage);
-
-        this._eventManager.click(position.x, position.y);
-      },
-      true
-    );
-
-    interactionManager.addListener(
       "pointermove",
       (event: PIXI.InteractionEvent) => {
         const position = event.data.getLocalPosition(this._application.stage);
 
-        this._eventManager.move(position.x, position.y);
+        this._eventManager.move(event, position.x, position.y);
       },
       true
     );
@@ -40,7 +30,7 @@ export class EventManagerContainer {
       (event: PIXI.InteractionEvent) => {
         const position = event.data.getLocalPosition(this._application.stage);
 
-        this._eventManager.pointerUp(position.x, position.y);
+        this._eventManager.pointerUp(event, position.x, position.y);
       },
       true
     );
@@ -50,7 +40,7 @@ export class EventManagerContainer {
       (event: PIXI.InteractionEvent) => {
         const position = event.data.getLocalPosition(this._application.stage);
 
-        this._eventManager.pointerDown(position.x, position.y);
+        this._eventManager.pointerDown(event, position.x, position.y);
       },
       true
     );

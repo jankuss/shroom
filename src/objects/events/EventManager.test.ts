@@ -1,3 +1,4 @@
+import { InteractionEvent } from "pixi.js";
 import { BehaviorSubject } from "rxjs";
 import { Rectangle } from "../room/IRoomRectangle";
 import { EventManager } from "./EventManager";
@@ -8,6 +9,10 @@ import {
   TILE_CURSOR,
 } from "./interfaces/IEventGroup";
 import { IEventTarget } from "./interfaces/IEventTarget";
+
+const interactionEvent: InteractionEvent = {
+  data: {},
+} as any;
 
 test("handles click when mounted", () => {
   const manager = new EventManager();
@@ -27,11 +32,11 @@ test("handles click when mounted", () => {
   };
 
   const node = manager.register(target);
-  manager.click(10, 10);
+  manager.click(interactionEvent, 10, 10);
   expect(target.triggerClick).toHaveBeenCalledTimes(1);
 
   node.destroy();
-  manager.click(10, 10);
+  manager.click(interactionEvent, 10, 10);
   expect(target.triggerClick).toHaveBeenCalledTimes(1);
 });
 
@@ -53,7 +58,7 @@ test("handles click on hit elements", () => {
   };
 
   const node = manager.register(target);
-  manager.click(10, 10);
+  manager.click(interactionEvent, 10, 10);
   expect(target.triggerClick).toHaveBeenCalledTimes(1);
 });
 
@@ -75,7 +80,7 @@ test("doesn't handle click on not hit elements", () => {
   };
 
   const node = manager.register(target);
-  manager.click(10, 10);
+  manager.click(interactionEvent, 10, 10);
   expect(target.triggerClick).toHaveBeenCalledTimes(0);
 });
 
@@ -143,7 +148,7 @@ test("handles click on multiple elements", () => {
   manager.register(target3);
   manager.register(target4);
 
-  manager.click(80, 80);
+  manager.click(interactionEvent, 80, 80);
   expect(target1.triggerClick).toHaveBeenCalledTimes(1);
   expect(target2.triggerClick).toHaveBeenCalledTimes(1);
   expect(target3.triggerClick).toHaveBeenCalledTimes(1);
@@ -184,7 +189,7 @@ test("handles click on multiple elements", () => {
   manager.register(target1);
   manager.register(target2);
 
-  manager.click(80, 80);
+  manager.click(interactionEvent, 80, 80);
   expect(target1.triggerClick).toHaveBeenCalledTimes(1);
   expect(target2.triggerClick).toHaveBeenCalledTimes(1);
 });
@@ -225,7 +230,7 @@ test("only handles first element when elements from same group", () => {
   manager.register(target1);
   manager.register(target2);
 
-  manager.click(80, 80);
+  manager.click(interactionEvent, 80, 80);
   expect(target1.triggerClick).toHaveBeenCalledTimes(0);
   expect(target2.triggerClick).toHaveBeenCalledTimes(1);
 });
@@ -294,7 +299,7 @@ test("event.skip() skips elements", () => {
   manager.register(target3);
   manager.register(target4);
 
-  manager.click(80, 80);
+  manager.click(interactionEvent, 80, 80);
   expect(target1.triggerClick).toHaveBeenCalledTimes(0);
   expect(target2.triggerClick).toHaveBeenCalledTimes(1);
   expect(target3.triggerClick).toHaveBeenCalledTimes(0);
@@ -319,35 +324,35 @@ test("move triggers correct events", () => {
   };
 
   manager.register(target1);
-  manager.move(80, 80);
+  manager.move(interactionEvent, 80, 80);
   expect(target1.triggerPointerOver).toHaveBeenCalledTimes(1);
   expect(target1.triggerPointerOut).toHaveBeenCalledTimes(0);
 
-  manager.move(85, 80);
+  manager.move(interactionEvent, 85, 80);
   expect(target1.triggerPointerOver).toHaveBeenCalledTimes(1);
   expect(target1.triggerPointerOut).toHaveBeenCalledTimes(0);
 
-  manager.move(90, 80);
+  manager.move(interactionEvent, 90, 80);
   expect(target1.triggerPointerOver).toHaveBeenCalledTimes(1);
   expect(target1.triggerPointerOut).toHaveBeenCalledTimes(0);
 
-  manager.move(95, 80);
+  manager.move(interactionEvent, 95, 80);
   expect(target1.triggerPointerOver).toHaveBeenCalledTimes(1);
   expect(target1.triggerPointerOut).toHaveBeenCalledTimes(0);
 
-  manager.move(100, 80);
+  manager.move(interactionEvent, 100, 80);
   expect(target1.triggerPointerOver).toHaveBeenCalledTimes(1);
   expect(target1.triggerPointerOut).toHaveBeenCalledTimes(0);
 
-  manager.move(105, 80);
+  manager.move(interactionEvent, 105, 80);
   expect(target1.triggerPointerOver).toHaveBeenCalledTimes(1);
   expect(target1.triggerPointerOut).toHaveBeenCalledTimes(1);
 
-  manager.move(100, 80);
+  manager.move(interactionEvent, 100, 80);
   expect(target1.triggerPointerOver).toHaveBeenCalledTimes(2);
   expect(target1.triggerPointerOut).toHaveBeenCalledTimes(1);
 
-  manager.move(105, 80);
+  manager.move(interactionEvent, 105, 80);
   expect(target1.triggerPointerOver).toHaveBeenCalledTimes(2);
   expect(target1.triggerPointerOut).toHaveBeenCalledTimes(2);
 });
@@ -416,7 +421,7 @@ test("event.skipExcept() skips elements except the specified", () => {
   manager.register(target3);
   manager.register(target4);
 
-  manager.click(80, 80);
+  manager.click(interactionEvent, 80, 80);
   expect(target1.triggerClick).toHaveBeenCalledTimes(1);
   expect(target2.triggerClick).toHaveBeenCalledTimes(1);
   expect(target3.triggerClick).toHaveBeenCalledTimes(0);

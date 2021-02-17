@@ -12,6 +12,7 @@ import {
   TILE_CURSOR,
 } from "./interfaces/IEventGroup";
 import { IEventManager } from "./interfaces/IEventManager";
+import { InteractionEvent } from "pixi.js";
 
 export class EventManager {
   private _nodes = new Map<IEventTarget, EventManagerNode>();
@@ -19,24 +20,24 @@ export class EventManager {
   private _currentOverElements: Set<EventManagerNode> = new Set();
   private _pointerDownElements: Set<EventManagerNode> = new Set();
 
-  click(x: number, y: number) {
+  click(event: InteractionEvent, x: number, y: number) {
     const elements = this._performHitTest(x, y);
-    new Propagation(elements.activeNodes, (target, event) =>
+    new Propagation(event, elements.activeNodes, (target, event) =>
       target.triggerClick(event)
     );
   }
 
-  pointerDown(x: number, y: number) {
+  pointerDown(event: InteractionEvent, x: number, y: number) {
     const elements = this._performHitTest(x, y);
 
     this._pointerDownElements = new Set(elements.activeNodes);
 
-    new Propagation(elements.activeNodes, (target, event) =>
+    new Propagation(event, elements.activeNodes, (target, event) =>
       target.triggerPointerDown(event)
     );
   }
 
-  pointerUp(x: number, y: number) {
+  pointerUp(event: InteractionEvent, x: number, y: number) {
     const elements = this._performHitTest(x, y);
 
     const elementsSet = new Set(elements.activeNodes);
@@ -47,16 +48,16 @@ export class EventManager {
       }
     });
 
-    new Propagation(elements.activeNodes, (target, event) =>
+    new Propagation(event, elements.activeNodes, (target, event) =>
       target.triggerPointerUp(event)
     );
 
-    new Propagation(Array.from(clickedNodes), (target, event) => {
+    new Propagation(event, Array.from(clickedNodes), (target, event) => {
       target.triggerClick(event);
     });
   }
 
-  move(x: number, y: number) {
+  move(event: InteractionEvent, x: number, y: number) {
     const elements = this._performHitTest(x, y);
     const current = new Set(
       elements.activeNodes.filter(
@@ -101,15 +102,19 @@ export class EventManager {
 
     this._currentOverElements = current;
 
-    new Propagation(Array.from(removedButGroupPresent), (target, event) => {
-      target.triggerPointerTargetChanged(event);
-    });
+    new Propagation(
+      event,
+      Array.from(removedButGroupPresent),
+      (target, event) => {
+        target.triggerPointerTargetChanged(event);
+      }
+    );
 
-    new Propagation(Array.from(actualRemoved), (target, event) =>
+    new Propagation(event, Array.from(actualRemoved), (target, event) =>
       target.triggerPointerOut(event)
     );
 
-    new Propagation(Array.from(added), (target, event) =>
+    new Propagation(event, Array.from(added), (target, event) =>
       target.triggerPointerOver(event)
     );
   }
@@ -169,6 +174,7 @@ class Propagation {
   private _stopped = false;
 
   constructor(
+    private event: InteractionEvent,
     private path: EventManagerNode[],
     private _trigger: (target: IEventTarget, event: IEventManagerEvent) => void
   ) {
@@ -201,6 +207,8 @@ class Propagation {
 
   private _createEvent(): IEventManagerEvent {
     return {
+      interactionEvent: this.event,
+      mouseEvent: this.event.data.originalEvent,
       stopPropagation: () => {
         this._stopped = true;
       },

@@ -14,6 +14,7 @@ export class EventOverOutHandler {
   private _onOverCallback: EventOverOutCallback | undefined;
   private _onOutCallback: EventOverOutCallback | undefined;
   private _timeout: any;
+  private _targetChanged = false;
 
   public get onOver() {
     return this._onOverCallback;
@@ -76,20 +77,24 @@ export class EventOverOutHandler {
     event: IEventManagerEvent
   ) => {
     this._overElements.delete(emitter);
-    this._update(event, false);
+    this._targetChanged = true;
+    this._update(event);
   };
 
-  private _update(event: IEventManagerEvent, triggerEvents = true) {
+  private _update(event: IEventManagerEvent) {
     if (this._overElements.size > 0 && !this._hover) {
       this._hover = true;
-      if (triggerEvents) {
+
+      if (!this._targetChanged) {
         this.onOver && this.onOver(event);
       }
+
+      this._targetChanged = false;
     }
 
     if (this._overElements.size < 1 && this._hover) {
       this._hover = false;
-      if (triggerEvents) {
+      if (!this._targetChanged) {
         this.onOut && this.onOut(event);
       }
     }
