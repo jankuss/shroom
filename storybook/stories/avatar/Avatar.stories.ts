@@ -68,6 +68,14 @@ export function Default() {
 
         room.addRoomObject(avatar);
         avatars.push(avatar);
+
+        avatar.onPointerOver = () => {
+          console.log("OVER");
+        };
+
+        avatar.onPointerOut = () => {
+          console.log("OUT");
+        };
       }
     }
 
@@ -103,10 +111,10 @@ export function Walking() {
 
     setTimeout(() => {
       avatar.walk(1, 2, 0, { direction: 4 });
-      avatar.walk(2, 2, 0, { direction: 2 });
-      avatar.walk(3, 2, 0, { direction: 2 });
-      avatar.walk(4, 2, 0);
-      avatar.walk(4, 3, 0, { direction: 4, headDirection: 5 });
+
+      setTimeout(() => {
+        avatar.walk(2, 2, 0, { direction: 2 });
+      }, 500);
     }, 3000);
 
     room.x = application.screen.width / 2 - room.roomWidth / 2;

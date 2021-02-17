@@ -17,6 +17,10 @@ import {
 import { createShroom } from "../common/createShroom";
 import { action } from "@storybook/addon-actions";
 import fetch from "node-fetch";
+import {
+  AVATAR,
+  FURNITURE,
+} from "../../../dist/objects/events/interfaces/IEventGroup";
 
 export default {
   title: "Furniture / General",
@@ -996,6 +1000,8 @@ export function LoadTest() {
       `,
     });
 
+    let activeFurniture: FloorFurniture | undefined;
+
     fetch(`./furni.json`)
       .then((response) => response.json())
       .then((furnitures: any[]) => {
@@ -1022,6 +1028,20 @@ export function LoadTest() {
 
           obj.onClick = (event) => {
             console.log("Clicked");
+            event.skip(FURNITURE, AVATAR);
+          };
+
+          obj.onPointerOver = (event) => {
+            if (activeFurniture != null) return;
+
+            activeFurniture = obj;
+            console.log("Active Furniture", obj.type, obj.roomX, obj.roomY);
+          };
+
+          obj.onPointerOut = (event) => {
+            if (activeFurniture === obj) {
+              activeFurniture = undefined;
+            }
           };
 
           room.addRoomObject(obj);
@@ -1040,6 +1060,11 @@ export function LoadTest() {
     room.x = application.screen.width / 2 - room.roomWidth / 2;
     room.y = application.screen.height / 2 - room.roomHeight / 2;
     room.addRoomObject(furniture1);
+
+    room.onTileClick = (event) => {
+      console.log(event);
+    };
+
     application.stage.addChild(room);
   });
 }

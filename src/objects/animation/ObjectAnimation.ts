@@ -1,6 +1,8 @@
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 import { RoomPosition } from "../../types/RoomPosition";
 
+type FinishCurrentCallback = () => void;
+
 export class ObjectAnimation<T> {
   private _current: RoomPosition | undefined;
   private _diff: RoomPosition | undefined;
@@ -11,6 +13,7 @@ export class ObjectAnimation<T> {
     data: T;
   }[] = [];
   private _nextPosition: RoomPosition | undefined;
+  private _finishCurrent: FinishCurrentCallback | undefined;
 
   constructor(
     private _animationTicker: IAnimationTicker,
@@ -32,13 +35,9 @@ export class ObjectAnimation<T> {
     newPos: { roomX: number; roomY: number; roomZ: number },
     data: T
   ) {
-    if (this._diff != null) {
-      this._enqueued.push({
-        currentPosition: currentPos,
-        newPosition: newPos,
-        data: data,
-      });
-      return;
+    if (this._finishCurrent != null) {
+      this._finishCurrent();
+      this._finishCurrent = undefined;
     }
 
     this._callbacks.onStart(data);
@@ -66,6 +65,7 @@ export class ObjectAnimation<T> {
 
       cancel();
     };
+    this._finishCurrent = handleFinish;
 
     this._callbacks.onUpdatePosition(
       {
