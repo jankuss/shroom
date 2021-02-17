@@ -44,12 +44,11 @@ export async function downloadAllFiles(
     logger
   );
 
-  /*
   await downloadFigures({ gordonUrl, file: figureMap, downloadPath }, logger);
   await downloadFurnitures(
     { downloadPath, file: furniData, hofFurniUrl },
     logger
-  );*/
+  );
   await downloadEffects(
     { gordonUrl, downloadPath, effectMapDownload: effectMap },
     logger

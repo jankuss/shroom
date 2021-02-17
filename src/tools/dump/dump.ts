@@ -69,17 +69,6 @@ export async function dump({ externalVariables, downloadPath }: Options) {
 
     await extractSwfs(logger, "Effects", effectsSwf, dumpFigure);
   });
-
-  await step("Post Processing", async () => {
-    console.log("Dumping offsets of figures");
-    const figureMapText = await fs.readFile(
-      `${downloadPath}/figuremap.xml`,
-      "utf-8"
-    );
-    const figureMap = new FigureMapData(figureMapText);
-
-    await createOffsetFile(downloadPath, figureMap, logger);
-  });
 }
 
 interface Options {
