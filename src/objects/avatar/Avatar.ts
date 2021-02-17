@@ -288,12 +288,12 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
    * for placing UI relative to the user.
    */
   get screenPosition() {
-    const worldTransform = this._avatarSprites.worldTransform;
+    const worldTransform = this._avatarSprites.getGlobalPosition();
     if (worldTransform == null) return;
 
     return {
-      x: worldTransform.tx,
-      y: worldTransform.ty,
+      x: worldTransform.x,
+      y: worldTransform.y,
     };
   }
 
