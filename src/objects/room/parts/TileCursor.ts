@@ -1,10 +1,11 @@
 import * as PIXI from "pixi.js";
 import { BehaviorSubject, Observable } from "rxjs";
 import { RoomPosition } from "../../../types/RoomPosition";
+import { isPointInside } from "../../../util/isPointInside";
 import {
   EventGroupIdentifier,
   IEventGroup,
-  TILE_CURSOR_EVENT,
+  TILE_CURSOR,
 } from "../../events/interfaces/IEventGroup";
 import { IEventManager } from "../../events/interfaces/IEventManager";
 import { IEventManagerEvent } from "../../events/interfaces/IEventManagerEvent";
@@ -41,7 +42,7 @@ export class TileCursor
   }
 
   getEventGroupIdentifier(): EventGroupIdentifier {
-    return TILE_CURSOR_EVENT;
+    return TILE_CURSOR;
   }
 
   getGroup(): IEventGroup {
@@ -56,7 +57,15 @@ export class TileCursor
     return -1000;
   }
 
-  triggerClick(event: IEventManagerEvent): void {}
+  triggerPointerTargetChanged(event: IEventManagerEvent): void {}
+
+  triggerClick(event: IEventManagerEvent): void {
+    this.onClick({
+      roomX: this._roomX,
+      roomY: this._roomY,
+      roomZ: this._roomZ,
+    });
+  }
 
   triggerPointerDown(event: IEventManagerEvent): void {}
 
@@ -153,25 +162,7 @@ export class TileCursor
   }
 
   private _pointInside(point: [number, number], vs: [number, number][]) {
-    // ray-casting algorithm based on
-    // https://wrf.ecse.rpi.edu/Research/Short_Notes/pnpoly.html/pnpoly.html
-
-    const x = point[0];
-    const y = point[1];
-
-    let inside = false;
-    for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-      const xi = vs[i][0];
-      const yi = vs[i][1];
-      const xj = vs[j][0];
-      const yj = vs[j][1];
-
-      const intersect =
-        yi > y != yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
-      if (intersect) inside = !inside;
-    }
-
-    return inside;
+    return isPointInside(point, vs);
   }
 }
 

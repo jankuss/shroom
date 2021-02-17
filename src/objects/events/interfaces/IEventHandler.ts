@@ -6,4 +6,5 @@ export interface IEventHandler {
   triggerPointerUp(event: IEventManagerEvent): void;
   triggerPointerOver(event: IEventManagerEvent): void;
   triggerPointerOut(event: IEventManagerEvent): void;
+  triggerPointerTargetChanged(event: IEventManagerEvent): void;
 }

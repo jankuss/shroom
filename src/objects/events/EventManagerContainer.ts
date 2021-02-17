@@ -1,57 +1,75 @@
 import * as PIXI from "pixi.js";
 import { EventManager } from "./EventManager";
 
-export class EventManagerContainer extends PIXI.Container {
+export class EventManagerContainer {
+  private _box: PIXI.TilingSprite | undefined;
+
   constructor(
     private _application: PIXI.Application,
     private _eventManager: EventManager
   ) {
-    super();
-
-    this.interactive = true;
     this._updateRectangle();
 
     _application.ticker.add(this._updateRectangle);
 
-    this.addListener("click", (event) => {
-      const position = event.data.getLocalPosition(this._application.stage);
+    const interactionManager: PIXI.InteractionManager = this._application
+      .renderer.plugins.interaction;
 
-      this._eventManager.click(position.x, position.y);
-    });
+    interactionManager.addListener(
+      "click",
+      (event: PIXI.InteractionEvent) => {
+        const position = event.data.getLocalPosition(this._application.stage);
 
-    this.addListener("pointermove", (event) => {
-      const position = event.data.getLocalPosition(this._application.stage);
+        this._eventManager.click(position.x, position.y);
+      },
+      true
+    );
 
-      this._eventManager.move(position.x, position.y);
-    });
+    interactionManager.addListener(
+      "pointermove",
+      (event: PIXI.InteractionEvent) => {
+        const position = event.data.getLocalPosition(this._application.stage);
 
-    this.addListener("pointerup", (event) => {
-      const position = event.data.getLocalPosition(this._application.stage);
+        this._eventManager.move(position.x, position.y);
+      },
+      true
+    );
 
-      this._eventManager.pointerUp(position.x, position.y);
-    });
+    interactionManager.addListener(
+      "pointerup",
+      (event: PIXI.InteractionEvent) => {
+        const position = event.data.getLocalPosition(this._application.stage);
 
-    this.addListener("pointerdown", (event) => {
-      const position = event.data.getLocalPosition(this._application.stage);
+        this._eventManager.pointerUp(position.x, position.y);
+      },
+      true
+    );
 
-      this._eventManager.pointerDown(position.x, position.y);
-    });
+    interactionManager.addListener(
+      "pointerdown",
+      (event: PIXI.InteractionEvent) => {
+        const position = event.data.getLocalPosition(this._application.stage);
+
+        this._eventManager.pointerDown(position.x, position.y);
+      },
+      true
+    );
   }
 
   destroy() {
-    super.destroy();
-
     this._application.ticker.remove(this._updateRectangle);
   }
 
   private _updateRectangle = () => {
-    const renderer = this._application.renderer;
+    //this._box?.destroy();
 
-    this.hitArea = new PIXI.Rectangle(
-      0,
-      0,
-      renderer.width / renderer.resolution,
-      renderer.height / renderer.resolution
-    );
+    const renderer = this._application.renderer;
+    const width = renderer.width / renderer.resolution;
+    const height = renderer.height / renderer.resolution;
+
+    this._box = new PIXI.TilingSprite(PIXI.Texture.WHITE, width, height);
+    this._box.alpha = 0.3;
+
+    //this._application.stage.addChild(this._box);
   };
 }

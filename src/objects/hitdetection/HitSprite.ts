@@ -77,6 +77,11 @@ export class HitSprite extends PIXI.Sprite implements IEventTarget {
     return this.zIndex;
   }
 
+  triggerPointerTargetChanged(event: IEventManagerEvent): void {
+    event.tag = this._tag;
+    this._eventEmitter.trigger("pointertargetchanged", event);
+  }
+
   triggerClick(event: IEventManagerEvent): void {
     event.tag = this._tag;
     this._eventEmitter.trigger("click", event);
@@ -230,10 +235,11 @@ export class HitSprite extends PIXI.Sprite implements IEventTarget {
   }
 }
 
-type HitSpriteEventMap = {
+export type HitSpriteEventMap = {
   click: IEventManagerEvent;
   pointerup: IEventManagerEvent;
   pointerdown: IEventManagerEvent;
   pointerover: IEventManagerEvent;
   pointerout: IEventManagerEvent;
+  pointertargetchanged: IEventManagerEvent;
 };

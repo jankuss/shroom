@@ -6,4 +6,6 @@ export interface IFurnitureEventHandlers {
   onDoubleClick?: (event: IEventManagerEvent) => void;
   onPointerDown?: (event: IEventManagerEvent) => void;
   onPointerUp?: (event: IEventManagerEvent) => void;
+  onPointerOver?: (event: IEventManagerEvent) => void;
+  onPointerOut?: (event: IEventManagerEvent) => void;
 }

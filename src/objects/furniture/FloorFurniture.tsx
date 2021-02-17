@@ -33,6 +33,8 @@ export class FloorFurniture
   private _onDoubleClick: HitEventHandler | undefined;
   private _onPointerDown: HitEventHandler | undefined;
   private _onPointerUp: HitEventHandler | undefined;
+  private _onPointerOver: HitEventHandler | undefined;
+  private _onPointerOut: HitEventHandler | undefined;
 
   constructor(
     options: {
@@ -203,6 +205,24 @@ export class FloorFurniture
   public set onPointerUp(value) {
     this._onPointerUp = value;
     this._baseFurniture.onPointerUp = this.onPointerUp;
+  }
+
+  public get onPointerOver() {
+    return this._onPointerOver;
+  }
+
+  public set onPointerOver(value) {
+    this._onPointerOver = value;
+    this._baseFurniture.onPointerOver = this.onPointerOver;
+  }
+
+  public get onPointerOut() {
+    return this._onPointerOut;
+  }
+
+  public set onPointerOut(value) {
+    this._onPointerOut = value;
+    this._baseFurniture.onPointerOut = this.onPointerOut;
   }
 
   /**

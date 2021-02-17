@@ -113,9 +113,8 @@ export class RoomModelVisualization
     this._tileLayer.sortableChildren = true;
 
     this.addChild(this._positionalContainer);
-    this._positionalContainer.addChild(
-      new EventManagerContainer(this._application, this._eventManager)
-    );
+
+    new EventManagerContainer(this._application, this._eventManager);
 
     this._updateHeightmap();
 

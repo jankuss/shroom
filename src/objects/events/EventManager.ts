@@ -2,14 +2,22 @@ import { EventManagerNode } from "./EventManagerNode";
 import { IEventManagerNode } from "./interfaces/IEventManagerNode";
 import { IEventTarget } from "./interfaces/IEventTarget";
 import RBush from "rbush";
-import { IEventManagerEvent } from "./interfaces/IEventManagerEvent";
-import { EventGroupIdentifier } from "./interfaces/IEventGroup";
+import {
+  EventGroupIdentifierParam,
+  IEventManagerEvent,
+} from "./interfaces/IEventManagerEvent";
+import {
+  EventGroupIdentifier,
+  IEventGroup,
+  TILE_CURSOR,
+} from "./interfaces/IEventGroup";
 import { IEventManager } from "./interfaces/IEventManager";
 
 export class EventManager {
   private _nodes = new Map<IEventTarget, EventManagerNode>();
   private _bush = new RBush<EventManagerNode>();
   private _currentOverElements: Set<EventManagerNode> = new Set();
+  private _pointerDownElements: Set<EventManagerNode> = new Set();
 
   click(x: number, y: number) {
     const elements = this._performHitTest(x, y);
@@ -21,6 +29,8 @@ export class EventManager {
   pointerDown(x: number, y: number) {
     const elements = this._performHitTest(x, y);
 
+    this._pointerDownElements = new Set(elements.activeNodes);
+
     new Propagation(elements.activeNodes, (target, event) =>
       target.triggerPointerDown(event)
     );
@@ -29,14 +39,34 @@ export class EventManager {
   pointerUp(x: number, y: number) {
     const elements = this._performHitTest(x, y);
 
+    const elementsSet = new Set(elements.activeNodes);
+    const clickedNodes = new Set<EventManagerNode>();
+    this._pointerDownElements.forEach((node) => {
+      if (elementsSet.has(node)) {
+        clickedNodes.add(node);
+      }
+    });
+
     new Propagation(elements.activeNodes, (target, event) =>
       target.triggerPointerUp(event)
     );
+
+    new Propagation(Array.from(clickedNodes), (target, event) => {
+      target.triggerClick(event);
+    });
   }
 
   move(x: number, y: number) {
     const elements = this._performHitTest(x, y);
-    const current = new Set(elements.activeNodes);
+    const current = new Set(
+      elements.activeNodes.filter(
+        (node, index) =>
+          // Only interested in the top most element
+          index === 0 ||
+          // or the tile cursor
+          node.target.getGroup().getEventGroupIdentifier() === TILE_CURSOR
+      )
+    );
     const previous = this._currentOverElements;
 
     const added = new Set<EventManagerNode>();
@@ -53,13 +83,34 @@ export class EventManager {
       }
     });
 
+    const addedGroups = new Set<IEventGroup>();
+    added.forEach((node) => {
+      addedGroups.add(node.target.getGroup());
+    });
+
+    const removedButGroupPresent = new Set<EventManagerNode>();
+    const actualRemoved = new Set<EventManagerNode>();
+
+    removed.forEach((node) => {
+      if (addedGroups.has(node.target.getGroup())) {
+        removedButGroupPresent.add(node);
+      }
+
+      actualRemoved.add(node);
+    });
+
     this._currentOverElements = current;
+
+    new Propagation(Array.from(removedButGroupPresent), (target, event) => {
+      target.triggerPointerTargetChanged(event);
+    });
+
+    new Propagation(Array.from(actualRemoved), (target, event) =>
+      target.triggerPointerOut(event)
+    );
 
     new Propagation(Array.from(added), (target, event) =>
       target.triggerPointerOver(event)
-    );
-    new Propagation(Array.from(removed), (target, event) =>
-      target.triggerPointerOut(event)
     );
   }
 
@@ -114,6 +165,7 @@ export class EventManager {
 
 class Propagation {
   private _skip = new Set<EventGroupIdentifier>();
+  private _allow = new Set<EventGroupIdentifier>();
   private _stopped = false;
 
   constructor(
@@ -129,8 +181,19 @@ class Propagation {
       if (this._stopped) return;
       const node = this.path[i];
 
-      if (this._skip.has(node.target.getGroup().getEventGroupIdentifier()))
+      if (
+        this._skip.has(node.target.getGroup().getEventGroupIdentifier()) &&
+        !this._allow.has(node.target.getGroup().getEventGroupIdentifier())
+      ) {
         continue;
+      }
+
+      if (
+        this._allow.size > 0 &&
+        !this._allow.has(node.target.getGroup().getEventGroupIdentifier())
+      ) {
+        continue;
+      }
 
       this._trigger(this.path[i].target, event);
     }
@@ -141,10 +204,27 @@ class Propagation {
       stopPropagation: () => {
         this._stopped = true;
       },
-      skip: (identifiers) => {
-        identifiers.forEach((identifier) => {
-          this._skip.add(identifier);
-        });
+      skip: (...identifiers) => {
+        const add = (identifier: EventGroupIdentifierParam) => {
+          if (Array.isArray(identifier)) {
+            identifier.forEach((value) => add(value));
+          } else {
+            this._skip.add(identifier);
+          }
+        };
+
+        add(identifiers);
+      },
+      skipExcept: (...identifiers) => {
+        const add = (identifier: EventGroupIdentifierParam) => {
+          if (Array.isArray(identifier)) {
+            identifier.forEach((value) => add(value));
+          } else {
+            this._allow.add(identifier);
+          }
+        };
+
+        add(identifiers);
       },
     };
   }

@@ -19,7 +19,7 @@ import { AvatarDrawDefinition } from "./structure/AvatarDrawDefinition";
 import { IEventManager } from "../events/interfaces/IEventManager";
 import { NOOP_EVENT_MANAGER } from "../events/EventManager";
 import {
-  AVATAR_EVENT,
+  AVATAR,
   EventGroupIdentifier,
   IEventGroup,
 } from "../events/interfaces/IEventGroup";
@@ -197,7 +197,7 @@ export class BaseAvatar extends PIXI.Container implements IEventGroup {
   }
 
   getEventGroupIdentifier(): EventGroupIdentifier {
-    return AVATAR_EVENT;
+    return AVATAR;
   }
 
   destroy(): void {

@@ -1,8 +1,9 @@
 import * as PIXI from "pixi.js";
+import { EventOverOutHandler } from "../events/EventOverOutHandler";
 
 import {
   EventGroupIdentifier,
-  FURNITURE_EVENT,
+  FURNITURE,
   IEventGroup,
 } from "../events/interfaces/IEventGroup";
 import { IEventManager } from "../events/interfaces/IEventManager";
@@ -88,12 +89,13 @@ export class FurnitureVisualizationView
   constructor(
     private _eventManager: IEventManager,
     private _clickHandler: ClickHandler,
+    private _overOutHandler: EventOverOutHandler,
     private _container: PIXI.Container,
     private _furniture: LoadFurniResult
   ) {}
 
   getEventGroupIdentifier(): EventGroupIdentifier {
-    return FURNITURE_EVENT;
+    return FURNITURE;
   }
 
   getLayers(): IFurnitureVisualizationLayer[] {
@@ -143,6 +145,7 @@ export class FurnitureVisualizationView
           part,
           this._eventManager,
           this._clickHandler,
+          this._overOutHandler,
           (id) => this._furniture.getTexture(id)
         )
     );
@@ -265,6 +268,7 @@ class FurnitureVisualizationLayer
     private _part: FurniDrawPart,
     private _eventManager: IEventManager,
     private _clickHandler: ClickHandler,
+    private _overOutHandler: EventOverOutHandler,
     private _getTexture: (id: string) => HitTexture | undefined
   ) {
     this.frameRepeat = _part.frameRepeat;
@@ -317,11 +321,13 @@ class FurnitureVisualizationLayer
 
     this._mountedSprites.add(sprite);
     this._container.addChild(sprite);
+    this._overOutHandler.register(sprite.events);
   }
 
   private _destroySprites() {
     this._sprites.forEach((sprite) => {
       this._container.removeChild(sprite);
+      this._overOutHandler.remove(sprite.events);
       sprite.destroy();
     });
     this._sprites = new Map();
@@ -476,6 +482,8 @@ class FurnitureVisualizationLayer
 
     this._setSpriteVisible(sprite, false);
     this._sprites.set(frameIndex, sprite);
+
+    this._overOutHandler.register(sprite.events);
 
     return sprite;
   }

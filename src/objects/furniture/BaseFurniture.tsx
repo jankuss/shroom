@@ -24,11 +24,12 @@ import { getDirectionForFurniture } from "./util/getDirectionForFurniture";
 import { IEventManager } from "../events/interfaces/IEventManager";
 import {
   EventGroupIdentifier,
-  FURNITURE_EVENT,
+  FURNITURE,
   IEventGroup,
 } from "../events/interfaces/IEventGroup";
 import { NOOP_EVENT_MANAGER } from "../events/EventManager";
 import { FurnitureVisualizationView } from "./FurnitureVisualizationView";
+import { EventOverOutHandler } from "../events/EventOverOutHandler";
 
 const highlightFilter = new HighlightFilter(0x999999, 0xffffff);
 
@@ -72,7 +73,10 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
   private _type: FurnitureFetch;
   private _unknownTexture: PIXI.Texture | undefined;
   private _unknownSprite: FurnitureSprite | undefined;
+
   private _clickHandler = new ClickHandler();
+  private _overOutHandler = new EventOverOutHandler();
+
   private _loadFurniResultPromise: Promise<LoadFurniResult>;
   private _validDirections: number[] | undefined;
   private _resolveLoadFurniResult: ResolveLoadFurniResult | undefined;
@@ -266,6 +270,22 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
     this._clickHandler.onPointerUp = value;
   }
 
+  public get onPointerOut() {
+    return this._overOutHandler.onOut;
+  }
+
+  public set onPointerOut(value) {
+    this._overOutHandler.onOut = value;
+  }
+
+  public get onPointerOver() {
+    return this._overOutHandler.onOver;
+  }
+
+  public set onPointerOver(value) {
+    this._overOutHandler.onOver = value;
+  }
+
   public get x() {
     return this._x;
   }
@@ -330,7 +350,7 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
   }
 
   getEventGroupIdentifier(): EventGroupIdentifier {
-    return FURNITURE_EVENT;
+    return FURNITURE;
   }
 
   destroy() {
@@ -476,8 +496,9 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
     this._view?.destroy();
 
     const view = new FurnitureVisualizationView(
-      this.dependencies.hitDetection,
+      this.dependencies.eventManager,
       this._clickHandler,
+      this._overOutHandler,
       this.dependencies.visualization.container,
       loadFurniResult
     );

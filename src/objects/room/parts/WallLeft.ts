@@ -74,24 +74,7 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
 
     this.removeChildren();
 
-    const hitArea = new PIXI.Polygon([
-      new PIXI.Point(
-        this._getOffsetX() + this._borderWidth,
-        this._wallWidth / 2 - (this.props.cutawayHeight ?? 0)
-      ),
-      new PIXI.Point(
-        this._getOffsetX() + this._wallWidth + this._borderWidth,
-        -(this.props.cutawayHeight ?? 0)
-      ),
-      new PIXI.Point(
-        this._getOffsetX() + this._wallWidth + this._borderWidth,
-        -this._wallHeight
-      ),
-      new PIXI.Point(
-        this._getOffsetX() + this._borderWidth,
-        -this._wallHeight + this._wallWidth / 2
-      ),
-    ]);
+    const hitArea = new PIXI.Polygon(this._getDisplayPoints());
 
     this.hitArea = hitArea;
 
@@ -133,6 +116,27 @@ export class WallLeft extends PIXI.Container implements IRoomPart {
     this._hitAreaElement.y = this.y;
     this._hitAreaElement.scale = this.scale;
     this.props.hitAreaContainer.addChild(this._hitAreaElement);
+  }
+
+  private _getDisplayPoints() {
+    return [
+      new PIXI.Point(
+        this._getOffsetX() + this._borderWidth,
+        this._wallWidth / 2 - (this.props.cutawayHeight ?? 0)
+      ),
+      new PIXI.Point(
+        this._getOffsetX() + this._wallWidth + this._borderWidth,
+        -(this.props.cutawayHeight ?? 0)
+      ),
+      new PIXI.Point(
+        this._getOffsetX() + this._wallWidth + this._borderWidth,
+        -this._wallHeight
+      ),
+      new PIXI.Point(
+        this._getOffsetX() + this._borderWidth,
+        -this._wallHeight + this._wallWidth / 2
+      ),
+    ];
   }
 
   private _getOffsetX() {

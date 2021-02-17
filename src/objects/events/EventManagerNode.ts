@@ -42,7 +42,9 @@ export class EventManagerNode implements IEventManagerNode {
   }
 
   destroy(): void {
-    this._bush.remove(this);
+    if (this._rectangle != null) {
+      this._bush.remove(this);
+    }
     this._subscription.unsubscribe();
   }
 
