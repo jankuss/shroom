@@ -164,6 +164,13 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this._updateFurniture();
   }
 
+  private _updateLayers() {
+    if (this.modifier != null) {
+      const modifier = this.modifier;
+      this.view.getLayers().forEach((layer) => modifier(layer));
+    }
+  }
+
   private _updateFurniture() {
     if (!this.mounted) return;
 
@@ -171,11 +178,7 @@ export class AnimatedFurnitureVisualization extends FurnitureVisualization {
     this.view.setDisplayAnimation(this.animationId?.toString());
     this.view.updateDisplay();
 
-    if (this.modifier != null) {
-      const modifier = this.modifier;
-      this.view.getLayers().forEach((layer) => modifier(layer));
-    }
-
+    this._updateLayers();
     this._update();
   }
 

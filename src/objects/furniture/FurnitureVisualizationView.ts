@@ -296,6 +296,10 @@ class FurnitureVisualizationLayer
     if (newFrame != null) {
       this._setSpriteVisible(newFrame, true);
       this._addSprite(newFrame);
+
+      if (this._color != null) {
+        newFrame.tint = this._color;
+      }
     }
   }
 
@@ -379,7 +383,9 @@ class FurnitureVisualizationLayer
 
   private _getSprite(frameIndex: number) {
     const current = this._sprites.get(frameIndex);
-    if (current != null) return current;
+    if (current != null) {
+      return current;
+    }
 
     const spriteInfo = this._getSpriteInfo(frameIndex);
     if (spriteInfo == null) return;
