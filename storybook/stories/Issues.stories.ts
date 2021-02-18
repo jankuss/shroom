@@ -305,3 +305,43 @@ export function Issue56() {
     storyContainer.appendChild(child);
   });
 }
+
+export function IssueZOrder() {
+  return createShroom(({ application, shroom }) => {
+    const room = Room.create(shroom, {
+      tilemap: `
+        xxxxxx
+        x00000
+        x00000
+        x00000
+        x00000
+        x00000
+      `,
+    });
+
+    const furniture = new FloorFurniture({
+      roomX: 1,
+      roomY: 2,
+      roomZ: 0,
+      direction: 2,
+      type: "throne",
+    });
+
+    const avatar = new Avatar({
+      look: "hd-180-1.hr-100-61.ch-210-66.lg-280-110.sh-305-62",
+      direction: 2,
+      roomX: 1,
+      roomY: 2,
+      roomZ: 0,
+    });
+
+    room.addRoomObject(furniture);
+    room.addRoomObject(avatar);
+
+    setTimeout(() => {
+      console.log(room.children.map((child) => [child, child.zIndex]));
+    }, 500);
+
+    application.stage.addChild(room);
+  });
+}

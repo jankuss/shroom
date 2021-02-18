@@ -320,6 +320,12 @@ class FurnitureVisualizationLayer
     this._destroySprites();
   }
 
+  private _updateSpritePosition(sprite: FurnitureSprite) {
+    sprite.baseX = this.x;
+    sprite.baseY = this.y;
+    sprite.baseZIndex = this.zIndex;
+  }
+
   private _addSprite(sprite: FurnitureSprite) {
     if (this._mountedSprites.has(sprite)) return;
 
@@ -362,9 +368,7 @@ class FurnitureVisualizationLayer
 
   private _updateSpritesPosition() {
     this._sprites.forEach((sprite) => {
-      sprite.baseX = this.x;
-      sprite.baseY = this.y;
-      sprite.baseZIndex = this.zIndex;
+      this._updateSpritePosition(sprite);
     });
   }
 
@@ -390,10 +394,10 @@ class FurnitureVisualizationLayer
     const spriteInfo = this._getSpriteInfo(frameIndex);
     if (spriteInfo == null) return;
 
-    const { layerIndex, z, layer, shadow, mask, tint } = this._part;
+    const { z, layer, shadow, mask, tint } = this._part;
     const { asset, texture } = spriteInfo;
 
-    const zIndex = (z ?? 0) + layerIndex * 0.01;
+    const zIndex = z ?? 0;
 
     const sprite = new FurnitureSprite({
       eventManager: this._eventManager,

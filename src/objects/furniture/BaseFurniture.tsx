@@ -452,47 +452,6 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
     }
   }
 
-  private _createSimpleAsset(
-    loadFurniResult: LoadFurniResult,
-    part: FurniDrawPart,
-    asset: FurnitureAsset
-  ) {
-    const { z, layer, mask, layerIndex } = part;
-
-    const getAssetTextureName = (asset: FurnitureAsset) =>
-      asset.source ?? asset.name;
-
-    const getTexture = (asset: FurnitureAsset) =>
-      loadFurniResult.getTexture(getAssetTextureName(asset));
-
-    const zIndex = (z ?? 0) + layerIndex * 0.01;
-
-    if (isNaN(zIndex)) {
-      throw new Error("invalid zindex");
-    }
-
-    const texture = getTexture(asset);
-    if (texture == null) return;
-
-    const sprite = this._createSprite(asset, layer, texture, part);
-
-    sprite.assetName = asset.name;
-
-    if (mask == null || !mask) {
-      this.dependencies.visualization.container.addChild(sprite);
-    } else {
-      const maskId = this._getMaskId(this.direction);
-      if (maskId != null) {
-        this._maskNodes.push(
-          this.dependencies.visualization.addMask(maskId, sprite)
-        );
-        this._maskSprites.push(sprite);
-      }
-    }
-
-    return sprite;
-  }
-
   private _createNewView(loadFurniResult: LoadFurniResult) {
     this._view?.destroy();
 
@@ -536,114 +495,6 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
 
     this._handleAnimationChange();
     this._updatePosition();
-  }
-
-  private _applyLayerDataToSprite(
-    sprite: FurnitureSprite,
-    asset: FurnitureAsset,
-    { layer, shadow = false, mask = false, z: zIndex = 0, tint }: FurniDrawPart
-  ) {
-    const highlight = this.highlight && layer?.ink == null && !shadow && !mask;
-
-    if (highlight) {
-      sprite.filters = [highlightFilter];
-    } else {
-      sprite.filters = [];
-    }
-
-    const scaleX = asset.flipH ? -1 : 1;
-
-    const offsetX = +(32 - asset.x * scaleX);
-    const offsetY = -asset.y + 16;
-
-    sprite.offsetX = offsetX;
-    sprite.offsetY = offsetY;
-    sprite.offsetZIndex = zIndex;
-
-    sprite.baseX = this.x;
-    sprite.baseY = this.y;
-    sprite.baseZIndex = this.zIndex;
-
-    if (shadow) {
-      sprite.baseZIndex = this.zIndex;
-      sprite.offsetZIndex = -this.zIndex;
-    }
-
-    if (tint != null) {
-      sprite.tint = parseInt(tint, 16);
-    }
-
-    const alpha = this._getAlpha({
-      baseAlpha: this.alpha,
-      layerAlpha: layer?.alpha,
-    });
-
-    if (layer != null) {
-      if (layer.ink != null) {
-        if (this.highlight) {
-          sprite.visible = false;
-        }
-        sprite.blendMode =
-          layer.ink === "ADD" ? PIXI.BLEND_MODES.ADD : PIXI.BLEND_MODES.NORMAL;
-      }
-    }
-
-    if (shadow) {
-      if (this.highlight) {
-        sprite.visible = false;
-        sprite.alpha = 0;
-      } else {
-        sprite.visible = true;
-        sprite.alpha = alpha / 5;
-      }
-    } else {
-      sprite.visible = true;
-      sprite.alpha = alpha;
-    }
-
-    if (mask) {
-      sprite.tint = 0xffffff;
-    }
-
-    if (!mask) {
-      // TODO: Figure out why this is needed. If we don't do this the alpha value of the sprite isn't correct for some reason.
-      sprite.setParent(this.dependencies.visualization.container);
-    }
-  }
-
-  private _createSprite(
-    asset: FurnitureAsset,
-    layer: FurnitureLayer | undefined,
-    texture: HitTexture,
-    part: FurniDrawPart
-  ): FurnitureSprite {
-    const sprite = new FurnitureSprite({
-      eventManager: this.dependencies.eventManager,
-      mirrored: asset.flipH,
-      tag: layer?.tag,
-      group: this,
-    });
-
-    const ignoreMouse = layer?.ignoreMouse != null && layer.ignoreMouse;
-    sprite.ignoreMouse = ignoreMouse;
-
-    sprite.events.addEventListener("click", (event) => {
-      this._clickHandler.handleClick(event);
-    });
-
-    sprite.events.addEventListener("pointerup", (event) => {
-      this._clickHandler.handlePointerUp(event);
-    });
-
-    sprite.events.addEventListener("pointerdown", (event) => {
-      this._clickHandler.handlePointerDown(event);
-    });
-
-    sprite.hitTexture = texture;
-
-    this._applyLayerDataToSprite(sprite, asset, part);
-
-    return sprite;
   }
 
   private _destroySprites() {
@@ -712,13 +563,6 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
 
     return baseAlpha;
   }
-}
-
-function getAssetFromPart(part: FurniDrawPart, assetIndex: number) {
-  const asset = part.assets != null ? part.assets[assetIndex] : undefined;
-  if (asset == null) return;
-
-  return asset;
 }
 
 export interface IFurnitureRoomVisualization {
