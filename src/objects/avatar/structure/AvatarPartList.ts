@@ -74,11 +74,13 @@ export class AvatarPartList {
   }
 
   getPartsForBodyBart(bodyPart: Bodypart) {
-    return bodyPart.items.flatMap((bodyPartItem) => {
-      return (
-        this._partsByType.get(bodyPartItem.id as AvatarFigurePartType) ?? []
-      );
-    });
+    return bodyPart.items
+      .flatMap((bodyPartItem) => {
+        return (
+          this._partsByType.get(bodyPartItem.id as AvatarFigurePartType) ?? []
+        );
+      })
+      .filter((part) => !this._hiddenLayers.has(part.type));
   }
 
   getPartsForType(type: AvatarFigurePartType) {
