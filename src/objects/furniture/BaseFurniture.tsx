@@ -359,6 +359,8 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
     PIXI.Ticker.shared.remove(this._onTicker);
     this._cancelTicker && this._cancelTicker();
     this._cancelTicker = undefined;
+
+    this._view?.destroy();
   }
 
   private _onTicker = () => {
