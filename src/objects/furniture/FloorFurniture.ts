@@ -104,6 +104,7 @@ export class FloorFurniture
 
   destroyed(): void {
     this._baseFurniture.destroy();
+    this._moveAnimation?.destroy();
   }
 
   registered(): void {

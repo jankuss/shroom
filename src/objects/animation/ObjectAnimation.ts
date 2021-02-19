@@ -3,6 +3,8 @@ import { RoomPosition } from "../../types/RoomPosition";
 
 type FinishCurrentCallback = () => void;
 
+type CancelTicker = () => void;
+
 export class ObjectAnimation<T> {
   private _current: RoomPosition | undefined;
   private _diff: RoomPosition | undefined;
@@ -14,6 +16,8 @@ export class ObjectAnimation<T> {
   }[] = [];
   private _nextPosition: RoomPosition | undefined;
   private _finishCurrent: FinishCurrentCallback | undefined;
+  private _destroyed = false;
+  private _cancelTicker: CancelTicker | undefined;
 
   constructor(
     private _animationTicker: IAnimationTicker,
@@ -28,6 +32,13 @@ export class ObjectAnimation<T> {
   clear() {
     this._enqueued = [];
     return this._nextPosition;
+  }
+
+  destroy() {
+    this._destroyed = true;
+    if (this._cancelTicker != null) {
+      this._cancelTicker();
+    }
   }
 
   move(
@@ -77,6 +88,7 @@ export class ObjectAnimation<T> {
     );
 
     const cancel = this._animationTicker.subscribe(() => {
+      if (this._destroyed) return;
       const timeDiff = performance.now() - this._start;
 
       let factor = timeDiff / this._duration;
@@ -103,5 +115,7 @@ export class ObjectAnimation<T> {
         return;
       }
     });
+
+    this._cancelTicker = cancel;
   }
 }

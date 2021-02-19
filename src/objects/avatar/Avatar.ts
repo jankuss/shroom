@@ -466,6 +466,8 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
     if (this._cancelAnimation != null) {
       this._cancelAnimation();
     }
+
+    this._moveAnimation?.destroy();
   }
 
   private _updateEventHandlers() {
