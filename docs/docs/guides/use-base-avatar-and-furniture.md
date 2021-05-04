@@ -3,7 +3,7 @@ id: use-base-avatar-and-furniture
 title: Using `BaseAvatar` and `BaseFurniture`
 ---
 
-For some use cases, you want to display avatar or furniture without a room.
+For some use cases, you want to display an avatar or furniture without a room.
 You can do this with `BaseAvatar` and `BaseFurniture`. The only thing you need is a `Shroom` instance.
 
 ```ts
@@ -20,7 +20,7 @@ const avatar = BaseAvatar.fromShroom(shroom, {
   position: { x: 0, y: 100 },
   zIndex: 0,
   onLoad: () => {
-    // This is called when the avatar has been loaded completly.
+    // This is called when the avatar has been loaded completely.
     console.log("Loaded");
   },
 });
