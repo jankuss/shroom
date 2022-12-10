@@ -18,6 +18,7 @@ import { RoomModelVisualization } from "./RoomModelVisualization";
 import { ParsedTileMap } from "./ParsedTileMap";
 import { getTileColors, getWallColors } from "./util/getTileColors";
 import { EventManager } from "../events/EventManager";
+import { InteractionEvent } from "pixi.js";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -328,6 +329,10 @@ export class Room
     this.roomObjects.forEach((object) => this.removeRoomObject(object));
 
     this._visualization.destroy();
+  }
+
+  public set onBackgroundClick(value: ((event: InteractionEvent) => void) | undefined) {
+    this._eventManager.onBackgroundClick = value;
   }
 
   private _getObjectPositionWithOffset(roomX: number, roomY: number) {
