@@ -19,6 +19,11 @@ export class EventManager {
   private _bush = new RBush<EventManagerNode>();
   private _currentOverElements: Set<EventManagerNode> = new Set();
   private _pointerDownElements: Set<EventManagerNode> = new Set();
+  private _onBackgroundClick: ((event: InteractionEvent) => void) | undefined = undefined;
+
+  public set onBackgroundClick(value: ((event: InteractionEvent) => void) | undefined) {
+    this._onBackgroundClick = value;
+  }
 
   click(event: InteractionEvent, x: number, y: number) {
     const elements = this._performHitTest(x, y);
@@ -47,6 +52,10 @@ export class EventManager {
         clickedNodes.add(node);
       }
     });
+
+    if (elements.activeNodes.length === 0 && clickedNodes.size === 0 && this._onBackgroundClick) {
+      this._onBackgroundClick(event);
+    }
 
     new Propagation(event, elements.activeNodes, (target, event) =>
       target.triggerPointerUp(event)
