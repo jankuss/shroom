@@ -46,6 +46,7 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _onPointerUp: HitEventHandler | undefined = undefined;
   private _onPointerOver: HitEventHandler | undefined = undefined;
   private _onPointerOut: HitEventHandler | undefined = undefined;
+  private _onStopMovementCallback: (() => void) | undefined = undefined;
 
   constructor({
     look,
@@ -427,6 +428,10 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
         onStop: () => {
           this._stopWalking();
           this._moving = false;
+
+          if (this._onStopMovementCallback) {
+            this._onStopMovementCallback();
+          }
         },
       },
       this.configuration.avatarMovementDuration
@@ -606,6 +611,10 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
   private _stopWalking() {
     this._walking = false;
     this._updateAvatarSprites();
+  }
+
+  public set onStopMovementCallback(value: (() => void) | undefined) {
+    this._onStopMovementCallback = value;
   }
 
   private _calculateZIndex() {
